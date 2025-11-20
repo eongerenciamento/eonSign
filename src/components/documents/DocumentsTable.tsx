@@ -1,0 +1,86 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Eye, Download, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export interface Document {
+  id: string;
+  name: string;
+  createdAt: string;
+  status: "pending" | "signed" | "expired" | "in_progress";
+  signers: number;
+  signedBy: number;
+}
+
+interface DocumentsTableProps {
+  documents: Document[];
+}
+
+const statusConfig = {
+  pending: { label: "Pendente", variant: "secondary" as const },
+  in_progress: { label: "Em Andamento", variant: "default" as const },
+  signed: { label: "Assinado", variant: "default" as const },
+  expired: { label: "Expirado", variant: "destructive" as const },
+};
+
+export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
+  return (
+    <div className="border rounded-lg">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome do Documento</TableHead>
+            <TableHead>Data de Criação</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Assinaturas</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {documents.map((doc) => {
+            const statusInfo = statusConfig[doc.status];
+            return (
+              <TableRow key={doc.id}>
+                <TableCell className="font-medium">{doc.name}</TableCell>
+                <TableCell>{doc.createdAt}</TableCell>
+                <TableCell>
+                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                </TableCell>
+                <TableCell>
+                  <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
+                    {doc.signedBy}/{doc.signers}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Eye className="w-4 h-4 mr-2" />
+                        Visualizar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Download className="w-4 h-4 mr-2" />
+                        Baixar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
