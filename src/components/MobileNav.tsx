@@ -1,4 +1,5 @@
-import { FileText, Grid2x2, FileBarChart, LogOut } from "lucide-react";
+import { FileText, FileBarChart, LogOut, Settings } from "lucide-react";
+import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,9 +11,10 @@ import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: Grid2x2 }, // 4 quadradinhos simétricos
+  { title: "Dashboard", url: "/", icon: DashboardIcon },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Relatórios", url: "/relatorios", icon: FileBarChart },
+  { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 
 export function MobileNav() {
@@ -57,7 +59,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-between h-16 pt-safe md:hidden">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-between h-16 pt-safe md:hidden border-none">
       {/* Ícones de navegação */}
       <div className="flex items-center justify-around flex-1">
         {items.map((item) => (
@@ -71,6 +73,7 @@ export function MobileNav() {
               className={`w-6 h-6 ${
                 isActive(item.url) ? "text-primary" : "text-white"
               }`}
+              strokeWidth={1.5}
             />
             {/* Letras removidas - apenas ícones */}
           </NavLink>
@@ -82,7 +85,7 @@ export function MobileNav() {
         <SheetTrigger asChild>
           <button className="mr-4">
             <Avatar className="h-9 w-9 border-2 border-white/20">
-              <AvatarFallback className="bg-primary text-primary-foreground">
+              <AvatarFallback className="bg-white/50 text-[#273d60]">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
@@ -95,7 +98,7 @@ export function MobileNav() {
           <div className="mt-6 space-y-4">
             <div className="flex flex-col items-center gap-4 pb-4 border-b">
               <Avatar className="h-20 w-20">
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                <AvatarFallback className="bg-white/50 text-[#273d60] text-2xl">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
