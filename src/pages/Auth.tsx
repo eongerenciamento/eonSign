@@ -142,7 +142,7 @@ export default function Auth() {
               <Label htmlFor="email" className="text-white">
                 E-mail
               </Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground" required disabled={isLoading} />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border-[hsl(221,45%,40%)] text-foreground" />
             </div>
 
             <div className="space-y-2">
