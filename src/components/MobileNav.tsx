@@ -1,10 +1,12 @@
-import { FileText, FileBarChart, LogOut, Settings } from "lucide-react";
+import { FileText, FileBarChart, LogOut, Settings, Camera, X } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
@@ -24,15 +26,32 @@ export function MobileNav() {
   const currentPath = location.pathname;
   const [user, setUser] = useState<User | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
+      if (user) {
+        setEmail(user.email || "");
+        setName(user.user_metadata?.name || "");
+        setOrganization(user.user_metadata?.organization || "");
+        setAvatarUrl(user.user_metadata?.avatar_url || null);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          setEmail(session.user.email || "");
+          setName(session.user.user_metadata?.name || "");
+          setOrganization(session.user.user_metadata?.organization || "");
+          setAvatarUrl(session.user.user_metadata?.avatar_url || null);
+        }
       }
     );
 
@@ -55,8 +74,61 @@ export function MobileNav() {
   };
 
   const getUserInitials = () => {
-    if (!user?.email) return "U";
-    return user.email.charAt(0).toUpperCase();
+    if (name) return name.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
+    return "U";
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrl);
+      toast.success("Avatar atualizado");
+    } catch (error) {
+      toast.error("Erro ao fazer upload do avatar");
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name,
+          organization,
+          avatar_url: avatarUrl
+        }
+      });
+
+      if (error) throw error;
+
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        if (passwordError) throw passwordError;
+      }
+
+      toast.success("Perfil atualizado com sucesso");
+      setSheetOpen(false);
+      setNewPassword("");
+    } catch (error) {
+      toast.error("Erro ao atualizar perfil");
+    }
   };
 
   return (
@@ -73,12 +145,12 @@ export function MobileNav() {
             key={item.url}
             to={item.url}
             end={item.url === "/"}
-            className="flex items-center justify-center h-full px-2 transition-colors"
+            className={`flex items-center justify-center h-full px-3 py-2 rounded-lg transition-colors ${
+              isActive(item.url) ? "bg-white/20" : ""
+            }`}
           >
             <item.icon
-              className={`w-5 h-5 ${
-                isActive(item.url) ? "text-primary" : "text-white"
-              }`}
+              className="w-5 h-5 text-white"
               strokeWidth={1.5}
             />
           </NavLink>
@@ -96,32 +168,105 @@ export function MobileNav() {
             </Avatar>
           </button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[300px]">
-          <SheetHeader>
+        <SheetContent side="right" className="w-[320px] overflow-y-auto">
+          <SheetHeader className="mb-6">
             <SheetTitle>Perfil do Usuário</SheetTitle>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
-            <div className="flex flex-col items-center gap-4 pb-4 border-b">
-              <Avatar className="h-20 w-20">
-                <AvatarFallback className="bg-white/50 text-[#273d60] text-2xl">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-center">
-                <p className="text-sm font-medium">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Usuário</p>
+          
+          <div className="space-y-6">
+            {/* Avatar com botão de upload */}
+            <div className="flex justify-end">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  {avatarUrl && <AvatarImage src={avatarUrl} />}
+                  <AvatarFallback className="bg-white/50 text-[#273d60] text-2xl">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-[#273d60] p-2 rounded-full cursor-pointer hover:bg-[#1e2f4d] transition-colors">
+                  <Camera className="h-4 w-4 text-white" />
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
 
-            {/* Botão de Logout */}
-            <Button
-              onClick={handleLogout}
-              variant="destructive"
-              className="w-full"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair do Sistema
-            </Button>
+            {/* Campos do formulário */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  value={email}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="organization">Organização</Label>
+                <Input
+                  id="organization"
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  placeholder="Nome da organização"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Alterar Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nova senha (opcional)"
+                />
+              </div>
+            </div>
+
+            {/* Botões de ação */}
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="w-full"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setSheetOpen(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSaveProfile}
+                  className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90"
+                >
+                  Salvar
+                </Button>
+              </div>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
