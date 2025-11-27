@@ -136,13 +136,13 @@ export default function Auth() {
           <img src={logo} alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" />
         </div>
 
-        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/80 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/20 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <Label htmlFor="email" className="text-white">
                 E-mail
               </Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/80 text-foreground" />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-foreground" />
             </div>
 
             <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.6s' }}>
@@ -150,7 +150,7 @@ export default function Auth() {
                 Senha
               </Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/80 text-foreground pr-10" />
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-foreground pr-10" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-transform hover:scale-110">
                   {showPassword ? <EyeOff size={20} className="text-primary-foreground" /> : <Eye size={20} />}
                 </button>
