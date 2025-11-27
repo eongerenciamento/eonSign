@@ -9,12 +9,14 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Session } from "@supabase/supabase-js";
-
 const authSchema = z.object({
-  email: z.string().trim().email({ message: "E-mail inválido" }),
-  password: z.string().min(6, { message: "A senha deve ter no mínimo 6 caracteres" }),
+  email: z.string().trim().email({
+    message: "E-mail inválido"
+  }),
+  password: z.string().min(6, {
+    message: "A senha deve ter no mínimo 6 caracteres"
+  })
 });
-
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -23,55 +25,61 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+    const {
+      data: {
+        subscription
       }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
+    // Check for existing session
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
+      setSession(session);
+    });
     return () => subscription.unsubscribe();
   }, []);
-
   useEffect(() => {
     if (session) {
       navigate("/dashboard");
     }
   }, [session, navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const validatedData = authSchema.parse({ email, password });
-
+      const validatedData = authSchema.parse({
+        email,
+        password
+      });
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const {
+          error
+        } = await supabase.auth.signInWithPassword({
           email: validatedData.email,
-          password: validatedData.password,
+          password: validatedData.password
         });
-
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Erro ao entrar",
               description: "E-mail ou senha incorretos",
-              variant: "destructive",
+              variant: "destructive"
             });
           } else {
             toast({
               title: "Erro ao entrar",
               description: error.message,
-              variant: "destructive",
+              variant: "destructive"
             });
           }
         } else {
@@ -79,32 +87,33 @@ export default function Auth() {
         }
       } else {
         const redirectUrl = `${window.location.origin}/dashboard`;
-        const { error } = await supabase.auth.signUp({
+        const {
+          error
+        } = await supabase.auth.signUp({
           email: validatedData.email,
           password: validatedData.password,
           options: {
-            emailRedirectTo: redirectUrl,
-          },
+            emailRedirectTo: redirectUrl
+          }
         });
-
         if (error) {
           if (error.message.includes("User already registered")) {
             toast({
               title: "Erro ao criar conta",
               description: "Este e-mail já está cadastrado",
-              variant: "destructive",
+              variant: "destructive"
             });
           } else {
             toast({
               title: "Erro ao criar conta",
               description: error.message,
-              variant: "destructive",
+              variant: "destructive"
             });
           }
         } else {
           toast({
             title: "Conta criada com sucesso!",
-            description: "Você já pode fazer login",
+            description: "Você já pode fazer login"
           });
           setIsLogin(true);
         }
@@ -114,36 +123,26 @@ export default function Auth() {
         toast({
           title: "Erro de validação",
           description: error.errors[0].message,
-          variant: "destructive",
+          variant: "destructive"
         });
       }
     } finally {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[hsl(221,45%,32%)] px-4">
+  return <div className="min-h-screen flex items-center justify-center bg-[hsl(221,45%,32%)] px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <img src={logo} alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" />
         </div>
 
-        <div className="bg-[hsl(221,45%,28%)] p-8 rounded-lg shadow-xl">
+        <div className="bg-[hsl(221,45%,28%)] p-8 rounded-lg shadow-xl opacity-90">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">
                 E-mail
               </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground"
-                required
-                disabled={isLoading}
-              />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground" required disabled={isLoading} />
             </div>
 
             <div className="space-y-2">
@@ -151,58 +150,32 @@ export default function Auth() {
                 Senha
               </Label>
               <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground pr-10"
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground pr-10" required disabled={isLoading} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              variant="ghost"
-              className="w-full text-white hover:bg-transparent hover:text-white/90"
-              disabled={isLoading}
-            >
+            <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90" disabled={isLoading}>
               {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
             </Button>
 
             <div className="flex justify-between items-center text-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  toast({
-                    title: "Em breve",
-                    description: "Funcionalidade em desenvolvimento",
-                  });
-                }}
-                className="text-white hover:text-white/80 transition-colors"
-              >
+              <button type="button" onClick={() => {
+              toast({
+                title: "Em breve",
+                description: "Funcionalidade em desenvolvimento"
+              });
+            }} className="text-white hover:text-white/80 transition-colors">
                 Esqueci a senha
               </button>
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-white hover:text-white/80 transition-colors"
-              >
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-white hover:text-white/80 transition-colors">
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
