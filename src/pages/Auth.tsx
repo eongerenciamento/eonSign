@@ -132,7 +132,7 @@ export default function Auth() {
         <div className="bg-[hsl(221,45%,28%)] p-8 rounded-lg shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
+              <Label htmlFor="email" className="text-white">
                 E-mail
               </Label>
               <Input
@@ -147,7 +147,7 @@ export default function Auth() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">
+              <Label htmlFor="password" className="text-white">
                 Senha
               </Label>
               <div className="relative">
@@ -172,7 +172,8 @@ export default function Auth() {
 
             <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
+              variant="ghost"
+              className="w-full text-white hover:bg-transparent hover:text-white/90"
               disabled={isLoading}
             >
               {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
@@ -187,14 +188,14 @@ export default function Auth() {
                     description: "Funcionalidade em desenvolvimento",
                   });
                 }}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-white hover:text-white/80 transition-colors"
               >
                 Esqueci a senha
               </button>
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-white hover:text-white/80 transition-colors"
               >
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
               </button>
