@@ -152,7 +152,7 @@ export default function Auth() {
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} className="bg-[hsl(221,45%,35%)] border-[hsl(221,45%,40%)] text-foreground pr-10" required disabled={isLoading} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={20} className="text-primary-foreground" /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
