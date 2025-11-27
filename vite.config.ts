@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {
-        name: 'ÉonSign - Assinatura Digital',
-        short_name: 'ÉonSign',
+        name: 'Éon Sign',
+        short_name: 'Éon Sign',
         description: 'Sistema de gestão de documentos e assinatura digital integrado com ICP-Brasil',
         theme_color: '#273d60',
         background_color: '#273d60',

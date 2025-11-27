@@ -40,7 +40,7 @@ const Install = () => {
           <div className="flex justify-center mb-4">
             <img src={logoEon} alt="Éon Logo" className="h-16 w-auto" />
           </div>
-          <CardTitle className="text-2xl">Instalar ÉonSign</CardTitle>
+          <CardTitle className="text-2xl">Instalar Éon Sign</CardTitle>
           <CardDescription>
             Instale nosso app para uma melhor experiência
           </CardDescription>
