@@ -136,7 +136,7 @@ export default function Auth() {
           <img src={logo} alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" />
         </div>
 
-        <div className="bg-[hsl(221,45%,28%)] p-8 rounded-lg shadow-xl opacity-90">
+        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60]">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">
