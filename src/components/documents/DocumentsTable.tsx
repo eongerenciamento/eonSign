@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { Eye, Download, MoreVertical, Move, FolderX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -42,10 +43,10 @@ interface DocumentsTableProps {
 }
 
 const statusConfig = {
-  pending: { label: "Pendente", variant: "secondary" as const },
-  in_progress: { label: "Em Andamento", variant: "default" as const },
-  signed: { label: "Assinado", variant: "default" as const },
-  expired: { label: "Expirado", variant: "destructive" as const },
+  pending: { label: "Pendente", className: "bg-yellow-700 text-white hover:bg-yellow-700" },
+  in_progress: { label: "Em Andamento", className: "bg-green-700 text-white hover:bg-green-700" },
+  signed: { label: "Assinado", className: "bg-green-700 text-white hover:bg-green-700" },
+  expired: { label: "Expirado", className: "bg-red-700 text-white hover:bg-red-700" },
 };
 
 const getInitials = (name: string) => {
@@ -118,10 +119,10 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
   return (
     <>
       {/* Desktop Table View */}
-      <div className="hidden md:block border rounded-lg">
+      <div className="hidden md:block rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-none bg-white hover:bg-white">
               <TableHead>Nome do Documento</TableHead>
               <TableHead>Data de Criação</TableHead>
               <TableHead>Status</TableHead>
@@ -129,14 +130,16 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
             </TableRow>
           </TableHeader>
           <TableBody>
-            {documents.map((doc) => {
+            {documents.map((doc, index) => {
               const statusInfo = statusConfig[doc.status];
+              const progressPercentage = (doc.signedBy / doc.signers) * 100;
               return (
                 <TableRow 
                   key={doc.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, doc.id)}
                   onDragEnd={handleDragEnd}
+                  className={`border-none ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:opacity-80`}
                 >
                   <TableCell>
                     <div className="flex items-center justify-between w-full">
@@ -196,13 +199,40 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                   </TableCell>
                   <TableCell>{doc.createdAt}</TableCell>
                   <TableCell>
-                    <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                    <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
-                        {doc.signedBy}/{doc.signers}
-                      </span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className={doc.signedBy === doc.signers ? "text-green-700 font-medium" : "font-medium"}>
+                          {doc.signedBy}/{doc.signers}
+                        </span>
+                        <div className="relative w-10 h-10">
+                          <svg className="w-10 h-10 transform -rotate-90">
+                            <circle
+                              cx="20"
+                              cy="20"
+                              r="16"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              className="text-gray-200"
+                            />
+                            <circle
+                              cx="20"
+                              cy="20"
+                              r="16"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              strokeDasharray={`${2 * Math.PI * 16}`}
+                              strokeDashoffset={`${2 * Math.PI * 16 * (1 - progressPercentage / 100)}`}
+                              className={doc.status === "expired" ? "text-red-700" : "text-green-700"}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
                       {showFolderActions && folders && folders.length > 0 && (
                         <Select 
                           value={doc.folderId || ""}
