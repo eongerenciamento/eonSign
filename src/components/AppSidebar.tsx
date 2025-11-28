@@ -127,19 +127,16 @@ export function AppSidebar() {
   };
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#274d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
-      <div className={`p-6 ${collapsed ? "px-3 py-4" : ""} flex items-center justify-between`}>
-        {!collapsed ? <>
-            <div className="flex items-center gap-2">
-              <img src={logoSign} alt="Éon Sign" className="h-10 w-auto object-contain" />
-              <div>
-                
-                
-              </div>
-            </div>
-            <SidebarTrigger className="text-white hover:bg-white/10" />
-          </> : <SidebarTrigger className="text-white hover:bg-white/10 mx-auto">
-            <Menu className="w-5 h-5" />
-          </SidebarTrigger>}
+      <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
+        <SidebarTrigger className={`text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
+          <Menu className="w-5 h-5" />
+        </SidebarTrigger>
+        
+        {!collapsed && (
+          <div className="mt-6 flex justify-center w-full">
+            <img src={logoSign} alt="Éon Sign" className="h-16 w-auto object-contain" />
+          </div>
+        )}
       </div>
 
       <SidebarContent>
