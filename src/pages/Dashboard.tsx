@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
-import { FileText } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -70,8 +70,8 @@ const Dashboard = () => {
             onClick={() => navigate("/novo-documento")}
             className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 shadow-lg"
           >
-            <FileText className="w-4 h-4 mr-2" />
-            Novo Documento
+            <Upload className="w-4 h-4 mr-2" />
+            Documento
           </Button>
         </div>
 
