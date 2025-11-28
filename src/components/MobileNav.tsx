@@ -1,4 +1,4 @@
-import { FileText, FileBarChart, LogOut, Settings, Camera, X } from "lucide-react";
+import { FolderClosed, FileBarChart, LogOut, Settings, Camera, X } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,11 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import logoEon from "@/assets/logo-eon.png";
 
 const items = [
   { title: "Dashboard", url: "/", icon: DashboardIcon },
-  { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Documentos", url: "/documentos", icon: FolderClosed },
   { title: "Relatórios", url: "/relatorios", icon: FileBarChart },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
@@ -132,12 +131,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-between h-16 pt-safe md:hidden border-none px-3">
-      {/* Logo no canto esquerdo */}
-      <div className="flex-shrink-0">
-        <img src={logoEon} alt="Éon Logo" className="h-8 w-auto" />
-      </div>
-
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
         {items.map((item) => (

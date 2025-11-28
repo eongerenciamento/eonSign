@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
+import NewDocument from "./pages/NewDocument";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/documentos" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+            <Route path="/novo-documento" element={<ProtectedRoute><NewDocument /></ProtectedRoute>} />
             <Route path="/relatorios" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
