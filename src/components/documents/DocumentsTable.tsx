@@ -38,6 +38,7 @@ interface DocumentsTableProps {
   folders?: Folder[];
   allFolders?: Folder[];
   onDocumentMoved?: () => void;
+  showFolderActions?: boolean;
 }
 
 const statusConfig = {
@@ -55,7 +56,7 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const DocumentsTable = ({ documents, showProgress = true, folders = [], allFolders = [], onDocumentMoved }: DocumentsTableProps) => {
+export const DocumentsTable = ({ documents, showProgress = true, folders = [], allFolders = [], onDocumentMoved, showFolderActions = true }: DocumentsTableProps) => {
   const { toast } = useToast();
 
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
@@ -157,14 +158,14 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                         >
                           <Download className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                              <MoreVertical className="w-4 h-4 text-gray-500" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white z-50">
-                            {allFolders.length > 0 && (
+                        {showFolderActions && allFolders.length > 0 && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                                <MoreVertical className="w-4 h-4 text-gray-500" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-white z-50">
                               <DropdownMenuSub>
                                 <DropdownMenuSubTrigger>
                                   <Move className="w-4 h-4 mr-2" />
@@ -187,9 +188,9 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                                   ))}
                                 </DropdownMenuSubContent>
                               </DropdownMenuSub>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </div>
                   </TableCell>
@@ -202,7 +203,7 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                       <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
                         {doc.signedBy}/{doc.signers}
                       </span>
-                      {folders && folders.length > 0 && (
+                      {showFolderActions && folders && folders.length > 0 && (
                         <Select 
                           value={doc.folderId || ""}
                           onValueChange={(value) => handleMoveToFolder(doc.id, value)}
@@ -294,7 +295,7 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
               )}
               
               <div className="flex flex-col gap-3 pt-2">
-                {folders && folders.length > 0 && (
+                {showFolderActions && folders && folders.length > 0 && (
                   <Select 
                     value={doc.folderId || ""}
                     onValueChange={(value) => handleMoveToFolder(doc.id, value)}
@@ -316,14 +317,14 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                   </Select>
                 )}
                 <div className="flex gap-2 justify-between items-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="bg-white z-50">
-                      {allFolders.length > 0 && (
+                  {showFolderActions && allFolders.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                          <MoreVertical className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="bg-white z-50">
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>
                             <Move className="w-4 h-4 mr-2" />
@@ -346,9 +347,9 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                             ))}
                           </DropdownMenuSubContent>
                         </DropdownMenuSub>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   <div className="flex gap-2">
                     <Button 
                       variant="ghost" 

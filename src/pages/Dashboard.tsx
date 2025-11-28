@@ -134,7 +134,7 @@ const Dashboard = () => {
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={mockDocuments} />
+          <DocumentsTable documents={mockDocuments} showFolderActions={false} />
         </div>
       </div>
     </Layout>
