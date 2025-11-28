@@ -178,8 +178,6 @@ const Settings = () => {
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
-        <Separator />
-
         <Tabs defaultValue="company" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
