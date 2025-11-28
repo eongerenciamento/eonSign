@@ -138,24 +138,26 @@ export const FoldersList = ({
             } ${dragOverId === folder.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""}`}
             onClick={() => onFolderClick(folder.id)}
           >
-            <div className="flex items-center gap-3 flex-1">
-              <Folder className="w-5 h-5 text-gray-500" />
-              {editingFolderId === folder.id ? (
-                <Input
-                  ref={inputRef}
-                  defaultValue={folder.name}
-                  onKeyDown={(e) => handleKeyDown(e, folder.id)}
-                  onBlur={(e) => handleBlur(e, folder.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-sm text-gray-600 h-8 w-64"
-                />
-              ) : (
-                <>
+            <div className="flex items-center justify-between gap-3 flex-1">
+              <div className="flex items-center gap-3">
+                <Folder className="w-5 h-5 text-gray-500" />
+                {editingFolderId === folder.id ? (
+                  <Input
+                    ref={inputRef}
+                    defaultValue={folder.name}
+                    onKeyDown={(e) => handleKeyDown(e, folder.id)}
+                    onBlur={(e) => handleBlur(e, folder.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm text-gray-600 h-8 w-64"
+                  />
+                ) : (
                   <span className="text-sm text-gray-600">{folder.name}</span>
-                  <span className="text-xs text-gray-500">
-                    {getDocumentCount(folder.id)} docs
-                  </span>
-                </>
+                )}
+              </div>
+              {!editingFolderId && (
+                <span className="text-xs text-gray-500">
+                  {getDocumentCount(folder.id)} docs
+                </span>
               )}
             </div>
             <DropdownMenu>
