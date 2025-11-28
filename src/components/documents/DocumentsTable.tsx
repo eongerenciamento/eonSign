@@ -59,7 +59,6 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
               <TableHead>Data de Criação</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Assinaturas</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,24 +66,59 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
               const statusInfo = statusConfig[doc.status];
               return (
                 <TableRow key={doc.id}>
-                  <TableCell className="font-medium">{doc.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-medium">{doc.name}</span>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent"
+                          onClick={() => console.log("View document", doc.id)}
+                        >
+                          <Eye className="w-4 h-4 text-gray-500" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent"
+                          onClick={() => console.log("Download document", doc.id)}
+                        >
+                          <Download className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell>{doc.createdAt}</TableCell>
                   <TableCell>
                     <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
                   </TableCell>
                   <TableCell>
-                    <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
-                      {doc.signedBy}/{doc.signers}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                        <Eye className="w-4 h-4 text-gray-500" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                        <Download className="w-4 h-4 text-gray-500" />
-                      </Button>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
+                        {doc.signedBy}/{doc.signers}
+                      </span>
+                      {folders && folders.length > 0 && (
+                        <Select 
+                          value={doc.folderId || ""}
+                          onValueChange={(value) => handleMoveToFolder(doc.id, value)}
+                        >
+                          <SelectTrigger className="w-[180px] hover:bg-gray-50">
+                            <SelectValue placeholder="Selecionar pasta" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white z-50">
+                            {folders.map((folder) => (
+                              <SelectItem 
+                                key={folder.id} 
+                                value={folder.id}
+                                className="hover:bg-gray-50"
+                              >
+                                {folder.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -149,18 +183,21 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
                 </div>
               )}
               
-              <div className="flex gap-2 pt-2 justify-end items-center">
+              <div className="flex flex-col gap-3 pt-2">
                 {folders && folders.length > 0 && (
-                  <Select onValueChange={(value) => handleMoveToFolder(doc.id, value)}>
-                    <SelectTrigger className="w-[180px] hover:bg-gray-100">
+                  <Select 
+                    value={doc.folderId || ""}
+                    onValueChange={(value) => handleMoveToFolder(doc.id, value)}
+                  >
+                    <SelectTrigger className="w-full hover:bg-gray-50">
                       <SelectValue placeholder="Selecionar pasta" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white z-50">
                       {folders.map((folder) => (
                         <SelectItem 
                           key={folder.id} 
                           value={folder.id}
-                          className="hover:bg-gray-100"
+                          className="hover:bg-gray-50"
                         >
                           {folder.name}
                         </SelectItem>
@@ -168,12 +205,24 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
                     </SelectContent>
                   </Select>
                 )}
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                  <Eye className="w-4 h-4 text-gray-500" />
-                </Button>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                  <Download className="w-4 h-4 text-gray-500" />
-                </Button>
+                <div className="flex gap-2 justify-end">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full hover:bg-transparent"
+                    onClick={() => console.log("View document", doc.id)}
+                  >
+                    <Eye className="w-4 h-4 text-gray-500" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full hover:bg-transparent"
+                    onClick={() => console.log("Download document", doc.id)}
+                  >
+                    <Download className="w-4 h-4 text-gray-500" />
+                  </Button>
+                </div>
               </div>
             </div>
           );
