@@ -132,20 +132,28 @@ export default function Auth() {
   };
   return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center animate-fade-in animate-scale-in" style={{ animationDelay: '0.1s' }}>
+        <div className="text-center animate-fade-in animate-scale-in" style={{
+        animationDelay: '0.1s'
+      }}>
           <img src={logo} alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" />
         </div>
 
-        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/20 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/20 animate-fade-in" style={{
+        animationDelay: '0.3s'
+      }}>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div className="space-y-2 animate-fade-in" style={{
+            animationDelay: '0.5s'
+          }}>
               <Label htmlFor="email" className="text-white">
                 E-mail
               </Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,20%)] border border-white/20 text-white [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
             </div>
 
-            <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            <div className="space-y-2 animate-fade-in" style={{
+            animationDelay: '0.6s'
+          }}>
               <Label htmlFor="password" className="text-white">
                 Senha
               </Label>
@@ -157,11 +165,15 @@ export default function Auth() {
               </div>
             </div>
 
-            <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90 animate-fade-in transition-transform hover:scale-105" style={{ animationDelay: '0.7s' }} disabled={isLoading}>
+            <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90 animate-fade-in transition-transform hover:scale-105" style={{
+            animationDelay: '0.7s'
+          }} disabled={isLoading}>
               {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
             </Button>
 
-            <div className="flex justify-between items-center text-sm animate-fade-in" style={{ animationDelay: '0.8s' }}>
+            <div className="flex justify-between items-center text-sm animate-fade-in" style={{
+            animationDelay: '0.8s'
+          }}>
               <button type="button" onClick={() => {
               toast({
                 title: "Em breve",
