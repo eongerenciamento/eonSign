@@ -100,24 +100,21 @@ const Reports = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge variant="default">Assinados</Badge>
-                  <span className="text-sm text-muted-foreground">62.8%</span>
+                  <Badge className="bg-green-700 text-white hover:bg-green-700">Assinados</Badge>
                 </div>
-                <span className="font-semibold">98</span>
+                <span className="text-sm text-muted-foreground">62.8%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge variant="default">Em Andamento</Badge>
-                  <span className="text-sm text-muted-foreground">28.8%</span>
+                  <Badge className="bg-yellow-700 text-white hover:bg-yellow-700">Em Andamento</Badge>
                 </div>
-                <span className="font-semibold">45</span>
+                <span className="text-sm text-muted-foreground">28.8%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge variant="destructive">Expirados</Badge>
-                  <span className="text-sm text-muted-foreground">8.4%</span>
+                  <Badge className="bg-red-700 text-white hover:bg-red-700">Expirados</Badge>
                 </div>
-                <span className="font-semibold">13</span>
+                <span className="text-sm text-muted-foreground">8.4%</span>
               </div>
             </div>
           </Card>
