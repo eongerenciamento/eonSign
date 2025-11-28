@@ -78,7 +78,7 @@ export function AppSidebar() {
   return (
     <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#274d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
-      <div className={`p-6 border-b border-white/10 ${collapsed ? "px-3" : ""} flex items-center justify-between`}>
+      <div className={`p-6 ${collapsed ? "px-3" : ""} flex items-center justify-between`}>
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
             <File className="w-6 h-6 text-white" />
@@ -117,7 +117,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/10 mt-auto">
+      <div className="p-4 mt-auto">
         {!collapsed ? (
           <button
             onClick={() => navigate("/configuracoes")}
