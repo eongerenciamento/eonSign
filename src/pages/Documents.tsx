@@ -3,8 +3,9 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { UploadDialog } from "@/components/documents/UploadDialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CheckCircle, User, Users } from "lucide-react";
+import { Search, CheckCircle, User, Users, Filter } from "lucide-react";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -106,6 +107,7 @@ const Documents = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [activeTab, setActiveTab] = useState("signed");
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -182,7 +184,17 @@ const Documents = () => {
           <div>
             <h1 className="text-sm font-bold text-gray-600">Documentos</h1>
           </div>
-          <UploadDialog />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
+            >
+              <Filter className="w-5 h-5 text-gray-600" />
+            </Button>
+            <UploadDialog />
+          </div>
         </div>
 
         {/* Tabs */}
@@ -204,30 +216,32 @@ const Documents = () => {
 
           <TabsContent value="signed" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {showFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar documentos..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                </div>
               </div>
-              <div className="flex gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-              </div>
-            </div>
+            )}
 
             {/* Documents Table */}
             <DocumentsTable documents={filteredDocuments} />
@@ -235,30 +249,32 @@ const Documents = () => {
 
           <TabsContent value="pending-internal" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {showFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar documentos..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                </div>
               </div>
-              <div className="flex gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-              </div>
-            </div>
+            )}
 
             {/* Documents Table */}
             <DocumentsTable documents={filteredDocuments} />
@@ -266,30 +282,32 @@ const Documents = () => {
 
           <TabsContent value="pending-external" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {showFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar documentos..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                </div>
               </div>
-              <div className="flex gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-              </div>
-            </div>
+            )}
 
             {/* Documents Table */}
             <DocumentsTable documents={filteredDocuments} />
