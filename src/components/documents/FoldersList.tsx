@@ -1,4 +1,4 @@
-import { Folder, MoreVertical, Pencil, Trash2, Move } from "lucide-react";
+import { Folder, MoreVertical, PenSquare, Trash2, Move } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -171,7 +171,7 @@ export const FoldersList = ({
                     onRenameFolder(folder);
                   }}
                 >
-                  <Pencil className="w-4 h-4 mr-2" />
+                  <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
@@ -268,7 +268,7 @@ export const FoldersList = ({
                     onRenameFolder(folder);
                   }}
                 >
-                  <Pencil className="w-4 h-4 mr-2" />
+                  <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
