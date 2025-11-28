@@ -96,32 +96,28 @@ const Dashboard = () => {
         </div>
 
         {/* Pending Documents Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-4">
           <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none">
-            <CardHeader>
-              <CardTitle className="text-white text-lg">
-                Pendentes - Sua Assinatura
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white text-base">
+                Pendentes
               </CardTitle>
+              <p className="text-gray-600 text-xs">Sua Assinatura</p>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-white">{pendingByOwner}</p>
-              <p className="text-white/80 text-sm mt-2">
-                Documentos aguardando sua assinatura
-              </p>
+              <p className="text-3xl font-bold text-white">{pendingByOwner}</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none">
-            <CardHeader>
-              <CardTitle className="text-white text-lg">
-                Pendentes - Signatários Externos
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white text-base">
+                Pendentes
               </CardTitle>
+              <p className="text-gray-600 text-xs">Signatários Externos</p>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-white">{pendingByExternal}</p>
-              <p className="text-white/80 text-sm mt-2">
-                Documentos aguardando assinatura de terceiros
-              </p>
+              <p className="text-3xl font-bold text-white">{pendingByExternal}</p>
             </CardContent>
           </Card>
         </div>
