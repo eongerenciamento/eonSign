@@ -113,31 +113,40 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
               
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Status</p>
-                <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                {doc.status === "in_progress" ? (
+                  <div className="space-y-1">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-[#273d60] to-[#001f3f] h-2 rounded-full transition-all"
+                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {Math.round((doc.signedBy / doc.signers) * 100)}% concluído
+                    </p>
+                  </div>
+                ) : (
+                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                )}
               </div>
               
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Assinaturas</p>
-                <div className="flex items-center gap-2">
-                  <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
-                    {doc.signedBy}/{doc.signers}
-                  </span>
-                  <div className="flex gap-1">
-                    {doc.signerStatuses?.map((status, idx) => (
-                      <div
-                        key={idx}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${
-                          status === "signed"
-                            ? "bg-green-500"
-                            : status === "pending"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                      >
-                        {doc.signerNames?.[idx] ? getInitials(doc.signerNames[idx]) : idx + 1}
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex gap-1">
+                  {doc.signerStatuses?.map((status, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${
+                        status === "signed"
+                          ? "bg-green-500"
+                          : status === "pending"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                    >
+                      {doc.signerNames?.[idx] ? getInitials(doc.signerNames[idx]) : idx + 1}
+                    </div>
+                  ))}
                 </div>
               </div>
               
