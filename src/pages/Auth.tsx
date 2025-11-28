@@ -130,7 +130,7 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001a4d] px-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center animate-fade-in animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <img src={logo} alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" />
