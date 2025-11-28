@@ -143,8 +143,8 @@ const NewDocument = () => {
     <Layout>
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Novo Documento</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
+          <p className="text-xs text-gray-500 mt-1">
             Envie um documento para assinatura digital
           </p>
         </div>
@@ -222,7 +222,7 @@ const NewDocument = () => {
 
             {/* Signers Section */}
             <div className="space-y-4">
-              <Label className="text-base font-semibold">Signatários</Label>
+              <Label className="text-base font-semibold text-gray-600">Signatários</Label>
               {signers.map((signer, index) => (
                 <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted/20">
                   {signers.length > 1 && (
@@ -290,15 +290,17 @@ const NewDocument = () => {
                 </div>
               ))}
               
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={addSigner}
-                className="w-10 h-10"
-              >
-                <Plus className="w-5 h-5" />
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={addSigner}
+                  className="w-10 h-10 rounded-full hover:bg-transparent"
+                >
+                  <Plus className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -306,12 +308,15 @@ const NewDocument = () => {
           <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90"
               onClick={() => navigate("/documentos")}
             >
               Cancelar
             </Button>
-            <Button className="flex-1" onClick={handleSubmit}>
+            <Button 
+              className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" 
+              onClick={handleSubmit}
+            >
               Enviar para Assinatura
             </Button>
           </div>
