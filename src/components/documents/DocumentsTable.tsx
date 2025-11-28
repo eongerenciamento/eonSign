@@ -111,25 +111,6 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                 <p>{doc.createdAt}</p>
               </div>
               
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Status</p>
-                {doc.status === "in_progress" ? (
-                  <div className="space-y-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-[#273d60] to-[#001f3f] h-2 rounded-full transition-all"
-                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {Math.round((doc.signedBy / doc.signers) * 100)}% concluído
-                    </p>
-                  </div>
-                ) : (
-                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-                )}
-              </div>
-              
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Assinaturas</p>
                 <div className="flex gap-1">
@@ -148,6 +129,25 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                     </div>
                   ))}
                 </div>
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Status</p>
+                {doc.status === "in_progress" ? (
+                  <div className="space-y-1">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-[#273d60] h-2 rounded-full transition-all"
+                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.signedBy}/{doc.signers}
+                    </p>
+                  </div>
+                ) : (
+                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                )}
               </div>
               
               <div className="flex gap-2 pt-2">
