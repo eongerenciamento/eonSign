@@ -165,7 +165,7 @@ export function AppSidebar() {
                           <TooltipTrigger asChild>
                             {menuButton}
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-[#273d60] text-white border-white/20">
+                          <TooltipContent side="right" className="bg-transparent text-white border-none shadow-none">
                             {item.title}
                           </TooltipContent>
                         </Tooltip> : menuButton}
