@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, FolderPlus, LayoutGrid, List } from "lucide-react";
+import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
@@ -208,6 +208,7 @@ const Drive = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent"
               >
                 {viewMode === "grid" ? (
                   <List className="w-5 h-5" />
@@ -216,12 +217,27 @@ const Drive = () => {
                 )}
               </Button>
             </div>
-            <FoldersList
-              folders={folders}
-              onFolderClick={setSelectedFolder}
-              onRenameFolder={handleRenameFolder}
-              onDeleteFolder={handleDeleteFolder}
-            />
+            {viewMode === "list" ? (
+              <FoldersList
+                folders={folders}
+                onFolderClick={setSelectedFolder}
+                onRenameFolder={handleRenameFolder}
+                onDeleteFolder={handleDeleteFolder}
+              />
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {folders.map((folder) => (
+                  <div
+                    key={folder.id}
+                    onClick={() => setSelectedFolder(folder.id)}
+                    className="flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <FolderIcon className="w-12 h-12 text-gray-600 mb-2" />
+                    <p className="text-sm text-center">{folder.name}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

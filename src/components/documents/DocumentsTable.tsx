@@ -1,13 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Download, MoreHorizontal } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Eye, Download } from "lucide-react";
 
 export interface Document {
   id: string;
@@ -83,23 +78,14 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="w-4 h-4 mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Download className="w-4 h-4 mr-2" />
-                          Baixar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                        <Download className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -165,28 +151,27 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
               
               <div className="flex gap-2 pt-2 justify-end items-center">
                 {folders && folders.length > 0 && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full">
-                        <MoreHorizontal className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                  <Select onValueChange={(value) => handleMoveToFolder(doc.id, value)}>
+                    <SelectTrigger className="w-[180px] hover:bg-gray-100">
+                      <SelectValue placeholder="Selecionar pasta" />
+                    </SelectTrigger>
+                    <SelectContent>
                       {folders.map((folder) => (
-                        <DropdownMenuItem
-                          key={folder.id}
-                          onClick={() => handleMoveToFolder(doc.id, folder.id)}
+                        <SelectItem 
+                          key={folder.id} 
+                          value={folder.id}
+                          className="hover:bg-gray-100"
                         >
-                          Mover para {folder.name}
-                        </DropdownMenuItem>
+                          {folder.name}
+                        </SelectItem>
                       ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </SelectContent>
+                  </Select>
                 )}
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
                   <Eye className="w-4 h-4 text-gray-500" />
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
                   <Download className="w-4 h-4 text-gray-500" />
                 </Button>
               </div>
