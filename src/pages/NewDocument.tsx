@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, FileText, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Signer {
   name: string;
@@ -21,9 +22,35 @@ const NewDocument = () => {
   const [signers, setSigners] = useState<Signer[]>([
     { name: "", cpf: "", phone: "", email: "" },
   ]);
+  const [companySigner, setCompanySigner] = useState<Signer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadCompanySigner = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: companyData } = await supabase
+          .from('company_settings')
+          .select('admin_name, admin_cpf, admin_phone, admin_email')
+          .eq('user_id', user.id)
+          .single();
+
+        if (companyData) {
+          setCompanySigner({
+            name: companyData.admin_name,
+            cpf: companyData.admin_cpf,
+            phone: companyData.admin_phone,
+            email: companyData.admin_email,
+          });
+        }
+      }
+    };
+
+    loadCompanySigner();
+  }, []);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -223,6 +250,31 @@ const NewDocument = () => {
             {/* Signers Section */}
             <div className="space-y-4">
               <Label className="text-base font-semibold text-gray-600">Signatários</Label>
+              
+              {/* Company Signer (Read-only) */}
+              {companySigner && (
+                <div className="p-4 border rounded-lg space-y-3 bg-primary/5">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Signatário da Empresa</p>
+                  <div className="grid gap-2">
+                    <Label>Nome Completo</Label>
+                    <Input value={companySigner.name} disabled />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>CPF</Label>
+                    <Input value={companySigner.cpf} disabled />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Telefone</Label>
+                    <Input value={companySigner.phone} disabled />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>E-mail</Label>
+                    <Input value={companySigner.email} disabled />
+                  </div>
+                </div>
+              )}
+
+              <p className="text-sm font-medium text-gray-600">Outros Signatários</p>
               {signers.map((signer, index) => (
                 <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted/20">
                   {signers.length > 1 && (
