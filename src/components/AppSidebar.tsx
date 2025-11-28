@@ -1,4 +1,4 @@
-import { File, Folder, BarChart, LogOut, Menu } from "lucide-react";
+import { File, Folder, BarChart, Menu } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -68,18 +68,6 @@ export function AppSidebar() {
     return currentPath.startsWith(path);
   };
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Erro ao sair",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      navigate("/auth");
-    }
-  };
 
   const getUserInitials = () => {
     if (name) return name.charAt(0).toUpperCase();
@@ -97,7 +85,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-bold text-white">DocSign</h1>
+              <h1 className="text-lg font-bold text-white">Éon Sign</h1>
               <p className="text-xs text-white/60">Assinatura Digital</p>
             </div>
           )}
@@ -131,41 +119,40 @@ export function AppSidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-white/10 mt-auto">
         {!collapsed ? (
-          <>
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar className="h-10 w-10">
-                {avatarUrl && <AvatarImage src={avatarUrl} />}
-                <AvatarFallback className="bg-white/20 text-white">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {name || user?.email || "Usuário"}
-                </p>
-                <p className="text-xs text-white/60 truncate">
-                  {organization || "Organização"}
-                </p>
-                <p className="text-xs text-white/40">
-                  Administrador
-                </p>
-              </div>
+          <button
+            onClick={() => navigate("/configuracoes")}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <Avatar className="h-10 w-10">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-white/20 text-white">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-medium text-white truncate">
+                {name || user?.email || "Usuário"}
+              </p>
+              <p className="text-xs text-white/60 truncate">
+                {organization || "Organização"}
+              </p>
+              <p className="text-xs text-white/40">
+                Administrador
+              </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Sair</span>
-            </button>
-          </>
+          </button>
         ) : (
           <button
-            onClick={handleLogout}
+            onClick={() => navigate("/configuracoes")}
             className="w-full flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-            title="Sair"
+            title="Configurações"
           >
-            <LogOut className="w-5 h-5" />
+            <Avatar className="h-10 w-10">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              <AvatarFallback className="bg-white/20 text-white">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
           </button>
         )}
       </div>
