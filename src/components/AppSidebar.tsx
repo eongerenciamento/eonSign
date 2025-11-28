@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
@@ -39,16 +40,33 @@ export function AppSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
+  const [pendingDocuments, setPendingDocuments] = useState(0);
+  const [supportTickets, setSupportTickets] = useState(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const loadUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
         setName(user.user_metadata?.name || "");
         setOrganization(user.user_metadata?.organization || "");
         setAvatarUrl(user.user_metadata?.avatar_url || null);
+        
+        // Buscar documentos pendentes
+        const { count } = await supabase
+          .from('documents')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'pending');
+        
+        setPendingDocuments(count || 0);
+        
+        // Placeholder para tickets de suporte (será implementado futuramente)
+        setSupportTickets(0);
       }
-    });
+    };
+
+    loadUserData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -61,7 +79,35 @@ export function AppSidebar() {
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Realtime subscription para documentos
+    const documentsChannel = supabase
+      .channel('documents-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { count } = await supabase
+              .from('documents')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('status', 'pending');
+            
+            setPendingDocuments(count || 0);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(documentsChannel);
+    };
   }, []);
 
   const isActive = (path: string) => {
@@ -98,20 +144,49 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20"
-                    >
-                      <item.icon className="w-5 h-5" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const showBadge = 
+                  (item.title === "Documentos" && pendingDocuments > 0) ||
+                  (item.title === "Configurações" && supportTickets > 0);
+                
+                const badgeCount = 
+                  item.title === "Documentos" ? pendingDocuments : supportTickets;
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/"}
+                        className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20"
+                      >
+                        <item.icon className="w-5 h-5" />
+                        {!collapsed && (
+                          <span className="flex items-center gap-2 flex-1">
+                            {item.title}
+                            {showBadge && (
+                              <Badge 
+                                variant="destructive" 
+                                className="ml-auto h-5 px-2 text-xs bg-red-500 text-white"
+                              >
+                                {badgeCount}
+                              </Badge>
+                            )}
+                          </span>
+                        )}
+                        {collapsed && showBadge && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-red-500 text-white"
+                          >
+                            {badgeCount > 9 ? '9+' : badgeCount}
+                          </Badge>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
