@@ -44,7 +44,7 @@ interface DocumentsTableProps {
 
 const statusConfig = {
   pending: { label: "Pendente", className: "bg-yellow-700 text-white hover:bg-yellow-700" },
-  in_progress: { label: "Em Andamento", className: "bg-green-700 text-white hover:bg-green-700" },
+  in_progress: { label: "Em Andamento", className: "bg-blue-700 text-white hover:bg-blue-700" },
   signed: { label: "Assinado", className: "bg-green-700 text-white hover:bg-green-700" },
   expired: { label: "Expirado", className: "bg-red-700 text-white hover:bg-red-700" },
 };
@@ -229,6 +229,9 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                               strokeDashoffset={`${2 * Math.PI * 16 * (1 - progressPercentage / 100)}`}
                               className={doc.status === "expired" ? "text-red-700" : "text-green-700"}
                               strokeLinecap="round"
+                              style={{
+                                transition: 'stroke-dashoffset 1s ease-in-out'
+                              }}
                             />
                           </svg>
                         </div>
