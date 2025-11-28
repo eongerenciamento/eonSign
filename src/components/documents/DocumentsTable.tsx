@@ -17,6 +17,7 @@ export interface Document {
   signers: number;
   signedBy: number;
   signerStatuses?: ("signed" | "pending" | "rejected")[];
+  signerNames?: string[];
 }
 
 interface DocumentsTableProps {
@@ -28,6 +29,14 @@ const statusConfig = {
   in_progress: { label: "Em Andamento", variant: "default" as const },
   signed: { label: "Assinado", variant: "default" as const },
   expired: { label: "Expirado", variant: "destructive" as const },
+};
+
+const getInitials = (name: string) => {
+  const names = name.trim().split(' ');
+  if (names.length >= 2) {
+    return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
 };
 
 export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
@@ -117,7 +126,7 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                     {doc.signerStatuses?.map((status, idx) => (
                       <div
                         key={idx}
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white ${
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${
                           status === "signed"
                             ? "bg-green-500"
                             : status === "pending"
@@ -125,7 +134,7 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                             : "bg-red-500"
                         }`}
                       >
-                        {idx + 1}
+                        {doc.signerNames?.[idx] ? getInitials(doc.signerNames[idx]) : idx + 1}
                       </div>
                     ))}
                   </div>
