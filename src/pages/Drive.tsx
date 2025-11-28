@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, FolderPlus } from "lucide-react";
+import { Search, ChevronLeft, FolderPlus, LayoutGrid, List } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
@@ -21,6 +21,7 @@ const allDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed"],
     signerNames: ["Empresa Admin", "Carlos Oliveira"],
+    folderId: null,
   },
   {
     id: "6",
@@ -31,6 +32,7 @@ const allDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed"],
     signerNames: ["Empresa Admin", "Roberto Costa"],
+    folderId: null,
   },
 ];
 
@@ -41,6 +43,7 @@ const Drive = () => {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,9 +74,12 @@ const Drive = () => {
   const filterDocuments = () => {
     let filtered = [...documents];
 
-    // Filter by folder
-    if (selectedFolder) {
-      filtered = filtered.filter((doc) => doc.id === selectedFolder);
+    // Filter out documents that are in folders (only show unassigned documents)
+    if (!selectedFolder) {
+      filtered = filtered.filter((doc) => !doc.folderId);
+    } else {
+      // Filter by selected folder
+      filtered = filtered.filter((doc) => doc.folderId === selectedFolder);
     }
 
     // Filter by search
@@ -196,7 +202,20 @@ const Drive = () => {
         {/* Folders Section */}
         {!selectedFolder && folders.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Pastas</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm text-gray-600">Pastas</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+              >
+                {viewMode === "grid" ? (
+                  <List className="w-5 h-5" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
             <FoldersList
               folders={folders}
               onFolderClick={setSelectedFolder}
@@ -233,7 +252,7 @@ const Drive = () => {
         </div>
 
         {/* Documents Table */}
-        <DocumentsTable documents={filteredDocuments} />
+        <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
       </div>
     </Layout>
   );

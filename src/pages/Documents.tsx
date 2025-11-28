@@ -19,6 +19,7 @@ const allDocuments: Document[] = [
     signedBy: 1,
     signerStatuses: ["signed", "pending", "pending"],
     signerNames: ["Empresa Admin", "João Silva", "Maria Santos"],
+    folderId: null,
   },
   {
     id: "2",
@@ -29,6 +30,7 @@ const allDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed"],
     signerNames: ["Empresa Admin", "Carlos Oliveira"],
+    folderId: null,
   },
   {
     id: "3",
@@ -39,6 +41,7 @@ const allDocuments: Document[] = [
     signedBy: 0,
     signerStatuses: ["pending", "pending", "pending", "pending"],
     signerNames: ["Empresa Admin", "Ana Costa", "Pedro Alves", "Lucas Mendes"],
+    folderId: null,
   },
   {
     id: "4",
@@ -49,6 +52,7 @@ const allDocuments: Document[] = [
     signedBy: 1,
     signerStatuses: ["pending", "signed"],
     signerNames: ["Empresa Admin", "Fernanda Lima"],
+    folderId: null,
   },
   {
     id: "5",
@@ -59,6 +63,7 @@ const allDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed", "rejected"],
     signerNames: ["Empresa Admin", "Rafael Souza", "Juliana Rocha"],
+    folderId: null,
   },
   {
     id: "6",
@@ -69,6 +74,7 @@ const allDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed"],
     signerNames: ["Empresa Admin", "Roberto Costa"],
+    folderId: null,
   },
   {
     id: "7",
@@ -79,6 +85,7 @@ const allDocuments: Document[] = [
     signedBy: 0,
     signerStatuses: ["pending"],
     signerNames: ["Empresa Admin"],
+    folderId: null,
   },
   {
     id: "8",
@@ -89,6 +96,7 @@ const allDocuments: Document[] = [
     signedBy: 0,
     signerStatuses: ["pending", "pending", "pending", "pending", "pending"],
     signerNames: ["Empresa Admin", "Marcos Silva", "Paula Lima", "André Santos", "Beatriz Alves"],
+    folderId: null,
   },
 ];
 
