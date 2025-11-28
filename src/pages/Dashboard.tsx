@@ -2,6 +2,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 
 const mockDocuments: Document[] = [
@@ -65,6 +66,15 @@ const Dashboard = () => {
   const date = currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
   const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
 
+  // Calculate pending documents
+  const pendingByOwner = mockDocuments.filter(doc => 
+    doc.signerStatuses && doc.signerStatuses[0] === "pending"
+  ).length;
+  
+  const pendingByExternal = mockDocuments.filter(doc => 
+    doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")
+  ).length;
+
   return (
     <Layout>
       <div className="p-8 space-y-8">
@@ -83,6 +93,37 @@ const Dashboard = () => {
             <Upload className="w-5 h-5 md:mr-2" />
             <span className="hidden md:inline">Documento</span>
           </Button>
+        </div>
+
+        {/* Pending Documents Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none">
+            <CardHeader>
+              <CardTitle className="text-white text-lg">
+                Pendentes - Sua Assinatura
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-4xl font-bold text-white">{pendingByOwner}</p>
+              <p className="text-white/80 text-sm mt-2">
+                Documentos aguardando sua assinatura
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none">
+            <CardHeader>
+              <CardTitle className="text-white text-lg">
+                Pendentes - Signatários Externos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-4xl font-bold text-white">{pendingByExternal}</p>
+              <p className="text-white/80 text-sm mt-2">
+                Documentos aguardando assinatura de terceiros
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Documents */}
