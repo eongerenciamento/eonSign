@@ -1,8 +1,8 @@
 import { Layout } from "@/components/Layout";
-import { StatsCard } from "@/components/dashboard/StatsCard";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
-import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
-import { UploadDialog } from "@/components/documents/UploadDialog";
+import { FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const mockDocuments: Document[] = [
   {
@@ -48,49 +48,31 @@ const mockDocuments: Document[] = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
+  const currentDate = new Date();
+  const weekDay = currentDate.toLocaleDateString('pt-BR', { weekday: 'long' });
+  const date = currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
+
   return (
     <Layout>
       <div className="p-8 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
-              Visão geral das suas assinaturas digitais
+            <h1 className="text-sm font-bold text-gray-600">Dashboard</h1>
+            <p className="text-xs text-gray-500 mt-1">
+              {subtitle}
             </p>
           </div>
-          <UploadDialog />
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Total de Documentos"
-            value={156}
-            icon={FileText}
-            variant="primary"
-            trend={{ value: 12, isPositive: true }}
-          />
-          <StatsCard
-            title="Assinados"
-            value={98}
-            icon={CheckCircle}
-            variant="success"
-            trend={{ value: 8, isPositive: true }}
-          />
-          <StatsCard
-            title="Aguardando"
-            value={45}
-            icon={Clock}
-            variant="warning"
-            trend={{ value: -5, isPositive: false }}
-          />
-          <StatsCard
-            title="Expirados"
-            value={13}
-            icon={AlertCircle}
-            variant="default"
-          />
+          <Button 
+            onClick={() => navigate("/novo-documento")}
+            className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 shadow-lg"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Novo Documento
+          </Button>
         </div>
 
         {/* Recent Documents */}
