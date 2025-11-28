@@ -50,6 +50,7 @@ const Drive = () => {
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [showFolderFilters, setShowFolderFilters] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -234,6 +235,41 @@ const Drive = () => {
     await loadFolders();
   };
 
+  const handleCreateSubfolder = async () => {
+    if (!selectedFolder) return;
+
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para criar pastas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("folders")
+      .insert({ name: "Nova Subpasta", user_id: userData.user.id, parent_folder_id: selectedFolder })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Erro ao criar subpasta",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (data) {
+      setEditingFolderId(data.id);
+      await loadFolders();
+    }
+  };
+
+  const handleDocumentMoved = () => {
+    setDocuments(prevDocs => prevDocs.filter(doc => !doc.folderId));
+  };
+
   return (
     <Layout>
       <div className="p-8 space-y-6">
@@ -394,37 +430,72 @@ const Drive = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
+            <DocumentsTable 
+              documents={filteredDocuments} 
+              showProgress={false} 
+              folders={folders}
+              onDocumentMoved={handleDocumentMoved}
+            />
           </div>
         )}
 
         {/* Selected Folder Documents */}
         {selectedFolder && (
           <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm text-gray-600">Documentos da Pasta</h2>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowFolderFilters(!showFolderFilters)}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  <Filter className="w-5 h-5 text-gray-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCreateSubfolder}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  <Plus className="w-5 h-5 text-gray-600" />
+                </Button>
               </div>
             </div>
-            <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
+
+            {showFolderFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar documentos..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            
+            <DocumentsTable 
+              documents={filteredDocuments} 
+              showProgress={false} 
+              folders={folders}
+              onDocumentMoved={handleDocumentMoved}
+            />
           </div>
         )}
       </div>
