@@ -1,8 +1,12 @@
-import { FileText, LayoutDashboard, FileBarChart, HardDrive, LogOut } from "lucide-react";
+import { File, Folder, BarChart, LogOut, Menu } from "lucide-react";
+import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
+import { User } from "@supabase/supabase-js";
 
 import {
   Sidebar,
@@ -12,14 +16,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Documentos", url: "/documentos", icon: FileText },
-  { title: "Drive", url: "/drive", icon: HardDrive },
-  { title: "Relatórios", url: "/relatorios", icon: FileBarChart },
+  { title: "Dashboard", url: "/", icon: DashboardIcon },
+  { title: "Documentos", url: "/documentos", icon: File },
+  { title: "Drive", url: "/drive", icon: Folder },
+  { title: "Relatórios", url: "/relatorios", icon: BarChart },
 ];
 
 export function AppSidebar() {
@@ -29,6 +34,34 @@ export function AppSidebar() {
   const { toast } = useToast();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const [user, setUser] = useState<User | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        setName(user.user_metadata?.name || "");
+        setOrganization(user.user_metadata?.organization || "");
+        setAvatarUrl(user.user_metadata?.avatar_url || null);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          setName(session.user.user_metadata?.name || "");
+          setOrganization(session.user.user_metadata?.organization || "");
+          setAvatarUrl(session.user.user_metadata?.avatar_url || null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === path;
@@ -48,21 +81,28 @@ export function AppSidebar() {
     }
   };
 
+  const getUserInitials = () => {
+    if (name) return name.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
+    return "U";
+  };
+
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
-      {/* Header */}
-      <div className={`p-6 border-b border-sidebar-border ${collapsed ? "px-3" : ""}`}>
+    <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#274d60] to-[#001a4d]`} collapsible="icon">
+      {/* Header com Toggle */}
+      <div className={`p-6 border-b border-white/10 ${collapsed ? "px-3" : ""} flex items-center justify-between`}>
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center flex-shrink-0">
-            <FileText className="w-6 h-6 text-sidebar-primary-foreground" />
+          <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <File className="w-6 h-6 text-white" />
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-bold text-sidebar-foreground">DocSign</h1>
-              <p className="text-xs text-sidebar-foreground/60">Assinatura Digital</p>
+              <h1 className="text-lg font-bold text-white">DocSign</h1>
+              <p className="text-xs text-white/60">Assinatura Digital</p>
             </div>
           )}
         </div>
+        <SidebarTrigger className="text-white hover:bg-white/10" />
       </div>
 
       <SidebarContent>
@@ -75,7 +115,7 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 hover:bg-sidebar-accent"
+                      className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20"
                     >
                       <item.icon className="w-5 h-5" />
                       {!collapsed && <span>{item.title}</span>}
@@ -89,24 +129,40 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border mt-auto">
+      <div className="p-4 border-t border-white/10 mt-auto">
         {!collapsed ? (
           <>
+            <div className="flex items-center gap-3 mb-3">
+              <Avatar className="h-10 w-10">
+                {avatarUrl && <AvatarImage src={avatarUrl} />}
+                <AvatarFallback className="bg-white/20 text-white">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {name || user?.email || "Usuário"}
+                </p>
+                <p className="text-xs text-white/60 truncate">
+                  {organization || "Organização"}
+                </p>
+                <p className="text-xs text-white/40">
+                  Administrador
+                </p>
+              </div>
+            </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
             >
               <LogOut className="w-5 h-5" />
               <span>Sair</span>
             </button>
-            <div className="text-xs text-sidebar-foreground/50 text-center mt-4">
-              ICP-Brasil Integrado
-            </div>
           </>
         ) : (
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+            className="w-full flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
             title="Sair"
           >
             <LogOut className="w-5 h-5" />

@@ -22,11 +22,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col w-full">
-            {/* Desktop Header with Toggle */}
-            <header className="hidden md:flex h-14 items-center border-b border-border px-4">
-              <SidebarTrigger />
-            </header>
-
             {/* Content Area */}
             <main className="flex-1 overflow-auto pt-16 md:pt-0">
               {children}
