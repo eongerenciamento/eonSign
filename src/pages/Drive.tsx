@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon } from "lucide-react";
+import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon, Filter } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
@@ -228,34 +228,82 @@ const Drive = () => {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex flex-col gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar documentos..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-4">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Ordenar por" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Mais Recentes</SelectItem>
-                <SelectItem value="oldest">Mais Antigos</SelectItem>
-                <SelectItem value="name">Nome A-Z</SelectItem>
-              </SelectContent>
-            </Select>
-            <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-          </div>
-        </div>
+        {/* Unallocated Documents Section */}
+        {!selectedFolder && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm text-gray-600">Documentos Não Alocados</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-transparent w-8 h-8 p-0"
+                onClick={() => console.log("Filter clicked")}
+              >
+                <Filter className="w-4 h-4 text-gray-600" />
+              </Button>
+            </div>
 
-        {/* Documents Table */}
-        <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
+            {/* Filters */}
+            <div className="flex flex-col gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar documentos..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              </div>
+            </div>
+
+            {/* Documents Table */}
+            <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
+          </div>
+        )}
+
+        {/* Selected Folder Documents */}
+        {selectedFolder && (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar documentos..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              </div>
+            </div>
+            <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
+          </div>
+        )}
       </div>
     </Layout>
   );
