@@ -173,7 +173,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="p-8 space-y-6 max-w-5xl">
         <div>
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
