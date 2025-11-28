@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_settings: {
+        Row: {
+          admin_cpf: string
+          admin_email: string
+          admin_name: string
+          admin_phone: string
+          cep: string
+          city: string
+          cnpj: string
+          company_name: string
+          created_at: string
+          id: string
+          logo_url: string | null
+          neighborhood: string
+          state: string
+          street: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_cpf: string
+          admin_email: string
+          admin_name: string
+          admin_phone: string
+          cep: string
+          city: string
+          cnpj: string
+          company_name: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          neighborhood: string
+          state: string
+          street: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_cpf?: string
+          admin_email?: string
+          admin_name?: string
+          admin_phone?: string
+          cep?: string
+          city?: string
+          cnpj?: string
+          company_name?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          neighborhood?: string
+          state?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string

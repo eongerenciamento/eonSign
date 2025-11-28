@@ -30,9 +30,35 @@ const Settings = () => {
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const loadData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-    });
+
+      if (user) {
+        const { data: companyData } = await supabase
+          .from('company_settings')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (companyData) {
+          setCompanyName(companyData.company_name);
+          setCnpj(companyData.cnpj);
+          setLogo(companyData.logo_url);
+          setCep(companyData.cep);
+          setStreet(companyData.street);
+          setNeighborhood(companyData.neighborhood);
+          setCity(companyData.city);
+          setState(companyData.state);
+          setAdminName(companyData.admin_name);
+          setAdminCpf(companyData.admin_cpf);
+          setPhone(companyData.admin_phone);
+          setCompanyEmail(companyData.admin_email);
+        }
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleLogout = async () => {
@@ -91,7 +117,57 @@ const Settings = () => {
     }
   };
 
-  const handleSaveCompany = () => {
+  const handleSaveCompany = async () => {
+    if (!user) return;
+
+    if (!companyName || !cnpj || !cep || !street || !neighborhood || !city || !state || !adminName || !adminCpf || !phone || !companyEmail) {
+      toast.error("Por favor, preencha todos os campos obrigatórios");
+      return;
+    }
+
+    const { data: existingData } = await supabase
+      .from('company_settings')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    const companyData = {
+      user_id: user.id,
+      company_name: companyName,
+      cnpj,
+      logo_url: logo,
+      cep,
+      street,
+      neighborhood,
+      city,
+      state,
+      admin_name: adminName,
+      admin_cpf: adminCpf,
+      admin_phone: phone,
+      admin_email: companyEmail,
+    };
+
+    if (existingData) {
+      const { error } = await supabase
+        .from('company_settings')
+        .update(companyData)
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast.error("Erro ao salvar dados da empresa");
+        return;
+      }
+    } else {
+      const { error } = await supabase
+        .from('company_settings')
+        .insert([companyData]);
+
+      if (error) {
+        toast.error("Erro ao salvar dados da empresa");
+        return;
+      }
+    }
+
     toast.success("Dados da empresa salvos com sucesso!");
   };
 
