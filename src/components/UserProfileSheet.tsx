@@ -55,16 +55,32 @@ export function UserProfileSheet({
     setPhone(formatPhone(value));
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newAvatar = reader.result as string;
-        setAvatar(newAvatar);
-        onAvatarChange(newAvatar);
-      };
-      reader.readAsDataURL(file);
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setAvatar(publicUrl);
+      onAvatarChange(publicUrl);
+      toast.success("Avatar atualizado!");
+    } catch (error) {
+      toast.error("Erro ao fazer upload do avatar");
     }
   };
 

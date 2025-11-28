@@ -85,7 +85,7 @@ export function MobileNav() {
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+      const fileName = `${user?.id}/${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
