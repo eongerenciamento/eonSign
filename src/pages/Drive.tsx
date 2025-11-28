@@ -13,35 +13,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const allDocuments: Document[] = [
-  {
-    id: "2",
-    name: "Termo de Confidencialidade - Parceiro B",
-    createdAt: "14/11/2025",
-    status: "signed",
-    signers: 2,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed"],
-    signerNames: ["Empresa Admin", "Carlos Oliveira"],
-    folderId: null,
-  },
-  {
-    id: "6",
-    name: "Contrato de Trabalho - Colaborador D",
-    createdAt: "09/11/2025",
-    status: "signed",
-    signers: 2,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed"],
-    signerNames: ["Empresa Admin", "Roberto Costa"],
-    folderId: null,
-  },
-];
-
 const Drive = () => {
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [documents, setDocuments] = useState<Document[]>(allDocuments);
-  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>(allDocuments);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -59,8 +34,44 @@ const Drive = () => {
   }, [selectedFolder]);
 
   useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  useEffect(() => {
     filterDocuments();
   }, [searchQuery, sortBy, documents, selectedFolder, dateFrom, dateTo]);
+
+  const loadDocuments = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .eq("status", "signed");
+
+    if (error) {
+      toast({
+        title: "Erro ao carregar documentos",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (data) {
+      const mappedDocs: Document[] = data.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+        status: doc.status as "pending" | "signed" | "expired" | "in_progress",
+        signers: doc.signers,
+        signedBy: doc.signed_by,
+        folderId: doc.folder_id,
+        signerStatuses: [],
+        signerNames: [],
+      }));
+      setDocuments(mappedDocs);
+    }
+  };
 
   const loadFolders = async () => {
     let query = supabase
@@ -278,7 +289,7 @@ const Drive = () => {
   };
 
   const handleDocumentMoved = () => {
-    setDocuments(prevDocs => prevDocs.filter(doc => !doc.folderId));
+    loadDocuments();
   };
 
   return (
