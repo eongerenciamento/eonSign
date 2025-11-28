@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +51,7 @@ const Drive = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [showFolderFilters, setShowFolderFilters] = useState(false);
+  const [showUnallocated, setShowUnallocated] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const Drive = () => {
     const { data, error } = await supabase
       .from("folders")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("name", { ascending: true });
 
     if (error) {
       toast({
@@ -344,18 +345,32 @@ const Drive = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm text-gray-600">Documentos Não Alocados</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full hover:bg-transparent w-8 h-8 p-0"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter className="w-4 h-4 text-gray-600" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowUnallocated(!showUnallocated)}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  {showUnallocated ? (
+                    <ChevronUp className="w-5 h-5 text-gray-600" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-600" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full hover:bg-transparent w-8 h-8 p-0"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="w-4 h-4 text-gray-600" />
+                </Button>
+              </div>
             </div>
 
             {/* Filters */}
-            {showFilters && (
+            {showUnallocated && showFilters && (
               <div className="flex flex-col gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -430,12 +445,14 @@ const Drive = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable 
-              documents={filteredDocuments} 
-              showProgress={false} 
-              folders={folders}
-              onDocumentMoved={handleDocumentMoved}
-            />
+            {showUnallocated && (
+              <DocumentsTable 
+                documents={filteredDocuments} 
+                showProgress={false} 
+                folders={folders}
+                onDocumentMoved={handleDocumentMoved}
+              />
+            )}
           </div>
         )}
 
