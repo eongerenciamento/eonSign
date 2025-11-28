@@ -246,7 +246,27 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
               onDragEnd={handleDragEnd}
             >
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Nome do Documento</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Nome do Documento</p>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => console.log("View document", doc.id)}
+                    >
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => console.log("Download document", doc.id)}
+                    >
+                      <Download className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </div>
+                </div>
                 <p className="font-medium">{doc.name}</p>
               </div>
               
@@ -316,59 +336,39 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], a
                     </SelectContent>
                   </Select>
                 )}
-                <div className="flex gap-2 justify-between items-center">
-                  {showFolderActions && allFolders.length > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                          <MoreVertical className="w-4 h-4 text-gray-500" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="bg-white z-50">
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <Move className="w-4 h-4 mr-2" />
-                            Mover para
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent className="bg-white z-50">
-                            {doc.folderId && (
-                              <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
-                                <FolderX className="w-4 h-4 mr-2" />
-                                Remover da pasta
-                              </DropdownMenuItem>
-                            )}
-                            {allFolders.map((folder) => (
-                              <DropdownMenuItem
-                                key={folder.id}
-                                onClick={() => handleMoveToFolder(doc.id, folder.id)}
-                              >
-                                📁 {folder.name}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent"
-                      onClick={() => console.log("View document", doc.id)}
-                    >
-                      <Eye className="w-4 h-4 text-gray-500" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent"
-                      onClick={() => console.log("Download document", doc.id)}
-                    >
-                      <Download className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  </div>
-                </div>
+                {showFolderActions && allFolders.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="bg-white z-50">
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <Move className="w-4 h-4 mr-2" />
+                          Mover para
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="bg-white z-50">
+                          {doc.folderId && (
+                            <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
+                              <FolderX className="w-4 h-4 mr-2" />
+                              Remover da pasta
+                            </DropdownMenuItem>
+                          )}
+                          {allFolders.map((folder) => (
+                            <DropdownMenuItem
+                              key={folder.id}
+                              onClick={() => handleMoveToFolder(doc.id, folder.id)}
+                            >
+                              📁 {folder.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           );
