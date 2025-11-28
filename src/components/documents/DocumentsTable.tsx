@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Document {
   id: string;
@@ -25,6 +27,7 @@ interface DocumentsTableProps {
   documents: Document[];
   showProgress?: boolean;
   folders?: Folder[];
+  onDocumentMoved?: () => void;
 }
 
 const statusConfig = {
@@ -42,10 +45,30 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const DocumentsTable = ({ documents, showProgress = true, folders = [] }: DocumentsTableProps) => {
+export const DocumentsTable = ({ documents, showProgress = true, folders = [], onDocumentMoved }: DocumentsTableProps) => {
+  const { toast } = useToast();
+
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
-    // Logic to move document to folder will be implemented
-    console.log(`Moving document ${documentId} to folder ${folderId}`);
+    const { error } = await supabase
+      .from("documents")
+      .update({ folder_id: folderId })
+      .eq("id", documentId);
+
+    if (error) {
+      toast({
+        title: "Erro ao mover documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Documento movido",
+        description: "O documento foi movido para a pasta com sucesso.",
+      });
+      if (onDocumentMoved) {
+        onDocumentMoved();
+      }
+    }
   };
 
   return (
