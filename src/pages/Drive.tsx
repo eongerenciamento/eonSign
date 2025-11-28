@@ -3,13 +3,16 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon, Filter } from "lucide-react";
+import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
-import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const allDocuments: Document[] = [
   {
@@ -45,6 +48,8 @@ const Drive = () => {
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [showFilters, setShowFilters] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,7 +58,7 @@ const Drive = () => {
 
   useEffect(() => {
     filterDocuments();
-  }, [searchQuery, sortBy, documents, selectedFolder]);
+  }, [searchQuery, sortBy, documents, selectedFolder, dateFrom, dateTo]);
 
   const loadFolders = async () => {
     const { data, error } = await supabase
@@ -90,6 +95,21 @@ const Drive = () => {
       );
     }
 
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter((doc) => {
+        const docDate = new Date(doc.createdAt.split('/').reverse().join('-'));
+        return docDate >= dateFrom;
+      });
+    }
+
+    if (dateTo) {
+      filtered = filtered.filter((doc) => {
+        const docDate = new Date(doc.createdAt.split('/').reverse().join('-'));
+        return docDate <= dateTo;
+      });
+    }
+
     // Sort
     if (sortBy === "recent") {
       filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -102,31 +122,13 @@ const Drive = () => {
     setFilteredDocuments(filtered);
   };
 
-  const handleAdvancedFilters = (filters: AdvancedFilters) => {
-    let filtered = [...documents];
-
+  const handleAdvancedFilters = (filters: any) => {
     if (filters.dateFrom) {
-      filtered = filtered.filter(
-        (doc) => new Date(doc.createdAt) >= filters.dateFrom!
-      );
+      setDateFrom(filters.dateFrom);
     }
-
     if (filters.dateTo) {
-      filtered = filtered.filter(
-        (doc) => new Date(doc.createdAt) <= filters.dateTo!
-      );
+      setDateTo(filters.dateTo);
     }
-
-    if (filters.signers && filters.signers !== "all") {
-      const signersNum = filters.signers === "4+" ? 4 : parseInt(filters.signers);
-      if (filters.signers === "4+") {
-        filtered = filtered.filter((doc) => doc.signers >= signersNum);
-      } else {
-        filtered = filtered.filter((doc) => doc.signers === signersNum);
-      }
-    }
-
-    setFilteredDocuments(filtered);
   };
 
   const handleDeleteFolder = async (folderId: string) => {
@@ -267,7 +269,54 @@ const Drive = () => {
                       <SelectItem value="name">Nome A-Z</SelectItem>
                     </SelectContent>
                   </Select>
-                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data Início"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={setDateFrom}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data Fim"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={setDateTo}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             )}
@@ -301,7 +350,6 @@ const Drive = () => {
                     <SelectItem value="name">Nome A-Z</SelectItem>
                   </SelectContent>
                 </Select>
-                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
               </div>
             </div>
             <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
