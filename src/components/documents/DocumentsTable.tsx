@@ -237,7 +237,7 @@ export const DocumentsTable = ({
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Assinaturas</p>
                 <div className="flex gap-1">
-                  {doc.signerStatuses?.map((status, idx) => <div key={idx} className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-500" : status === "pending" ? "bg-yellow-500" : "bg-red-500"}`}>
+                  {doc.signerStatuses?.map((status, idx) => <div key={idx} className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
                       {doc.signerNames?.[idx] ? getInitials(doc.signerNames[idx]) : idx + 1}
                     </div>)}
                 </div>
