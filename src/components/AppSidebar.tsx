@@ -125,7 +125,7 @@ export function AppSidebar() {
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
   };
-  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-[#3d5a73]`} collapsible="icon">
+  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
         <SidebarTrigger className={`text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
