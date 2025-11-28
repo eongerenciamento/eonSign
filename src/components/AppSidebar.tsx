@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import logoSign from "@/assets/logo-sign.png";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 const items = [{
   title: "Dashboard",
   url: "/",
@@ -140,12 +141,12 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map(item => {
-              const showBadge = item.title === "Documentos" && pendingDocuments > 0 || item.title === "Configurações" && supportTickets > 0;
-              const badgeCount = item.title === "Documentos" ? pendingDocuments : supportTickets;
-              return <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+            <TooltipProvider>
+              <SidebarMenu>
+                {items.map(item => {
+                const showBadge = item.title === "Documentos" && pendingDocuments > 0 || item.title === "Configurações" && supportTickets > 0;
+                const badgeCount = item.title === "Documentos" ? pendingDocuments : supportTickets;
+                const menuButton = <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20">
                         <item.icon className="w-5 h-5" />
                         {!collapsed && <span className="flex items-center gap-2 flex-1 font-sans font-light text-sm">
@@ -158,10 +159,20 @@ export function AppSidebar() {
                             {badgeCount > 9 ? '9+' : badgeCount}
                           </Badge>}
                       </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>;
-            })}
-            </SidebarMenu>
+                    </SidebarMenuButton>;
+                return <SidebarMenuItem key={item.title}>
+                      {collapsed ? <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            {menuButton}
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="bg-[#273d60] text-white border-white/20">
+                            {item.title}
+                          </TooltipContent>
+                        </Tooltip> : menuButton}
+                    </SidebarMenuItem>;
+              })}
+              </SidebarMenu>
+            </TooltipProvider>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
