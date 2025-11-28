@@ -4,13 +4,14 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { UploadDialog } from "@/components/documents/UploadDialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft } from "lucide-react";
+import { Search, ChevronLeft, CheckCircle, User, Users } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const allDocuments: Document[] = [
   {
@@ -20,6 +21,8 @@ const allDocuments: Document[] = [
     status: "in_progress",
     signers: 3,
     signedBy: 1,
+    signerStatuses: ["signed", "pending", "pending"],
+    signerNames: ["Empresa Admin", "João Silva", "Maria Santos"],
   },
   {
     id: "2",
@@ -28,6 +31,8 @@ const allDocuments: Document[] = [
     status: "signed",
     signers: 2,
     signedBy: 2,
+    signerStatuses: ["signed", "signed"],
+    signerNames: ["Empresa Admin", "Carlos Oliveira"],
   },
   {
     id: "3",
@@ -36,6 +41,8 @@ const allDocuments: Document[] = [
     status: "pending",
     signers: 4,
     signedBy: 0,
+    signerStatuses: ["pending", "pending", "pending", "pending"],
+    signerNames: ["Empresa Admin", "Ana Costa", "Pedro Alves", "Lucas Mendes"],
   },
   {
     id: "4",
@@ -44,6 +51,8 @@ const allDocuments: Document[] = [
     status: "in_progress",
     signers: 2,
     signedBy: 1,
+    signerStatuses: ["pending", "signed"],
+    signerNames: ["Empresa Admin", "Fernanda Lima"],
   },
   {
     id: "5",
@@ -52,6 +61,8 @@ const allDocuments: Document[] = [
     status: "expired",
     signers: 3,
     signedBy: 2,
+    signerStatuses: ["signed", "signed", "rejected"],
+    signerNames: ["Empresa Admin", "Rafael Souza", "Juliana Rocha"],
   },
   {
     id: "6",
@@ -60,6 +71,8 @@ const allDocuments: Document[] = [
     status: "signed",
     signers: 2,
     signedBy: 2,
+    signerStatuses: ["signed", "signed"],
+    signerNames: ["Empresa Admin", "Roberto Costa"],
   },
   {
     id: "7",
@@ -68,6 +81,8 @@ const allDocuments: Document[] = [
     status: "in_progress",
     signers: 1,
     signedBy: 0,
+    signerStatuses: ["pending"],
+    signerNames: ["Empresa Admin"],
   },
   {
     id: "8",
@@ -76,6 +91,8 @@ const allDocuments: Document[] = [
     status: "pending",
     signers: 5,
     signedBy: 0,
+    signerStatuses: ["pending", "pending", "pending", "pending", "pending"],
+    signerNames: ["Empresa Admin", "Marcos Silva", "Paula Lima", "André Santos", "Beatriz Alves"],
   },
 ];
 
@@ -87,6 +104,7 @@ const Documents = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  const [activeTab, setActiveTab] = useState("signed");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,7 +113,7 @@ const Documents = () => {
 
   useEffect(() => {
     filterDocuments();
-  }, [searchQuery, statusFilter, sortBy, documents, selectedFolder]);
+  }, [searchQuery, statusFilter, sortBy, documents, selectedFolder, activeTab]);
 
   const loadFolders = async () => {
     const { data, error } = await supabase
@@ -116,6 +134,19 @@ const Documents = () => {
 
   const filterDocuments = () => {
     let filtered = [...documents];
+
+    // Filter by tab
+    if (activeTab === "signed") {
+      filtered = filtered.filter((doc) => doc.status === "signed");
+    } else if (activeTab === "pending-internal") {
+      filtered = filtered.filter(
+        (doc) => doc.signerStatuses && doc.signerStatuses[0] === "pending"
+      );
+    } else if (activeTab === "pending-external") {
+      filtered = filtered.filter(
+        (doc) => doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")
+      );
+    }
 
     // Filter by folder
     if (selectedFolder) {
@@ -274,44 +305,110 @@ const Documents = () => {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar documentos..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="pending">Pendente</SelectItem>
-              <SelectItem value="in_progress">Em Andamento</SelectItem>
-              <SelectItem value="signed">Assinado</SelectItem>
-              <SelectItem value="expired">Expirado</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Ordenar por" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Mais Recentes</SelectItem>
-              <SelectItem value="oldest">Mais Antigos</SelectItem>
-              <SelectItem value="name">Nome A-Z</SelectItem>
-            </SelectContent>
-          </Select>
-          <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-        </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="signed" className="data-[state=active]:text-gray-700">
+              <CheckCircle className="w-4 h-4 md:mr-2 text-gray-700" />
+              <span className="hidden md:inline">Assinados</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-700">
+              <User className="w-4 h-4 md:mr-2 text-yellow-700" />
+              <span className="hidden md:inline">Pendente Interno</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-700">
+              <Users className="w-4 h-4 md:mr-2 text-red-700" />
+              <span className="hidden md:inline">Pendente Externo</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Documents Table */}
-        <DocumentsTable documents={filteredDocuments} />
+          <TabsContent value="signed" className="mt-6 space-y-6">
+            {/* Filters */}
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar documentos..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest">Mais Antigos</SelectItem>
+                  <SelectItem value="name">Nome A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+            </div>
+
+            {/* Documents Table */}
+            <DocumentsTable documents={filteredDocuments} />
+          </TabsContent>
+
+          <TabsContent value="pending-internal" className="mt-6 space-y-6">
+            {/* Filters */}
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar documentos..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest">Mais Antigos</SelectItem>
+                  <SelectItem value="name">Nome A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+            </div>
+
+            {/* Documents Table */}
+            <DocumentsTable documents={filteredDocuments} />
+          </TabsContent>
+
+          <TabsContent value="pending-external" className="mt-6 space-y-6">
+            {/* Filters */}
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar documentos..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest">Mais Antigos</SelectItem>
+                  <SelectItem value="name">Nome A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+            </div>
+
+            {/* Documents Table */}
+            <DocumentsTable documents={filteredDocuments} />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
