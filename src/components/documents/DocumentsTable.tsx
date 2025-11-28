@@ -16,6 +16,7 @@ export interface Document {
   status: "pending" | "signed" | "expired" | "in_progress";
   signers: number;
   signedBy: number;
+  signerStatuses?: ("signed" | "pending" | "rejected")[];
 }
 
 interface DocumentsTableProps {
@@ -106,11 +107,29 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                 <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
               </div>
               
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Assinaturas</p>
-                <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
-                  {doc.signedBy}/{doc.signers}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={doc.signedBy === doc.signers ? "text-success font-medium" : ""}>
+                    {doc.signedBy}/{doc.signers}
+                  </span>
+                  <div className="flex gap-1">
+                    {doc.signerStatuses?.map((status, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white ${
+                          status === "signed"
+                            ? "bg-green-500"
+                            : status === "pending"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                      >
+                        {idx + 1}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               
               <div className="flex gap-2 pt-2">
