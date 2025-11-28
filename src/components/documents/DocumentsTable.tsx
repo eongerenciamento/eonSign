@@ -133,21 +133,19 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
               
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Status</p>
-                {doc.status === "in_progress" ? (
-                  <div className="space-y-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-[#273d60] h-2 rounded-full transition-all"
-                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.signedBy}/{doc.signers}
-                    </p>
+                <div className="space-y-1">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        doc.status === "expired" ? "bg-red-500" : "bg-[#273d60]"
+                      }`}
+                      style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
+                    />
                   </div>
-                ) : (
-                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-                )}
+                  <p className="text-xs text-muted-foreground">
+                    {doc.signedBy}/{doc.signers}
+                  </p>
+                </div>
               </div>
               
               <div className="flex gap-2 pt-2">
