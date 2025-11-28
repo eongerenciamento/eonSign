@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserProfileSheet } from "@/components/UserProfileSheet";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
+import logoSign from "@/assets/logo-sign.png";
 
 import {
   Sidebar,
@@ -131,9 +132,7 @@ export function AppSidebar() {
         {!collapsed ? (
           <>
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <File className="w-6 h-6 text-white" />
-              </div>
+              <img src={logoSign} alt="Éon Sign" className="h-10 w-auto object-contain" />
               <div>
                 <h1 className="text-lg font-bold text-white">Éon Sign</h1>
                 <p className="text-xs text-white/60">Assinatura Digital</p>
