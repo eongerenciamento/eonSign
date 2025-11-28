@@ -394,7 +394,7 @@ const Drive = () => {
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
                 <h1 className="text-sm font-bold text-gray-600">
-                  {folders.find((f) => f.id === selectedFolder)?.name}
+                  {allFolders.find((f) => f.id === selectedFolder)?.name}
                 </h1>
               </div>
             ) : (
