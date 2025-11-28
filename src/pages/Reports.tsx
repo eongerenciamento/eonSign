@@ -12,15 +12,8 @@ const Reports = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Relatórios</h1>
-            <p className="text-muted-foreground mt-1">
-              Análise detalhada de documentos e assinaturas
-            </p>
+            <h1 className="text-sm font-bold text-gray-600">Relatórios</h1>
           </div>
-          <Button className="gap-2">
-            <Download className="w-4 h-4" />
-            Exportar Relatório
-          </Button>
         </div>
 
         {/* Filters */}
