@@ -175,57 +175,17 @@ const Settings = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Configurações</h1>
-          <p className="text-muted-foreground">Gerencie suas preferências e informações da conta</p>
+          <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
         <Separator />
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Perfil</TabsTrigger>
+        <Tabs defaultValue="company" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
+            <TabsTrigger value="subscription">Assinatura</TabsTrigger>
+            <TabsTrigger value="support">Suporte</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="profile" className="space-y-6 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações da Conta</CardTitle>
-                <CardDescription>Seus dados de usuário</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={user?.email || ""}
-                    disabled
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="user-id">ID do Usuário</Label>
-                  <Input
-                    id="user-id"
-                    value={user?.id || ""}
-                    disabled
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Sessão</CardTitle>
-                <CardDescription>Gerenciar sua sessão atual</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={handleLogout} variant="destructive">
-                  Sair do Sistema
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="company" className="space-y-6 mt-6">
             <Card>
@@ -357,6 +317,15 @@ const Settings = () => {
                   </div>
 
                   <div className="grid gap-2">
+                    <Label htmlFor="user-id">ID do Usuário</Label>
+                    <Input
+                      id="user-id"
+                      value={user?.id || ""}
+                      disabled
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
                     <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
                     <Input
                       id="admin-cpf"
@@ -416,6 +385,86 @@ const Settings = () => {
                     onClick={handleSaveCompany}
                   >
                     Salvar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="subscription" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações da Assinatura</CardTitle>
+                <CardDescription>Gerenciar sua assinatura do Éon Sign</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Plano Atual</Label>
+                  <Input value="Plano Básico" disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Input value="Ativo" disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Próxima Cobrança</Label>
+                  <Input value="15/01/2025" disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Valor</Label>
+                  <Input value="R$ 99,00/mês" disabled />
+                </div>
+                <div className="pt-4">
+                  <Button className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
+                    Gerenciar Assinatura
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="support" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Suporte</CardTitle>
+                <CardDescription>Central de ajuda e tickets de suporte</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Precisa de ajuda? Entre em contato com nosso suporte ou consulte seus tickets abertos.
+                  </p>
+                  <div className="grid gap-3">
+                    <Button className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
+                      Abrir Novo Ticket
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      Ver Meus Tickets
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      Central de Ajuda
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator className="my-6" />
+
+                <div className="space-y-2">
+                  <Label>E-mail de Suporte</Label>
+                  <Input value="suporte@eonsign.com.br" disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Horário de Atendimento</Label>
+                  <Input value="Segunda a Sexta, 9h às 18h" disabled />
+                </div>
+
+                <div className="pt-4">
+                  <Button 
+                    variant="destructive" 
+                    className="w-full"
+                    onClick={handleLogout}
+                  >
+                    Sair do Sistema
                   </Button>
                 </div>
               </CardContent>
