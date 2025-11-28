@@ -5,10 +5,13 @@ import { UploadDialog } from "@/components/documents/UploadDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CheckCircle, User, Users, Filter } from "lucide-react";
-import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Search, CheckCircle, User, Users, Filter, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const allDocuments: Document[] = [
   {
@@ -108,11 +111,13 @@ const Documents = () => {
   const [sortBy, setSortBy] = useState("recent");
   const [activeTab, setActiveTab] = useState("signed");
   const [showFilters, setShowFilters] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
   const { toast } = useToast();
 
   useEffect(() => {
     filterDocuments();
-  }, [searchQuery, sortBy, documents, activeTab]);
+  }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo]);
 
   const filterDocuments = () => {
     let filtered = [...documents];
@@ -137,6 +142,25 @@ const Documents = () => {
       );
     }
 
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter(
+        (doc) => {
+          const docDate = new Date(doc.createdAt.split('/').reverse().join('-'));
+          return docDate >= dateFrom;
+        }
+      );
+    }
+
+    if (dateTo) {
+      filtered = filtered.filter(
+        (doc) => {
+          const docDate = new Date(doc.createdAt.split('/').reverse().join('-'));
+          return docDate <= dateTo;
+        }
+      );
+    }
+
     // Sort
     if (sortBy === "recent") {
       filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -144,33 +168,6 @@ const Documents = () => {
       filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     } else if (sortBy === "name") {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    setFilteredDocuments(filtered);
-  };
-
-  const handleAdvancedFilters = (filters: AdvancedFilters) => {
-    let filtered = [...documents];
-
-    if (filters.dateFrom) {
-      filtered = filtered.filter(
-        (doc) => new Date(doc.createdAt) >= filters.dateFrom!
-      );
-    }
-
-    if (filters.dateTo) {
-      filtered = filtered.filter(
-        (doc) => new Date(doc.createdAt) <= filters.dateTo!
-      );
-    }
-
-    if (filters.signers && filters.signers !== "all") {
-      const signersNum = filters.signers === "4+" ? 4 : parseInt(filters.signers);
-      if (filters.signers === "4+") {
-        filtered = filtered.filter((doc) => doc.signers >= signersNum);
-      } else {
-        filtered = filtered.filter((doc) => doc.signers === signersNum);
-      }
     }
 
     setFilteredDocuments(filtered);
@@ -227,19 +224,64 @@ const Documents = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-4">
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="oldest">Mais Antigos</SelectItem>
-                      <SelectItem value="name">Nome A-Z</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                <div className="grid grid-cols-2 gap-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={setDateFrom}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={setDateTo}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -260,19 +302,64 @@ const Documents = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-4">
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="oldest">Mais Antigos</SelectItem>
-                      <SelectItem value="name">Nome A-Z</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                <div className="grid grid-cols-2 gap-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={setDateFrom}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={setDateTo}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -293,19 +380,64 @@ const Documents = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-4">
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="oldest">Mais Antigos</SelectItem>
-                      <SelectItem value="name">Nome A-Z</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                <div className="grid grid-cols-2 gap-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={setDateFrom}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !dateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={setDateTo}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
