@@ -51,7 +51,7 @@ const Drive = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [showFolderFilters, setShowFolderFilters] = useState(false);
-  const [showUnallocated, setShowUnallocated] = useState(true);
+  const [showUnallocated, setShowUnallocated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
