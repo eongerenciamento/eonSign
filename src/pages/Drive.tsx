@@ -4,7 +4,6 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus } from "lucide-react";
-import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +49,7 @@ const Drive = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -176,6 +176,64 @@ const Drive = () => {
     }
   };
 
+  const handleCreateFolderInline = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para criar pastas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("folders")
+      .insert({ name: "Nova Pasta", user_id: userData.user.id })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Erro ao criar pasta",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (data) {
+      setEditingFolderId(data.id);
+      await loadFolders();
+    }
+  };
+
+  const handleSaveFolderName = async (folderId: string, newName: string) => {
+    if (!newName.trim()) {
+      await handleCancelEdit(folderId);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("folders")
+      .update({ name: newName.trim() })
+      .eq("id", folderId);
+
+    if (error) {
+      toast({
+        title: "Erro ao salvar nome da pasta",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setEditingFolderId(null);
+      await loadFolders();
+    }
+  };
+
+  const handleCancelEdit = async (folderId: string) => {
+    await supabase.from("folders").delete().eq("id", folderId);
+    setEditingFolderId(null);
+    await loadFolders();
+  };
+
   return (
     <Layout>
       <div className="p-8 space-y-6">
@@ -202,20 +260,19 @@ const Drive = () => {
         </div>
 
         {/* Folders Section */}
-        {!selectedFolder && folders.length > 0 && (
+        {!selectedFolder && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm text-gray-600">Pastas</h2>
               <div className="flex items-center gap-2">
-                <CreateFolderDialog onFolderCreated={loadFolders} trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                  >
-                    <Plus className="w-5 h-5 text-gray-600" />
-                  </Button>
-                } />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCreateFolderInline}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  <Plus className="w-5 h-5 text-gray-600" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -230,14 +287,19 @@ const Drive = () => {
                 </Button>
               </div>
             </div>
-            <FoldersList
-              folders={folders}
-              documents={documents}
-              viewMode={viewMode}
-              onFolderClick={setSelectedFolder}
-              onRenameFolder={handleRenameFolder}
-              onDeleteFolder={handleDeleteFolder}
-            />
+            {folders.length > 0 && (
+              <FoldersList
+                folders={folders}
+                documents={documents}
+                viewMode={viewMode}
+                onFolderClick={setSelectedFolder}
+                onRenameFolder={handleRenameFolder}
+                onDeleteFolder={handleDeleteFolder}
+                editingFolderId={editingFolderId}
+                onSaveFolderName={handleSaveFolderName}
+                onCancelEdit={handleCancelEdit}
+              />
+            )}
           </div>
         )}
 

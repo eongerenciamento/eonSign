@@ -7,7 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Document } from "./DocumentsTable";
+import { useEffect, useRef } from "react";
 
 export interface Folder {
   id: string;
@@ -22,6 +24,9 @@ interface FoldersListProps {
   onFolderClick: (folderId: string) => void;
   onRenameFolder: (folder: Folder) => void;
   onDeleteFolder: (folderId: string) => void;
+  editingFolderId?: string | null;
+  onSaveFolderName?: (folderId: string, name: string) => void;
+  onCancelEdit?: (folderId: string) => void;
 }
 
 export const FoldersList = ({
@@ -31,9 +36,35 @@ export const FoldersList = ({
   onFolderClick,
   onRenameFolder,
   onDeleteFolder,
+  editingFolderId,
+  onSaveFolderName,
+  onCancelEdit,
 }: FoldersListProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingFolderId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingFolderId]);
+
   const getDocumentCount = (folderId: string) => {
     return documents.filter((doc) => doc.folderId === folderId).length;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, folderId: string) => {
+    if (e.key === "Enter" && onSaveFolderName) {
+      onSaveFolderName(folderId, e.currentTarget.value);
+    } else if (e.key === "Escape" && onCancelEdit) {
+      onCancelEdit(folderId);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>, folderId: string) => {
+    if (onSaveFolderName) {
+      onSaveFolderName(folderId, e.currentTarget.value);
+    }
   };
 
   if (viewMode === "list") {
@@ -49,10 +80,23 @@ export const FoldersList = ({
           >
             <div className="flex items-center gap-3 flex-1">
               <Folder className="w-5 h-5 text-gray-500" />
-              <span className="text-sm text-gray-600">{folder.name}</span>
-              <span className="text-sm text-gray-500">
-                {getDocumentCount(folder.id)} documentos
-              </span>
+              {editingFolderId === folder.id ? (
+                <Input
+                  ref={inputRef}
+                  defaultValue={folder.name}
+                  onKeyDown={(e) => handleKeyDown(e, folder.id)}
+                  onBlur={(e) => handleBlur(e, folder.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-sm text-gray-600 h-8 w-64"
+                />
+              ) : (
+                <>
+                  <span className="text-sm text-gray-600">{folder.name}</span>
+                  <span className="text-sm text-gray-500">
+                    {getDocumentCount(folder.id)} documentos
+                  </span>
+                </>
+              )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -98,9 +142,20 @@ export const FoldersList = ({
         >
           <div className="flex flex-col items-center space-y-2">
             <Folder className="w-12 h-12 text-primary" />
-            <p className="text-sm font-medium text-center truncate w-full">
-              {folder.name}
-            </p>
+            {editingFolderId === folder.id ? (
+              <Input
+                ref={inputRef}
+                defaultValue={folder.name}
+                onKeyDown={(e) => handleKeyDown(e, folder.id)}
+                onBlur={(e) => handleBlur(e, folder.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm text-center w-full"
+              />
+            ) : (
+              <p className="text-sm font-medium text-center truncate w-full">
+                {folder.name}
+              </p>
+            )}
           </div>
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <DropdownMenu>
