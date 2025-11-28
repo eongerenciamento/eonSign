@@ -73,9 +73,11 @@ export const CreateFolderDialog = ({ onFolderCreated }: CreateFolderDialogProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <FolderPlus className="w-4 h-4 mr-2" />
-          Nova Pasta
+        <Button 
+          className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:rounded-md md:px-4 md:py-2"
+        >
+          <FolderPlus className="w-5 h-5 md:mr-2" />
+          <span className="hidden md:inline">Nova Pasta</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

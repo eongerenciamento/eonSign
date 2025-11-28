@@ -1,4 +1,4 @@
-import { FileText, LayoutDashboard, FileBarChart, LogOut } from "lucide-react";
+import { FileText, LayoutDashboard, FileBarChart, HardDrive, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ import {
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Drive", url: "/drive", icon: HardDrive },
   { title: "Relatórios", url: "/relatorios", icon: FileBarChart },
 ];
 

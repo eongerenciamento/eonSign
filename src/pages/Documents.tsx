@@ -4,13 +4,9 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { UploadDialog } from "@/components/documents/UploadDialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, CheckCircle, User, Users } from "lucide-react";
-import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
+import { Search, CheckCircle, User, Users } from "lucide-react";
 import { AdvancedFiltersDialog, AdvancedFilters } from "@/components/documents/AdvancedFiltersDialog";
-import { FoldersList, Folder } from "@/components/documents/FoldersList";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const allDocuments: Document[] = [
@@ -97,40 +93,16 @@ const allDocuments: Document[] = [
 ];
 
 const Documents = () => {
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [documents, setDocuments] = useState<Document[]>(allDocuments);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>(allDocuments);
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [activeTab, setActiveTab] = useState("signed");
   const { toast } = useToast();
 
   useEffect(() => {
-    loadFolders();
-  }, []);
-
-  useEffect(() => {
     filterDocuments();
-  }, [searchQuery, statusFilter, sortBy, documents, selectedFolder, activeTab]);
-
-  const loadFolders = async () => {
-    const { data, error } = await supabase
-      .from("folders")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Erro ao carregar pastas",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setFolders(data || []);
-    }
-  };
+  }, [searchQuery, sortBy, documents, activeTab]);
 
   const filterDocuments = () => {
     let filtered = [...documents];
@@ -148,21 +120,11 @@ const Documents = () => {
       );
     }
 
-    // Filter by folder
-    if (selectedFolder) {
-      filtered = filtered.filter((doc) => doc.id === selectedFolder);
-    }
-
     // Filter by search
     if (searchQuery) {
       filtered = filtered.filter((doc) =>
         doc.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    }
-
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((doc) => doc.status === statusFilter);
     }
 
     // Sort
@@ -179,10 +141,6 @@ const Documents = () => {
 
   const handleAdvancedFilters = (filters: AdvancedFilters) => {
     let filtered = [...documents];
-
-    if (filters.status !== "all") {
-      filtered = filtered.filter((doc) => doc.status === filters.status);
-    }
 
     if (filters.dateFrom) {
       filtered = filtered.filter(
@@ -208,102 +166,16 @@ const Documents = () => {
     setFilteredDocuments(filtered);
   };
 
-  const handleDeleteFolder = async (folderId: string) => {
-    const { error } = await supabase.from("folders").delete().eq("id", folderId);
-
-    if (error) {
-      toast({
-        title: "Erro ao excluir pasta",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Pasta excluída",
-        description: "A pasta foi excluída com sucesso.",
-      });
-      loadFolders();
-      if (selectedFolder === folderId) {
-        setSelectedFolder(null);
-      }
-    }
-  };
-
-  const handleRenameFolder = async (folder: Folder) => {
-    const newName = prompt("Novo nome da pasta:", folder.name);
-    if (!newName || newName === folder.name) return;
-
-    const { error } = await supabase
-      .from("folders")
-      .update({ name: newName })
-      .eq("id", folder.id);
-
-    if (error) {
-      toast({
-        title: "Erro ao renomear pasta",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Pasta renomeada",
-        description: "A pasta foi renomeada com sucesso.",
-      });
-      loadFolders();
-    }
-  };
-
   return (
     <Layout>
       <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            {selectedFolder ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedFolder(null)}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <div>
-                  <h1 className="text-3xl font-bold text-foreground">
-                    {folders.find((f) => f.id === selectedFolder)?.name}
-                  </h1>
-                  <p className="text-muted-foreground mt-1">
-                    Documentos da pasta
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Documentos</h1>
-                <p className="text-muted-foreground mt-1">
-                  Gerencie todos os seus documentos e assinaturas
-                </p>
-              </div>
-            )}
+            <h1 className="text-sm font-bold text-gray-600">Documentos</h1>
           </div>
-          <div className="flex gap-2">
-            {!selectedFolder && <CreateFolderDialog onFolderCreated={loadFolders} />}
-            <UploadDialog />
-          </div>
+          <UploadDialog />
         </div>
-
-        {/* Folders Section */}
-        {!selectedFolder && folders.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Pastas</h2>
-            <FoldersList
-              folders={folders}
-              onFolderClick={setSelectedFolder}
-              onRenameFolder={handleRenameFolder}
-              onDeleteFolder={handleDeleteFolder}
-            />
-          </div>
-        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -324,7 +196,7 @@ const Documents = () => {
 
           <TabsContent value="signed" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -334,17 +206,19 @@ const Documents = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest">Mais Antigos</SelectItem>
-                  <SelectItem value="name">Nome A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              </div>
             </div>
 
             {/* Documents Table */}
@@ -353,7 +227,7 @@ const Documents = () => {
 
           <TabsContent value="pending-internal" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -363,17 +237,19 @@ const Documents = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest">Mais Antigos</SelectItem>
-                  <SelectItem value="name">Nome A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              </div>
             </div>
 
             {/* Documents Table */}
@@ -382,7 +258,7 @@ const Documents = () => {
 
           <TabsContent value="pending-external" className="mt-6 space-y-6">
             {/* Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -392,17 +268,19 @@ const Documents = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest">Mais Antigos</SelectItem>
-                  <SelectItem value="name">Nome A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-              <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="name">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+              </div>
             </div>
 
             {/* Documents Table */}
