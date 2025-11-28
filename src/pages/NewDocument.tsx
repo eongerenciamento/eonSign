@@ -282,7 +282,7 @@ const NewDocument = () => {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2"
+                      className="absolute top-2 right-2 hover:bg-transparent active:bg-transparent focus:bg-transparent"
                       onClick={() => removeSigner(index)}
                     >
                       <X className="w-4 h-4" />
