@@ -3,18 +3,24 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+
+interface Signer {
+  name: string;
+  cpf: string;
+  phone: string;
+  email: string;
+}
 
 const NewDocument = () => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [name, setName] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
-  const [signers, setSigners] = useState("");
+  const [signers, setSigners] = useState<Signer[]>([
+    { name: "", cpf: "", phone: "", email: "" },
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -63,11 +69,57 @@ const NewDocument = () => {
     }
   };
 
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 7)
+      return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
+    return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  const handleSignerChange = (
+    index: number,
+    field: keyof Signer,
+    value: string
+  ) => {
+    const newSigners = [...signers];
+    if (field === "phone") {
+      newSigners[index][field] = formatPhone(value);
+    } else {
+      newSigners[index][field] = value;
+    }
+    setSigners(newSigners);
+  };
+
+  const addSigner = () => {
+    setSigners([...signers, { name: "", cpf: "", phone: "", email: "" }]);
+  };
+
+  const removeSigner = (index: number) => {
+    if (signers.length > 1) {
+      setSigners(signers.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = () => {
-    if (!file || !name || !cpf || !email || !title || !signers) {
+    if (!file || !title) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
+        description: "Por favor, preencha o título e selecione um arquivo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const hasEmptySigner = signers.some(
+      (signer) =>
+        !signer.name || !signer.cpf || !signer.phone || !signer.email
+    );
+
+    if (hasEmptySigner) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos dos signatários.",
         variant: "destructive",
       });
       return;
@@ -157,39 +209,7 @@ const NewDocument = () => {
           </div>
 
           {/* Form Fields */}
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nome Completo</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Digite seu nome completo"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
-                placeholder="000.000.000-00"
-                maxLength={14}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-              />
-            </div>
-
+          <div className="grid gap-6">
             <div className="grid gap-2">
               <Label htmlFor="title">Título do Documento</Label>
               <Input
@@ -200,17 +220,85 @@ const NewDocument = () => {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="signers">E-mails dos Signatários</Label>
-              <Input
-                id="signers"
-                value={signers}
-                onChange={(e) => setSigners(e.target.value)}
-                placeholder="email1@exemplo.com, email2@exemplo.com"
-              />
-              <p className="text-xs text-muted-foreground">
-                Separe múltiplos e-mails com vírgula
-              </p>
+            {/* Signers Section */}
+            <div className="space-y-4">
+              <Label className="text-base font-semibold">Signatários</Label>
+              {signers.map((signer, index) => (
+                <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted/20">
+                  {signers.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={() => removeSigner(index)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor={`name-${index}`}>Nome Completo</Label>
+                    <Input
+                      id={`name-${index}`}
+                      value={signer.name}
+                      onChange={(e) =>
+                        handleSignerChange(index, "name", e.target.value)
+                      }
+                      placeholder="Digite o nome completo"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor={`cpf-${index}`}>CPF</Label>
+                    <Input
+                      id={`cpf-${index}`}
+                      value={signer.cpf}
+                      onChange={(e) =>
+                        handleSignerChange(index, "cpf", e.target.value)
+                      }
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor={`phone-${index}`}>Telefone</Label>
+                    <Input
+                      id={`phone-${index}`}
+                      value={signer.phone}
+                      onChange={(e) =>
+                        handleSignerChange(index, "phone", e.target.value)
+                      }
+                      placeholder="(00)00000-0000"
+                      maxLength={14}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor={`email-${index}`}>E-mail</Label>
+                    <Input
+                      id={`email-${index}`}
+                      type="email"
+                      value={signer.email}
+                      onChange={(e) =>
+                        handleSignerChange(index, "email", e.target.value)
+                      }
+                      placeholder="email@exemplo.com"
+                    />
+                  </div>
+                </div>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={addSigner}
+                className="w-10 h-10"
+              >
+                <Plus className="w-5 h-5" />
+              </Button>
             </div>
           </div>
 
