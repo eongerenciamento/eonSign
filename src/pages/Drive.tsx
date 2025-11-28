@@ -56,17 +56,27 @@ const Drive = () => {
 
   useEffect(() => {
     loadFolders();
-  }, []);
+  }, [selectedFolder]);
 
   useEffect(() => {
     filterDocuments();
   }, [searchQuery, sortBy, documents, selectedFolder, dateFrom, dateTo]);
 
   const loadFolders = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("folders")
       .select("*")
       .order("name", { ascending: true });
+
+    // Se não há pasta selecionada, carregar apenas pastas raiz
+    if (!selectedFolder) {
+      query = query.is("parent_folder_id", null);
+    } else {
+      // Se há pasta selecionada, carregar apenas subpastas dessa pasta
+      query = query.eq("parent_folder_id", selectedFolder);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       toast({
