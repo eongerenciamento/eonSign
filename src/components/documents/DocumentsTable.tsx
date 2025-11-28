@@ -111,7 +111,7 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
                               <SelectItem 
                                 key={folder.id} 
                                 value={folder.id}
-                                className="hover:bg-gray-50"
+                                className="hover:bg-gray-50 focus:bg-gray-50"
                               >
                                 {folder.name}
                               </SelectItem>
@@ -197,7 +197,7 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [] }:
                         <SelectItem 
                           key={folder.id} 
                           value={folder.id}
-                          className="hover:bg-gray-50"
+                          className="hover:bg-gray-50 focus:bg-gray-50"
                         >
                           {folder.name}
                         </SelectItem>
