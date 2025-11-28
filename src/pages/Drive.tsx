@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 const Drive = () => {
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -31,6 +32,7 @@ const Drive = () => {
 
   useEffect(() => {
     loadFolders();
+    loadAllFolders();
   }, [selectedFolder]);
 
   useEffect(() => {
@@ -97,6 +99,19 @@ const Drive = () => {
       });
     } else {
       setFolders(data || []);
+    }
+  };
+
+  const loadAllFolders = async () => {
+    const { data, error } = await supabase
+      .from("folders")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Erro ao carregar todas as pastas:", error);
+    } else {
+      setAllFolders(data || []);
     }
   };
 
@@ -292,6 +307,77 @@ const Drive = () => {
     loadDocuments();
   };
 
+  const handleMoveFolder = async (folderId: string, targetFolderId: string | null) => {
+    // Validar que pasta não pode ser movida para si mesma
+    if (folderId === targetFolderId) {
+      toast({
+        title: "Operação inválida",
+        description: "Uma pasta não pode ser movida para si mesma.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar que pasta não pode ser movida para uma de suas subpastas
+    const isSubfolder = (parentId: string, childId: string | null): boolean => {
+      if (!childId) return false;
+      if (parentId === childId) return true;
+      const folder = allFolders.find(f => f.id === childId);
+      if (!folder || !folder.parent_folder_id) return false;
+      return isSubfolder(parentId, folder.parent_folder_id);
+    };
+
+    if (targetFolderId && isSubfolder(folderId, targetFolderId)) {
+      toast({
+        title: "Operação inválida",
+        description: "Uma pasta não pode ser movida para dentro de uma de suas subpastas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("folders")
+      .update({ parent_folder_id: targetFolderId })
+      .eq("id", folderId);
+
+    if (error) {
+      toast({
+        title: "Erro ao mover pasta",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Pasta movida",
+        description: "A pasta foi movida com sucesso.",
+      });
+      loadFolders();
+      loadAllFolders();
+    }
+  };
+
+  const handleDropDocumentOnFolder = async (documentId: string, folderId: string) => {
+    const { error } = await supabase
+      .from("documents")
+      .update({ folder_id: folderId })
+      .eq("id", documentId);
+
+    if (error) {
+      toast({
+        title: "Erro ao mover documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Documento movido",
+        description: "O documento foi movido com sucesso.",
+      });
+      loadDocuments();
+    }
+  };
+
   return (
     <Layout>
       <div className="p-8 space-y-6">
@@ -356,6 +442,10 @@ const Drive = () => {
                 editingFolderId={editingFolderId}
                 onSaveFolderName={handleSaveFolderName}
                 onCancelEdit={handleCancelEdit}
+                onMoveFolder={handleMoveFolder}
+                onDropDocument={handleDropDocumentOnFolder}
+                allFolders={allFolders}
+                currentFolderId={null}
               />
             )}
           </div>
@@ -471,6 +561,7 @@ const Drive = () => {
                 documents={filteredDocuments} 
                 showProgress={false} 
                 folders={folders}
+                allFolders={allFolders}
                 onDocumentMoved={handleDocumentMoved}
               />
             )}
@@ -515,6 +606,10 @@ const Drive = () => {
               editingFolderId={editingFolderId}
               onSaveFolderName={handleSaveFolderName}
               onCancelEdit={handleCancelEdit}
+              onMoveFolder={handleMoveFolder}
+              onDropDocument={handleDropDocumentOnFolder}
+              allFolders={allFolders}
+              currentFolderId={selectedFolder}
             />
           </div>
         )}
@@ -566,6 +661,7 @@ const Drive = () => {
               documents={filteredDocuments} 
               showProgress={false} 
               folders={folders}
+              allFolders={allFolders}
               onDocumentMoved={handleDocumentMoved}
             />
           </div>

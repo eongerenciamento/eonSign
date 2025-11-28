@@ -2,9 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Download } from "lucide-react";
+import { Eye, Download, MoreVertical, Move, FolderX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface Document {
   id: string;
@@ -27,6 +36,7 @@ interface DocumentsTableProps {
   documents: Document[];
   showProgress?: boolean;
   folders?: Folder[];
+  allFolders?: Folder[];
   onDocumentMoved?: () => void;
 }
 
@@ -45,7 +55,7 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const DocumentsTable = ({ documents, showProgress = true, folders = [], onDocumentMoved }: DocumentsTableProps) => {
+export const DocumentsTable = ({ documents, showProgress = true, folders = [], allFolders = [], onDocumentMoved }: DocumentsTableProps) => {
   const { toast } = useToast();
 
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
@@ -71,6 +81,39 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], o
     }
   };
 
+  const handleRemoveFromFolder = async (documentId: string) => {
+    const { error } = await supabase
+      .from("documents")
+      .update({ folder_id: null })
+      .eq("id", documentId);
+
+    if (error) {
+      toast({
+        title: "Erro ao remover documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Documento removido da pasta",
+        description: "O documento foi removido da pasta com sucesso.",
+      });
+      if (onDocumentMoved) {
+        onDocumentMoved();
+      }
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, documentId: string) => {
+    e.dataTransfer.setData("documentId", documentId);
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.classList.add("opacity-50");
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove("opacity-50");
+  };
+
   return (
     <>
       {/* Desktop Table View */}
@@ -88,7 +131,12 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], o
             {documents.map((doc) => {
               const statusInfo = statusConfig[doc.status];
               return (
-                <TableRow key={doc.id}>
+                <TableRow 
+                  key={doc.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, doc.id)}
+                  onDragEnd={handleDragEnd}
+                >
                   <TableCell>
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium">{doc.name}</span>
@@ -109,6 +157,39 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], o
                         >
                           <Download className="w-4 h-4 text-gray-500" />
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                              <MoreVertical className="w-4 h-4 text-gray-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white z-50">
+                            {allFolders.length > 0 && (
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                  <Move className="w-4 h-4 mr-2" />
+                                  Mover para
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent className="bg-white z-50">
+                                  {doc.folderId && (
+                                    <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
+                                      <FolderX className="w-4 h-4 mr-2" />
+                                      Remover da pasta
+                                    </DropdownMenuItem>
+                                  )}
+                                  {allFolders.map((folder) => (
+                                    <DropdownMenuItem
+                                      key={folder.id}
+                                      onClick={() => handleMoveToFolder(doc.id, folder.id)}
+                                    >
+                                      📁 {folder.name}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuSubContent>
+                              </DropdownMenuSub>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </TableCell>
@@ -156,7 +237,13 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], o
         {documents.map((doc) => {
           const statusInfo = statusConfig[doc.status];
           return (
-            <div key={doc.id} className="border rounded-lg p-4 space-y-3">
+            <div 
+              key={doc.id} 
+              className="border rounded-lg p-4 space-y-3"
+              draggable
+              onDragStart={(e) => handleDragStart(e, doc.id)}
+              onDragEnd={handleDragEnd}
+            >
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Nome do Documento</p>
                 <p className="font-medium">{doc.name}</p>
@@ -228,23 +315,58 @@ export const DocumentsTable = ({ documents, showProgress = true, folders = [], o
                     </SelectContent>
                   </Select>
                 )}
-                <div className="flex gap-2 justify-end">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="rounded-full hover:bg-transparent"
-                    onClick={() => console.log("View document", doc.id)}
-                  >
-                    <Eye className="w-4 h-4 text-gray-500" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="rounded-full hover:bg-transparent"
-                    onClick={() => console.log("Download document", doc.id)}
-                  >
-                    <Download className="w-4 h-4 text-gray-500" />
-                  </Button>
+                <div className="flex gap-2 justify-between items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="bg-white z-50">
+                      {allFolders.length > 0 && (
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <Move className="w-4 h-4 mr-2" />
+                            Mover para
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-white z-50">
+                            {doc.folderId && (
+                              <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
+                                <FolderX className="w-4 h-4 mr-2" />
+                                Remover da pasta
+                              </DropdownMenuItem>
+                            )}
+                            {allFolders.map((folder) => (
+                              <DropdownMenuItem
+                                key={folder.id}
+                                onClick={() => handleMoveToFolder(doc.id, folder.id)}
+                              >
+                                📁 {folder.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent"
+                      onClick={() => console.log("View document", doc.id)}
+                    >
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent"
+                      onClick={() => console.log("Download document", doc.id)}
+                    >
+                      <Download className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

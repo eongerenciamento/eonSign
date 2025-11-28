@@ -1,20 +1,24 @@
-import { Folder, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Folder, MoreVertical, Pencil, Trash2, Move } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Document } from "./DocumentsTable";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface Folder {
   id: string;
   name: string;
   created_at: string;
+  parent_folder_id?: string | null;
 }
 
 interface FoldersListProps {
@@ -27,6 +31,10 @@ interface FoldersListProps {
   editingFolderId?: string | null;
   onSaveFolderName?: (folderId: string, name: string) => void;
   onCancelEdit?: (folderId: string) => void;
+  onMoveFolder?: (folderId: string, targetFolderId: string | null) => void;
+  onDropDocument?: (documentId: string, folderId: string) => void;
+  allFolders?: Folder[];
+  currentFolderId?: string | null;
 }
 
 export const FoldersList = ({
@@ -39,8 +47,13 @@ export const FoldersList = ({
   editingFolderId,
   onSaveFolderName,
   onCancelEdit,
+  onMoveFolder,
+  onDropDocument,
+  allFolders = [],
+  currentFolderId = null,
 }: FoldersListProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingFolderId && inputRef.current) {
@@ -67,15 +80,62 @@ export const FoldersList = ({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, folderId: string) => {
+    e.dataTransfer.setData("folderId", folderId);
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.classList.add("opacity-50");
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove("opacity-50");
+    setDragOverId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, folderId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverId(folderId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetFolderId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverId(null);
+
+    const draggedFolderId = e.dataTransfer.getData("folderId");
+    const draggedDocumentId = e.dataTransfer.getData("documentId");
+
+    if (draggedFolderId && draggedFolderId !== targetFolderId && onMoveFolder) {
+      onMoveFolder(draggedFolderId, targetFolderId);
+    } else if (draggedDocumentId && onDropDocument) {
+      onDropDocument(draggedDocumentId, targetFolderId);
+    }
+  };
+
+  const availableFolders = allFolders.filter(f => 
+    f.id !== currentFolderId && 
+    (!currentFolderId || f.parent_folder_id !== currentFolderId)
+  );
+
   if (viewMode === "list") {
     return (
       <div className="space-y-0">
         {folders.map((folder, index) => (
           <div
             key={folder.id}
+            draggable={!editingFolderId}
+            onDragStart={(e) => handleDragStart(e, folder.id)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, folder.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, folder.id)}
             className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 transition-colors group ${
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
-            }`}
+            } ${dragOverId === folder.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""}`}
             onClick={() => onFolderClick(folder.id)}
           >
             <div className="flex items-center gap-3 flex-1">
@@ -114,6 +174,35 @@ export const FoldersList = ({
                   <Pencil className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
+                {onMoveFolder && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Move className="w-4 h-4 mr-2" />
+                      Mover
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-white z-50">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMoveFolder(folder.id, null);
+                        }}
+                      >
+                        📁 Raiz
+                      </DropdownMenuItem>
+                      {availableFolders.map((targetFolder) => (
+                        <DropdownMenuItem
+                          key={targetFolder.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveFolder(folder.id, targetFolder.id);
+                          }}
+                        >
+                          📁 {targetFolder.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
                 <DropdownMenuItem
                   className="text-destructive"
                   onClick={(e) => {
@@ -137,7 +226,15 @@ export const FoldersList = ({
       {folders.map((folder) => (
         <Card
           key={folder.id}
-          className="p-4 hover:bg-accent cursor-pointer transition-colors group relative"
+          draggable={!editingFolderId}
+          onDragStart={(e) => handleDragStart(e, folder.id)}
+          onDragEnd={handleDragEnd}
+          onDragOver={(e) => handleDragOver(e, folder.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, folder.id)}
+          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative ${
+            dragOverId === folder.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""
+          }`}
           onClick={() => onFolderClick(folder.id)}
         >
           <div className="flex flex-col items-center space-y-2">
@@ -174,6 +271,35 @@ export const FoldersList = ({
                   <Pencil className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
+                {onMoveFolder && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Move className="w-4 h-4 mr-2" />
+                      Mover
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-white z-50">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMoveFolder(folder.id, null);
+                        }}
+                      >
+                        📁 Raiz
+                      </DropdownMenuItem>
+                      {availableFolders.map((targetFolder) => (
+                        <DropdownMenuItem
+                          key={targetFolder.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveFolder(folder.id, targetFolder.id);
+                          }}
+                        >
+                          📁 {targetFolder.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
                 <DropdownMenuItem
                   className="text-destructive"
                   onClick={(e) => {
