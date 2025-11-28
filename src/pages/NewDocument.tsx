@@ -348,7 +348,7 @@ const NewDocument = () => {
                   variant="ghost"
                   size="icon"
                   onClick={addSigner}
-                  className="w-10 h-10 rounded-full hover:bg-transparent"
+                  className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
                 >
                   <Plus className="w-5 h-5" />
                 </Button>
