@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Smartphone } from "lucide-react";
-import logoEon from "@/assets/logo-eon.png";
+import appIcon from "@/assets/app-icon.png";
 
 const Install = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -38,7 +38,7 @@ const Install = () => {
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logoEon} alt="Éon Logo" className="h-16 w-auto" />
+            <img src={appIcon} alt="Éon Sign" className="h-20 w-20 rounded-2xl shadow-lg" />
           </div>
           <CardTitle className="text-2xl">Instalar Éon Sign</CardTitle>
           <CardDescription>
