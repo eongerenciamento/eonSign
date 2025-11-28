@@ -132,11 +132,9 @@ export function AppSidebar() {
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
         
-        {!collapsed && (
-          <div className="mt-6 flex justify-center w-full">
+        {!collapsed && <div className="mt-6 flex justify-center w-full">
             <img src={logoSign} alt="Éon Sign" className="h-16 w-auto object-contain" />
-          </div>
-        )}
+          </div>}
       </div>
 
       <SidebarContent>
@@ -150,7 +148,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20">
                         <item.icon className="w-5 h-5" />
-                        {!collapsed && <span className="flex items-center gap-2 flex-1">
+                        {!collapsed && <span className="flex items-center gap-2 flex-1 font-sans font-light text-sm">
                             {item.title}
                             {showBadge && <Badge variant="destructive" className="ml-auto h-5 px-2 text-xs bg-red-500 text-white">
                                 {badgeCount}
