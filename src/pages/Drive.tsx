@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, FolderPlus, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus } from "lucide-react";
 import { CreateFolderDialog } from "@/components/documents/CreateFolderDialog";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
@@ -199,7 +199,6 @@ const Drive = () => {
               <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
             )}
           </div>
-          <CreateFolderDialog onFolderCreated={loadFolders} />
         </div>
 
         {/* Folders Section */}
@@ -207,18 +206,29 @@ const Drive = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm text-gray-600">Pastas</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-              >
-                {viewMode === "grid" ? (
-                  <List className="w-5 h-5 text-gray-600" />
-                ) : (
-                  <LayoutGrid className="w-5 h-5 text-gray-600" />
-                )}
-              </Button>
+              <div className="flex items-center gap-2">
+                <CreateFolderDialog onFolderCreated={loadFolders} trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                  >
+                    <Plus className="w-5 h-5 text-gray-600" />
+                  </Button>
+                } />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  {viewMode === "grid" ? (
+                    <List className="w-5 h-5 text-gray-600" />
+                  ) : (
+                    <LayoutGrid className="w-5 h-5 text-gray-600" />
+                  )}
+                </Button>
+              </div>
             </div>
             <FoldersList
               folders={folders}
