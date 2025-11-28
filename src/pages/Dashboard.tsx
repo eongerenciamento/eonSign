@@ -12,6 +12,7 @@ const mockDocuments: Document[] = [
     status: "in_progress",
     signers: 3,
     signedBy: 1,
+    signerStatuses: ["signed", "pending", "pending"],
   },
   {
     id: "2",
@@ -20,6 +21,7 @@ const mockDocuments: Document[] = [
     status: "signed",
     signers: 2,
     signedBy: 2,
+    signerStatuses: ["signed", "signed"],
   },
   {
     id: "3",
@@ -28,6 +30,7 @@ const mockDocuments: Document[] = [
     status: "pending",
     signers: 4,
     signedBy: 0,
+    signerStatuses: ["pending", "pending", "pending", "pending"],
   },
   {
     id: "4",
@@ -36,6 +39,7 @@ const mockDocuments: Document[] = [
     status: "in_progress",
     signers: 2,
     signedBy: 1,
+    signerStatuses: ["signed", "pending"],
   },
   {
     id: "5",
@@ -44,6 +48,7 @@ const mockDocuments: Document[] = [
     status: "expired",
     signers: 3,
     signedBy: 2,
+    signerStatuses: ["signed", "signed", "rejected"],
   },
 ];
 
@@ -70,8 +75,8 @@ const Dashboard = () => {
             onClick={() => navigate("/novo-documento")}
             className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 shadow-lg"
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Documento
+            <Upload className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Documento</span>
           </Button>
         </div>
 
