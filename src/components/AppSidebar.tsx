@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { UserProfileSheet } from "@/components/UserProfileSheet";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
@@ -42,6 +43,7 @@ export function AppSidebar() {
   const [organization, setOrganization] = useState("");
   const [pendingDocuments, setPendingDocuments] = useState(0);
   const [supportTickets, setSupportTickets] = useState(0);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -196,7 +198,7 @@ export function AppSidebar() {
       <div className="p-4 mt-auto">
         {!collapsed ? (
           <button
-            onClick={() => navigate("/configuracoes")}
+            onClick={() => setProfileSheetOpen(true)}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
           >
             <Avatar className="h-10 w-10">
@@ -219,9 +221,9 @@ export function AppSidebar() {
           </button>
         ) : (
           <button
-            onClick={() => navigate("/configuracoes")}
+            onClick={() => setProfileSheetOpen(true)}
             className="w-full flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-            title="Configurações"
+            title="Perfil"
           >
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
@@ -232,6 +234,16 @@ export function AppSidebar() {
           </button>
         )}
       </div>
+
+      <UserProfileSheet
+        open={profileSheetOpen}
+        onOpenChange={setProfileSheetOpen}
+        userName={name}
+        userEmail={user?.email || ""}
+        userAvatar={avatarUrl}
+        organization={organization}
+        onAvatarChange={setAvatarUrl}
+      />
     </Sidebar>
   );
 }
