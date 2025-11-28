@@ -15,6 +15,7 @@ const mockDocuments: Document[] = [
     signedBy: 1,
     signerStatuses: ["signed", "pending", "pending"],
     signerNames: ["Empresa Admin", "João Silva", "Maria Santos"],
+    folderId: null,
   },
   {
     id: "2",
@@ -25,6 +26,7 @@ const mockDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed"],
     signerNames: ["Empresa Admin", "Carlos Oliveira"],
+    folderId: null,
   },
   {
     id: "3",
@@ -35,6 +37,7 @@ const mockDocuments: Document[] = [
     signedBy: 0,
     signerStatuses: ["pending", "pending", "pending", "pending"],
     signerNames: ["Empresa Admin", "Ana Costa", "Pedro Alves", "Lucas Mendes"],
+    folderId: null,
   },
   {
     id: "4",
@@ -45,6 +48,7 @@ const mockDocuments: Document[] = [
     signedBy: 1,
     signerStatuses: ["signed", "pending"],
     signerNames: ["Empresa Admin", "Fernanda Lima"],
+    folderId: null,
   },
   {
     id: "5",
@@ -55,6 +59,7 @@ const mockDocuments: Document[] = [
     signedBy: 2,
     signerStatuses: ["signed", "signed", "rejected"],
     signerNames: ["Empresa Admin", "Rafael Souza", "Juliana Rocha"],
+    folderId: null,
   },
 ];
 

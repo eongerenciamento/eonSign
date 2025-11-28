@@ -18,10 +18,18 @@ export interface Document {
   signedBy: number;
   signerStatuses?: ("signed" | "pending" | "rejected")[];
   signerNames?: string[];
+  folderId?: string | null;
+}
+
+interface Folder {
+  id: string;
+  name: string;
 }
 
 interface DocumentsTableProps {
   documents: Document[];
+  showProgress?: boolean;
+  folders?: Folder[];
 }
 
 const statusConfig = {
@@ -39,7 +47,12 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
+export const DocumentsTable = ({ documents, showProgress = true, folders = [] }: DocumentsTableProps) => {
+  const handleMoveToFolder = async (documentId: string, folderId: string) => {
+    // Logic to move document to folder will be implemented
+    console.log(`Moving document ${documentId} to folder ${folderId}`);
+  };
+
   return (
     <>
       {/* Desktop Table View */}
@@ -131,31 +144,50 @@ export const DocumentsTable = ({ documents }: DocumentsTableProps) => {
                 </div>
               </div>
               
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Status</p>
+              {showProgress && (
                 <div className="space-y-1">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        doc.status === "expired" ? "bg-red-500" : "bg-[#273d60]"
-                      }`}
-                      style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
-                    />
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <div className="space-y-1">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all ${
+                          doc.status === "expired" ? "bg-red-500" : "bg-[#273d60]"
+                        }`}
+                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.signedBy}/{doc.signers}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {doc.signedBy}/{doc.signers}
-                  </p>
                 </div>
-              </div>
+              )}
               
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Visualizar
+              <div className="flex gap-2 pt-2 justify-end items-center">
+                {folders && folders.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {folders.map((folder) => (
+                        <DropdownMenuItem
+                          key={folder.id}
+                          onClick={() => handleMoveToFolder(doc.id, folder.id)}
+                        >
+                          Mover para {folder.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Eye className="w-4 h-4 text-gray-500" />
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Download className="w-4 h-4 text-gray-500" />
                 </Button>
               </div>
             </div>
