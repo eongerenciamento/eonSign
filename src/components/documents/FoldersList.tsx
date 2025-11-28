@@ -152,8 +152,8 @@ export const FoldersList = ({
               ) : (
                 <>
                   <span className="text-sm text-gray-600">{folder.name}</span>
-                  <span className="text-sm text-gray-500">
-                    {getDocumentCount(folder.id)} documentos
+                  <span className="text-xs text-gray-500">
+                    {getDocumentCount(folder.id)} docs
                   </span>
                 </>
               )}
