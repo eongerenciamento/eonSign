@@ -13,7 +13,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <MobileNav />
 
       {/* Desktop Layout with Sidebar */}
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="min-h-screen flex w-full">
           {/* Desktop Sidebar */}
           <div className="hidden md:block">

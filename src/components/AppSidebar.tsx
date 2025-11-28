@@ -127,19 +127,25 @@ export function AppSidebar() {
   return (
     <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#274d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
-      <div className={`p-6 ${collapsed ? "px-3" : ""} flex items-center justify-between`}>
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-            <File className="w-6 h-6 text-white" />
-          </div>
-          {!collapsed && (
-            <div>
-              <h1 className="text-lg font-bold text-white">Éon Sign</h1>
-              <p className="text-xs text-white/60">Assinatura Digital</p>
+      <div className={`p-6 ${collapsed ? "px-3 py-4" : ""} flex items-center justify-between`}>
+        {!collapsed ? (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                <File className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">Éon Sign</h1>
+                <p className="text-xs text-white/60">Assinatura Digital</p>
+              </div>
             </div>
-          )}
-        </div>
-        <SidebarTrigger className="text-white hover:bg-white/10" />
+            <SidebarTrigger className="text-white hover:bg-white/10" />
+          </>
+        ) : (
+          <SidebarTrigger className="text-white hover:bg-white/10 mx-auto">
+            <Menu className="w-5 h-5" />
+          </SidebarTrigger>
+        )}
       </div>
 
       <SidebarContent>
