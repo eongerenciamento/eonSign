@@ -208,12 +208,12 @@ const Drive = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                className="hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
                 {viewMode === "grid" ? (
-                  <List className="w-5 h-5" />
+                  <List className="w-5 h-5 text-gray-600" />
                 ) : (
-                  <LayoutGrid className="w-5 h-5" />
+                  <LayoutGrid className="w-5 h-5 text-gray-600" />
                 )}
               </Button>
             </div>
