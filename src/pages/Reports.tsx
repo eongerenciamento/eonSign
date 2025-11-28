@@ -4,10 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Download, TrendingUp, Users, FileCheck, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
 const Reports = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="p-8 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -51,7 +49,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
-                <p className="text-2xl font-bold">87.5%</p>
+                <p className="text-2xl font-bold text-gray-600">87.5%</p>
               </div>
             </div>
           </Card>
@@ -63,7 +61,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Docs Assinados</p>
-                <p className="text-2xl font-bold">98</p>
+                <p className="text-2xl font-bold text-gray-600">98</p>
               </div>
             </div>
           </Card>
@@ -75,7 +73,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tempo Médio</p>
-                <p className="text-2xl font-bold">2.3d</p>
+                <p className="text-2xl font-bold text-gray-600">2.3d</p>
               </div>
             </div>
           </Card>
@@ -87,7 +85,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Signatários Ativos</p>
-                <p className="text-2xl font-bold">234</p>
+                <p className="text-2xl font-bold text-gray-600">234</p>
               </div>
             </div>
           </Card>
@@ -131,20 +129,29 @@ const Reports = () => {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Top Signatários</h3>
             <div className="space-y-4">
-              {[
-                { name: "João Silva", docs: 24, email: "joao.silva@empresa.com" },
-                { name: "Maria Santos", docs: 19, email: "maria.santos@empresa.com" },
-                { name: "Pedro Costa", docs: 15, email: "pedro.costa@empresa.com" },
-                { name: "Ana Oliveira", docs: 12, email: "ana.oliveira@empresa.com" },
-              ].map((signer) => (
-                <div key={signer.email} className="flex items-center justify-between">
+              {[{
+              name: "João Silva",
+              docs: 24,
+              email: "joao.silva@empresa.com"
+            }, {
+              name: "Maria Santos",
+              docs: 19,
+              email: "maria.santos@empresa.com"
+            }, {
+              name: "Pedro Costa",
+              docs: 15,
+              email: "pedro.costa@empresa.com"
+            }, {
+              name: "Ana Oliveira",
+              docs: 12,
+              email: "ana.oliveira@empresa.com"
+            }].map(signer => <div key={signer.email} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{signer.name}</p>
                     <p className="text-sm text-muted-foreground">{signer.email}</p>
                   </div>
                   <Badge variant="secondary">{signer.docs} docs</Badge>
-                </div>
-              ))}
+                </div>)}
             </div>
           </Card>
         </div>
@@ -153,29 +160,37 @@ const Reports = () => {
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Atividade Recente</h3>
           <div className="space-y-4">
-            {[
-              { action: "Documento assinado", doc: "Contrato - Cliente A", time: "Há 2 horas", status: "success" },
-              { action: "Documento enviado", doc: "Proposta Comercial", time: "Há 5 horas", status: "default" },
-              { action: "Documento assinado", doc: "NDA - Parceiro B", time: "Há 1 dia", status: "success" },
-              { action: "Documento expirado", doc: "Termo de Adesão", time: "Há 2 dias", status: "warning" },
-            ].map((activity, index) => (
-              <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  activity.status === "success" ? "bg-success" :
-                  activity.status === "warning" ? "bg-warning" : "bg-primary"
-                }`} />
+            {[{
+            action: "Documento assinado",
+            doc: "Contrato - Cliente A",
+            time: "Há 2 horas",
+            status: "success"
+          }, {
+            action: "Documento enviado",
+            doc: "Proposta Comercial",
+            time: "Há 5 horas",
+            status: "default"
+          }, {
+            action: "Documento assinado",
+            doc: "NDA - Parceiro B",
+            time: "Há 1 dia",
+            status: "success"
+          }, {
+            action: "Documento expirado",
+            doc: "Termo de Adesão",
+            time: "Há 2 dias",
+            status: "warning"
+          }].map((activity, index) => <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success" ? "bg-success" : activity.status === "warning" ? "bg-warning" : "bg-primary"}`} />
                 <div className="flex-1">
                   <p className="font-medium">{activity.action}</p>
                   <p className="text-sm text-muted-foreground">{activity.doc}</p>
                 </div>
                 <span className="text-sm text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
+              </div>)}
           </div>
         </Card>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Reports;
