@@ -217,27 +217,14 @@ const Drive = () => {
                 )}
               </Button>
             </div>
-            {viewMode === "list" ? (
-              <FoldersList
-                folders={folders}
-                onFolderClick={setSelectedFolder}
-                onRenameFolder={handleRenameFolder}
-                onDeleteFolder={handleDeleteFolder}
-              />
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {folders.map((folder) => (
-                  <div
-                    key={folder.id}
-                    onClick={() => setSelectedFolder(folder.id)}
-                    className="flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                  >
-                    <FolderIcon className="w-12 h-12 text-gray-600 mb-2" />
-                    <p className="text-sm text-center">{folder.name}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <FoldersList
+              folders={folders}
+              documents={documents}
+              viewMode={viewMode}
+              onFolderClick={setSelectedFolder}
+              onRenameFolder={handleRenameFolder}
+              onDeleteFolder={handleDeleteFolder}
+            />
           </div>
         )}
 

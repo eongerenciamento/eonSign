@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { Document } from "./DocumentsTable";
 
 export interface Folder {
   id: string;
@@ -16,6 +17,8 @@ export interface Folder {
 
 interface FoldersListProps {
   folders: Folder[];
+  documents?: Document[];
+  viewMode?: "grid" | "list";
   onFolderClick: (folderId: string) => void;
   onRenameFolder: (folder: Folder) => void;
   onDeleteFolder: (folderId: string) => void;
@@ -23,10 +26,70 @@ interface FoldersListProps {
 
 export const FoldersList = ({
   folders,
+  documents = [],
+  viewMode = "grid",
   onFolderClick,
   onRenameFolder,
   onDeleteFolder,
 }: FoldersListProps) => {
+  const getDocumentCount = (folderId: string) => {
+    return documents.filter((doc) => doc.folderId === folderId).length;
+  };
+
+  if (viewMode === "list") {
+    return (
+      <div className="space-y-0">
+        {folders.map((folder, index) => (
+          <div
+            key={folder.id}
+            className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 transition-colors group ${
+              index % 2 === 0 ? "bg-white" : "bg-gray-50"
+            }`}
+            onClick={() => onFolderClick(folder.id)}
+          >
+            <div className="flex items-center gap-3 flex-1">
+              <Folder className="w-5 h-5 text-gray-500" />
+              <span className="text-sm text-gray-600">{folder.name}</span>
+              <span className="text-sm text-gray-500">
+                ({getDocumentCount(folder.id)})
+              </span>
+            </div>
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRenameFolder(folder);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Renomear
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteFolder(folder.id);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
       {folders.map((folder) => (
