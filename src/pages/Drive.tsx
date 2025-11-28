@@ -44,6 +44,7 @@ const Drive = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -193,7 +194,7 @@ const Drive = () => {
                 </h1>
               </div>
             ) : (
-              <h1 className="text-sm font-bold text-gray-600">Drive</h1>
+              <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
             )}
           </div>
           <CreateFolderDialog onFolderCreated={loadFolders} />
@@ -231,43 +232,45 @@ const Drive = () => {
         {/* Unallocated Documents Section */}
         {!selectedFolder && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between">
               <h2 className="text-sm text-gray-600">Documentos Não Alocados</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full hover:bg-transparent w-8 h-8 p-0"
-                onClick={() => console.log("Filter clicked")}
+                onClick={() => setShowFilters(!showFilters)}
               >
                 <Filter className="w-4 h-4 text-gray-600" />
               </Button>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {showFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar documentos..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
+                </div>
               </div>
-              <div className="flex gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                <AdvancedFiltersDialog onApplyFilters={handleAdvancedFilters} />
-              </div>
-            </div>
+            )}
 
             {/* Documents Table */}
             <DocumentsTable documents={filteredDocuments} showProgress={false} folders={folders} />
