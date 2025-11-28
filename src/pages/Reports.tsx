@@ -107,11 +107,20 @@ const Reports = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-yellow-700 text-white hover:bg-yellow-700">Em Andamento</Badge>
+                  <Badge className="bg-blue-700 text-white hover:bg-blue-700">Em Andamento</Badge>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">28.8%</span>
                   <span className="text-sm text-gray-600 font-semibold">45</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-yellow-700 text-white hover:bg-yellow-700">Pendente</Badge>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-500">15.2%</span>
+                  <span className="text-sm text-gray-600 font-semibold">24</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
