@@ -477,11 +477,11 @@ const Drive = () => {
           </div>
         )}
 
-        {/* Selected Folder Documents */}
-        {selectedFolder && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm text-gray-600">Documentos da Pasta</h2>
+        {/* Subfolders Section */}
+        {selectedFolder && folders.length > 0 && (
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm text-gray-600">Subpastas</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -491,6 +491,40 @@ const Drive = () => {
                 >
                   <Plus className="w-5 h-5 text-gray-600" />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+                >
+                  {viewMode === "grid" ? (
+                    <List className="w-5 h-5 text-gray-600" />
+                  ) : (
+                    <LayoutGrid className="w-5 h-5 text-gray-600" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <FoldersList
+              folders={folders}
+              documents={documents}
+              viewMode={viewMode}
+              onFolderClick={setSelectedFolder}
+              onRenameFolder={handleRenameFolder}
+              onDeleteFolder={handleDeleteFolder}
+              editingFolderId={editingFolderId}
+              onSaveFolderName={handleSaveFolderName}
+              onCancelEdit={handleCancelEdit}
+            />
+          </div>
+        )}
+
+        {/* Selected Folder Documents */}
+        {selectedFolder && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm text-gray-600">Documentos da Pasta</h2>
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
