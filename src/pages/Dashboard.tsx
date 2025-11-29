@@ -96,7 +96,7 @@ const Dashboard = () => {
               </CardTitle>
               <p className="text-gray-200 text-xs">Sua Assinatura</p>
             </CardHeader>
-            <CardContent className="px-6 pb-6 bg-[#273d60]">
+            <CardContent className="px-6 pb-6 bg-[#273d60] rounded-md">
               <p className="text-3xl font-bold text-white">{pendingByOwner}</p>
             </CardContent>
           </Card>
