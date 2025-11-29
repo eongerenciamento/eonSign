@@ -171,7 +171,13 @@ const NewDocument = () => {
 
       // Upload PDF to storage
       const timestamp = Date.now();
-      const filePath = `${user.id}/${timestamp}-${file.name}`;
+      // Sanitize filename: remove special characters, spaces, and accents
+      const sanitizedFileName = file.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars and spaces with underscore
+        .replace(/__+/g, '_'); // Replace multiple underscores with single
+      const filePath = `${user.id}/${timestamp}-${sanitizedFileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('documents')
