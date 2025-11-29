@@ -18,7 +18,8 @@ export interface Document {
   signerNames?: string[];
   folderId?: string | null;
 }
-interface Folder {
+
+export interface Folder {
   id: string;
   name: string;
 }

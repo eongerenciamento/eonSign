@@ -27,7 +27,6 @@ const Drive = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [showFolderFilters, setShowFolderFilters] = useState(false);
-  const [showUnallocated, setShowUnallocated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -118,12 +117,12 @@ const Drive = () => {
   const filterDocuments = () => {
     let filtered = [...documents];
 
-    // Filter out documents that are in folders (only show unassigned documents)
-    if (!selectedFolder) {
-      filtered = filtered.filter((doc) => !doc.folderId);
-    } else {
-      // Filter by selected folder
+    // Filter by selected folder
+    if (selectedFolder) {
       filtered = filtered.filter((doc) => doc.folderId === selectedFolder);
+    } else {
+      // No documents shown at root level - they're managed in Documents page
+      filtered = [];
     }
 
     // Filter by search
@@ -411,24 +410,24 @@ const Drive = () => {
               </Button>
             )}
             <div className="flex items-center gap-2">
-              {selectedFolder ? (
-                <>
-                  {getBreadcrumbPath().map((folder, index) => (
-                    <button
-                      key={folder.id}
-                      onClick={() => setSelectedFolder(folder.id)}
-                      className={cn(
-                        "text-sm font-bold hover:underline",
-                        index === 0 ? "text-gray-600" : "text-gray-500"
-                      )}
-                    >
-                      {folder.name}
-                    </button>
-                  ))}
-                </>
-              ) : (
-                <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
-              )}
+              <button
+                onClick={() => setSelectedFolder(null)}
+                className="text-sm font-bold text-gray-600 hover:underline"
+              >
+                Drive
+              </button>
+              {selectedFolder && getBreadcrumbPath().map((folder, index) => (
+                <button
+                  key={folder.id}
+                  onClick={() => setSelectedFolder(folder.id)}
+                  className={cn(
+                    "text-sm font-bold hover:underline",
+                    index === 0 ? "text-gray-600" : "text-gray-500"
+                  )}
+                >
+                  {folder.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -473,123 +472,6 @@ const Drive = () => {
                 onDropDocument={handleDropDocumentOnFolder}
                 allFolders={allFolders}
                 currentFolderId={null}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Unallocated Documents Section */}
-        {!selectedFolder && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm text-gray-600">Documentos Não Alocados</h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowUnallocated(!showUnallocated)}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  {showUnallocated ? (
-                    <ChevronUp className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-600" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-transparent w-8 h-8 p-0"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  <Filter className="w-4 h-4 text-gray-600" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Filters */}
-            {showUnallocated && showFilters && (
-              <div className="flex flex-col gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar documentos..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="oldest">Mais Antigos</SelectItem>
-                      <SelectItem value="name">Nome A-Z</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "justify-start text-left font-normal",
-                          !dateFrom && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data Início"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={dateFrom}
-                        onSelect={setDateFrom}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "justify-start text-left font-normal",
-                          !dateTo && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data Fim"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={dateTo}
-                        onSelect={setDateTo}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            )}
-
-            {/* Documents Table */}
-            {showUnallocated && (
-              <DocumentsTable 
-                documents={filteredDocuments} 
-                showProgress={false} 
-                folders={folders}
-                allFolders={allFolders}
-                onDocumentMoved={handleDocumentMoved}
               />
             )}
           </div>
