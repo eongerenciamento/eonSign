@@ -7,6 +7,7 @@ import { Eye, Download, MoreVertical, Move, FolderX, PenTool } from "lucide-reac
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 export interface Document {
   id: string;
   name: string;
@@ -67,6 +68,71 @@ export const DocumentsTable = ({
   const {
     toast
   } = useToast();
+  const navigate = useNavigate();
+
+  const handleSignDocument = (documentId: string) => {
+    navigate(`/assinar/${documentId}`);
+  };
+
+  const handleViewDocument = async (documentId: string) => {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("file_url")
+      .eq("id", documentId)
+      .single();
+
+    if (error || !data?.file_url) {
+      toast({
+        title: "Erro ao visualizar documento",
+        description: "Não foi possível carregar o documento.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open(data.file_url, "_blank");
+  };
+
+  const handleDownloadDocument = async (documentId: string) => {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("file_url, name")
+      .eq("id", documentId)
+      .single();
+
+    if (error || !data?.file_url) {
+      toast({
+        title: "Erro ao baixar documento",
+        description: "Não foi possível carregar o documento.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(data.file_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = data.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download iniciado",
+        description: "O documento está sendo baixado.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao baixar documento",
+        description: "Não foi possível baixar o documento.",
+        variant: "destructive",
+      });
+    }
+  };
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
     const {
       error
@@ -145,15 +211,15 @@ export const DocumentsTable = ({
                             variant="ghost"
                             size="icon" 
                             className="rounded-full hover:bg-transparent" 
-                            onClick={() => console.log("Sign document", doc.id)}
+                            onClick={() => handleSignDocument(doc.id)}
                           >
                             <PenTool className="w-4 h-4 text-gray-500" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("View document", doc.id)}>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)}>
                           <Eye className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("Download document", doc.id)}>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
                           <Download className="w-4 h-4 text-gray-500" />
                         </Button>
                         {showFolderActions && allFolders.length > 0 && <DropdownMenu>
@@ -232,15 +298,15 @@ export const DocumentsTable = ({
                       variant="ghost"
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => console.log("Sign document", doc.id)}
+                      onClick={() => handleSignDocument(doc.id)}
                     >
                       <PenTool className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)}>
                     <Eye className="w-4 h-4 text-gray-500" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("Download document", doc.id)}>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)}>
                     <Download className="w-4 h-4 text-gray-500" />
                   </Button>
                 </div>
