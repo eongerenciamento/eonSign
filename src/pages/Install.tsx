@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Smartphone } from "lucide-react";
+import { Download, Smartphone, ArrowLeft } from "lucide-react";
 import appIcon from "@/assets/app-icon.png";
 
 const Install = () => {
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
@@ -35,6 +37,13 @@ const Install = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#273d60] to-[#001a4d]">
+      <button
+        onClick={() => navigate("/auth")}
+        className="absolute top-4 left-4 text-gray-400"
+        aria-label="Voltar"
+      >
+        <ArrowLeft className="h-6 w-6" />
+      </button>
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
