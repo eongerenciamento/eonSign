@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SplashScreen } from "./components/SplashScreen";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
 import Drive from "./pages/Drive";
@@ -19,19 +17,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("splashShown");
-  });
-
-  const handleSplashFinished = () => {
-    sessionStorage.setItem("splashShown", "true");
-    setShowSplash(false);
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {showSplash && <SplashScreen onFinished={handleSplashFinished} />}
         <Toaster />
         <Sonner />
         <BrowserRouter>
