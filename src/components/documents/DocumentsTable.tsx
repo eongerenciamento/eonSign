@@ -140,12 +140,6 @@ export const DocumentsTable = ({
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-gray-600">{doc.name}</span>
                       <div className="flex items-center gap-2 ml-4">
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("View document", doc.id)}>
-                          <Eye className="w-4 h-4 text-gray-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("Download document", doc.id)}>
-                          <Download className="w-4 h-4 text-gray-500" />
-                        </Button>
                         {doc.signerStatuses?.[0] === "pending" && (
                           <Button 
                             variant="ghost"
@@ -156,6 +150,12 @@ export const DocumentsTable = ({
                             <PenTool className="w-4 h-4 text-gray-500" />
                           </Button>
                         )}
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("View document", doc.id)}>
+                          <Eye className="w-4 h-4 text-gray-500" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("Download document", doc.id)}>
+                          <Download className="w-4 h-4 text-gray-500" />
+                        </Button>
                         {showFolderActions && allFolders.length > 0 && <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
@@ -229,12 +229,6 @@ export const DocumentsTable = ({
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">Nome do Documento</p>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
-                      <Eye className="w-4 h-4 text-gray-500" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("Download document", doc.id)}>
-                      <Download className="w-4 h-4 text-gray-500" />
-                    </Button>
                     {doc.signerStatuses?.[0] === "pending" && (
                       <Button 
                         variant="ghost"
@@ -245,6 +239,12 @@ export const DocumentsTable = ({
                         <PenTool className="w-4 h-4 text-gray-500" />
                       </Button>
                     )}
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("Download document", doc.id)}>
+                      <Download className="w-4 h-4 text-gray-500" />
+                    </Button>
                   </div>
                 </div>
                 <p className="font-medium">{doc.name}</p>
