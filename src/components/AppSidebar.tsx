@@ -138,7 +138,7 @@ export function AppSidebar() {
           </div>}
       </div>
 
-      <SidebarContent>
+      <SidebarContent className="bg-[#273d60]">
         <SidebarGroup>
           <SidebarGroupContent>
             <TooltipProvider>
@@ -178,7 +178,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <div className="p-4 mt-auto">
+      <div className="p-4 mt-auto bg-[#273d60]">
         {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors">
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
