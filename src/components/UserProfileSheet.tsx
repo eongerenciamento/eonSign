@@ -135,6 +135,10 @@ export function UserProfileSheet({
     if (error) {
       toast.error("Erro ao salvar alterações");
     } else {
+      // Atualizar callback com nova URL do avatar
+      if (avatar) {
+        onAvatarChange(avatar);
+      }
       toast.success("Alterações salvas com sucesso!");
       onOpenChange(false);
     }
