@@ -400,60 +400,63 @@ const Drive = () => {
       <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            {selectedFolder ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedFolder(null)}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  {getBreadcrumbPath().map((folder, index) => (
-                    <div key={folder.id} className="flex items-center gap-1">
-                      {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
-                      <h1 className="text-sm font-bold text-gray-600">
-                        {folder.name}
-                      </h1>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
+          <div className="flex items-center gap-2">
+            {selectedFolder && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedFolder(null)}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
             )}
+            <div className="flex items-center gap-2">
+              {selectedFolder ? (
+                <>
+                  {getBreadcrumbPath().map((folder, index) => (
+                    <button
+                      key={folder.id}
+                      onClick={() => setSelectedFolder(folder.id)}
+                      className={cn(
+                        "text-sm font-bold hover:underline",
+                        index === 0 ? "text-gray-600" : "text-gray-500"
+                      )}
+                    >
+                      {folder.name}
+                    </button>
+                  ))}
+                </>
+              ) : (
+                <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Folders Section */}
         {!selectedFolder && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm text-gray-600">Pastas</h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCreateFolderInline}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  <Plus className="w-5 h-5 text-gray-600" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  {viewMode === "grid" ? (
-                    <List className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <LayoutGrid className="w-5 h-5 text-gray-600" />
-                  )}
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCreateFolderInline}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                <Plus className="w-5 h-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                {viewMode === "grid" ? (
+                  <List className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5 text-gray-600" />
+                )}
+              </Button>
             </div>
             {folders.length > 0 && (
               <FoldersList
@@ -595,29 +598,15 @@ const Drive = () => {
         {/* Folder Contents - Subfolders and Documents */}
         {selectedFolder && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCreateSubfolder}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  <Plus className="w-5 h-5 text-gray-600" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  {viewMode === "grid" ? (
-                    <List className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <LayoutGrid className="w-5 h-5 text-gray-600" />
-                  )}
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCreateSubfolder}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                <Plus className="w-5 h-5 text-gray-600" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -625,6 +614,18 @@ const Drive = () => {
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
                 <Filter className="w-5 h-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                {viewMode === "grid" ? (
+                  <List className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5 text-gray-600" />
+                )}
               </Button>
             </div>
 
