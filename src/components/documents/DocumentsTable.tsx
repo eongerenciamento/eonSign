@@ -260,7 +260,7 @@ export const DocumentsTable = ({
                         </Button>
                         {doc.signedBy === 0 && (
                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-4 h-4 text-gray-500" />
                           </Button>
                         )}
                         {showFolderActions && allFolders.length > 0 && <DropdownMenu>
@@ -352,7 +352,7 @@ export const DocumentsTable = ({
                   </Button>
                   {doc.signedBy === 0 && (
                     <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
                 </div>
