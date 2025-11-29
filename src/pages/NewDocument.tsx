@@ -314,7 +314,7 @@ const NewDocument = () => {
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100"
+                  className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 hover:bg-gray-100 hover:text-gray-600"
                 >
                   Selecionar Arquivo
                 </Button>
