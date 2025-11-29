@@ -569,7 +569,7 @@ const Drive = () => {
         )}
 
         {/* Subfolders Section */}
-        {selectedFolder && folders.length > 0 && (
+        {selectedFolder && (
           <div className="space-y-4 mb-6">
             <div className="flex items-center justify-between">
               <h2 className="text-sm text-gray-600">Subpastas</h2>
@@ -596,21 +596,23 @@ const Drive = () => {
                 </Button>
               </div>
             </div>
-            <FoldersList
-              folders={folders}
-              documents={documents}
-              viewMode={viewMode}
-              onFolderClick={setSelectedFolder}
-              onRenameFolder={handleRenameFolder}
-              onDeleteFolder={handleDeleteFolder}
-              editingFolderId={editingFolderId}
-              onSaveFolderName={handleSaveFolderName}
-              onCancelEdit={handleCancelEdit}
-              onMoveFolder={handleMoveFolder}
-              onDropDocument={handleDropDocumentOnFolder}
-              allFolders={allFolders}
-              currentFolderId={selectedFolder}
-            />
+            {folders.length > 0 && (
+              <FoldersList
+                folders={folders}
+                documents={documents}
+                viewMode={viewMode}
+                onFolderClick={setSelectedFolder}
+                onRenameFolder={handleRenameFolder}
+                onDeleteFolder={handleDeleteFolder}
+                editingFolderId={editingFolderId}
+                onSaveFolderName={handleSaveFolderName}
+                onCancelEdit={handleCancelEdit}
+                onMoveFolder={handleMoveFolder}
+                onDropDocument={handleDropDocumentOnFolder}
+                allFolders={allFolders}
+                currentFolderId={selectedFolder}
+              />
+            )}
           </div>
         )}
 
