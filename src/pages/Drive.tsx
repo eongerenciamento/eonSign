@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -378,6 +378,23 @@ const Drive = () => {
     }
   };
 
+  const getBreadcrumbPath = (): { id: string; name: string }[] => {
+    if (!selectedFolder) return [];
+    
+    const path: { id: string; name: string }[] = [];
+    let currentFolderId: string | null = selectedFolder;
+    
+    while (currentFolderId) {
+      const folder = allFolders.find(f => f.id === currentFolderId);
+      if (!folder) break;
+      
+      path.unshift({ id: folder.id, name: folder.name });
+      currentFolderId = folder.parent_folder_id;
+    }
+    
+    return path;
+  };
+
   return (
     <Layout>
       <div className="p-8 space-y-6">
@@ -393,9 +410,16 @@ const Drive = () => {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
-                <h1 className="text-sm font-bold text-gray-600">
-                  {allFolders.find((f) => f.id === selectedFolder)?.name}
-                </h1>
+                <div className="flex items-center gap-1">
+                  {getBreadcrumbPath().map((folder, index) => (
+                    <div key={folder.id} className="flex items-center gap-1">
+                      {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                      <h1 className="text-sm font-bold text-gray-600">
+                        {folder.name}
+                      </h1>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <h1 className="text-sm font-bold text-gray-600">Éon Drive</h1>
@@ -568,11 +592,10 @@ const Drive = () => {
           </div>
         )}
 
-        {/* Subfolders Section */}
+        {/* Folder Contents - Subfolders and Documents */}
         {selectedFolder && (
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm text-gray-600">Subpastas</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -595,42 +618,14 @@ const Drive = () => {
                   )}
                 </Button>
               </div>
-            </div>
-            {folders.length > 0 && (
-              <FoldersList
-                folders={folders}
-                documents={documents}
-                viewMode={viewMode}
-                onFolderClick={setSelectedFolder}
-                onRenameFolder={handleRenameFolder}
-                onDeleteFolder={handleDeleteFolder}
-                editingFolderId={editingFolderId}
-                onSaveFolderName={handleSaveFolderName}
-                onCancelEdit={handleCancelEdit}
-                onMoveFolder={handleMoveFolder}
-                onDropDocument={handleDropDocumentOnFolder}
-                allFolders={allFolders}
-                currentFolderId={selectedFolder}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Selected Folder Documents */}
-        {selectedFolder && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm text-gray-600">Documentos da Pasta</h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowFolderFilters(!showFolderFilters)}
-                  className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-                >
-                  <Filter className="w-5 h-5 text-gray-600" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowFolderFilters(!showFolderFilters)}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                <Filter className="w-5 h-5 text-gray-600" />
+              </Button>
             </div>
 
             {showFolderFilters && (
@@ -658,7 +653,27 @@ const Drive = () => {
                 </div>
               </div>
             )}
+
+            {/* Subfolders List */}
+            {folders.length > 0 && (
+              <FoldersList
+                folders={folders}
+                documents={documents}
+                viewMode={viewMode}
+                onFolderClick={setSelectedFolder}
+                onRenameFolder={handleRenameFolder}
+                onDeleteFolder={handleDeleteFolder}
+                editingFolderId={editingFolderId}
+                onSaveFolderName={handleSaveFolderName}
+                onCancelEdit={handleCancelEdit}
+                onMoveFolder={handleMoveFolder}
+                onDropDocument={handleDropDocumentOnFolder}
+                allFolders={allFolders}
+                currentFolderId={selectedFolder}
+              />
+            )}
             
+            {/* Documents List */}
             <DocumentsTable 
               documents={filteredDocuments} 
               showProgress={false} 
