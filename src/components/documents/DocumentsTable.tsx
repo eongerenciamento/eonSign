@@ -290,9 +290,9 @@ export const DocumentsTable = ({
           <TableHeader>
             <TableRow className="border-none bg-white hover:bg-white">
               <TableHead>Nome do Documento</TableHead>
-              <TableHead>Data de Criação</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Assinaturas</TableHead>
+              <TableHead className="w-[200px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -301,58 +301,11 @@ export const DocumentsTable = ({
             const progressPercentage = doc.signedBy / doc.signers * 100;
             return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:opacity-80`}>
                   <TableCell>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="space-y-0.5">
                       <span className="font-medium text-gray-600">{doc.name}</span>
-                      <div className="flex items-center gap-2 ml-4">
-                        {doc.signerStatuses?.[0] === "pending" && (
-                          <Button 
-                            variant="ghost"
-                            size="icon" 
-                            className="rounded-full hover:bg-transparent" 
-                            onClick={() => handleSignDocument(doc.id)}
-                          >
-                            <PenTool className="w-4 h-4 text-gray-500" />
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)}>
-                          <Eye className="w-4 h-4 text-gray-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
-                          <Download className="w-4 h-4 text-gray-500" />
-                        </Button>
-                        {doc.signedBy === 0 && (
-                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
-                            <Trash2 className="w-4 h-4 text-gray-500" />
-                          </Button>
-                        )}
-                        {showFolderActions && allFolders.length > 0 && <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                                <MoreVertical className="w-4 h-4 text-gray-500" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white z-50">
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  <Move className="w-4 h-4 mr-2" />
-                                  Mover para
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="bg-white z-50">
-                                  {doc.folderId && <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
-                                      <FolderX className="w-4 h-4 mr-2" />
-                                      Remover da pasta
-                                    </DropdownMenuItem>}
-                                  {allFolders.map(folder => <DropdownMenuItem key={folder.id} onClick={() => handleMoveToFolder(doc.id, folder.id)}>
-                                      📁 {folder.name}
-                                    </DropdownMenuItem>)}
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                            </DropdownMenuContent>
-                          </DropdownMenu>}
-                      </div>
+                      <p className="text-xs text-gray-500">{doc.createdAt}</p>
                     </div>
                   </TableCell>
-                  <TableCell className="text-gray-500">{doc.createdAt}</TableCell>
                   <TableCell>
                     <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
                   </TableCell>
@@ -381,6 +334,55 @@ export const DocumentsTable = ({
                               </SelectItem>)}
                           </SelectContent>
                         </Select>}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 justify-end">
+                      {doc.signerStatuses?.[0] === "pending" && (
+                        <Button 
+                          variant="ghost"
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleSignDocument(doc.id)}
+                        >
+                          <PenTool className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)}>
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
+                        <Download className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      {doc.signedBy === 0 && (
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                          <Trash2 className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
+                      {showFolderActions && allFolders.length > 0 && <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
+                              <MoreVertical className="w-4 h-4 text-gray-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white z-50">
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <Move className="w-4 h-4 mr-2" />
+                                Mover para
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent className="bg-white z-50">
+                                {doc.folderId && <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
+                                    <FolderX className="w-4 h-4 mr-2" />
+                                    Remover da pasta
+                                  </DropdownMenuItem>}
+                                {allFolders.map(folder => <DropdownMenuItem key={folder.id} onClick={() => handleMoveToFolder(doc.id, folder.id)}>
+                                    📁 {folder.name}
+                                  </DropdownMenuItem>)}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                          </DropdownMenuContent>
+                        </DropdownMenu>}
                     </div>
                   </TableCell>
                 </TableRow>;
