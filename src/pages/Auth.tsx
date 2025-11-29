@@ -165,32 +165,27 @@ export default function Auth() {
               </div>
             </div>
 
-            <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90 animate-fade-in transition-transform hover:scale-105" style={{
+            <div className="space-y-3 animate-fade-in" style={{
             animationDelay: '0.7s'
-          }} disabled={isLoading}>
-              {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
-            </Button>
-
-            <div className="flex justify-between items-center text-sm animate-fade-in" style={{
-            animationDelay: '0.8s'
           }}>
+              <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90 transition-transform hover:scale-105" disabled={isLoading}>
+                {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
+              </Button>
+
               <button type="button" onClick={() => {
-              toast({
-                title: "Em breve",
-                description: "Funcionalidade em desenvolvimento"
-              });
-            }} className="text-white hover:text-white/80 transition-colors">
+                toast({
+                  title: "Em breve",
+                  description: "Funcionalidade em desenvolvimento"
+                });
+              }} className="w-full text-white hover:text-white/80 transition-colors text-sm">
                 Esqueci a senha
               </button>
-              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-white hover:text-white/80 transition-colors">
+
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-white hover:text-white/80 transition-colors text-sm">
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
               </button>
-            </div>
 
-            <div className="text-center mt-4 animate-fade-in" style={{
-            animationDelay: '0.9s'
-          }}>
-              <Link to="/install" className="text-white hover:text-white/80 transition-colors text-sm">
+              <Link to="/install" className="block w-full text-center text-white hover:text-white/80 transition-colors text-sm">
                 Instale o App
               </Link>
             </div>
