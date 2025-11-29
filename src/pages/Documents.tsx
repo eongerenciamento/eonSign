@@ -50,12 +50,12 @@ const Documents = () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
+    // Load all documents for the user
     const { data, error } = await supabase
       .from("documents")
       .select("*")
       .eq("user_id", userData.user.id)
-      .eq("status", "signed")
-      .is("folder_id", null);
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
@@ -63,20 +63,36 @@ const Documents = () => {
         description: error.message,
         variant: "destructive",
       });
-    } else if (data) {
-      const mappedDocs: Document[] = data.map(doc => ({
-        id: doc.id,
-        name: doc.name,
-        createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
-        status: doc.status as "pending" | "signed" | "expired" | "in_progress",
-        signers: doc.signers,
-        signedBy: doc.signed_by,
-        folderId: doc.folder_id,
-        signerStatuses: [],
-        signerNames: [],
-      }));
-      setDocuments(mappedDocs);
+      return;
     }
+
+    // Load signers for each document
+    const documentsWithSigners = await Promise.all(
+      (data || []).map(async (doc) => {
+        const { data: signersData } = await supabase
+          .from("document_signers")
+          .select("*")
+          .eq("document_id", doc.id)
+          .order("is_company_signer", { ascending: false });
+
+        const signerNames = (signersData || []).map(s => s.name);
+        const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
+
+        return {
+          id: doc.id,
+          name: doc.name,
+          createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+          status: doc.status as "pending" | "signed" | "expired" | "in_progress",
+          signers: doc.signers,
+          signedBy: doc.signed_by,
+          folderId: doc.folder_id,
+          signerStatuses,
+          signerNames,
+        };
+      })
+    );
+
+    setDocuments(documentsWithSigners);
   };
 
   const loadFolders = async () => {
@@ -98,7 +114,7 @@ const Documents = () => {
 
     // Filter by tab
     if (activeTab === "signed") {
-      filtered = filtered.filter((doc) => doc.status === "signed");
+      filtered = filtered.filter((doc) => doc.status === "signed" && doc.folderId === null);
     } else if (activeTab === "pending-internal") {
       filtered = filtered.filter(
         (doc) => doc.signerStatuses && doc.signerStatuses[0] === "pending"

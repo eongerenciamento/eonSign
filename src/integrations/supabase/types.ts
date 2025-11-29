@@ -71,6 +71,56 @@ export type Database = {
         }
         Relationships: []
       }
+      document_signers: {
+        Row: {
+          cpf: string | null
+          created_at: string
+          document_id: string
+          email: string
+          id: string
+          is_company_signer: boolean
+          name: string
+          phone: string
+          signed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cpf?: string | null
+          created_at?: string
+          document_id: string
+          email: string
+          id?: string
+          is_company_signer?: boolean
+          name: string
+          phone: string
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string | null
+          created_at?: string
+          document_id?: string
+          email?: string
+          id?: string
+          is_company_signer?: boolean
+          name?: string
+          phone?: string
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signers_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string

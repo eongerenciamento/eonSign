@@ -1,84 +1,84 @@
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-
-const mockDocuments: Document[] = [
-  {
-    id: "1",
-    name: "Contrato de Prestação de Serviços - Cliente A",
-    createdAt: "15/11/2025",
-    status: "in_progress",
-    signers: 3,
-    signedBy: 1,
-    signerStatuses: ["signed", "pending", "pending"],
-    signerNames: ["Empresa Admin", "João Silva", "Maria Santos"],
-    folderId: null,
-  },
-  {
-    id: "2",
-    name: "Termo de Confidencialidade - Parceiro B",
-    createdAt: "14/11/2025",
-    status: "signed",
-    signers: 2,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed"],
-    signerNames: ["Empresa Admin", "Carlos Oliveira"],
-    folderId: null,
-  },
-  {
-    id: "3",
-    name: "Proposta Comercial - Projeto XYZ",
-    createdAt: "13/11/2025",
-    status: "pending",
-    signers: 4,
-    signedBy: 0,
-    signerStatuses: ["pending", "pending", "pending", "pending"],
-    signerNames: ["Empresa Admin", "Ana Costa", "Pedro Alves", "Lucas Mendes"],
-    folderId: null,
-  },
-  {
-    id: "4",
-    name: "Aditivo Contratual - Fornecedor C",
-    createdAt: "12/11/2025",
-    status: "in_progress",
-    signers: 2,
-    signedBy: 1,
-    signerStatuses: ["signed", "pending"],
-    signerNames: ["Empresa Admin", "Fernanda Lima"],
-    folderId: null,
-  },
-  {
-    id: "5",
-    name: "Acordo de Parceria Estratégica",
-    createdAt: "10/11/2025",
-    status: "expired",
-    signers: 3,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed", "rejected"],
-    signerNames: ["Empresa Admin", "Rafael Souza", "Juliana Rocha"],
-    folderId: null,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [pendingByOwner, setPendingByOwner] = useState(0);
+  const [pendingByExternal, setPendingByExternal] = useState(0);
   
   const currentDate = new Date();
   const weekDay = currentDate.toLocaleDateString('pt-BR', { weekday: 'long' });
   const date = currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
   const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
 
-  // Calculate pending documents
-  const pendingByOwner = mockDocuments.filter(doc => 
-    doc.signerStatuses && doc.signerStatuses[0] === "pending"
-  ).length;
-  
-  const pendingByExternal = mockDocuments.filter(doc => 
-    doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")
-  ).length;
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    // Load recent documents
+    const { data: docsData, error: docsError } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (docsError) {
+      console.error("Error loading documents:", docsError);
+      return;
+    }
+
+    // Load signers for each document
+    const documentsWithSigners = await Promise.all(
+      (docsData || []).map(async (doc) => {
+        const { data: signersData } = await supabase
+          .from("document_signers")
+          .select("*")
+          .eq("document_id", doc.id)
+          .order("is_company_signer", { ascending: false });
+
+        const signerNames = (signersData || []).map(s => s.name);
+        const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
+
+        return {
+          id: doc.id,
+          name: doc.name,
+          createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+          status: doc.status as "pending" | "signed" | "expired" | "in_progress",
+          signers: doc.signers,
+          signedBy: doc.signed_by,
+          folderId: doc.folder_id,
+          signerStatuses,
+          signerNames,
+        };
+      })
+    );
+
+    setDocuments(documentsWithSigners);
+
+    // Calculate pending counts
+    const pendingOwner = documentsWithSigners.filter(doc => 
+      doc.signerStatuses && doc.signerStatuses[0] === "pending"
+    ).length;
+    
+    const pendingExt = documentsWithSigners.filter(doc => 
+      doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")
+    ).length;
+
+    setPendingByOwner(pendingOwner);
+    setPendingByExternal(pendingExt);
+  };
 
   return (
     <Layout>
@@ -140,7 +140,7 @@ const Dashboard = () => {
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={mockDocuments} showFolderActions={false} />
+          <DocumentsTable documents={documents} showFolderActions={false} />
         </div>
       </div>
     </Layout>
