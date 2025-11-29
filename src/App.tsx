@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
+import SignDocument from "./pages/SignDocument";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
+        <Route path="/assinar/:documentId" element={<PageTransition><SignDocument /></PageTransition>} />
         <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
         <Route path="/documentos" element={<ProtectedRoute><PageTransition><Documents /></PageTransition></ProtectedRoute>} />
