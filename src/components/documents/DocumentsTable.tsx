@@ -150,7 +150,7 @@ export const DocumentsTable = ({
                           <Button 
                             variant="ghost"
                             size="icon" 
-                            className="rounded-full w-7 h-7 hover:bg-transparent" 
+                            className="rounded-full hover:bg-transparent" 
                             onClick={() => console.log("Sign document", doc.id)}
                           >
                             <PenTool className="w-4 h-4 text-gray-500" />
@@ -239,7 +239,7 @@ export const DocumentsTable = ({
                       <Button 
                         variant="ghost"
                         size="icon" 
-                        className="rounded-full w-7 h-7 hover:bg-transparent" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
                         onClick={() => console.log("Sign document", doc.id)}
                       >
                         <PenTool className="w-4 h-4 text-gray-500" />
