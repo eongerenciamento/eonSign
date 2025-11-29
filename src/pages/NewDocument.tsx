@@ -10,9 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface Signer {
   name: string;
-  cpf: string;
   phone: string;
   email: string;
+}
+
+interface CompanySigner extends Signer {
+  cpf: string;
 }
 
 const NewDocument = () => {
@@ -20,9 +23,9 @@ const NewDocument = () => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [signers, setSigners] = useState<Signer[]>([
-    { name: "", cpf: "", phone: "", email: "" },
+    { name: "", phone: "", email: "" },
   ]);
-  const [companySigner, setCompanySigner] = useState<Signer | null>(null);
+  const [companySigner, setCompanySigner] = useState<CompanySigner | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -119,7 +122,7 @@ const NewDocument = () => {
   };
 
   const addSigner = () => {
-    setSigners([...signers, { name: "", cpf: "", phone: "", email: "" }]);
+    setSigners([...signers, { name: "", phone: "", email: "" }]);
   };
 
   const removeSigner = (index: number) => {
@@ -128,7 +131,7 @@ const NewDocument = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!file || !title) {
       toast({
         title: "Campos obrigatórios",
@@ -140,7 +143,7 @@ const NewDocument = () => {
 
     const hasEmptySigner = signers.some(
       (signer) =>
-        !signer.name || !signer.cpf || !signer.phone || !signer.email
+        !signer.name || !signer.phone || !signer.email
     );
 
     if (hasEmptySigner) {
@@ -152,11 +155,96 @@ const NewDocument = () => {
       return;
     }
 
-    toast({
-      title: "Documento enviado!",
-      description: "O documento foi enviado com sucesso e está aguardando assinaturas.",
-    });
-    navigate("/documentos");
+    if (!companySigner) {
+      toast({
+        title: "Erro",
+        description: "Configure os dados da empresa antes de enviar documentos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Upload PDF to storage
+      const timestamp = Date.now();
+      const filePath = `${user.id}/${timestamp}-${file.name}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      // Create document record
+      const totalSigners = signers.length + 1; // +1 for company signer
+      const { data: documentData, error: docError } = await supabase
+        .from('documents')
+        .insert({
+          name: title,
+          file_url: publicUrl,
+          user_id: user.id,
+          status: 'pending',
+          signers: totalSigners,
+          signed_by: 0,
+        })
+        .select()
+        .single();
+
+      if (docError) throw docError;
+
+      // Create company signer record
+      const { error: companySignerError } = await supabase
+        .from('document_signers')
+        .insert({
+          document_id: documentData.id,
+          name: companySigner.name,
+          email: companySigner.email,
+          phone: companySigner.phone,
+          cpf: companySigner.cpf,
+          is_company_signer: true,
+          status: 'pending',
+        });
+
+      if (companySignerError) throw companySignerError;
+
+      // Create external signers records
+      const externalSigners = signers.map(signer => ({
+        document_id: documentData.id,
+        name: signer.name,
+        email: signer.email,
+        phone: signer.phone,
+        cpf: null, // Will be filled by signer
+        is_company_signer: false,
+        status: 'pending',
+      }));
+
+      const { error: signersError } = await supabase
+        .from('document_signers')
+        .insert(externalSigners);
+
+      if (signersError) throw signersError;
+
+      toast({
+        title: "Documento enviado!",
+        description: "O documento foi enviado com sucesso e está aguardando assinaturas.",
+      });
+      navigate("/documentos?tab=pending-internal");
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const removeFile = () => {
@@ -274,7 +362,12 @@ const NewDocument = () => {
                 </div>
               )}
 
-              <p className="text-sm font-medium text-gray-600">Outros Signatários</p>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-600">Outros Signatários</p>
+                <p className="text-xs text-muted-foreground">
+                  ℹ️ CPF/CNPJ será preenchido pelo próprio signatário
+                </p>
+              </div>
               {signers.map((signer, index) => (
                 <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted/20">
                   {signers.length > 1 && (
@@ -290,27 +383,14 @@ const NewDocument = () => {
                   )}
                   
                   <div className="grid gap-2">
-                    <Label htmlFor={`name-${index}`}>Nome Completo</Label>
+                    <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
                     <Input
                       id={`name-${index}`}
                       value={signer.name}
                       onChange={(e) =>
                         handleSignerChange(index, "name", e.target.value)
                       }
-                      placeholder="Digite o nome completo"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor={`cpf-${index}`}>CPF</Label>
-                    <Input
-                      id={`cpf-${index}`}
-                      value={signer.cpf}
-                      onChange={(e) =>
-                        handleSignerChange(index, "cpf", e.target.value)
-                      }
-                      placeholder="000.000.000-00"
-                      maxLength={14}
+                      placeholder="Digite o nome ou razão social"
                     />
                   </div>
 
