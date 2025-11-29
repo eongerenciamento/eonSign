@@ -56,10 +56,24 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Erro ao baixar o documento");
     }
 
+    // Função auxiliar para converter Uint8Array para base64 de forma segura
+    function uint8ArrayToBase64(bytes: Uint8Array): string {
+      let binary = '';
+      const chunkSize = 0x8000; // 32KB chunks para evitar stack overflow
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
+      }
+      return btoa(binary);
+    }
+
     // Converter o arquivo para base64
     const arrayBuffer = await fileData.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
-    const base64Content = btoa(String.fromCharCode(...buffer));
+    
+    console.log(`File size: ${buffer.length} bytes`);
+    const base64Content = uint8ArrayToBase64(buffer);
+    console.log(`Base64 conversion successful, length: ${base64Content.length}`);
 
     // Preparar lista de destinatários (todos os signatários)
     const recipients = signerEmails;
