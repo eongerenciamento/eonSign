@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, MoreVertical, Move, FolderX, PenTool } from "lucide-react";
+import { Eye, Download, MoreVertical, Move, FolderX, PenTool, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
@@ -133,6 +133,42 @@ export const DocumentsTable = ({
       });
     }
   };
+
+  const handleDeleteDocument = async (documentId: string, signedBy: number) => {
+    if (signedBy > 0) {
+      toast({
+        title: "Não é possível excluir",
+        description: "Este documento já possui assinaturas e não pode ser excluído.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!confirm("Tem certeza que deseja excluir este documento?")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("documents")
+      .delete()
+      .eq("id", documentId);
+
+    if (error) {
+      toast({
+        title: "Erro ao excluir documento",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Documento excluído",
+        description: "O documento foi excluído com sucesso.",
+      });
+      if (onDocumentMoved) {
+        onDocumentMoved();
+      }
+    }
+  };
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
     const {
       error
@@ -222,6 +258,11 @@ export const DocumentsTable = ({
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
                           <Download className="w-4 h-4 text-gray-500" />
                         </Button>
+                        {doc.signedBy === 0 && (
+                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        )}
                         {showFolderActions && allFolders.length > 0 && <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
@@ -309,6 +350,11 @@ export const DocumentsTable = ({
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)}>
                     <Download className="w-4 h-4 text-gray-500" />
                   </Button>
+                  {doc.signedBy === 0 && (
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  )}
                 </div>
                 
                 <div className="space-y-1">
