@@ -26,8 +26,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending signature email to:", signerEmail);
 
-    // URL para página de assinatura
-    const signatureUrl = `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/assinar/${documentId}`;
+    // URL para página de assinatura - usa APP_URL configurável
+    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const signatureUrl = `${APP_URL}/assinar/${documentId}`;
 
     const emailResponse = await resend.emails.send({
       from: "Éon Sign <noreply@eongerenciamento.com.br>",
