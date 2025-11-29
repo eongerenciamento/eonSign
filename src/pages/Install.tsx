@@ -39,7 +39,7 @@ const Install = () => {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#273d60] to-[#001a4d]">
       <button
         onClick={() => navigate("/auth")}
-        className="absolute top-4 left-4 text-gray-400"
+        className="absolute top-8 left-8 text-gray-400"
         aria-label="Voltar"
       >
         <ArrowLeft className="h-6 w-6" />
