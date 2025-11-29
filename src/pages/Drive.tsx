@@ -412,7 +412,7 @@ const Drive = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSelectedFolder(null)}
-                className="text-sm font-bold text-gray-600 hover:underline"
+                className="text-sm text-gray-700 hover:underline"
               >
                 Drive
               </button>
@@ -421,8 +421,8 @@ const Drive = () => {
                   key={folder.id}
                   onClick={() => setSelectedFolder(folder.id)}
                   className={cn(
-                    "text-sm font-bold hover:underline",
-                    index === 0 ? "text-gray-600" : "text-gray-500"
+                    "text-sm hover:underline",
+                    index === 0 ? "text-gray-500" : "text-gray-400"
                   )}
                 >
                   {folder.name}
