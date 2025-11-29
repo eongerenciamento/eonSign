@@ -226,27 +226,26 @@ export const DocumentsTable = ({
         const statusInfo = statusConfig[doc.status];
         return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{doc.name}</p>
-                  <div className="flex gap-1">
-                    {doc.signerStatuses?.[0] === "pending" && (
-                      <Button 
-                        variant="ghost"
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => console.log("Sign document", doc.id)}
-                      >
-                        <PenTool className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
-                      <Eye className="w-4 h-4 text-gray-500" />
+                <div className="flex justify-end gap-1">
+                  {doc.signerStatuses?.[0] === "pending" && (
+                    <Button 
+                      variant="ghost"
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => console.log("Sign document", doc.id)}
+                    >
+                      <PenTool className="w-4 h-4 text-gray-500" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("Download document", doc.id)}>
-                      <Download className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  </div>
+                  )}
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
+                    <Eye className="w-4 h-4 text-gray-500" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("Download document", doc.id)}>
+                    <Download className="w-4 h-4 text-gray-500" />
+                  </Button>
                 </div>
+                
+                <p className="font-medium">{doc.name}</p>
                 
                 <p className="text-gray-500 text-sm">{doc.createdAt}</p>
               </div>
