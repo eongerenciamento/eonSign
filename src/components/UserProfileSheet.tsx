@@ -249,7 +249,7 @@ export function UserProfileSheet({
 
           <Button
             variant="outline"
-            className="w-full justify-start text-gray-600 border-gray-300"
+            className="w-full justify-start text-gray-600 border-gray-300 hover:bg-gray-100 hover:text-gray-600"
             onClick={() => setShowPasswordFields(!showPasswordFields)}
           >
             <Lock className="w-4 h-4 mr-2" />
