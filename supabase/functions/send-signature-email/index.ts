@@ -35,6 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
     // URL para página de assinatura - usa APP_URL configurável
     const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
     const signatureUrl = `${APP_URL}/assinar/${documentId}`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     const emailResponse = await resend.emails.send({
       from: "Éon Sign <noreply@eongerenciamento.com.br>",
@@ -43,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
-            <img src="${APP_URL}/email-assets/header-banner.png" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block;" />
+            <img src="${BANNER_URL}" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block;" />
           </div>
           <div style="padding: 30px; background: #f9f9f9;">
             <h2 style="color: #273d60;">Olá, ${signerName || 'Signatário'}!</h2>
