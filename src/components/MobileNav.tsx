@@ -157,6 +157,7 @@ export function MobileNav() {
         <SheetTrigger asChild>
           <button className="flex-shrink-0">
             <Avatar className="h-8 w-8 border-2 border-white/20">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-white/50 text-[#273d60]">
                 {getUserInitials()}
               </AvatarFallback>
