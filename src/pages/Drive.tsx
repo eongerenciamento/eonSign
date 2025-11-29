@@ -447,6 +447,14 @@ const Drive = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => setShowFilters(!showFilters)}
+                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+              >
+                <Filter className="w-5 h-5 text-gray-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
