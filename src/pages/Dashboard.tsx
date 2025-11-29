@@ -93,7 +93,7 @@ const Dashboard = () => {
           </div>
           <Button 
             onClick={() => navigate("/novo-documento")}
-            className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:rounded-md md:px-4 md:py-2"
+            className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#2d4670] hover:to-[#002855] shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:rounded-md md:px-4 md:py-2"
           >
             <Upload className="w-5 h-5 md:mr-2" />
             <span className="hidden md:inline">Documento</span>
