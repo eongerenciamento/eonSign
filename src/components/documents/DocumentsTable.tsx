@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, MoreVertical, Move, FolderX } from "lucide-react";
+import { Eye, Download, MoreVertical, Move, FolderX, PenTool } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
@@ -139,6 +139,15 @@ export const DocumentsTable = ({
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-gray-600">{doc.name}</span>
                       <div className="flex items-center gap-2 ml-4">
+                        {doc.signerStatuses?.[0] === "pending" && (
+                          <Button 
+                            size="icon" 
+                            className="rounded-full w-8 h-8 bg-gradient-to-r from-[#273d60] to-[#001f3f] hover:from-[#273d60] hover:to-[#001f3f]" 
+                            onClick={() => console.log("Sign document", doc.id)}
+                          >
+                            <PenTool className="w-4 h-4 text-white" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => console.log("View document", doc.id)}>
                           <Eye className="w-4 h-4 text-gray-500" />
                         </Button>
@@ -218,6 +227,15 @@ export const DocumentsTable = ({
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">Nome do Documento</p>
                   <div className="flex gap-1">
+                    {doc.signerStatuses?.[0] === "pending" && (
+                      <Button 
+                        size="icon" 
+                        className="rounded-full w-8 h-8 bg-gradient-to-r from-[#273d60] to-[#001f3f] hover:from-[#273d60] hover:to-[#001f3f]" 
+                        onClick={() => console.log("Sign document", doc.id)}
+                      >
+                        <PenTool className="w-4 h-4 text-white" />
+                      </Button>
+                    )}
                     <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => console.log("View document", doc.id)}>
                       <Eye className="w-4 h-4 text-gray-500" />
                     </Button>
