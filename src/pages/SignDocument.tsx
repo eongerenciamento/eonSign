@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-sign.png";
 
 interface Signer {
   id: string;
@@ -203,11 +203,20 @@ const SignDocument = () => {
             <p className="text-muted-foreground mb-6">
               Sua assinatura foi registrada com sucesso no documento "{document.name}".
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-6">
               {document.signed_by === document.signers 
                 ? "Todas as assinaturas foram coletadas. O documento está finalizado."
                 : "Aguardando assinatura dos demais signatários."}
             </p>
+            
+            {currentSigner?.is_company_signer && (
+              <Button 
+                onClick={() => navigate("/dashboard")}
+                className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
+              >
+                Ir para Dashboard
+              </Button>
+            )}
           </Card>
         </div>
       </div>
