@@ -225,9 +225,9 @@ export const DocumentsTable = ({
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
         return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
-              <div className="space-y-1">
+            <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Nome do Documento</p>
+                  <p className="font-medium">{doc.name}</p>
                   <div className="flex gap-1">
                     {doc.signerStatuses?.[0] === "pending" && (
                       <Button 
@@ -247,16 +247,11 @@ export const DocumentsTable = ({
                     </Button>
                   </div>
                 </div>
-                <p className="font-medium">{doc.name}</p>
-              </div>
-              
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Data de Criação</p>
-                <p>{doc.createdAt}</p>
+                
+                <p className="text-gray-500 text-sm">{doc.createdAt}</p>
               </div>
               
               {showProgress && <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Status</p>
                   <div className="space-y-1">
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div className={`h-2 rounded-full transition-all ${doc.status === "expired" ? "bg-red-500" : "bg-[#273d60]"}`} style={{
