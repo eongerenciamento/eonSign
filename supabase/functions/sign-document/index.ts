@@ -67,6 +67,53 @@ serve(async (req) => {
       console.error("Error updating document:", docError);
     }
 
+    // Se todos assinaram, enviar email de confirmação
+    if (allSigned) {
+      console.log("All signatures completed, sending confirmation emails");
+      
+      // Buscar informações do documento e signatários
+      const { data: document, error: docDataError } = await supabase
+        .from("documents")
+        .select("name, user_id")
+        .eq("id", documentId)
+        .single();
+
+      if (!docDataError && document) {
+        // Buscar configurações da empresa para pegar o nome do remetente
+        const { data: companySettings } = await supabase
+          .from("company_settings")
+          .select("admin_name")
+          .eq("user_id", document.user_id)
+          .single();
+
+        // Buscar emails de todos os signatários
+        const { data: allSigners } = await supabase
+          .from("document_signers")
+          .select("email")
+          .eq("document_id", documentId);
+
+        if (allSigners && allSigners.length > 0) {
+          const signerEmails = allSigners.map(s => s.email);
+          const senderName = companySettings?.admin_name || "Éon Sign";
+
+          // Chamar função para enviar emails
+          try {
+            await supabase.functions.invoke('send-document-completed-email', {
+              body: {
+                documentId,
+                documentName: document.name,
+                signerEmails,
+                senderName
+              }
+            });
+            console.log("Confirmation emails sent successfully");
+          } catch (emailError) {
+            console.error("Error sending confirmation emails:", emailError);
+          }
+        }
+      }
+    }
+
     console.log("Signature processed successfully");
 
     return new Response(
