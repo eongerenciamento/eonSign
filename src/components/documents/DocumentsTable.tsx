@@ -224,7 +224,7 @@ export const DocumentsTable = ({
       <div className="md:hidden space-y-4">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
-        return <div key={doc.id} className="border rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
+        return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">Nome do Documento</p>
