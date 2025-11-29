@@ -89,7 +89,7 @@ const Dashboard = () => {
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6 border-[#273d60] bg-[#273d60]">
               <CardTitle className="text-white text-base">
                 Pendentes
@@ -101,7 +101,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6 bg-[#273d60]">
               <CardTitle className="text-white text-base">
                 Pendentes
