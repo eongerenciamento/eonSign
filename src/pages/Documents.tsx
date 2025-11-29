@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
-import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
+import { DocumentsTable, Document, Folder } from "@/components/documents/DocumentsTable";
 import { UploadDialog } from "@/components/documents/UploadDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,112 +12,76 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-const allDocuments: Document[] = [
-  {
-    id: "1",
-    name: "Contrato de Prestação de Serviços - Cliente A",
-    createdAt: "15/11/2025",
-    status: "in_progress",
-    signers: 3,
-    signedBy: 1,
-    signerStatuses: ["signed", "pending", "pending"],
-    signerNames: ["Empresa Admin", "João Silva", "Maria Santos"],
-    folderId: null,
-  },
-  {
-    id: "2",
-    name: "Termo de Confidencialidade - Parceiro B",
-    createdAt: "14/11/2025",
-    status: "signed",
-    signers: 2,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed"],
-    signerNames: ["Empresa Admin", "Carlos Oliveira"],
-    folderId: null,
-  },
-  {
-    id: "3",
-    name: "Proposta Comercial - Projeto XYZ",
-    createdAt: "13/11/2025",
-    status: "pending",
-    signers: 4,
-    signedBy: 0,
-    signerStatuses: ["pending", "pending", "pending", "pending"],
-    signerNames: ["Empresa Admin", "Ana Costa", "Pedro Alves", "Lucas Mendes"],
-    folderId: null,
-  },
-  {
-    id: "4",
-    name: "Aditivo Contratual - Fornecedor C",
-    createdAt: "12/11/2025",
-    status: "in_progress",
-    signers: 2,
-    signedBy: 1,
-    signerStatuses: ["pending", "signed"],
-    signerNames: ["Empresa Admin", "Fernanda Lima"],
-    folderId: null,
-  },
-  {
-    id: "5",
-    name: "Acordo de Parceria Estratégica",
-    createdAt: "10/11/2025",
-    status: "expired",
-    signers: 3,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed", "rejected"],
-    signerNames: ["Empresa Admin", "Rafael Souza", "Juliana Rocha"],
-    folderId: null,
-  },
-  {
-    id: "6",
-    name: "Contrato de Trabalho - Colaborador D",
-    createdAt: "09/11/2025",
-    status: "signed",
-    signers: 2,
-    signedBy: 2,
-    signerStatuses: ["signed", "signed"],
-    signerNames: ["Empresa Admin", "Roberto Costa"],
-    folderId: null,
-  },
-  {
-    id: "7",
-    name: "Termo de Adesão - Serviço Premium",
-    createdAt: "08/11/2025",
-    status: "in_progress",
-    signers: 1,
-    signedBy: 0,
-    signerStatuses: ["pending"],
-    signerNames: ["Empresa Admin"],
-    folderId: null,
-  },
-  {
-    id: "8",
-    name: "NDA - Projeto Confidencial Alpha",
-    createdAt: "07/11/2025",
-    status: "pending",
-    signers: 5,
-    signedBy: 0,
-    signerStatuses: ["pending", "pending", "pending", "pending", "pending"],
-    signerNames: ["Empresa Admin", "Marcos Silva", "Paula Lima", "André Santos", "Beatriz Alves"],
-    folderId: null,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const Documents = () => {
-  const [documents, setDocuments] = useState<Document[]>(allDocuments);
-  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>(allDocuments);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [activeTab, setActiveTab] = useState("signed");
   const [showFilters, setShowFilters] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadSignedDocuments();
+    loadFolders();
+  }, []);
 
   useEffect(() => {
     filterDocuments();
   }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo]);
+
+  const loadSignedDocuments = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .eq("status", "signed")
+      .is("folder_id", null);
+
+    if (error) {
+      toast({
+        title: "Erro ao carregar documentos",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (data) {
+      const mappedDocs: Document[] = data.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+        status: doc.status as "pending" | "signed" | "expired" | "in_progress",
+        signers: doc.signers,
+        signedBy: doc.signed_by,
+        folderId: doc.folder_id,
+        signerStatuses: [],
+        signerNames: [],
+      }));
+      setDocuments(mappedDocs);
+    }
+  };
+
+  const loadFolders = async () => {
+    const { data, error } = await supabase
+      .from("folders")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Erro ao carregar pastas:", error);
+    } else {
+      setFolders(data || []);
+      setAllFolders(data || []);
+    }
+  };
 
   const filterDocuments = () => {
     let filtered = [...documents];
@@ -286,7 +250,13 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} />
+            <DocumentsTable 
+              documents={filteredDocuments}
+              folders={folders}
+              allFolders={allFolders}
+              onDocumentMoved={loadSignedDocuments}
+              showFolderActions={true}
+            />
           </TabsContent>
 
           <TabsContent value="pending-internal" className="mt-6 space-y-6">
