@@ -134,7 +134,7 @@ export function AppSidebar() {
         </SidebarTrigger>
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
-            <img src={logoSign} alt="Éon Sign" className="h-19 w-auto object-contain" />
+            <img alt="Éon Sign" src="/lovable-uploads/19c6ec9a-fc32-4941-9952-3a449454d40e.png" className="h-15 w-auto object-contain" />
           </div>}
       </div>
 
