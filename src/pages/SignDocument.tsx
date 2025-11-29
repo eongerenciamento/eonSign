@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2 } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-sign.png";
 
@@ -40,6 +40,7 @@ const SignDocument = () => {
   const [isSigning, setIsSigning] = useState(false);
   const [isIdentified, setIsIdentified] = useState(false);
   const [signatureComplete, setSignatureComplete] = useState(false);
+  const [pdfScale, setPdfScale] = useState(1);
 
   useEffect(() => {
     if (documentId) {
@@ -161,6 +162,34 @@ const SignDocument = () => {
     }
   };
 
+  const handleZoomIn = () => {
+    setPdfScale(prev => Math.min(prev + 0.25, 2.5));
+  };
+
+  const handleZoomOut = () => {
+    setPdfScale(prev => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleDownload = async () => {
+    if (!document?.file_url) return;
+    
+    try {
+      const response = await fetch(document.file_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = `${document.name}.pdf`;
+      window.document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success("Download iniciado!");
+    } catch (error) {
+      toast.error("Erro ao baixar documento");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       signed: { label: "Assinado", className: "bg-green-700 text-white" },
@@ -276,13 +305,55 @@ const SignDocument = () => {
 
             {/* PDF Viewer */}
             <Card className="p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Visualizar Documento</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Visualizar Documento</h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleZoomOut}
+                    className="h-8 w-8"
+                    title="Diminuir zoom"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
+                    {Math.round(pdfScale * 100)}%
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleZoomIn}
+                    className="h-8 w-8"
+                    title="Aumentar zoom"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleDownload}
+                    className="h-8 w-8"
+                    title="Baixar documento"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
               {document.file_url ? (
-                <iframe
-                  src={document.file_url}
-                  className="w-full h-[500px] border rounded-md"
-                  title="Document Preview"
-                />
+                <div className="overflow-auto border rounded-md" style={{ maxHeight: '500px' }}>
+                  <iframe
+                    src={document.file_url}
+                    className="w-full border-0"
+                    style={{ 
+                      height: `${500 * pdfScale}px`,
+                      transform: `scale(${pdfScale})`,
+                      transformOrigin: 'top left',
+                      width: `${100 / pdfScale}%`
+                    }}
+                    title="Document Preview"
+                  />
+                </div>
               ) : (
                 <p className="text-muted-foreground">Documento não disponível para visualização</p>
               )}
