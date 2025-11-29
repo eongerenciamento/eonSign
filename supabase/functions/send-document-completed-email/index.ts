@@ -108,9 +108,9 @@ const handler = async (req: Request): Promise<Response> => {
                 Este documento possui validade legal e todas as assinaturas foram registradas.
               </p>
             </div>
-            <div style="background: #273d60; padding: 20px; text-align: center;">
-              <p style="color: white; margin: 0; font-size: 12px;">
-                © 2024 Éon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+            <div style="background: #f9f9f9; padding: 20px; text-align: center;">
+              <p style="color: #6b7280; margin: 0; font-size: 12px;">
+                © ${new Date().getFullYear()} Éon Sign - Sistema de Gestão de Documentos e Assinatura Digital
               </p>
             </div>
           </div>
