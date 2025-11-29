@@ -129,7 +129,7 @@ export function AppSidebar() {
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
-        <SidebarTrigger className={`text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
+        <SidebarTrigger className={`bg-[#273d60] text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
         
