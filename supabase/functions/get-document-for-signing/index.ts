@@ -36,6 +36,33 @@ serve(async (req) => {
       });
     }
 
+    // Gerar URL assinada temporária para o documento
+    let documentWithSignedUrl = document;
+    if (document.file_url) {
+      try {
+        // Extrair o caminho do arquivo da URL armazenada
+        const filePath = document.file_url.split('/documents/').pop();
+        console.log("Extracted file path:", filePath);
+
+        // Gerar URL assinada com validade de 1 hora (3600 segundos)
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(filePath!, 3600);
+
+        if (signedUrlError) {
+          console.error("Error creating signed URL:", signedUrlError);
+        } else {
+          console.log("Signed URL generated successfully");
+          documentWithSignedUrl = {
+            ...document,
+            file_url: signedUrlData.signedUrl
+          };
+        }
+      } catch (error) {
+        console.error("Error processing file URL:", error);
+      }
+    }
+
     // Buscar signatários
     const { data: signers, error: signersError } = await supabase
       .from("document_signers")
@@ -51,13 +78,13 @@ serve(async (req) => {
     const currentSigner = signers?.find(s => s.email === signerEmail);
 
     console.log("Document fetched successfully:", { 
-      documentName: document.name, 
+      documentName: documentWithSignedUrl.name, 
       signersCount: signers?.length,
       currentSignerFound: !!currentSigner 
     });
 
     return new Response(
-      JSON.stringify({ document, signers, currentSigner }),
+      JSON.stringify({ document: documentWithSignedUrl, signers, currentSigner }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
