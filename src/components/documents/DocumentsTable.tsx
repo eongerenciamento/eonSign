@@ -245,9 +245,10 @@ export const DocumentsTable = ({
                   </Button>
                 </div>
                 
-                <p className="font-medium">{doc.name}</p>
-                
-                <p className="text-gray-500 text-sm">{doc.createdAt}</p>
+                <div className="space-y-1">
+                  <p className="font-medium">{doc.name}</p>
+                  <p className="text-gray-500 text-sm">{doc.createdAt}</p>
+                </div>
               </div>
               
               {showProgress && <div className="space-y-1">
