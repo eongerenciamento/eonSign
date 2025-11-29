@@ -75,6 +75,9 @@ export const DocumentsTable = ({
   };
 
   const handleViewDocument = async (documentId: string) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
     const { data, error } = await supabase
       .from("documents")
       .select("file_url")
@@ -90,10 +93,41 @@ export const DocumentsTable = ({
       return;
     }
 
-    window.open(data.file_url, "_blank");
+    // Extract path from URL for signed URL generation
+    const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+    if (urlParts.length < 2) {
+      toast({
+        title: "Erro ao visualizar documento",
+        description: "URL do documento inválida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const filePath = urlParts[1];
+
+    // Generate signed URL for private bucket
+    const { data: signedData, error: signedError } = await supabase
+      .storage
+      .from('documents')
+      .createSignedUrl(filePath, 3600); // Valid for 1 hour
+
+    if (signedError || !signedData?.signedUrl) {
+      toast({
+        title: "Erro ao visualizar documento",
+        description: "Não foi possível gerar link de acesso.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open(signedData.signedUrl, "_blank");
   };
 
   const handleDownloadDocument = async (documentId: string) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
     const { data, error } = await supabase
       .from("documents")
       .select("file_url, name")
@@ -109,8 +143,36 @@ export const DocumentsTable = ({
       return;
     }
 
+    // Extract path from URL for signed URL generation
+    const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+    if (urlParts.length < 2) {
+      toast({
+        title: "Erro ao baixar documento",
+        description: "URL do documento inválida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const filePath = urlParts[1];
+
+    // Generate signed URL for private bucket
+    const { data: signedData, error: signedError } = await supabase
+      .storage
+      .from('documents')
+      .createSignedUrl(filePath, 3600); // Valid for 1 hour
+
+    if (signedError || !signedData?.signedUrl) {
+      toast({
+        title: "Erro ao baixar documento",
+        description: "Não foi possível gerar link de download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const response = await fetch(data.file_url);
+      const response = await fetch(signedData.signedUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
