@@ -125,6 +125,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     const results = await Promise.allSettled(emailPromises);
     
+    // Salvar no histórico
+    const historyPromises = recipients.map(async (email, index) => {
+      const result = results[index];
+      return supabase.from('email_history').insert({
+        user_id: document.user_id,
+        recipient_email: email,
+        subject: `Documento Assinado - ${documentName}`,
+        email_type: 'document_completed',
+        document_id: documentId,
+        status: result.status === 'fulfilled' ? 'sent' : 'failed',
+        error_message: result.status === 'rejected' ? String(result.reason) : null
+      });
+    });
+
+    await Promise.allSettled(historyPromises);
+    
     // Log dos resultados
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {

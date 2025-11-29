@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +14,7 @@ const corsHeaders = {
 interface WelcomeEmailRequest {
   email: string;
   name?: string;
+  userId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -19,11 +23,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, name }: WelcomeEmailRequest = await req.json();
+    const { email, name, userId }: WelcomeEmailRequest = await req.json();
 
     console.log("Sending welcome email to:", email);
 
     const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const emailResponse = await resend.emails.send({
       from: "Éon Sign <noreply@eongerenciamento.com.br>",
@@ -77,6 +82,17 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Welcome email sent successfully:", emailResponse);
+
+    // Salvar no histórico se tivermos userId
+    if (userId) {
+      await supabase.from('email_history').insert({
+        user_id: userId,
+        recipient_email: email,
+        subject: "Bem-vindo ao Éon Sign!",
+        email_type: 'welcome',
+        status: 'sent'
+      });
+    }
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

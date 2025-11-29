@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +17,7 @@ interface SignatureEmailRequest {
   documentName: string;
   documentId: string;
   senderName: string;
+  userId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,9 +26,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerEmail, documentName, documentId, senderName }: SignatureEmailRequest = await req.json();
+    const { signerName, signerEmail, documentName, documentId, senderName, userId }: SignatureEmailRequest = await req.json();
 
     console.log("Sending signature email to:", signerEmail);
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // URL para página de assinatura - usa APP_URL configurável
     const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
@@ -79,12 +85,42 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
+    // Salvar no histórico
+    await supabase.from('email_history').insert({
+      user_id: userId,
+      recipient_email: signerEmail,
+      subject: `Você tem um documento para assinar - ${documentName}`,
+      email_type: 'signature_invitation',
+      document_id: documentId,
+      status: 'sent'
+    });
+
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error sending email:", error);
+    
+    // Salvar erro no histórico se tivermos as informações necessárias
+    try {
+      const body = await req.clone().json();
+      if (body.userId && body.signerEmail) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        await supabase.from('email_history').insert({
+          user_id: body.userId,
+          recipient_email: body.signerEmail,
+          subject: `Você tem um documento para assinar - ${body.documentName || 'Documento'}`,
+          email_type: 'signature_invitation',
+          document_id: body.documentId,
+          status: 'failed',
+          error_message: error.message
+        });
+      }
+    } catch (historyError) {
+      console.error("Error saving to history:", historyError);
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
