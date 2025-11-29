@@ -9,6 +9,13 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Session } from "@supabase/supabase-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 const authSchema = z.object({
   email: z.string().trim().email({
     message: "E-mail inválido"
@@ -24,6 +31,9 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
   const navigate = useNavigate();
   const {
     toast
@@ -111,9 +121,18 @@ export default function Auth() {
             });
           }
         } else {
+          // Enviar email de boas-vindas
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: { email: validatedData.email }
+            });
+          } catch (emailError) {
+            console.error("Error sending welcome email:", emailError);
+          }
+          
           toast({
             title: "Conta criada com sucesso!",
-            description: "Você já pode fazer login"
+            description: "Você já pode fazer login. Verifique seu e-mail de boas-vindas!"
           });
           setIsLogin(true);
         }
@@ -128,6 +147,45 @@ export default function Auth() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsResetting(true);
+
+    try {
+      const emailSchema = z.string().email({ message: "E-mail inválido" });
+      emailSchema.parse(resetEmail);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) {
+        toast({
+          title: "Erro ao enviar e-mail",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "E-mail enviado!",
+          description: "Verifique sua caixa de entrada para redefinir sua senha",
+        });
+        setShowResetDialog(false);
+        setResetEmail("");
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "E-mail inválido",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsResetting(false);
     }
   };
   return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4">
@@ -172,14 +230,15 @@ export default function Auth() {
                 {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
               </Button>
 
-              <button type="button" onClick={() => {
-                toast({
-                  title: "Em breve",
-                  description: "Funcionalidade em desenvolvimento"
-                });
-              }} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
-                Esqueci a senha
-              </button>
+              {isLogin && (
+                <button 
+                  type="button" 
+                  onClick={() => setShowResetDialog(true)} 
+                  className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm"
+                >
+                  Esqueci a senha
+                </button>
+              )}
 
               <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
@@ -192,5 +251,50 @@ export default function Auth() {
           </form>
         </div>
       </div>
+
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="bg-[#273d60] border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Recuperar Senha</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Digite seu e-mail para receber as instruções de recuperação de senha.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordReset} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email" className="text-white">
+                E-mail
+              </Label>
+              <Input
+                id="reset-email"
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+                disabled={isResetting}
+                className="bg-[hsl(221,30%,35%)] border border-white/20 text-white"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowResetDialog(false)}
+                disabled={isResetting}
+                className="flex-1 text-white hover:bg-white/10"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isResetting}
+                className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90"
+              >
+                {isResetting ? "Enviando..." : "Enviar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
