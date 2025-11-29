@@ -233,9 +233,28 @@ const NewDocument = () => {
 
       if (signersError) throw signersError;
 
+      // Send email to each external signer
+      for (const signer of signers) {
+        try {
+          await supabase.functions.invoke('send-signature-email', {
+            body: {
+              signerName: signer.name,
+              signerEmail: signer.email,
+              documentName: title,
+              documentId: documentData.id,
+              senderName: companySigner.name
+            }
+          });
+          console.log(`Email sent to ${signer.email}`);
+        } catch (emailError) {
+          console.error(`Failed to send email to ${signer.email}:`, emailError);
+          // Continue even if email fails - document is already created
+        }
+      }
+
       toast({
         title: "Documento enviado!",
-        description: "O documento foi enviado com sucesso e está aguardando assinaturas.",
+        description: "O documento foi enviado com sucesso e os signatários receberão o link por e-mail.",
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
