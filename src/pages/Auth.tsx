@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +185,14 @@ export default function Auth() {
               <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-white hover:text-white/80 transition-colors">
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
               </button>
+            </div>
+
+            <div className="text-center mt-4 animate-fade-in" style={{
+            animationDelay: '0.9s'
+          }}>
+              <Link to="/install" className="text-white hover:text-white/80 transition-colors text-sm">
+                Instale o App
+              </Link>
             </div>
           </form>
         </div>
