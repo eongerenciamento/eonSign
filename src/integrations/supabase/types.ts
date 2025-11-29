@@ -20,16 +20,16 @@ export type Database = {
           admin_email: string
           admin_name: string
           admin_phone: string
-          cep: string
-          city: string
+          cep: string | null
+          city: string | null
           cnpj: string
           company_name: string
           created_at: string
           id: string
           logo_url: string | null
-          neighborhood: string
-          state: string
-          street: string
+          neighborhood: string | null
+          state: string | null
+          street: string | null
           updated_at: string
           user_id: string
         }
@@ -38,16 +38,16 @@ export type Database = {
           admin_email: string
           admin_name: string
           admin_phone: string
-          cep: string
-          city: string
+          cep?: string | null
+          city?: string | null
           cnpj: string
           company_name: string
           created_at?: string
           id?: string
           logo_url?: string | null
-          neighborhood: string
-          state: string
-          street: string
+          neighborhood?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           user_id: string
         }
@@ -56,16 +56,16 @@ export type Database = {
           admin_email?: string
           admin_name?: string
           admin_phone?: string
-          cep?: string
-          city?: string
+          cep?: string | null
+          city?: string | null
           cnpj?: string
           company_name?: string
           created_at?: string
           id?: string
           logo_url?: string | null
-          neighborhood?: string
-          state?: string
-          street?: string
+          neighborhood?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           user_id?: string
         }
