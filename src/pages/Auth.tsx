@@ -177,15 +177,15 @@ export default function Auth() {
                   title: "Em breve",
                   description: "Funcionalidade em desenvolvimento"
                 });
-              }} className="w-full text-white hover:text-white/80 transition-colors text-sm">
+              }} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
                 Esqueci a senha
               </button>
 
-              <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-white hover:text-white/80 transition-colors text-sm">
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
                 {isLogin ? "Criar nova conta" : "Já tenho conta"}
               </button>
 
-              <Link to="/install" className="block w-full text-center text-white hover:text-white/80 transition-colors text-sm">
+              <Link to="/install" className="block w-full text-center text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
                 Instale o App
               </Link>
             </div>
