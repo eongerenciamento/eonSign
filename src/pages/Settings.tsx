@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload } from "lucide-react";
+import { EmailHistoryTab } from "@/components/settings/EmailHistoryTab";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -204,10 +205,11 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="company" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
+            <TabsTrigger value="emails">Histórico de E-mails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
@@ -492,6 +494,10 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="emails" className="space-y-6 mt-6">
+            <EmailHistoryTab />
           </TabsContent>
         </Tabs>
       </div>

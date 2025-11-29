@@ -248,7 +248,8 @@ const NewDocument = () => {
               signerEmail: signer.email,
               documentName: title,
               documentId: documentData.id,
-              senderName: companySigner.name
+              senderName: companySigner.name,
+              userId: user.id
             }
           });
           console.log(`Email sent to ${signer.email}`);
