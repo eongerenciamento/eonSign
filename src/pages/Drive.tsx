@@ -400,35 +400,24 @@ const Drive = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {selectedFolder && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedFolder(null)}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-            )}
-            <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedFolder(null)}
+              className="text-sm text-gray-700 hover:underline"
+            >
+              Drive
+            </button>
+            {selectedFolder && getBreadcrumbPath().map((folder, index) => (
               <button
-                onClick={() => setSelectedFolder(null)}
-                className="text-sm text-gray-700 hover:underline"
+                key={folder.id}
+                onClick={() => setSelectedFolder(folder.id)}
+                className={cn(
+                  "text-sm hover:underline",
+                  index === 0 ? "text-gray-500" : "text-gray-400"
+                )}
               >
-                Drive
+                {folder.name}
               </button>
-              {selectedFolder && getBreadcrumbPath().map((folder, index) => (
-                <button
-                  key={folder.id}
-                  onClick={() => setSelectedFolder(folder.id)}
-                  className={cn(
-                    "text-sm hover:underline",
-                    index === 0 ? "text-gray-500" : "text-gray-400"
-                  )}
-                >
-                  {folder.name}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
