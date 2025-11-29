@@ -36,8 +36,8 @@ const handler = async (req: Request): Promise<Response> => {
       subject: `Você tem um documento para assinar - ${documentName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 30px; text-align: center;">
-            <h1 style="color: white; margin: 0;">Éon Sign</h1>
+          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
+            <img src="${APP_URL}/email-assets/header-banner.png" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block;" />
           </div>
           <div style="padding: 30px; background: #f9f9f9;">
             <h2 style="color: #273d60;">Olá, ${signerName || 'Signatário'}!</h2>
