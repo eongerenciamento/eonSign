@@ -155,7 +155,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#273d60] via-[#1a2d4d] to-[#001a4d]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function Pricing() {
           </div>
           <Button 
             variant="ghost" 
-            className="text-white hover:bg-white/10"
+            className="text-[#273d60] hover:bg-gray-100"
             onClick={() => navigate('/auth')}
           >
             Já tenho conta
@@ -174,73 +174,75 @@ export default function Pricing() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-[#273d60] mb-4">
           Planos e Preços
         </h1>
-        <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           Escolha o plano ideal para o volume de documentos da sua empresa
         </p>
       </div>
 
-      {/* Pricing Cards */}
+      {/* Pricing Cards - Horizontal Scroll */}
       <div className="container mx-auto px-4 pb-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {PLANS.map((plan) => (
-            <Card 
-              key={plan.name} 
-              className={`relative ${plan.recommended ? 'border-2 border-primary shadow-2xl scale-105' : ''}`}
-            >
-              {plan.recommended && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-white px-4 py-1">Mais Popular</Badge>
-                </div>
-              )}
-              <CardHeader className="space-y-4">
-                <div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </div>
-                <div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">
-                      {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
-                    </span>
-                    {plan.price > 0 && <span className="text-muted-foreground">/mês</span>}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos/mês`}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {plan.features.slice(0, 3).map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      {feature.included ? (
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      )}
-                      <span className={feature.included ? '' : 'text-muted-foreground'}>
-                        {feature.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  onClick={() => handleSelectPlan(plan)}
-                  className={`w-full ${
-                    plan.recommended 
-                      ? 'bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white' 
-                      : ''
+        <div className="relative">
+          <div className="overflow-x-auto scrollbar-hide pb-4">
+            <div className="flex gap-6 px-4" style={{ width: 'max-content' }}>
+              {PLANS.map((plan) => (
+                <Card 
+                  key={plan.name} 
+                  className={`relative bg-[#273d60] text-white border-none w-80 flex-shrink-0 ${
+                    plan.recommended ? 'ring-4 ring-yellow-400 shadow-2xl scale-105' : 'shadow-xl'
                   }`}
-                  variant={plan.recommended ? 'default' : 'outline'}
                 >
-                  {plan.price === 0 ? 'Começar Grátis' : 'Escolher Plano'}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  {plan.recommended && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-yellow-400 text-[#273d60] px-4 py-1 font-bold">Mais Popular</Badge>
+                    </div>
+                  )}
+                  <CardHeader className="space-y-4">
+                    <div>
+                      <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
+                      <CardDescription className="text-gray-300">{plan.description}</CardDescription>
+                    </div>
+                    <div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-white">
+                          {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
+                        </span>
+                        {plan.price > 0 && <span className="text-gray-300">/mês</span>}
+                      </div>
+                      <p className="text-sm text-gray-300 mt-1">
+                        {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos/mês`}
+                      </p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      {plan.features.slice(0, 3).map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm">
+                          {feature.included ? (
+                            <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                          ) : (
+                            <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          )}
+                          <span className={feature.included ? 'text-white' : 'text-gray-400'}>
+                            {feature.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => handleSelectPlan(plan)}
+                      className="w-full bg-white text-[#273d60] hover:bg-gray-100 font-bold"
+                      variant="secondary"
+                    >
+                      {plan.price === 0 ? 'Começar Grátis' : 'Escolher Plano'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -249,7 +251,7 @@ export default function Pricing() {
         <div className="max-w-7xl mx-auto">
           <Button
             variant="ghost"
-            className="w-full text-white hover:bg-white/10"
+            className="w-full text-[#273d60] hover:bg-gray-100"
             onClick={() => setShowComparison(!showComparison)}
           >
             {showComparison ? (
@@ -313,10 +315,10 @@ export default function Pricing() {
       {/* FAQ Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-4">
+          <h2 className="text-3xl font-bold text-[#273d60] text-center mb-4">
             Perguntas Frequentes
           </h2>
-          <p className="text-white/80 text-center mb-12">
+          <p className="text-gray-600 text-center mb-12">
             Tire suas dúvidas sobre nossos planos e funcionalidades
           </p>
           <Card>
@@ -339,17 +341,17 @@ export default function Pricing() {
       </div>
 
       {/* CTA Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="container mx-auto px-4 py-16 text-center bg-gray-50">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-[#273d60] mb-4">
             Pronto para começar?
           </h2>
-          <p className="text-white/80 mb-8">
+          <p className="text-gray-600 mb-8">
             Comece gratuitamente e faça upgrade quando precisar de mais documentos
           </p>
           <Button
             size="lg"
-            className="bg-white text-[#273d60] hover:bg-white/90"
+            className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
             onClick={() => handleSelectPlan(PLANS[0])}
           >
             Começar Agora
