@@ -41,7 +41,6 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending WhatsApp to ${cleanPhone} for document ${documentId}`);
 
     const signatureUrl = `${APP_URL}/assinar/${documentId}`;
-    const driveUrl = `${APP_URL}/drive`;
 
     let messageBody: string;
 
@@ -51,10 +50,9 @@ const handler = async (req: Request): Promise<Response> => {
 
 O documento *${documentName}* foi assinado por todos os signatários! ✅
 
-Você receberá o documento assinado por e-mail e também pode acessá-lo a qualquer momento no sistema:
-${driveUrl}
+Você receberá o documento assinado por e-mail.
 
-_Éon Sign - Sistema de Assinatura Digital_`;
+_Eon Sign - Sistema de Assinatura Digital_`;
     } else {
       // Mensagem para convite de assinatura
       messageBody = `Olá ${signerName}! 👋
@@ -66,7 +64,7 @@ _Éon Sign - Sistema de Assinatura Digital_`;
 Clique no link abaixo para visualizar e assinar:
 ${signatureUrl}
 
-_Éon Sign - Sistema de Assinatura Digital_`;
+_Eon Sign - Sistema de Assinatura Digital_`;
     }
 
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
