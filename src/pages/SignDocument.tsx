@@ -36,6 +36,7 @@ const SignDocument = () => {
   const [currentSigner, setCurrentSigner] = useState<Signer | null>(null);
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
+  const [cpfValid, setCpfValid] = useState<boolean | null>(null);
   const [birthDate, setBirthDate] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSigning, setIsSigning] = useState(false);
@@ -122,14 +123,103 @@ const SignDocument = () => {
     }
   };
 
+  const validateCPF = (cpf: string): boolean => {
+    const cleanCpf = cpf.replace(/\D/g, "");
+    
+    if (cleanCpf.length !== 11) return false;
+    if (/^(\d)\1+$/.test(cleanCpf)) return false;
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
+    }
+    let remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cleanCpf.charAt(9))) return false;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
+    }
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cleanCpf.charAt(10))) return false;
+    
+    return true;
+  };
+
+  const validateCNPJ = (cnpj: string): boolean => {
+    const cleanCnpj = cnpj.replace(/\D/g, "");
+    
+    if (cleanCnpj.length !== 14) return false;
+    if (/^(\d)\1+$/.test(cleanCnpj)) return false;
+    
+    let size = cleanCnpj.length - 2;
+    let numbers = cleanCnpj.substring(0, size);
+    const digits = cleanCnpj.substring(size);
+    let sum = 0;
+    let pos = size - 7;
+    
+    for (let i = size; i >= 1; i--) {
+      sum += parseInt(numbers.charAt(size - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    
+    let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(0))) return false;
+    
+    size = size + 1;
+    numbers = cleanCnpj.substring(0, size);
+    sum = 0;
+    pos = size - 7;
+    
+    for (let i = size; i >= 1; i--) {
+      sum += parseInt(numbers.charAt(size - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    
+    result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(1))) return false;
+    
+    return true;
+  };
+
+  const validateCpfCnpj = (value: string): boolean => {
+    const clean = value.replace(/\D/g, "");
+    
+    if (clean.length === 11) {
+      return validateCPF(clean);
+    } else if (clean.length === 14) {
+      return validateCNPJ(clean);
+    }
+    
+    return false;
+  };
+
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCpfCnpj(e.target.value);
     setCpf(formatted);
+    
+    // Validar CPF/CNPJ em tempo real
+    const clean = formatted.replace(/\D/g, "");
+    if (clean.length === 11 || clean.length === 14) {
+      setCpfValid(validateCpfCnpj(formatted));
+    } else {
+      setCpfValid(null);
+    }
   };
 
   const handleSign = async () => {
     if (!cpf) {
       toast.error("Por favor, informe seu CPF/CNPJ");
+      return;
+    }
+
+    // Validar CPF/CNPJ
+    if (!validateCpfCnpj(cpf)) {
+      const cleanCpf = cpf.replace(/\D/g, "");
+      const type = cleanCpf.length === 11 ? "CPF" : cleanCpf.length === 14 ? "CNPJ" : "CPF/CNPJ";
+      toast.error(`${type} inválido. Por favor, verifique o número informado.`);
       return;
     }
 
@@ -169,7 +259,18 @@ const SignDocument = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error from edge function:", error);
+        const errorMessage = error.message || "Erro ao assinar documento";
+        toast.error(errorMessage);
+        return;
+      }
+
+      // Check if response contains error in data
+      if (data && data.error) {
+        toast.error(data.error);
+        return;
+      }
 
       toast.success("Documento assinado com sucesso!");
       setSignatureComplete(true);
@@ -178,7 +279,8 @@ const SignDocument = () => {
       await fetchDocumentData();
     } catch (error: any) {
       console.error("Error signing document:", error);
-      toast.error("Erro ao assinar documento");
+      const errorMessage = error?.message || "Erro ao assinar documento";
+      toast.error(errorMessage);
     } finally {
       setIsSigning(false);
     }
@@ -406,13 +508,32 @@ const SignDocument = () => {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="cpf">CPF/CNPJ</Label>
-                    <Input
-                      id="cpf"
-                      value={cpf}
-                      onChange={handleCpfChange}
-                      placeholder="000.000.000-00"
-                      maxLength={18}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="cpf"
+                        value={cpf}
+                        onChange={handleCpfChange}
+                        placeholder="000.000.000-00"
+                        maxLength={18}
+                        className={
+                          cpfValid === false 
+                            ? "border-red-500 focus-visible:ring-red-500" 
+                            : cpfValid === true 
+                            ? "border-green-500 focus-visible:ring-green-500" 
+                            : ""
+                        }
+                      />
+                      {cpfValid === false && (
+                        <p className="text-xs text-red-500 mt-1">
+                          CPF/CNPJ inválido
+                        </p>
+                      )}
+                      {cpfValid === true && (
+                        <p className="text-xs text-green-600 mt-1">
+                          ✓ CPF/CNPJ válido
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="birthDate">Data de Nascimento</Label>

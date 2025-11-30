@@ -6,6 +6,94 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Função para validar CPF
+const validateCPF = (cpf: string): boolean => {
+  // Remove caracteres não numéricos
+  const cleanCpf = cpf.replace(/\D/g, "");
+  
+  // CPF deve ter 11 dígitos
+  if (cleanCpf.length !== 11) return false;
+  
+  // Verifica se todos os dígitos são iguais
+  if (/^(\d)\1+$/.test(cleanCpf)) return false;
+  
+  // Validação do primeiro dígito verificador
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
+  }
+  let remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCpf.charAt(9))) return false;
+  
+  // Validação do segundo dígito verificador
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
+  }
+  remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCpf.charAt(10))) return false;
+  
+  return true;
+};
+
+// Função para validar CNPJ
+const validateCNPJ = (cnpj: string): boolean => {
+  // Remove caracteres não numéricos
+  const cleanCnpj = cnpj.replace(/\D/g, "");
+  
+  // CNPJ deve ter 14 dígitos
+  if (cleanCnpj.length !== 14) return false;
+  
+  // Verifica se todos os dígitos são iguais
+  if (/^(\d)\1+$/.test(cleanCnpj)) return false;
+  
+  // Validação do primeiro dígito verificador
+  let size = cleanCnpj.length - 2;
+  let numbers = cleanCnpj.substring(0, size);
+  const digits = cleanCnpj.substring(size);
+  let sum = 0;
+  let pos = size - 7;
+  
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(numbers.charAt(size - i)) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  
+  let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (result !== parseInt(digits.charAt(0))) return false;
+  
+  // Validação do segundo dígito verificador
+  size = size + 1;
+  numbers = cleanCnpj.substring(0, size);
+  sum = 0;
+  pos = size - 7;
+  
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(numbers.charAt(size - i)) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  
+  result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (result !== parseInt(digits.charAt(1))) return false;
+  
+  return true;
+};
+
+// Função para validar CPF ou CNPJ
+const validateCpfCnpj = (value: string): { valid: boolean; type: "CPF" | "CNPJ" | null } => {
+  const clean = value.replace(/\D/g, "");
+  
+  if (clean.length === 11) {
+    return { valid: validateCPF(clean), type: "CPF" };
+  } else if (clean.length === 14) {
+    return { valid: validateCNPJ(clean), type: "CNPJ" };
+  }
+  
+  return { valid: false, type: null };
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,7 +102,67 @@ serve(async (req) => {
   try {
     const { documentId, signerId, cpf, birthDate } = await req.json();
 
+    // Validar entrada
+    if (!documentId || !signerId || !cpf || !birthDate) {
+      return new Response(
+        JSON.stringify({ error: "Campos obrigatórios não fornecidos" }), 
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Validar formato de data
+    const birthDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!birthDateRegex.test(birthDate)) {
+      return new Response(
+        JSON.stringify({ error: "Formato de data inválido" }), 
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Validar idade mínima (18 anos)
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    if (age < 18) {
+      return new Response(
+        JSON.stringify({ error: "Signatário deve ter pelo menos 18 anos" }), 
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     console.log("Processing signature:", { documentId, signerId, cpf, birthDate });
+
+    // Validar CPF/CNPJ
+    const validation = validateCpfCnpj(cpf);
+    if (!validation.valid) {
+      console.error("Invalid CPF/CNPJ:", cpf);
+      return new Response(
+        JSON.stringify({ 
+          error: `${validation.type || "CPF/CNPJ"} inválido. Por favor, verifique o número informado.` 
+        }), 
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    console.log(`Valid ${validation.type} provided`);
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
