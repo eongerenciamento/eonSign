@@ -35,16 +35,17 @@ serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    // Check if user has active subscription
+    // Get user's tier (default to free tier if none)
     const { data: subscription } = await supabaseClient
       .from("user_subscriptions")
-      .select("*")
+      .select("plan_name, document_limit, status")
       .eq("user_id", user.id)
       .eq("status", "active")
       .single();
 
-    const hasActiveSubscription = !!subscription;
-    logStep("Subscription status", { hasActive: hasActiveSubscription });
+    const documentLimit = subscription?.document_limit || 5;
+    const planName = subscription?.plan_name || "Grátis";
+    logStep("User tier", { planName, documentLimit });
 
     // Get current month usage
     const currentMonth = new Date();
@@ -60,15 +61,16 @@ serve(async (req) => {
       .single();
 
     const currentCount = usage?.document_count || 0;
-    logStep("Current usage retrieved", { current: currentCount });
+    const canCreate = currentCount < documentLimit;
 
-    // No limits if has active subscription
-    const canCreate = hasActiveSubscription;
+    logStep("Usage checked", { currentCount, documentLimit, canCreate });
 
     return new Response(JSON.stringify({
       canCreate,
       current: currentCount,
-      hasSubscription: hasActiveSubscription,
+      limit: documentLimit,
+      planName,
+      remaining: Math.max(0, documentLimit - currentCount)
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

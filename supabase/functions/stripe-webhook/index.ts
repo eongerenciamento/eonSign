@@ -47,30 +47,31 @@ serve(async (req) => {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           const userId = session.metadata?.user_id;
+          const tierName = session.metadata?.tier_name;
+          const documentLimit = parseInt(session.metadata?.document_limit || "5");
           
-          if (!userId) throw new Error("No user_id in session metadata");
+          if (!userId || !tierName) throw new Error("Missing metadata in session");
 
-          logStep("Processing checkout.session.completed", { userId });
+          logStep("Processing checkout.session.completed (tier upgrade)", { userId, tierName, documentLimit });
 
-          // Get subscription details
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          // For one-time payment mode, upgrade the user's tier
+          if (session.mode === "payment" && session.payment_status === "paid") {
+            await supabaseClient.from("user_subscriptions").upsert({
+              user_id: userId,
+              stripe_customer_id: session.customer as string,
+              stripe_subscription_id: null,
+              stripe_price_id: session.metadata?.price_id || null,
+              plan_name: tierName,
+              status: 'active',
+              current_period_start: null,
+              current_period_end: null,
+              cancel_at_period_end: false,
+              document_limit: documentLimit,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
 
-          // Upsert subscription record
-          await supabaseClient.from("user_subscriptions").upsert({
-            user_id: userId,
-            stripe_customer_id: session.customer as string,
-            stripe_subscription_id: session.subscription as string,
-            stripe_price_id: subscription.items.data[0].price.id,
-            plan_name: "Eon Sign",
-            status: subscription.status,
-            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-            cancel_at_period_end: subscription.cancel_at_period_end,
-            document_limit: 999999,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
-
-          logStep("Subscription created/updated");
+            logStep("Tier upgraded successfully");
+          }
           break;
         }
 
