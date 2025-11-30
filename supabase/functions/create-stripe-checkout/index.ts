@@ -36,11 +36,11 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId } = await req.json();
-    if (!priceId) {
-      throw new Error("Missing required field: priceId");
+    const { priceId, tierName, documentLimit } = await req.json();
+    if (!priceId || !tierName || !documentLimit) {
+      throw new Error("Missing required fields: priceId, tierName, documentLimit");
     }
-    logStep("Request data", { priceId });
+    logStep("Request data", { priceId, tierName, documentLimit });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -63,20 +63,23 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Create checkout session
+    // Create checkout session for one-time payment (tier upgrade)
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
           price: priceId,
+          quantity: 1,
         },
       ],
-      mode: "subscription",
+      mode: "payment",
       success_url: `${origin}/configuracoes?tab=subscription&success=true`,
       cancel_url: `${origin}/configuracoes?tab=subscription&canceled=true`,
       metadata: {
         user_id: user.id,
+        tier_name: tierName,
+        document_limit: documentLimit.toString(),
       }
     });
 
