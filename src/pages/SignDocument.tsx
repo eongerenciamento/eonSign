@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, ChevronDown } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-sign.png";
 
@@ -43,7 +42,7 @@ const SignDocument = () => {
   const [isSigning, setIsSigning] = useState(false);
   const [isIdentified, setIsIdentified] = useState(false);
   const [signatureComplete, setSignatureComplete] = useState(false);
-  const [showSigners, setShowSigners] = useState(false);
+  const [pdfScale, setPdfScale] = useState(1);
 
   useEffect(() => {
     if (documentId) {
@@ -287,6 +286,34 @@ const SignDocument = () => {
     }
   };
 
+  const handleZoomIn = () => {
+    setPdfScale(prev => Math.min(prev + 0.25, 2.5));
+  };
+
+  const handleZoomOut = () => {
+    setPdfScale(prev => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleDownload = async () => {
+    if (!document?.file_url) return;
+    
+    try {
+      const response = await fetch(document.file_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = `${document.name}.pdf`;
+      window.document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success("Download iniciado!");
+    } catch (error) {
+      toast.error("Erro ao baixar documento");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       signed: { label: "Assinado", className: "bg-green-700 text-white" },
@@ -350,14 +377,16 @@ const SignDocument = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d]">
-      {/* Identificação */}
-      {!isIdentified && (
-        <div className="max-w-4xl mx-auto p-4 pt-8">
-          <div className="text-center mb-8">
-            <img src={logo} alt="Éon Sign" className="h-16 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Assinatura de Documento</h1>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
+      <div className="max-w-4xl mx-auto pt-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <img src={logo} alt="Éon Sign" className="h-16 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white mb-2">Assinatura de Documento</h1>
+        </div>
+
+        {/* Identificação */}
+        {!isIdentified && (
           <Card className="p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">Identificação</h2>
             <p className="text-sm text-muted-foreground mb-4">
@@ -379,63 +408,154 @@ const SignDocument = () => {
               </Button>
             </div>
           </Card>
-        </div>
-      )}
+        )}
 
-      {/* Documento e Assinatura - Layout Full Screen */}
-      {isIdentified && (
-        <div className="flex flex-col h-screen">
-          {/* Header com Logo */}
-          <div className="bg-gradient-to-r from-[#273d60] to-[#001a4d] p-2 flex items-center justify-center">
-            <img src={logo} alt="Éon Sign" className="h-10" />
-          </div>
+        {/* Documento Info e Assinatura */}
+        {isIdentified && (
+          <>
+            {/* PDF Viewer */}
+            <Card className="p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Visualizar Documento</h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleZoomOut}
+                    className="h-8 w-8"
+                    title="Diminuir zoom"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
+                    {Math.round(pdfScale * 100)}%
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleZoomIn}
+                    className="h-8 w-8"
+                    title="Aumentar zoom"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleDownload}
+                    className="h-8 w-8"
+                    title="Baixar documento"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {document.file_url ? (
+                <div className="overflow-auto border rounded-md" style={{ maxHeight: '60vh' }}>
+                  <iframe
+                    src={`${document.file_url}#view=FitH`}
+                    className="w-full border-0"
+                    style={{ 
+                      height: `${60 * pdfScale}vh`,
+                      minHeight: '400px'
+                    }}
+                    title="Document Preview"
+                  />
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Documento não disponível para visualização</p>
+              )}
+            </Card>
 
-          {/* Área de Assinatura - Formulário Compacto */}
-          {currentSigner && currentSigner.status === "pending" && (
-            <div className="bg-white border-b shadow-sm p-4">
-              <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <Card className="p-6 mb-6">
+              <div className="flex items-start gap-4">
+                <FileText className="h-8 w-8 text-primary flex-shrink-0" />
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold mb-2">{document.name}</h2>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Status: {getStatusBadge(document.status)}</span>
+                    <span>•</span>
+                    <span>Assinaturas: {document.signed_by}/{document.signers}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Signatários */}
+            <Card className="p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Signatários</h3>
+              <div className="space-y-3">
+                {signers.map((signer) => (
+                  <div key={signer.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
                     <div>
-                      <Label htmlFor="cpf" className="text-xs">CPF/CNPJ</Label>
+                      <p className="font-medium">{signer.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {signer.email}
+                        {signer.is_company_signer && " (Empresa)"}
+                        {currentSigner?.id === signer.id && " (Você)"}
+                      </p>
+                    </div>
+                    {getStatusBadge(signer.status)}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Formulário de Assinatura */}
+            {currentSigner && currentSigner.status === "pending" && (
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Assinar Documento</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="cpf">CPF/CNPJ</Label>
+                    <div className="relative">
                       <Input
                         id="cpf"
                         value={cpf}
                         onChange={handleCpfChange}
                         placeholder="000.000.000-00"
                         maxLength={18}
-                        className={`h-9 ${
+                        className={
                           cpfValid === false 
                             ? "border-red-500 focus-visible:ring-red-500" 
                             : cpfValid === true 
                             ? "border-green-500 focus-visible:ring-green-500" 
                             : ""
-                        }`}
+                        }
                       />
                       {cpfValid === false && (
-                        <p className="text-xs text-red-500 mt-0.5">CPF/CNPJ inválido</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          CPF/CNPJ inválido
+                        </p>
+                      )}
+                      {cpfValid === true && (
+                        <p className="text-xs text-green-600 mt-1">
+                          ✓ CPF/CNPJ válido
+                        </p>
                       )}
                     </div>
-                    <div>
-                      <Label htmlFor="birthDate" className="text-xs">Data de Nascimento</Label>
-                      <Input
-                        id="birthDate"
-                        type="date"
-                        value={birthDate}
-                        onChange={(e) => setBirthDate(e.target.value)}
-                        max={(() => {
-                          const today = new Date();
-                          today.setFullYear(today.getFullYear() - 18);
-                          return today.toISOString().split('T')[0];
-                        })()}
-                        className="h-9"
-                      />
-                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="birthDate">Data de Nascimento</Label>
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      max={(() => {
+                        const today = new Date();
+                        today.setFullYear(today.getFullYear() - 18);
+                        return today.toISOString().split('T')[0];
+                      })()}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você deve ter pelo menos 18 anos
+                    </p>
                   </div>
                   <Button
                     onClick={handleSign}
-                    disabled={isSigning || !cpf || !birthDate || cpfValid === false}
-                    className="bg-green-600 hover:bg-green-700 text-white h-9 px-8 md:min-w-[200px]"
+                    disabled={isSigning || !cpf || !birthDate}
+                    className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
                   >
                     {isSigning ? (
                       <>
@@ -443,85 +563,25 @@ const SignDocument = () => {
                         Processando...
                       </>
                     ) : (
-                      "ASSINAR"
+                      "Assinar Documento"
                     )}
                   </Button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Já Assinou - Mensagem */}
-          {currentSigner && currentSigner.status === "signed" && (
-            <div className="bg-green-50 border-b border-green-200 p-3">
-              <div className="max-w-6xl mx-auto flex items-center justify-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-700" />
-                <p className="text-sm font-medium text-green-700">
-                  Você já assinou este documento em {new Date(currentSigner.signed_at!).toLocaleString("pt-BR")}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Informações do Documento e Signatários - Colapsável */}
-          <div className="bg-gray-50 border-b">
-            <div className="max-w-6xl mx-auto">
-              <Collapsible open={showSigners} onOpenChange={setShowSigners}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-100"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-[#273d60]" />
-                      <div className="text-left">
-                        <p className="font-semibold">{document.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Assinaturas: {document.signed_by}/{document.signers}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronDown className={`h-5 w-5 transition-transform ${showSigners ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="px-4 pb-4 space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Signatários:</p>
-                    {signers.map((signer) => (
-                      <div key={signer.id} className="flex items-center justify-between p-2 bg-white rounded-md border">
-                        <div>
-                          <p className="text-sm font-medium">{signer.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {signer.email}
-                            {signer.is_company_signer && " (Empresa)"}
-                            {currentSigner?.id === signer.id && " (Você)"}
-                          </p>
-                        </div>
-                        {getStatusBadge(signer.status)}
-                      </div>
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </div>
-
-          {/* PDF Viewer - Full Width */}
-          <div className="flex-1 bg-gray-200">
-            {document.file_url ? (
-              <iframe
-                src={`${document.file_url}#view=FitH`}
-                className="w-full h-full border-0"
-                title="Document Preview"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">Documento não disponível para visualização</p>
-              </div>
+              </Card>
             )}
-          </div>
-        </div>
-      )}
+
+            {currentSigner && currentSigner.status === "signed" && (
+              <Card className="p-6 text-center">
+                <CheckCircle className="h-12 w-12 text-green-700 mx-auto mb-4" />
+                <p className="text-lg font-medium">Você já assinou este documento</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Assinado em {new Date(currentSigner.signed_at!).toLocaleString("pt-BR")}
+                </p>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
