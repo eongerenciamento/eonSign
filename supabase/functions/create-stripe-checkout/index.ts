@@ -63,7 +63,7 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Create checkout session for one-time payment (tier upgrade)
+    // Create checkout session for subscription (tier upgrade)
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -73,7 +73,7 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: "payment",
+      mode: "subscription",
       success_url: `${origin}/configuracoes?tab=subscription&success=true`,
       cancel_url: `${origin}/configuracoes?tab=subscription&canceled=true`,
       metadata: {

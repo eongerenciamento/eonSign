@@ -52,25 +52,28 @@ serve(async (req) => {
           
           if (!userId || !tierName) throw new Error("Missing metadata in session");
 
-          logStep("Processing checkout.session.completed (tier upgrade)", { userId, tierName, documentLimit });
+          logStep("Processing checkout.session.completed", { userId, tierName, documentLimit, mode: session.mode });
 
-          // For one-time payment mode, upgrade the user's tier
-          if (session.mode === "payment" && session.payment_status === "paid") {
+          // For subscription mode, create/update subscription record
+          if (session.mode === "subscription" && session.subscription) {
+            const subscriptionId = session.subscription as string;
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            
             await supabaseClient.from("user_subscriptions").upsert({
               user_id: userId,
               stripe_customer_id: session.customer as string,
-              stripe_subscription_id: null,
-              stripe_price_id: session.metadata?.price_id || null,
+              stripe_subscription_id: subscriptionId,
+              stripe_price_id: subscription.items.data[0].price.id,
               plan_name: tierName,
-              status: 'active',
-              current_period_start: null,
-              current_period_end: null,
-              cancel_at_period_end: false,
+              status: subscription.status as any,
+              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              cancel_at_period_end: subscription.cancel_at_period_end,
               document_limit: documentLimit,
               updated_at: new Date().toISOString()
             }, { onConflict: 'user_id' });
 
-            logStep("Tier upgraded successfully");
+            logStep("Subscription created successfully");
           }
           break;
         }
