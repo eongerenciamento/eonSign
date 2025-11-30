@@ -233,8 +233,7 @@ const Reports = () => {
 
     // Tabela com dados
     const tableData = signatories.map(s => [
-      s.name,
-      s.cpf || "-",
+      `${s.name}\n${s.cpf || "CPF não informado"}`, // Nome com CPF abaixo
       s.birth_date ? format(new Date(s.birth_date), "dd/MM/yyyy", { locale: ptBR }) : "-",
       s.email,
       s.phone,
@@ -243,8 +242,13 @@ const Reports = () => {
       s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy", { locale: ptBR }) : "-"
     ]);
 
+    // Calcular totalizadores
+    const totalSignatories = signatories.length;
+    const totalSigned = signatories.filter(s => s.status === "signed").length;
+    const totalPending = signatories.filter(s => s.status === "pending").length;
+
     autoTable(doc, {
-      head: [["Nome", "CPF/CNPJ", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura"]],
+      head: [["Nome / CPF", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura"]],
       body: tableData,
       startY: filters.length > 0 ? 50 : 45,
       styles: {
@@ -260,16 +264,51 @@ const Reports = () => {
         fillColor: [245, 245, 245],
       },
       columnStyles: {
-        0: { cellWidth: 40 }, // Nome
-        1: { cellWidth: 30 }, // CPF/CNPJ
-        2: { cellWidth: 25 }, // Nascimento
-        3: { cellWidth: 50 }, // Email
-        4: { cellWidth: 30 }, // Telefone
-        5: { cellWidth: 45 }, // Documento
-        6: { cellWidth: 22 }, // Status
-        7: { cellWidth: 28 }, // Assinatura
+        0: { cellWidth: 60 }, // Nome + CPF
+        1: { cellWidth: 28 }, // Nascimento
+        2: { cellWidth: 55 }, // Email
+        3: { cellWidth: 32 }, // Telefone
+        4: { cellWidth: 50 }, // Documento
+        5: { cellWidth: 25 }, // Status
+        6: { cellWidth: 30 }, // Assinatura
       },
+      didDrawCell: (data) => {
+        // Estilizar CPF em fonte menor
+        if (data.column.index === 0 && data.section === 'body') {
+          const cell = data.cell;
+          const text = cell.text[0];
+          if (text && text.includes('\n')) {
+            const [name, cpf] = text.split('\n');
+            const textX = cell.x + 2;
+            const textY = cell.y + 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(40, 40, 40);
+            doc.text(name, textX, textY);
+            
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text(cpf, textX, textY + 5);
+            
+            // Limpar o texto automático
+            cell.text = [];
+          }
+        }
+      }
     });
+
+    // Adicionar totalizadores após a tabela
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    
+    doc.setFontSize(11);
+    doc.setTextColor(39, 61, 96);
+    doc.text("Totalizadores:", 14, finalY);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Total de Signatários: ${totalSignatories}`, 14, finalY + 8);
+    doc.text(`Assinados: ${totalSigned}`, 14, finalY + 16);
+    doc.text(`Pendentes: ${totalPending}`, 14, finalY + 24);
 
     // Footer
     const pageCount = doc.getNumberOfPages();
