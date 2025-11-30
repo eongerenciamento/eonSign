@@ -224,12 +224,6 @@ export default function Pricing() {
                   </CardHeader>
                    <CardContent className="space-y-4">
                      <div className="space-y-3">
-                       <div className="flex items-center gap-2 text-sm">
-                         <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                         <span className="text-white font-medium">
-                           {plan.limit >= 1000 ? '1000 documentos/mês' : `${plan.limit} documentos/mês`}
-                         </span>
-                       </div>
                        {plan.features.slice(1, 4).map((feature, idx) => (
                          <div key={idx} className="flex items-center gap-2 text-sm">
                            {feature.included ? (
