@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,13 +16,49 @@ import { toast } from "sonner";
 const Reports = () => {
   const [dateFilter, setDateFilter] = useState("30");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Buscar signatários
-  const { data: signatories, isLoading } = useQuery({
-    queryKey: ["signatories-report", dateFilter, statusFilter],
+  // Contar total de signatários
+  const { data: totalCount } = useQuery({
+    queryKey: ["signatories-count", dateFilter, statusFilter],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
+
+      let query = supabase
+        .from("document_signers")
+        .select("*", { count: "exact", head: true })
+        .eq("documents.user_id", user.id);
+
+      // Filtro de data
+      if (dateFilter !== "all") {
+        const days = parseInt(dateFilter);
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        query = query.gte("created_at", date.toISOString());
+      }
+
+      // Filtro de status
+      if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  // Buscar signatários com paginação
+  const { data: signatories, isLoading } = useQuery({
+    queryKey: ["signatories-report", dateFilter, statusFilter, currentPage, itemsPerPage],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
 
       let query = supabase
         .from("document_signers")
@@ -34,7 +70,8 @@ const Reports = () => {
           )
         `)
         .eq("documents.user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       // Filtro de data
       if (dateFilter !== "all") {
@@ -54,6 +91,8 @@ const Reports = () => {
       return data;
     },
   });
+
+  const totalPages = Math.ceil((totalCount || 0) / itemsPerPage);
 
   const handleExport = () => {
     if (!signatories || signatories.length === 0) {
@@ -293,8 +332,11 @@ const Reports = () => {
           <TabsContent value="signatories" className="space-y-6 mt-8">
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex gap-4">
-                <Select value={dateFilter} onValueChange={setDateFilter}>
+              <div className="flex flex-wrap gap-4">
+                <Select value={dateFilter} onValueChange={(value) => {
+                  setDateFilter(value);
+                  setCurrentPage(1);
+                }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Período" />
                   </SelectTrigger>
@@ -306,7 +348,10 @@ const Reports = () => {
                     <SelectItem value="all">Todos</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={(value) => {
+                  setStatusFilter(value);
+                  setCurrentPage(1);
+                }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -314,6 +359,20 @@ const Reports = () => {
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="signed">Assinados</SelectItem>
                     <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                  setItemsPerPage(parseInt(value));
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Por página" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 por página</SelectItem>
+                    <SelectItem value="25">25 por página</SelectItem>
+                    <SelectItem value="50">50 por página</SelectItem>
+                    <SelectItem value="100">100 por página</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -381,6 +440,54 @@ const Reports = () => {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+              )}
+
+              {/* Paginação */}
+              {signatories && signatories.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+                  <div className="text-sm text-muted-foreground">
+                    Mostrando {(currentPage - 1) * itemsPerPage + 1} até{" "}
+                    {Math.min(currentPage * itemsPerPage, totalCount || 0)} de {totalCount || 0}{" "}
+                    registros
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                    >
+                      Primeira
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium px-4">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Última
+                    </Button>
+                  </div>
                 </div>
               )}
             </Card>
