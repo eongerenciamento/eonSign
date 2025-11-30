@@ -180,7 +180,7 @@ const Reports = () => {
       return;
     }
 
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "landscape" });
     
     // Adicionar logo se disponível
     if (companySettings?.logo_url) {
