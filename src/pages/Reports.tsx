@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Reports = () => {
   const [dateFilter, setDateFilter] = useState("30");
@@ -123,13 +125,31 @@ const Reports = () => {
 
   const totalPages = Math.ceil((totalCount || 0) / itemsPerPage);
 
-  const handleExport = () => {
+  // Buscar configurações da empresa para o logo
+  const { data: companySettings } = useQuery({
+    queryKey: ["company-settings"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { data, error } = await supabase
+        .from("company_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleExportCSV = () => {
     if (!signatories || signatories.length === 0) {
       toast.error("Não há dados para exportar");
       return;
     }
 
-    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data de Assinatura"];
+    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data Assinatura"];
     const csvData = signatories.map(s => [
       s.name,
       s.cpf || "-",
@@ -151,7 +171,122 @@ const Reports = () => {
     link.href = URL.createObjectURL(blob);
     link.download = `relatorio-signatarios-${format(new Date(), "yyyy-MM-dd")}.csv`;
     link.click();
-    toast.success("Relatório exportado com sucesso");
+    toast.success("Relatório CSV exportado com sucesso");
+  };
+
+  const handleExportPDF = async () => {
+    if (!signatories || signatories.length === 0) {
+      toast.error("Não há dados para exportar");
+      return;
+    }
+
+    const doc = new jsPDF();
+    
+    // Adicionar logo se disponível
+    if (companySettings?.logo_url) {
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = companySettings.logo_url;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        doc.addImage(img, "PNG", 14, 10, 30, 30);
+      } catch (error) {
+        console.error("Erro ao carregar logo:", error);
+      }
+    }
+
+    // Header com informações da empresa
+    doc.setFontSize(18);
+    doc.setTextColor(39, 61, 96);
+    doc.text(companySettings?.company_name || "Éon Sign", 50, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Relatório de Signatários", 50, 28);
+    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`, 50, 34);
+
+    // Informações dos filtros aplicados
+    const filters = [];
+    if (dateFilter !== "all") {
+      const filterLabels: Record<string, string> = {
+        "7": "Últimos 7 dias",
+        "30": "Últimos 30 dias", 
+        "90": "Últimos 90 dias",
+        "365": "Último ano"
+      };
+      filters.push(`Período: ${filterLabels[dateFilter]}`);
+    }
+    if (statusFilter !== "all") {
+      filters.push(`Status: ${statusFilter === "signed" ? "Assinados" : "Pendentes"}`);
+    }
+    if (searchTerm) {
+      filters.push(`Busca: ${searchTerm}`);
+    }
+    if (filters.length > 0) {
+      doc.setFontSize(9);
+      doc.setTextColor(80);
+      doc.text(`Filtros: ${filters.join(" | ")}`, 14, 44);
+    }
+
+    // Tabela com dados
+    const tableData = signatories.map(s => [
+      s.name,
+      s.cpf || "-",
+      s.birth_date ? format(new Date(s.birth_date), "dd/MM/yyyy", { locale: ptBR }) : "-",
+      s.email,
+      s.phone,
+      s.documents?.name || "-",
+      s.status === "signed" ? "Assinado" : "Pendente",
+      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy", { locale: ptBR }) : "-"
+    ]);
+
+    autoTable(doc, {
+      head: [["Nome", "CPF/CNPJ", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura"]],
+      body: tableData,
+      startY: filters.length > 0 ? 50 : 45,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [39, 61, 96],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 20 },
+        7: { cellWidth: 22 },
+      },
+    });
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        doc.internal.pageSize.width / 2,
+        doc.internal.pageSize.height - 10,
+        { align: "center" }
+      );
+    }
+
+    doc.save(`relatorio-signatarios-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    toast.success("Relatório PDF exportado com sucesso");
   };
 
   return <Layout>
@@ -416,13 +551,22 @@ const Reports = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button
-                onClick={handleExport}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Exportar CSV
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleExportCSV}
+                  variant="outline"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  CSV
+                </Button>
+                <Button
+                  onClick={handleExportPDF}
+                  className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+              </div>
             </div>
 
             {/* Table */}
