@@ -564,7 +564,7 @@ const Reports = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
-                  placeholder="Buscar por nome, CPF/CNPJ ou email..."
+                  placeholder="Buscar nome, CPF/CNPJ ou email..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-10 rounded-full text-sm placeholder:text-xs"
