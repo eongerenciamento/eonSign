@@ -286,7 +286,63 @@ const SignDocument = () => {
           </Card>
         )}
 
-        {/* Documento Info */}
+        {/* PDF Viewer - Sempre visível */}
+        <Card className="p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Visualizar Documento</h3>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleZoomOut}
+                className="h-8 w-8"
+                title="Diminuir zoom"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
+                {Math.round(pdfScale * 100)}%
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleZoomIn}
+                className="h-8 w-8"
+                title="Aumentar zoom"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDownload}
+                className="h-8 w-8"
+                title="Baixar documento"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          {document.file_url ? (
+            <div className="overflow-auto border rounded-md" style={{ maxHeight: '500px' }}>
+              <iframe
+                src={document.file_url}
+                className="w-full border-0"
+                style={{ 
+                  height: `${500 * pdfScale}px`,
+                  transform: `scale(${pdfScale})`,
+                  transformOrigin: 'top left',
+                  width: `${100 / pdfScale}%`
+                }}
+                title="Document Preview"
+              />
+            </div>
+          ) : (
+            <p className="text-muted-foreground">Documento não disponível para visualização</p>
+          )}
+        </Card>
+
+        {/* Documento Info e Assinatura */}
         {isIdentified && (
           <>
             <Card className="p-6 mb-6">
@@ -301,62 +357,6 @@ const SignDocument = () => {
                   </div>
                 </div>
               </div>
-            </Card>
-
-            {/* PDF Viewer */}
-            <Card className="p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Visualizar Documento</h3>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleZoomOut}
-                    className="h-8 w-8"
-                    title="Diminuir zoom"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
-                    {Math.round(pdfScale * 100)}%
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleZoomIn}
-                    className="h-8 w-8"
-                    title="Aumentar zoom"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleDownload}
-                    className="h-8 w-8"
-                    title="Baixar documento"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {document.file_url ? (
-                <div className="overflow-auto border rounded-md" style={{ maxHeight: '500px' }}>
-                  <iframe
-                    src={document.file_url}
-                    className="w-full border-0"
-                    style={{ 
-                      height: `${500 * pdfScale}px`,
-                      transform: `scale(${pdfScale})`,
-                      transformOrigin: 'top left',
-                      width: `${100 / pdfScale}%`
-                    }}
-                    title="Document Preview"
-                  />
-                </div>
-              ) : (
-                <p className="text-muted-foreground">Documento não disponível para visualização</p>
-              )}
             </Card>
 
             {/* Signatários */}
