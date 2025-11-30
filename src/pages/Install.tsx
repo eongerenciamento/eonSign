@@ -37,14 +37,14 @@ const Install = () => {
           <div className="flex justify-center mb-4">
             <img alt="Eon Sign" className="h-20 w-20 rounded-2xl shadow-lg" src="/lovable-uploads/f32ae029-d722-417f-af76-c5b94067fded.png" />
           </div>
-          <CardTitle className="text-2xl">Instalar Eon Sign</CardTitle>
+          <CardTitle className="text-2xl text-gray-600">Instalar Eon Sign</CardTitle>
           <CardDescription>
             Instale nosso app para uma melhor experiência
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-            <Smartphone className="h-5 w-5 text-primary mt-0.5" />
+            <Smartphone className="h-5 w-5 mt-0.5 text-gray-700" />
             <div>
               <h3 className="font-semibold mb-1">Acesso Rápido</h3>
               <p className="text-sm text-muted-foreground">
@@ -54,7 +54,7 @@ const Install = () => {
           </div>
 
           <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-            <Download className="h-5 w-5 text-primary mt-0.5" />
+            <Download className="h-5 w-5 mt-0.5 text-gray-700" />
             <div>
               <h3 className="font-semibold mb-1">Funciona Offline</h3>
               <p className="text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ const Install = () => {
           {isInstallable ? <Button onClick={handleInstall} className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
               Instalar Agora
             </Button> : <div className="text-center text-sm text-muted-foreground space-y-2">
-              <p>Para instalar em dispositivos móveis:</p>
+              <p className="font-medium">Para instalar em dispositivos móveis:</p>
               <p className="font-medium">
                 iPhone: Toque em <span className="text-primary">Compartilhar</span> → 
                 <span className="text-primary"> Adicionar à Tela de Início</span>
