@@ -4,7 +4,88 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Download, TrendingUp, Users, FileCheck, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useState } from "react";
+import { toast } from "sonner";
+
 const Reports = () => {
+  const [dateFilter, setDateFilter] = useState("30");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Buscar signatários
+  const { data: signatories, isLoading } = useQuery({
+    queryKey: ["signatories-report", dateFilter, statusFilter],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      let query = supabase
+        .from("document_signers")
+        .select(`
+          *,
+          documents!inner(
+            user_id,
+            name
+          )
+        `)
+        .eq("documents.user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      // Filtro de data
+      if (dateFilter !== "all") {
+        const days = parseInt(dateFilter);
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        query = query.gte("created_at", date.toISOString());
+      }
+
+      // Filtro de status
+      if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleExport = () => {
+    if (!signatories || signatories.length === 0) {
+      toast.error("Não há dados para exportar");
+      return;
+    }
+
+    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data de Assinatura"];
+    const csvData = signatories.map(s => [
+      s.name,
+      s.cpf || "-",
+      s.birth_date ? format(new Date(s.birth_date), "dd/MM/yyyy", { locale: ptBR }) : "-",
+      s.email,
+      s.phone,
+      s.documents?.name || "-",
+      s.status === "signed" ? "Assinado" : s.status === "pending" ? "Pendente" : "Rejeitado",
+      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-"
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `relatorio-signatarios-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    toast.success("Relatório exportado com sucesso");
+  };
+
   return <Layout>
       <div className="p-8 space-y-8">
         {/* Header */}
@@ -13,6 +94,14 @@ const Reports = () => {
             <h1 className="text-sm font-bold text-gray-600">Relatórios</h1>
           </div>
         </div>
+
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="signatories">Signatários</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-8 mt-8">
 
         {/* Filters */}
         <div className="flex gap-4">
@@ -199,6 +288,104 @@ const Reports = () => {
               </div>)}
           </div>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="signatories" className="space-y-6 mt-8">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex gap-4">
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Últimos 7 dias</SelectItem>
+                    <SelectItem value="30">Últimos 30 dias</SelectItem>
+                    <SelectItem value="90">Últimos 90 dias</SelectItem>
+                    <SelectItem value="365">Último ano</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="signed">Assinados</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                onClick={handleExport}
+                className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
+            </div>
+
+            {/* Table */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Relatório de Signatários</h3>
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+              ) : !signatories || signatories.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>CPF/CNPJ</TableHead>
+                        <TableHead>Nascimento</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Telefone</TableHead>
+                        <TableHead>Documento</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Data Assinatura</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {signatories.map((signer) => (
+                        <TableRow key={signer.id}>
+                          <TableCell className="font-medium">{signer.name}</TableCell>
+                          <TableCell>{signer.cpf || "-"}</TableCell>
+                          <TableCell>
+                            {signer.birth_date
+                              ? format(new Date(signer.birth_date), "dd/MM/yyyy", { locale: ptBR })
+                              : "-"}
+                          </TableCell>
+                          <TableCell>{signer.email}</TableCell>
+                          <TableCell>{signer.phone}</TableCell>
+                          <TableCell>{signer.documents?.name || "-"}</TableCell>
+                          <TableCell>
+                            <Badge
+                              className={
+                                signer.status === "signed"
+                                  ? "bg-green-700 text-white hover:bg-green-700"
+                                  : "bg-yellow-700 text-white hover:bg-yellow-700"
+                              }
+                            >
+                              {signer.status === "signed" ? "Assinado" : "Pendente"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {signer.signed_at
+                              ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                              : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>;
 };
