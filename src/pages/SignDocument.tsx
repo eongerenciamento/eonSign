@@ -36,6 +36,7 @@ const SignDocument = () => {
   const [currentSigner, setCurrentSigner] = useState<Signer | null>(null);
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSigning, setIsSigning] = useState(false);
   const [isIdentified, setIsIdentified] = useState(false);
@@ -132,6 +133,26 @@ const SignDocument = () => {
       return;
     }
 
+    if (!birthDate) {
+      toast.error("Por favor, informe sua data de nascimento");
+      return;
+    }
+
+    // Validar idade mínima de 18 anos
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    if (age < 18) {
+      toast.error("Você deve ter pelo menos 18 anos para assinar documentos");
+      return;
+    }
+
     if (!currentSigner) {
       toast.error("Signatário não identificado");
       return;
@@ -144,6 +165,7 @@ const SignDocument = () => {
           documentId,
           signerId: currentSigner.id,
           cpf: cpf.replace(/\D/g, ""),
+          birthDate: birthDate,
         },
       });
 
@@ -392,9 +414,26 @@ const SignDocument = () => {
                       maxLength={18}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="birthDate">Data de Nascimento</Label>
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      max={(() => {
+                        const today = new Date();
+                        today.setFullYear(today.getFullYear() - 18);
+                        return today.toISOString().split('T')[0];
+                      })()}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você deve ter pelo menos 18 anos
+                    </p>
+                  </div>
                   <Button
                     onClick={handleSign}
-                    disabled={isSigning || !cpf}
+                    disabled={isSigning || !cpf || !birthDate}
                     className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
                   >
                     {isSigning ? (

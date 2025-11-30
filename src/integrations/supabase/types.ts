@@ -73,6 +73,7 @@ export type Database = {
       }
       document_signers: {
         Row: {
+          birth_date: string | null
           cpf: string | null
           created_at: string
           document_id: string
@@ -86,6 +87,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           document_id: string
@@ -99,6 +101,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           document_id?: string
