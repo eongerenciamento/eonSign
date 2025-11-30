@@ -20,27 +20,11 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
-
-    const { priceId, tierName, documentLimit } = await req.json();
-    if (!priceId || !tierName || !documentLimit) {
-      throw new Error("Missing required fields: priceId, tierName, documentLimit");
+    const { priceId, tierName, documentLimit, email, organizationName } = await req.json();
+    if (!priceId || !tierName || !documentLimit || !email || !organizationName) {
+      throw new Error("Missing required fields: priceId, tierName, documentLimit, email, organizationName");
     }
-    logStep("Request data", { priceId, tierName, documentLimit });
+    logStep("Request data", { priceId, tierName, documentLimit, email, organizationName });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -48,25 +32,19 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     // Check if customer already exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email, limit: 1 });
     let customerId;
     
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Found existing customer", { customerId });
-    } else {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { user_id: user.id }
-      });
-      customerId = customer.id;
-      logStep("Created new customer", { customerId });
     }
 
-    // Create checkout session for subscription (tier upgrade)
+    // Create checkout session for new account registration
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
+      customer_email: customerId ? undefined : email,
       line_items: [
         {
           price: priceId,
@@ -74,10 +52,11 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/configuracoes?tab=subscription&success=true`,
-      cancel_url: `${origin}/configuracoes?tab=subscription&canceled=true`,
+      success_url: `${origin}/auth?checkout=success`,
+      cancel_url: `${origin}/planos?checkout=canceled`,
       metadata: {
-        user_id: user.id,
+        email,
+        organization_name: organizationName,
         tier_name: tierName,
         document_limit: documentLimit.toString(),
       }

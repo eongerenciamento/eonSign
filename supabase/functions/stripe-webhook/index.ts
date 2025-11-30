@@ -46,34 +46,103 @@ serve(async (req) => {
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
+          const email = session.metadata?.email;
+          const organizationName = session.metadata?.organization_name;
           const userId = session.metadata?.user_id;
           const tierName = session.metadata?.tier_name;
           const documentLimit = parseInt(session.metadata?.document_limit || "5");
           
-          if (!userId || !tierName) throw new Error("Missing metadata in session");
-
-          logStep("Processing checkout.session.completed", { userId, tierName, documentLimit, mode: session.mode });
+          logStep("Processing checkout.session.completed", { email, organizationName, userId, tierName, documentLimit, mode: session.mode });
 
           // For subscription mode, create/update subscription record
           if (session.mode === "subscription" && session.subscription) {
             const subscriptionId = session.subscription as string;
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
             
-            await supabaseClient.from("user_subscriptions").upsert({
-              user_id: userId,
-              stripe_customer_id: session.customer as string,
-              stripe_subscription_id: subscriptionId,
-              stripe_price_id: subscription.items.data[0].price.id,
-              plan_name: tierName,
-              status: subscription.status as any,
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-              cancel_at_period_end: subscription.cancel_at_period_end,
-              document_limit: documentLimit,
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' });
+            // If this is a new account (has email in metadata), create the user
+            if (email && organizationName && !userId) {
+              logStep("Creating new user account", { email, organizationName });
+              
+              // Generate temporary password (first part of email before @)
+              const tempPassword = email.split('@')[0] + Math.random().toString(36).slice(-4);
+              
+              // Create user via Admin API
+              const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
+                email,
+                password: tempPassword,
+                email_confirm: true,
+              });
 
-            logStep("Subscription created successfully");
+              if (createError) {
+                logStep("Error creating user", { error: createError.message });
+                throw createError;
+              }
+
+              logStep("User created", { userId: newUser.user.id });
+
+              // Create company_settings
+              await supabaseClient.from("company_settings").insert({
+                user_id: newUser.user.id,
+                company_name: organizationName,
+                cnpj: "00.000.000/0000-00", // Placeholder
+                admin_name: organizationName,
+                admin_cpf: "000.000.000-00", // Placeholder
+                admin_phone: "(00)00000-0000", // Placeholder
+                admin_email: email,
+              });
+
+              logStep("Company settings created");
+
+              // Create subscription
+              await supabaseClient.from("user_subscriptions").insert({
+                user_id: newUser.user.id,
+                stripe_customer_id: session.customer as string,
+                stripe_subscription_id: subscriptionId,
+                stripe_price_id: subscription.items.data[0].price.id,
+                plan_name: tierName,
+                status: subscription.status as any,
+                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                cancel_at_period_end: subscription.cancel_at_period_end,
+                document_limit: documentLimit,
+              });
+
+              logStep("Subscription created");
+
+              // Send welcome email with temporary password
+              await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-welcome-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+                },
+                body: JSON.stringify({
+                  email,
+                  name: organizationName,
+                  userId: newUser.user.id,
+                  tempPassword,
+                }),
+              });
+
+              logStep("Welcome email sent");
+            } else if (userId) {
+              // Existing user upgrading - update subscription
+              await supabaseClient.from("user_subscriptions").upsert({
+                user_id: userId,
+                stripe_customer_id: session.customer as string,
+                stripe_subscription_id: subscriptionId,
+                stripe_price_id: subscription.items.data[0].price.id,
+                plan_name: tierName,
+                status: subscription.status as any,
+                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                cancel_at_period_end: subscription.cancel_at_period_end,
+                document_limit: documentLimit,
+                updated_at: new Date().toISOString()
+              }, { onConflict: 'user_id' });
+
+              logStep("Subscription updated for existing user");
+            }
           }
           break;
         }
