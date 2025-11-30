@@ -1,0 +1,352 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const PLANS = [
+  { 
+    name: "Grátis", 
+    limit: 5, 
+    price: 0, 
+    priceId: "free", 
+    description: "Ideal para testes",
+    features: [
+      { name: "Até 5 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: false },
+      { name: "Suporte prioritário", included: false },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+  { 
+    name: "Básico", 
+    limit: 20, 
+    price: 59, 
+    priceId: "price_1SZBDZHRTD5WvpxjeKMhFcSK", 
+    description: "Para pequenas empresas",
+    recommended: false,
+    features: [
+      { name: "Até 20 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Suporte prioritário", included: false },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+  { 
+    name: "Profissional", 
+    limit: 50, 
+    price: 99, 
+    priceId: "price_1SZBEAHRTD5Wvpxj0pcztkPt", 
+    description: "Para empresas em crescimento",
+    recommended: true,
+    features: [
+      { name: "Até 50 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Suporte prioritário", included: true },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+  { 
+    name: "Empresarial", 
+    limit: 100, 
+    price: 159, 
+    priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o", 
+    description: "Para empresas estabelecidas",
+    features: [
+      { name: "Até 100 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Suporte prioritário", included: true },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+  { 
+    name: "Premium", 
+    limit: 500, 
+    price: 499, 
+    priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54", 
+    description: "Para grandes volumes",
+    features: [
+      { name: "Até 500 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Suporte prioritário", included: true },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+  { 
+    name: "Enterprise", 
+    limit: 1000, 
+    price: 899, 
+    priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z", 
+    description: "Documentos ilimitados",
+    features: [
+      { name: "Até 1000 documentos/mês", included: true },
+      { name: "Assinatura digital ICP-Brasil", included: true },
+      { name: "Notificações por email", included: true },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Suporte prioritário", included: true },
+      { name: "Armazenamento em pastas", included: true },
+    ]
+  },
+];
+
+const FAQS = [
+  {
+    question: "Como funciona a contagem de documentos?",
+    answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
+  },
+  {
+    question: "Posso mudar de plano depois?",
+    answer: "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento através das configurações. As mudanças são aplicadas imediatamente."
+  },
+  {
+    question: "As assinaturas digitais têm validade jurídica?",
+    answer: "Sim, utilizamos certificação ICP-Brasil, que garante validade jurídica para todos os documentos assinados através da plataforma."
+  },
+  {
+    question: "Posso cancelar minha assinatura?",
+    answer: "Sim, você pode cancelar sua assinatura a qualquer momento. O plano permanece ativo até o final do período pago."
+  },
+  {
+    question: "Como funcionam as notificações por WhatsApp?",
+    answer: "Enviamos notificações automáticas via WhatsApp para os signatários quando um documento é enviado e quando é completamente assinado. Disponível nos planos pagos."
+  },
+  {
+    question: "Existe período de teste gratuito?",
+    answer: "Sim! O plano Grátis permite testar a plataforma com até 5 documentos por mês, sem necessidade de cartão de crédito."
+  },
+  {
+    question: "Posso ter múltiplos usuários na minha conta?",
+    answer: "Atualmente cada conta é individual. Para equipes maiores, recomendamos o plano Enterprise que oferece maior volume de documentos."
+  },
+  {
+    question: "Os documentos ficam armazenados com segurança?",
+    answer: "Sim, todos os documentos são armazenados com criptografia em servidores seguros, com acesso restrito apenas ao proprietário da conta."
+  }
+];
+
+export default function Pricing() {
+  const navigate = useNavigate();
+  const [showComparison, setShowComparison] = useState(false);
+
+  const handleSelectPlan = (plan: typeof PLANS[0]) => {
+    // Redirecionar para página de criação de conta com plano selecionado
+    navigate(`/auth?plan=${plan.priceId}&planName=${encodeURIComponent(plan.name)}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#273d60] via-[#1a2d4d] to-[#001a4d]">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/src/assets/logo.png" alt="Eon Sign" className="h-12" />
+          </div>
+          <Button 
+            variant="ghost" 
+            className="text-white hover:bg-white/10"
+            onClick={() => navigate('/auth')}
+          >
+            Já tenho conta
+          </Button>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          Planos e Preços
+        </h1>
+        <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+          Escolha o plano ideal para o volume de documentos da sua empresa
+        </p>
+      </div>
+
+      {/* Pricing Cards */}
+      <div className="container mx-auto px-4 pb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {PLANS.map((plan) => (
+            <Card 
+              key={plan.name} 
+              className={`relative ${plan.recommended ? 'border-2 border-primary shadow-2xl scale-105' : ''}`}
+            >
+              {plan.recommended && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-white px-4 py-1">Mais Popular</Badge>
+                </div>
+              )}
+              <CardHeader className="space-y-4">
+                <div>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">
+                      {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
+                    </span>
+                    {plan.price > 0 && <span className="text-muted-foreground">/mês</span>}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos/mês`}
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {plan.features.slice(0, 3).map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-sm">
+                      {feature.included ? (
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      )}
+                      <span className={feature.included ? '' : 'text-muted-foreground'}>
+                        {feature.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => handleSelectPlan(plan)}
+                  className={`w-full ${
+                    plan.recommended 
+                      ? 'bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white' 
+                      : ''
+                  }`}
+                  variant={plan.recommended ? 'default' : 'outline'}
+                >
+                  {plan.price === 0 ? 'Começar Grátis' : 'Escolher Plano'}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Comparison Table Toggle */}
+      <div className="container mx-auto px-4 pb-8">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            variant="ghost"
+            className="w-full text-white hover:bg-white/10"
+            onClick={() => setShowComparison(!showComparison)}
+          >
+            {showComparison ? (
+              <>
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Ocultar Tabela Comparativa
+              </>
+            ) : (
+              <>
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Ver Tabela Comparativa Completa
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Comparison Table */}
+      {showComparison && (
+        <div className="container mx-auto px-4 pb-16">
+          <Card className="max-w-7xl mx-auto overflow-x-auto">
+            <CardContent className="p-6">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-4 px-4">Recursos</th>
+                    {PLANS.map((plan) => (
+                      <th key={plan.name} className="text-center py-4 px-4">
+                        <div className="font-semibold">{plan.name}</div>
+                        <div className="text-sm text-muted-foreground font-normal">
+                          {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}/mês`}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {PLANS[0].features.map((_, featureIdx) => (
+                    <tr key={featureIdx} className="border-b">
+                      <td className="py-4 px-4 text-sm">
+                        {PLANS[0].features[featureIdx].name}
+                      </td>
+                      {PLANS.map((plan) => (
+                        <td key={plan.name} className="text-center py-4 px-4">
+                          {plan.features[featureIdx].included ? (
+                            <Check className="h-5 w-5 text-green-600 mx-auto" />
+                          ) : (
+                            <X className="h-5 w-5 text-gray-400 mx-auto" />
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* FAQ Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-white text-center mb-4">
+            Perguntas Frequentes
+          </h2>
+          <p className="text-white/80 text-center mb-12">
+            Tire suas dúvidas sobre nossos planos e funcionalidades
+          </p>
+          <Card>
+            <CardContent className="p-6">
+              <Accordion type="single" collapsible className="w-full">
+                {FAQS.map((faq, idx) => (
+                  <AccordionItem key={idx} value={`item-${idx}`}>
+                    <AccordionTrigger className="text-left">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Pronto para começar?
+          </h2>
+          <p className="text-white/80 mb-8">
+            Comece gratuitamente e faça upgrade quando precisar de mais documentos
+          </p>
+          <Button
+            size="lg"
+            className="bg-white text-[#273d60] hover:bg-white/90"
+            onClick={() => handleSelectPlan(PLANS[0])}
+          >
+            Começar Agora
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
