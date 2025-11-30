@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,6 +23,8 @@ const Reports = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortField, setSortField] = useState<"name" | "signed_at" | "status">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Debounce para busca
   useEffect(() => {
@@ -78,7 +80,7 @@ const Reports = () => {
 
   // Buscar signatários com paginação
   const { data: signatories, isLoading } = useQuery({
-    queryKey: ["signatories-report", dateFilter, statusFilter, currentPage, itemsPerPage, searchTerm],
+    queryKey: ["signatories-report", dateFilter, statusFilter, currentPage, itemsPerPage, searchTerm, sortField, sortDirection],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
@@ -96,7 +98,7 @@ const Reports = () => {
           )
         `)
         .eq("documents.user_id", user.id)
-        .order("created_at", { ascending: false })
+        .order(sortField, { ascending: sortDirection === "asc" })
         .range(from, to);
 
       // Filtro de data
@@ -124,6 +126,27 @@ const Reports = () => {
   });
 
   const totalPages = Math.ceil((totalCount || 0) / itemsPerPage);
+
+  const handleSort = (field: "name" | "signed_at" | "status") => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+    setCurrentPage(1);
+  };
+
+  const SortIcon = ({ field }: { field: "name" | "signed_at" | "status" }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 ml-1 opacity-50" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp className="w-4 h-4 ml-1" />
+    ) : (
+      <ArrowDown className="w-4 h-4 ml-1" />
+    );
+  };
 
   // Buscar configurações da empresa para o logo
   const { data: companySettings } = useQuery({
@@ -620,13 +643,37 @@ const Reports = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome / CPF</TableHead>
+                        <TableHead>
+                          <button
+                            onClick={() => handleSort("name")}
+                            className="flex items-center hover:text-foreground transition-colors"
+                          >
+                            Nome / CPF
+                            <SortIcon field="name" />
+                          </button>
+                        </TableHead>
                         <TableHead>Nascimento</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Telefone</TableHead>
                         <TableHead>Documento</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Data Assinatura</TableHead>
+                        <TableHead>
+                          <button
+                            onClick={() => handleSort("status")}
+                            className="flex items-center hover:text-foreground transition-colors"
+                          >
+                            Status
+                            <SortIcon field="status" />
+                          </button>
+                        </TableHead>
+                        <TableHead>
+                          <button
+                            onClick={() => handleSort("signed_at")}
+                            className="flex items-center hover:text-foreground transition-colors"
+                          >
+                            Data Assinatura
+                            <SortIcon field="signed_at" />
+                          </button>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
