@@ -620,8 +620,7 @@ const Reports = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>CPF/CNPJ</TableHead>
+                        <TableHead>Nome / CPF</TableHead>
                         <TableHead>Nascimento</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Telefone</TableHead>
@@ -633,8 +632,12 @@ const Reports = () => {
                     <TableBody>
                       {signatories.map((signer) => (
                         <TableRow key={signer.id}>
-                          <TableCell className="font-medium">{signer.name}</TableCell>
-                          <TableCell>{signer.cpf || "-"}</TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex flex-col">
+                              <span>{signer.name}</span>
+                              <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
+                            </div>
+                          </TableCell>
                           <TableCell>
                             {signer.birth_date
                               ? format(new Date(signer.birth_date), "dd/MM/yyyy", { locale: ptBR })
