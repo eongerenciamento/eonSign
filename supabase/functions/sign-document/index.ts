@@ -100,7 +100,7 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, signerId, cpf, birthDate } = await req.json();
+    const { documentId, signerId, cpf, birthDate, latitude, longitude } = await req.json();
 
     // Validar entrada
     if (!documentId || !signerId || !cpf || !birthDate) {
@@ -169,6 +169,37 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Obter localização via geocoding reverso se coordenadas foram fornecidas
+    let city = null;
+    let state = null;
+    let country = null;
+
+    if (latitude && longitude) {
+      try {
+        console.log(`Reverse geocoding coordinates: ${latitude}, ${longitude}`);
+        const geoResponse = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=pt-BR`,
+          {
+            headers: {
+              'User-Agent': 'EonSign/1.0'
+            }
+          }
+        );
+        
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          city = geoData.address?.city || geoData.address?.town || geoData.address?.village || null;
+          state = geoData.address?.state || null;
+          country = geoData.address?.country || null;
+          console.log("Location resolved:", { city, state, country });
+        } else {
+          console.warn("Geocoding failed, continuing without location");
+        }
+      } catch (geoError) {
+        console.error("Error in reverse geocoding:", geoError);
+      }
+    }
+
     // Atualizar signatário
     const { error: signerError } = await supabase
       .from("document_signers")
@@ -177,6 +208,11 @@ serve(async (req) => {
         birth_date: birthDate,
         status: "signed",
         signed_at: new Date().toISOString(),
+        signature_latitude: latitude,
+        signature_longitude: longitude,
+        signature_city: city,
+        signature_state: state,
+        signature_country: country,
       })
       .eq("id", signerId);
 

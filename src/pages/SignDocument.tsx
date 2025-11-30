@@ -43,12 +43,38 @@ const SignDocument = () => {
   const [isIdentified, setIsIdentified] = useState(false);
   const [signatureComplete, setSignatureComplete] = useState(false);
   const [pdfScale, setPdfScale] = useState(1);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState(false);
 
   useEffect(() => {
     if (documentId) {
       fetchDocumentData();
     }
   }, [documentId]);
+
+  // Solicitar geolocalização quando o usuário é identificado
+  useEffect(() => {
+    if (isIdentified && !location && !locationError) {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+            console.log("Localização capturada:", position.coords);
+          },
+          (error) => {
+            console.warn("Erro ao obter localização:", error);
+            setLocationError(true);
+            toast.info("Permissão de localização negada. A assinatura ainda é válida.");
+          }
+        );
+      } else {
+        setLocationError(true);
+      }
+    }
+  }, [isIdentified, location, locationError]);
 
   const fetchDocumentData = async () => {
     try {
@@ -256,6 +282,8 @@ const SignDocument = () => {
           signerId: currentSigner.id,
           cpf: cpf.replace(/\D/g, ""),
           birthDate: birthDate,
+          latitude: location?.latitude || null,
+          longitude: location?.longitude || null,
         },
       });
 

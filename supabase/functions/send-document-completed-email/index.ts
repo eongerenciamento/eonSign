@@ -104,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </p>
               </div>
               <p style="color: #333; font-size: 14px;">
-                O documento assinado está anexado a este e-mail. Você também pode visualizá-lo no sistema a qualquer momento.
+                O documento assinado está anexado a este e-mail com todas as assinaturas e localizações registradas. Você também pode visualizá-lo no sistema a qualquer momento.
               </p>
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${APP_URL}/drive" 
