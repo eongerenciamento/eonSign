@@ -238,15 +238,15 @@ export default function Auth() {
                 {isLoading ? "Carregando..." : "Entrar"}
               </Button>
 
-              <button type="button" onClick={handleForgotPassword} disabled={isLoading} className="w-full transition-colors text-sm text-slate-300">
+              <button type="button" onClick={handleForgotPassword} disabled={isLoading} className="w-full transition-colors text-sm text-gray-400">
                 Esqueci a senha
               </button>
 
-              <button type="button" onClick={() => navigate('/planos')} disabled={isLoading} className="w-full transition-colors text-sm text-slate-300">
+              <button type="button" onClick={() => navigate('/planos')} disabled={isLoading} className="w-full transition-colors text-sm text-gray-400">
                 Criar nova conta
               </button>
 
-              <Link to="/install" className="block w-full text-center transition-colors text-sm text-slate-300">
+              <Link to="/install" className="block w-full text-center transition-colors text-sm text-gray-400">
                 Instale o App
               </Link>
             </div>
