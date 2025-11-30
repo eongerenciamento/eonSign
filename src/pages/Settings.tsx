@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
@@ -16,6 +16,7 @@ import { WhatsAppHistoryTab } from "@/components/settings/WhatsAppHistoryTab";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("");
@@ -30,6 +31,10 @@ const Settings = () => {
   const [phone, setPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Get tab and subtab from URL params
+  const activeTab = searchParams.get('tab') || 'company';
+  const activeSubTab = searchParams.get('subtab') || 'email';
 
   useEffect(() => {
     const loadData = async () => {
@@ -205,7 +210,7 @@ const Settings = () => {
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
-        <Tabs defaultValue="company" className="w-full">
+        <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
@@ -498,7 +503,7 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6 mt-6">
-            <Tabs defaultValue="email" className="w-full">
+            <Tabs value={activeSubTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="email">Email</TabsTrigger>
                 <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
