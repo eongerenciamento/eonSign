@@ -36,28 +36,32 @@ const NewDocument = () => {
   ]);
   const [companySigner, setCompanySigner] = useState<CompanySigner | null>(null);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
-  const [limitInfo, setLimitInfo] = useState<{ current: number; limit: number; planName: string } | null>(null);
+  const [hasSubscription, setHasSubscription] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkDocumentLimit = async () => {
+    const checkSubscription = async () => {
       try {
         const { data, error } = await supabase.functions.invoke("check-document-limit");
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error checking subscription:", error);
+          return;
+        }
+
+        setHasSubscription(data.hasSubscription);
         
         if (!data.canCreate) {
-          setLimitInfo({ current: data.current, limit: data.limit, planName: data.planName });
           setShowLimitDialog(true);
         }
       } catch (error) {
-        console.error("Error checking document limit:", error);
+        console.error("Error checking subscription:", error);
       }
     };
 
-    checkDocumentLimit();
+    checkSubscription();
   }, []);
 
   useEffect(() => {
@@ -520,7 +524,7 @@ const NewDocument = () => {
             <Button 
               className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" 
               onClick={handleSubmit}
-              disabled={showLimitDialog}
+              disabled={!hasSubscription}
             >
               Enviar para Assinatura
             </Button>
@@ -528,17 +532,19 @@ const NewDocument = () => {
         </div>
       </div>
 
-      {/* Limit Reached Dialog */}
+      {/* Subscription Required Dialog */}
       <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Limite de Documentos Atingido</AlertDialogTitle>
+            <AlertDialogTitle>Assinatura Necessária</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>
-                Você atingiu o limite de <strong>{limitInfo?.limit} documentos</strong> do plano{" "}
-                <strong>{limitInfo?.planName}</strong> este mês.
+                Para criar documentos no Eon Sign, você precisa ter uma assinatura ativa.
               </p>
-              <p>Faça upgrade do seu plano para continuar criando documentos.</p>
+              <p>
+                A cobrança é automática por volume mensal de documentos utilizados.
+              </p>
+              <p>Assine agora para começar a usar o sistema sem limites.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -546,7 +552,7 @@ const NewDocument = () => {
               Voltar
             </Button>
             <Button onClick={() => navigate("/configuracoes?tab=subscription")}>
-              Ver Planos
+              Assinar Agora
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
