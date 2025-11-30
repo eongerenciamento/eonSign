@@ -16,7 +16,7 @@ const PLANS = [
     priceId: "free", 
     description: "Ideal para testes",
     features: [
-      { name: "Até 5 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "5" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -34,7 +34,7 @@ const PLANS = [
     description: "Para pequenas empresas",
     recommended: false,
     features: [
-      { name: "Até 20 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "20" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -52,7 +52,7 @@ const PLANS = [
     description: "Para empresas em crescimento",
     recommended: true,
     features: [
-      { name: "Até 50 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "50" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -69,7 +69,7 @@ const PLANS = [
     priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o", 
     description: "Para empresas estabelecidas",
     features: [
-      { name: "Até 100 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "100" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -86,7 +86,7 @@ const PLANS = [
     priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54", 
     description: "Para grandes volumes",
     features: [
-      { name: "Até 500 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "500" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -103,7 +103,7 @@ const PLANS = [
     priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z", 
     description: "Documentos ilimitados",
     features: [
-      { name: "Até 1000 documentos/mês", included: true },
+      { name: "Quantidade de documentos", value: "1000" },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
@@ -166,7 +166,7 @@ export default function Pricing() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/lovable-uploads/064fa19f-41fd-43f6-a45f-95f030679937.png" alt="Eon Sign" className="h-12" />
+            <img src="/logo-eon-sign.png" alt="Eon Sign" className="h-12" />
           </div>
           <Button 
             variant="ghost" 
@@ -303,7 +303,9 @@ export default function Pricing() {
                         </td>
                         {PLANS.map((plan) => (
                           <td key={plan.name} className="text-center py-4 px-4">
-                            {plan.features[featureIdx].included ? (
+                            {featureIdx === 0 ? (
+                              <span className="text-sm font-medium">{plan.features[featureIdx].value || plan.limit}</span>
+                            ) : plan.features[featureIdx].included ? (
                               <Check className="h-5 w-5 text-green-600 mx-auto" />
                             ) : (
                               <X className="h-5 w-5 text-gray-400 mx-auto" />
