@@ -196,7 +196,7 @@ export default function Pricing() {
               {PLANS.map((plan) => (
                 <Card 
                   key={plan.name} 
-                  className="relative bg-[#273d60] text-white border-none w-80 flex-shrink-0 shadow-xl"
+                  className="relative bg-[#273d60] text-white border-none w-96 flex-shrink-0 shadow-xl"
                 >
                   <CardHeader className="space-y-4">
                     <div className="h-7">
