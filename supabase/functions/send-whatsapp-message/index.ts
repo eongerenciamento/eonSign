@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,11 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { signerName, signerPhone, documentName, documentId, organizationName, isCompleted }: WhatsAppMessageRequest = await req.json();
+
+    // Initialize Supabase client for logging
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
     const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
@@ -90,10 +96,51 @@ _Eon Sign - Sistema de Assinatura Digital_`;
 
     if (result.error_code) {
       console.error("Twilio error:", result.error_message);
+      
+      // Log failed message to database
+      const { data: documentData } = await supabase
+        .from('documents')
+        .select('user_id')
+        .eq('id', documentId)
+        .single();
+
+      if (documentData) {
+        await supabase.from('whatsapp_history').insert({
+          user_id: documentData.user_id,
+          document_id: documentId,
+          recipient_phone: cleanPhone,
+          recipient_name: signerName,
+          message_type: isCompleted ? 'document_completed' : 'signature_invitation',
+          message_sid: result.sid || null,
+          status: 'failed',
+          error_code: result.error_code,
+          error_message: result.error_message,
+        });
+      }
+
       throw new Error(`Twilio error: ${result.error_message}`);
     }
 
     console.log("WhatsApp message sent successfully:", result.sid);
+
+    // Log successful message to database
+    const { data: documentData } = await supabase
+      .from('documents')
+      .select('user_id')
+      .eq('id', documentId)
+      .single();
+
+    if (documentData) {
+      await supabase.from('whatsapp_history').insert({
+        user_id: documentData.user_id,
+        document_id: documentId,
+        recipient_phone: cleanPhone,
+        recipient_name: signerName,
+        message_type: isCompleted ? 'document_completed' : 'signature_invitation',
+        message_sid: result.sid,
+        status: 'sent',
+      });
+    }
 
     return new Response(JSON.stringify({ success: true, sid: result.sid }), {
       status: 200,
@@ -101,6 +148,40 @@ _Eon Sign - Sistema de Assinatura Digital_`;
     });
   } catch (error: any) {
     console.error("Error sending WhatsApp message:", error);
+    
+    // Try to log the error to database if we have the necessary info
+    try {
+      const { signerName, signerPhone, documentId } = await req.json();
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { data: documentData } = await supabase
+        .from('documents')
+        .select('user_id')
+        .eq('id', documentId)
+        .single();
+
+      if (documentData) {
+        let cleanPhone = signerPhone.replace(/\D/g, "");
+        if (!cleanPhone.startsWith("55")) {
+          cleanPhone = "55" + cleanPhone;
+        }
+
+        await supabase.from('whatsapp_history').insert({
+          user_id: documentData.user_id,
+          document_id: documentId,
+          recipient_phone: cleanPhone,
+          recipient_name: signerName,
+          message_type: 'signature_invitation',
+          status: 'failed',
+          error_message: error.message,
+        });
+      }
+    } catch (logError) {
+      console.error("Error logging to database:", logError);
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }

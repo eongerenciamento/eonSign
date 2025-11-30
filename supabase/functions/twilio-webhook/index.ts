@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     // Twilio envia dados como form-urlencoded
     const formData = await req.formData();
     
@@ -30,6 +36,37 @@ const handler = async (req: Request): Promise<Response> => {
       errorMessage,
       timestamp: new Date().toISOString()
     });
+
+    // Update message status in database
+    if (messageSid) {
+      const updateData: any = {
+        status: messageStatus,
+      };
+
+      if (messageStatus === "delivered") {
+        updateData.delivered_at = new Date().toISOString();
+      }
+
+      if (messageStatus === "read") {
+        updateData.read_at = new Date().toISOString();
+      }
+
+      if (messageStatus === "failed" || messageStatus === "undelivered") {
+        updateData.error_code = errorCode;
+        updateData.error_message = errorMessage;
+      }
+
+      const { error: updateError } = await supabase
+        .from('whatsapp_history')
+        .update(updateData)
+        .eq('message_sid', messageSid);
+
+      if (updateError) {
+        console.error("Error updating WhatsApp history:", updateError);
+      } else {
+        console.log(`WhatsApp history updated for message ${messageSid} with status ${messageStatus}`);
+      }
+    }
 
     // Tratamento especial para falhas
     if (messageStatus === "failed" || messageStatus === "undelivered") {

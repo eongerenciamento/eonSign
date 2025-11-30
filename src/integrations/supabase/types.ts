@@ -242,6 +242,57 @@ export type Database = {
           },
         ]
       }
+      whatsapp_history: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          document_id: string | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          message_sid: string | null
+          message_type: string
+          read_at: string | null
+          recipient_name: string
+          recipient_phone: string
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          document_id?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          message_sid?: string | null
+          message_type: string
+          read_at?: string | null
+          recipient_name: string
+          recipient_phone: string
+          sent_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          document_id?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          message_sid?: string | null
+          message_type?: string
+          read_at?: string | null
+          recipient_name?: string
+          recipient_phone?: string
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -12,6 +12,7 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload } from "lucide-react";
 import { EmailHistoryTab } from "@/components/settings/EmailHistoryTab";
+import { WhatsAppHistoryTab } from "@/components/settings/WhatsAppHistoryTab";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -209,7 +210,7 @@ const Settings = () => {
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
-            <TabsTrigger value="emails">Histórico de E-mails</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
@@ -496,8 +497,21 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="emails" className="space-y-6 mt-6">
-            <EmailHistoryTab />
+          <TabsContent value="history" className="space-y-6 mt-6">
+            <Tabs defaultValue="email" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="email" className="mt-6">
+                <EmailHistoryTab />
+              </TabsContent>
+
+              <TabsContent value="whatsapp" className="mt-6">
+                <WhatsAppHistoryTab />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
