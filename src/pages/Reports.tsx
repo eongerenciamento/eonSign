@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,6 +27,7 @@ const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<"name" | "signed_at" | "status">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showFilters, setShowFilters] = useState(true);
 
   // Debounce para busca
   useEffect(() => {
@@ -558,19 +559,51 @@ const Reports = () => {
           </TabsContent>
 
           <TabsContent value="signatories" className="space-y-6 mt-8">
-            {/* Search */}
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Buscar por nome, CPF/CNPJ ou email..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search and Action Buttons */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Buscar por nome, CPF/CNPJ ou email..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowFilters(!showFilters)}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={handleExportCSV}
+                  disabled={!signatories || signatories.length === 0}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500"
+                >
+                  <FileDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={handleExportPDF}
+                  disabled={!signatories || signatories.length === 0}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500"
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Filters - Collapsible */}
+            {showFilters && (
               <div className="flex flex-wrap gap-4">
                 <Select value={dateFilter} onValueChange={(value) => {
                   setDateFilter(value);
@@ -615,23 +648,7 @@ const Reports = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleExportCSV}
-                  variant="outline"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  CSV
-                </Button>
-                <Button
-                  onClick={handleExportPDF}
-                  className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  PDF
-                </Button>
-              </div>
-            </div>
+            )}
 
             {/* Table / Cards */}
             <Card className="p-6">
