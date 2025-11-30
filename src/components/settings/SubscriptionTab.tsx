@@ -9,11 +9,11 @@ import { Check, Crown, Loader2 } from "lucide-react";
 
 const SUBSCRIPTION_TIERS = [
   { name: "Grátis", limit: 5, price: 0, priceId: "free", description: "Ideal para testes" },
-  { name: "Básico", limit: 50, price: 59, priceId: "price_basic_tier", description: "Para pequenas empresas" },
-  { name: "Profissional", limit: 100, price: 99, priceId: "price_professional_tier", description: "Para empresas em crescimento" },
-  { name: "Empresarial", limit: 200, price: 159, priceId: "price_business_tier", description: "Para empresas estabelecidas" },
-  { name: "Premium", limit: 500, price: 499, priceId: "price_premium_tier", description: "Para grandes volumes" },
-  { name: "Enterprise", limit: 999999, price: 899, priceId: "price_enterprise_tier", description: "Sem limites" },
+  { name: "Básico", limit: 20, price: 59, priceId: "price_1SZBDZHRTD5WvpxjeKMhFcSK", description: "Para pequenas empresas" },
+  { name: "Profissional", limit: 50, price: 99, priceId: "price_1SZBEAHRTD5Wvpxj0pcztkPt", description: "Para empresas em crescimento" },
+  { name: "Empresarial", limit: 100, price: 159, priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o", description: "Para empresas estabelecidas" },
+  { name: "Premium", limit: 500, price: 499, priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54", description: "Para grandes volumes" },
+  { name: "Enterprise", limit: 1000, price: 899, priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z", description: "Documentos ilimitados" },
 ];
 
 export function SubscriptionTab() {
@@ -187,14 +187,14 @@ export function SubscriptionTab() {
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-3xl font-bold">R$ {tier.price}</p>
-                    <p className="text-sm text-muted-foreground">pagamento único</p>
+                    <p className="text-sm text-muted-foreground">por mês</p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600" />
-                      <span>
-                        {tier.limit === 999999 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
-                      </span>
+                    <span>
+                      {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
+                    </span>
                     </div>
                   </div>
                   <Button
@@ -263,13 +263,13 @@ export function SubscriptionTab() {
                   <p className="text-3xl font-bold">
                     {tier.price === 0 ? "Grátis" : `R$ ${tier.price}`}
                   </p>
-                  {tier.price > 0 && <p className="text-sm text-muted-foreground">pagamento único</p>}
+                  {tier.price > 0 && <p className="text-sm text-muted-foreground">por mês</p>}
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
                     <span>
-                      {tier.limit === 999999 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
+                      {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
