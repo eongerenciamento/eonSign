@@ -2,15 +2,16 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 const Reports = () => {
@@ -18,17 +19,35 @@ const Reports = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Debounce para busca
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Contar total de signatários
   const { data: totalCount } = useQuery({
-    queryKey: ["signatories-count", dateFilter, statusFilter],
+    queryKey: ["signatories-count", dateFilter, statusFilter, searchTerm],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
 
       let query = supabase
         .from("document_signers")
-        .select("*", { count: "exact", head: true })
+        .select(`
+          *,
+          documents!inner(
+            user_id,
+            name
+          )
+        `, { count: "exact", head: true })
         .eq("documents.user_id", user.id);
 
       // Filtro de data
@@ -44,6 +63,11 @@ const Reports = () => {
         query = query.eq("status", statusFilter);
       }
 
+      // Filtro de busca
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,cpf.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
@@ -52,7 +76,7 @@ const Reports = () => {
 
   // Buscar signatários com paginação
   const { data: signatories, isLoading } = useQuery({
-    queryKey: ["signatories-report", dateFilter, statusFilter, currentPage, itemsPerPage],
+    queryKey: ["signatories-report", dateFilter, statusFilter, currentPage, itemsPerPage, searchTerm],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
@@ -84,6 +108,11 @@ const Reports = () => {
       // Filtro de status
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
+      }
+
+      // Filtro de busca
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,cpf.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await query;
@@ -330,6 +359,17 @@ const Reports = () => {
           </TabsContent>
 
           <TabsContent value="signatories" className="space-y-6 mt-8">
+            {/* Search */}
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Buscar por nome, CPF/CNPJ ou email..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-wrap gap-4">
