@@ -19,7 +19,8 @@ const PLANS = [
       { name: "Até 5 documentos/mês", included: true },
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: false },
+      { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: false },
       { name: "Suporte prioritário", included: false },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -37,6 +38,7 @@ const PLANS = [
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: true },
       { name: "Suporte prioritário", included: false },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -54,6 +56,7 @@ const PLANS = [
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -70,6 +73,7 @@ const PLANS = [
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -86,6 +90,7 @@ const PLANS = [
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -102,6 +107,7 @@ const PLANS = [
       { name: "Assinatura digital ICP-Brasil", included: true },
       { name: "Notificações por email", included: true },
       { name: "Notificações por WhatsApp", included: true },
+      { name: "Geolocalização da assinatura", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -160,7 +166,7 @@ export default function Pricing() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/src/assets/logo.png" alt="Eon Sign" className="h-12" />
+            <img src="/lovable-uploads/064fa19f-41fd-43f6-a45f-95f030679937.png" alt="Eon Sign" className="h-12" />
           </div>
           <Button 
             variant="ghost" 
@@ -272,41 +278,43 @@ export default function Pricing() {
       {/* Comparison Table */}
       {showComparison && (
         <div className="container mx-auto px-4 pb-16">
-          <Card className="max-w-7xl mx-auto overflow-x-auto">
-            <CardContent className="p-6">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-4 px-4">Recursos</th>
-                    {PLANS.map((plan) => (
-                      <th key={plan.name} className="text-center py-4 px-4">
-                        <div className="font-semibold">{plan.name}</div>
-                        <div className="text-sm text-muted-foreground font-normal">
-                          {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}/mês`}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {PLANS[0].features.map((_, featureIdx) => (
-                    <tr key={featureIdx} className="border-b">
-                      <td className="py-4 px-4 text-sm">
-                        {PLANS[0].features[featureIdx].name}
-                      </td>
+          <Card className="max-w-7xl mx-auto">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="sticky left-0 bg-card z-10 text-left py-4 px-4 min-w-[200px]">Recursos</th>
                       {PLANS.map((plan) => (
-                        <td key={plan.name} className="text-center py-4 px-4">
-                          {plan.features[featureIdx].included ? (
-                            <Check className="h-5 w-5 text-green-600 mx-auto" />
-                          ) : (
-                            <X className="h-5 w-5 text-gray-400 mx-auto" />
-                          )}
-                        </td>
+                        <th key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
+                          <div className="font-semibold">{plan.name}</div>
+                          <div className="text-sm text-muted-foreground font-normal">
+                            {plan.price === 0 ? 'Grátis' : <><span className="text-xs">R$</span> {plan.price}/mês</>}
+                          </div>
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {PLANS[0].features.map((_, featureIdx) => (
+                      <tr key={featureIdx} className="border-b">
+                        <td className="sticky left-0 bg-card z-10 py-4 px-4 text-sm">
+                          {PLANS[0].features[featureIdx].name}
+                        </td>
+                        {PLANS.map((plan) => (
+                          <td key={plan.name} className="text-center py-4 px-4">
+                            {plan.features[featureIdx].included ? (
+                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                            ) : (
+                              <X className="h-5 w-5 text-gray-400 mx-auto" />
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </div>
