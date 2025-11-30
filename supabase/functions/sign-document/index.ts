@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, signerId, cpf } = await req.json();
+    const { documentId, signerId, cpf, birthDate } = await req.json();
 
-    console.log("Processing signature:", { documentId, signerId, cpf });
+    console.log("Processing signature:", { documentId, signerId, cpf, birthDate });
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -26,6 +26,7 @@ serve(async (req) => {
       .from("document_signers")
       .update({
         cpf: cpf,
+        birth_date: birthDate,
         status: "signed",
         signed_at: new Date().toISOString(),
       })
