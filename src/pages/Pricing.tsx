@@ -18,9 +18,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "5" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: false },
+      { name: "Eon Drive", included: false },
       { name: "Suporte prioritário", included: false },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -36,9 +36,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "20" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
+      { name: "Eon Drive", included: true },
       { name: "Suporte prioritário", included: false },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -54,9 +54,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "50" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
+      { name: "Eon Drive", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -71,9 +71,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "100" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
+      { name: "Eon Drive", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -88,9 +88,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "500" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
+      { name: "Eon Drive", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
@@ -105,9 +105,9 @@ const PLANS = [
     features: [
       { name: "Quantidade de documentos", value: "1000" },
       { name: "Assinatura digital ICP-Brasil", included: true },
-      { name: "Notificações por email", included: true },
-      { name: "Notificações por WhatsApp", included: true },
+      { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
+      { name: "Eon Drive", included: true },
       { name: "Suporte prioritário", included: true },
       { name: "Armazenamento em pastas", included: true },
     ]
