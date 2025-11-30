@@ -567,7 +567,7 @@ const Reports = () => {
                   placeholder="Buscar por nome, CPF/CNPJ ou email..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-10 rounded-full"
+                  className="pl-10 rounded-full text-sm placeholder:text-xs"
                 />
               </div>
               
