@@ -7,13 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, Crown, Loader2 } from "lucide-react";
 
-const SUBSCRIPTION_PLANS = [
-  { name: "Grátis", limit: 5, price: 0, priceId: "free", description: "Ideal para testes" },
-  { name: "Básico", limit: 50, price: 59, priceId: "price_basic", description: "Para pequenas empresas" },
-  { name: "Profissional", limit: 100, price: 99, priceId: "price_professional", description: "Para empresas em crescimento" },
-  { name: "Empresarial", limit: 200, price: 159, priceId: "price_business", description: "Para empresas estabelecidas" },
-  { name: "Premium", limit: 500, price: 499, priceId: "price_premium", description: "Para grandes volumes" },
-  { name: "Enterprise", limit: 999999, price: 899, priceId: "price_enterprise", description: "Sem limites" },
+const STRIPE_PRICE_ID = "price_1SWhQIHRTD5WvpxjPvRHBY18";
+
+const PRICING_TIERS = [
+  { range: "0-5", price: 0, description: "Grátis até 5 documentos" },
+  { range: "6-50", price: 59, description: "De 6 a 50 documentos" },
+  { range: "51-100", price: 99, description: "De 51 a 100 documentos" },
+  { range: "101-200", price: 159, description: "De 101 a 200 documentos" },
+  { range: "201-500", price: 499, description: "De 201 a 500 documentos" },
+  { range: "501+", price: 899, description: "A partir de 501 documentos" },
 ];
 
 export function SubscriptionTab() {
@@ -52,20 +54,11 @@ export function SubscriptionTab() {
     }
   };
 
-  const handleSubscribe = async (plan: typeof SUBSCRIPTION_PLANS[0]) => {
-    if (plan.priceId === "free") {
-      toast.info("Você já está no plano gratuito");
-      return;
-    }
-
+  const handleSubscribe = async () => {
     setProcessingCheckout(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
-        body: {
-          priceId: plan.priceId,
-          planName: plan.name,
-          documentLimit: plan.limit,
-        },
+        body: { priceId: STRIPE_PRICE_ID },
       });
 
       if (error) throw error;
@@ -117,8 +110,6 @@ export function SubscriptionTab() {
 
   // User has active subscription
   if (subscription && subscription.status === "active") {
-    const usagePercent = usage ? (usage.current / usage.limit) * 100 : 0;
-
     return (
       <div className="space-y-6">
         <Card>
@@ -126,10 +117,10 @@ export function SubscriptionTab() {
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  {subscription.plan_name}
-                  {subscription.plan_name !== "Grátis" && <Crown className="h-5 w-5 text-yellow-500" />}
+                  Assinatura Ativa
+                  <Crown className="h-5 w-5 text-yellow-500" />
                 </CardTitle>
-                <CardDescription>Sua assinatura atual</CardDescription>
+                <CardDescription>Cobrança automática por volume mensal</CardDescription>
               </div>
               {getStatusBadge(subscription.status)}
             </div>
@@ -139,11 +130,11 @@ export function SubscriptionTab() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Documentos este mês</span>
-                  <span className="font-medium">
-                    {usage?.current || 0} / {usage?.limit || subscription.document_limit}
-                  </span>
+                  <span className="font-medium">{usage?.current || 0}</span>
                 </div>
-                <Progress value={usagePercent} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  Cobrança automática conforme o volume usado
+                </p>
               </div>
 
               {subscription.current_period_end && (
@@ -171,137 +162,102 @@ export function SubscriptionTab() {
           </CardContent>
         </Card>
 
-        {/* Show other plans for upgrade */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Outros Planos Disponíveis</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SUBSCRIPTION_PLANS.filter((p) => p.name !== subscription.plan_name).map((plan) => (
-              <Card key={plan.name} className="relative">
-                <CardHeader>
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-3xl font-bold">
-                      {plan.price === 0 ? "Grátis" : `R$ ${plan.price}`}
-                    </p>
-                    {plan.price > 0 && <p className="text-sm text-muted-foreground">/mês</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span>
-                        {plan.limit === 999999 ? "Documentos ilimitados" : `Até ${plan.limit} documentos/mês`}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => handleSubscribe(plan)}
-                    disabled={processingCheckout || plan.priceId === "free"}
-                    className="w-full"
-                    variant={plan.priceId === "free" ? "outline" : "default"}
-                  >
-                    {processingCheckout ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : plan.priceId === "free" ? (
-                      "Plano Atual"
-                    ) : (
-                      "Fazer Upgrade"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        {/* Pricing tiers info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tabela de Preços por Volume</CardTitle>
+            <CardDescription>Você é cobrado automaticamente conforme o uso mensal</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {PRICING_TIERS.map((tier) => (
+                <div key={tier.range} className="flex justify-between items-center py-2 border-b last:border-0">
+                  <span className="text-sm font-medium">{tier.description}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {tier.price === 0 ? "Grátis" : `R$ ${tier.price}/mês`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  // User has no subscription - show all plans
+  // User has no subscription - show pricing info
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Escolha seu Plano</CardTitle>
+          <CardTitle>Assinatura Eon Sign</CardTitle>
           <CardDescription>
-            Selecione o plano que melhor atende suas necessidades de volume de documentos
+            Cobrança automática por volume mensal de documentos
           </CardDescription>
         </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="font-semibold">Tabela de Preços</h3>
+            <div className="space-y-2">
+              {PRICING_TIERS.map((tier) => (
+                <div key={tier.range} className="flex justify-between items-center py-3 border-b last:border-0">
+                  <div>
+                    <p className="font-medium">{tier.description}</p>
+                    <p className="text-sm text-muted-foreground">{tier.range} documentos/mês</p>
+                  </div>
+                  <span className="text-lg font-bold">
+                    {tier.price === 0 ? "Grátis" : `R$ ${tier.price}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Assinatura digital ICP-Brasil</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Notificações por email e WhatsApp</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Cobrança automática conforme o uso</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Sem limites de documentos</span>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleSubscribe}
+            disabled={processingCheckout}
+            className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
+            size="lg"
+          >
+            {processingCheckout ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Assinar Agora"
+            )}
+          </Button>
+        </CardContent>
       </Card>
 
-      {usage && (
-        <Card className="border-yellow-200 bg-yellow-50">
+      {usage && usage.current > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
-            <p className="text-sm text-yellow-800">
-              Você está usando o plano <strong>Grátis</strong> com limite de 5 documentos por mês.
+            <p className="text-sm text-blue-800">
+              Você criou <strong>{usage.current} documentos</strong> este mês.
               <br />
-              Uso atual: <strong>{usage.current} / {usage.limit}</strong> documentos este mês.
+              Assine para continuar usando o Eon Sign sem limites.
             </p>
           </CardContent>
         </Card>
       )}
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {SUBSCRIPTION_PLANS.map((plan, index) => {
-          const isRecommended = index === 2; // Professional plan
-          return (
-            <Card
-              key={plan.name}
-              className={`relative ${isRecommended ? "border-primary shadow-lg" : ""}`}
-            >
-              {isRecommended && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary">Recomendado</Badge>
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-3xl font-bold">
-                    {plan.price === 0 ? "Grátis" : `R$ ${plan.price}`}
-                  </p>
-                  {plan.price > 0 && <p className="text-sm text-muted-foreground">/mês</p>}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span>
-                      {plan.limit === 999999 ? "Documentos ilimitados" : `Até ${plan.limit} documentos/mês`}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span>Assinatura digital ICP-Brasil</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span>Notificações por email e WhatsApp</span>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={processingCheckout || plan.priceId === "free"}
-                  className="w-full"
-                  variant={plan.priceId === "free" ? "outline" : "default"}
-                >
-                  {processingCheckout ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : plan.priceId === "free" ? (
-                    "Plano Atual"
-                  ) : (
-                    "Assinar"
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
     </div>
   );
 }

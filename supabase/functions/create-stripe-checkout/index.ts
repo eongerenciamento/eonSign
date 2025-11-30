@@ -36,11 +36,11 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, planName, documentLimit } = await req.json();
-    if (!priceId || !planName || !documentLimit) {
-      throw new Error("Missing required fields: priceId, planName, documentLimit");
+    const { priceId } = await req.json();
+    if (!priceId) {
+      throw new Error("Missing required field: priceId");
     }
-    logStep("Request data", { priceId, planName, documentLimit });
+    logStep("Request data", { priceId });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -70,7 +70,6 @@ serve(async (req) => {
       line_items: [
         {
           price: priceId,
-          quantity: 1,
         },
       ],
       mode: "subscription",
@@ -78,8 +77,6 @@ serve(async (req) => {
       cancel_url: `${origin}/configuracoes?tab=subscription&canceled=true`,
       metadata: {
         user_id: user.id,
-        plan_name: planName,
-        document_limit: documentLimit.toString()
       }
     });
 

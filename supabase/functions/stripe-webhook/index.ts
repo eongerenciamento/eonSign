@@ -47,12 +47,10 @@ serve(async (req) => {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           const userId = session.metadata?.user_id;
-          const planName = session.metadata?.plan_name;
-          const documentLimit = parseInt(session.metadata?.document_limit || "5");
           
           if (!userId) throw new Error("No user_id in session metadata");
 
-          logStep("Processing checkout.session.completed", { userId, planName });
+          logStep("Processing checkout.session.completed", { userId });
 
           // Get subscription details
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
@@ -63,12 +61,12 @@ serve(async (req) => {
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: session.subscription as string,
             stripe_price_id: subscription.items.data[0].price.id,
-            plan_name: planName,
+            plan_name: "Eon Sign",
             status: subscription.status,
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
-            document_limit: documentLimit,
+            document_limit: 999999,
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id' });
 
@@ -115,13 +113,11 @@ serve(async (req) => {
             .from("user_subscriptions")
             .update({
               status: 'canceled',
-              document_limit: 5, // Reset to free tier
-              plan_name: 'Grátis',
               updated_at: new Date().toISOString()
             })
             .eq("stripe_subscription_id", subscription.id);
 
-          logStep("Subscription canceled - reset to free tier");
+          logStep("Subscription canceled");
           break;
         }
 
