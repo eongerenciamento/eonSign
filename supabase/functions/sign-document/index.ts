@@ -86,10 +86,10 @@ serve(async (req) => {
           .eq("user_id", document.user_id)
           .single();
 
-        // Buscar emails de todos os signatários
+        // Buscar emails e telefones de todos os signatários
         const { data: allSigners } = await supabase
           .from("document_signers")
-          .select("email")
+          .select("email, phone, name")
           .eq("document_id", documentId);
 
         if (allSigners && allSigners.length > 0) {
@@ -109,6 +109,25 @@ serve(async (req) => {
             console.log("Confirmation emails sent successfully");
           } catch (emailError) {
             console.error("Error sending confirmation emails:", emailError);
+          }
+
+          // Enviar WhatsApp para cada signatário
+          for (const signer of allSigners) {
+            try {
+              await supabase.functions.invoke('send-whatsapp-message', {
+                body: {
+                  signerName: signer.name,
+                  signerPhone: signer.phone,
+                  documentName: document.name,
+                  documentId,
+                  organizationName: companySettings?.admin_name || "Éon Sign",
+                  isCompleted: true
+                }
+              });
+              console.log(`WhatsApp confirmation sent to ${signer.phone}`);
+            } catch (whatsappError) {
+              console.error(`Error sending WhatsApp to ${signer.phone}:`, whatsappError);
+            }
           }
         }
       }
