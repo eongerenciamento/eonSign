@@ -99,7 +99,6 @@ export default function Auth() {
     });
     return () => subscription.unsubscribe();
   }, []);
-
   useEffect(() => {
     if (session) {
       navigate("/dashboard");
@@ -108,36 +107,37 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const result = loginSchema.safeParse({ email, password });
-      
+      const result = loginSchema.safeParse({
+        email,
+        password
+      });
       if (!result.success) {
         const firstError = result.error.errors[0];
         toast({
           title: "Erro de validação",
           description: firstError.message,
-          variant: "destructive",
+          variant: "destructive"
         });
         setIsLoading(false);
         return;
       }
-
-      const { error } = await supabase.auth.signInWithPassword({
+      const {
+        error
+      } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
-
       if (error) {
         toast({
           title: "Erro ao entrar",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "Bem-vindo!",
-          description: "Login realizado com sucesso.",
+          description: "Login realizado com sucesso."
         });
         navigate("/dashboard");
       }
@@ -146,7 +146,7 @@ export default function Auth() {
       toast({
         title: "Erro",
         description: "Ocorreu um erro durante o login.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -238,15 +238,15 @@ export default function Auth() {
                 {isLoading ? "Carregando..." : "Entrar"}
               </Button>
 
-              <button type="button" onClick={handleForgotPassword} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
+              <button type="button" onClick={handleForgotPassword} disabled={isLoading} className="w-full transition-colors text-sm text-slate-300">
                 Esqueci a senha
               </button>
 
-              <button type="button" onClick={() => navigate('/planos')} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
+              <button type="button" onClick={() => navigate('/planos')} disabled={isLoading} className="w-full transition-colors text-sm text-slate-300">
                 Criar nova conta
               </button>
 
-              <Link to="/install" className="block w-full text-center text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
+              <Link to="/install" className="block w-full text-center transition-colors text-sm text-slate-300">
                 Instale o App
               </Link>
             </div>
