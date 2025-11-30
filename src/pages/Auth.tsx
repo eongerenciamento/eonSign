@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,9 @@ const signupSchema = z.object({
   path: ["confirmPassword"]
 });
 export default function Auth() {
+  const [searchParams] = useSearchParams();
+  const selectedPlan = searchParams.get('plan');
+  const selectedPlanName = searchParams.get('planName');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -98,6 +101,13 @@ export default function Auth() {
     });
     return () => subscription.unsubscribe();
   }, []);
+  useEffect(() => {
+    // Se veio da página de planos, abrir em modo signup
+    if (selectedPlan) {
+      setIsLogin(false);
+    }
+  }, [selectedPlan]);
+
   useEffect(() => {
     if (session) {
       navigate("/dashboard");
@@ -178,6 +188,61 @@ export default function Auth() {
             });
             return;
           }
+
+          // Processar plano selecionado
+          if (selectedPlan && selectedPlan !== 'free') {
+            // Se for plano pago, redirecionar para checkout Stripe
+            try {
+              const planLimits: Record<string, number> = {
+                'price_1SZBDZHRTD5WvpxjeKMhFcSK': 20, // Básico
+                'price_1SZBEAHRTD5Wvpxj0pcztkPt': 50, // Profissional
+                'price_1SZBEOHRTD5WvpxjFsV37k0o': 100, // Empresarial
+                'price_1SZBEdHRTD5Wvpxj46hhdp54': 500, // Premium
+                'price_1SZBEsHRTD5Wvpxj6t1lc01Z': 1000, // Enterprise
+              };
+
+              const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke("create-stripe-checkout", {
+                body: {
+                  priceId: selectedPlan,
+                  tierName: selectedPlanName || 'Plano Selecionado',
+                  documentLimit: planLimits[selectedPlan] || 20,
+                },
+              });
+
+              if (checkoutError) throw checkoutError;
+
+              if (checkoutData.url) {
+                // Abrir checkout em nova aba
+                window.open(checkoutData.url, "_blank");
+                toast({
+                  title: "Conta criada com sucesso!",
+                  description: "Complete o pagamento na nova aba para ativar seu plano"
+                });
+              }
+            } catch (checkoutError) {
+              console.error("Error creating checkout:", checkoutError);
+              toast({
+                title: "Conta criada, mas erro no checkout",
+                description: "Você pode fazer upgrade depois nas configurações",
+                variant: "destructive"
+              });
+            }
+          } else {
+            // Plano gratuito - apenas criar subscription padrão
+            await supabase.from('user_subscriptions').insert({
+              user_id: authData.user.id,
+              stripe_customer_id: '', // Será preenchido quando criar cliente Stripe
+              plan_name: 'Grátis',
+              status: 'active',
+              document_limit: 5,
+            });
+
+            toast({
+              title: "Conta criada com sucesso!",
+              description: "Você já pode fazer login com o plano gratuito!"
+            });
+          }
+
           try {
             await supabase.functions.invoke('send-welcome-email', {
               body: {
@@ -189,10 +254,7 @@ export default function Auth() {
           } catch (emailError) {
             console.error("Error sending welcome email:", emailError);
           }
-          toast({
-            title: "Conta criada com sucesso!",
-            description: "Você já pode fazer login. Verifique seu e-mail de boas-vindas!"
-          });
+
           setIsLogin(true);
         }
       }
