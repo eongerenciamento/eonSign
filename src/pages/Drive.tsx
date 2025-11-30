@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
+import { DocumentsList } from "@/components/documents/DocumentsList";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
@@ -554,13 +555,84 @@ const Drive = () => {
             )}
             
             {/* Documents List */}
-            <DocumentsTable 
-              documents={filteredDocuments} 
-              showProgress={false} 
-              folders={folders}
-              allFolders={allFolders}
-              onDocumentMoved={handleDocumentMoved}
-            />
+            {filteredDocuments.length > 0 && (
+              <DocumentsList
+                documents={filteredDocuments}
+                viewMode={viewMode}
+                onViewDocument={(documentId) => {
+                  const doc = documents.find(d => d.id === documentId);
+                  if (doc?.folderId) {
+                    supabase.storage
+                      .from('documents')
+                      .createSignedUrl(doc.name, 60)
+                      .then(({ data }) => {
+                        if (data?.signedUrl) {
+                          window.open(data.signedUrl, '_blank');
+                        }
+                      });
+                  }
+                }}
+                onDownloadDocument={(documentId) => {
+                  const doc = documents.find(d => d.id === documentId);
+                  if (doc?.folderId) {
+                    supabase.storage
+                      .from('documents')
+                      .createSignedUrl(doc.name, 60)
+                      .then(({ data }) => {
+                        if (data?.signedUrl) {
+                          const link = document.createElement('a');
+                          link.href = data.signedUrl;
+                          link.download = doc.name;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }
+                      });
+                  }
+                }}
+                onMoveToFolder={async (documentId, folderId) => {
+                  const { error } = await supabase
+                    .from("documents")
+                    .update({ folder_id: folderId })
+                    .eq("id", documentId);
+
+                  if (error) {
+                    toast({
+                      title: "Erro ao mover documento",
+                      description: error.message,
+                      variant: "destructive",
+                    });
+                  } else {
+                    toast({
+                      title: "Documento movido",
+                      description: "O documento foi movido com sucesso.",
+                    });
+                    loadDocuments();
+                  }
+                }}
+                onRemoveFromFolder={async (documentId) => {
+                  const { error } = await supabase
+                    .from("documents")
+                    .update({ folder_id: null })
+                    .eq("id", documentId);
+
+                  if (error) {
+                    toast({
+                      title: "Erro ao remover documento",
+                      description: error.message,
+                      variant: "destructive",
+                    });
+                  } else {
+                    toast({
+                      title: "Documento removido da pasta",
+                      description: "O documento foi removido da pasta.",
+                    });
+                    loadDocuments();
+                  }
+                }}
+                allFolders={allFolders}
+              />
+            )}
           </div>
         )}
       </div>
