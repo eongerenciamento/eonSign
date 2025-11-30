@@ -35,7 +35,7 @@ const Install = () => {
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={appIcon} alt="Éon Sign" className="h-20 w-20 rounded-2xl shadow-lg" />
+            <img src={appIcon} alt="Eon Sign" className="h-20 w-20 rounded-2xl shadow-lg" />
           </div>
           <CardTitle className="text-2xl">Instalar Eon Sign</CardTitle>
           <CardDescription>
