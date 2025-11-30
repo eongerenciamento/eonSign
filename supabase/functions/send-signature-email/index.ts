@@ -17,6 +17,7 @@ interface SignatureEmailRequest {
   documentName: string;
   documentId: string;
   senderName: string;
+  organizationName: string;
   userId: string;
 }
 
@@ -26,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerEmail, documentName, documentId, senderName, userId }: SignatureEmailRequest = await req.json();
+    const { signerName, signerEmail, documentName, documentId, senderName, organizationName, userId }: SignatureEmailRequest = await req.json();
 
     console.log("Sending signature email to:", signerEmail);
 
@@ -49,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="padding: 30px; background: #f9f9f9;">
             <h2 style="color: #273d60;">Olá, ${signerName || 'Signatário'}!</h2>
             <p style="color: #333; font-size: 16px;">
-              <strong>${senderName}</strong> enviou um documento para você assinar digitalmente.
+              <strong>${organizationName}</strong> enviou um documento para você assinar digitalmente.
             </p>
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0; color: #666;"><strong>Documento:</strong> ${documentName}</p>

@@ -16,6 +16,7 @@ interface Signer {
 
 interface CompanySigner extends Signer {
   cpf: string;
+  companyName: string;
 }
 
 const NewDocument = () => {
@@ -37,7 +38,7 @@ const NewDocument = () => {
       if (user) {
         const { data: companyData } = await supabase
           .from('company_settings')
-          .select('admin_name, admin_cpf, admin_phone, admin_email')
+          .select('admin_name, admin_cpf, admin_phone, admin_email, company_name')
           .eq('user_id', user.id)
           .single();
 
@@ -47,6 +48,7 @@ const NewDocument = () => {
             cpf: companyData.admin_cpf,
             phone: companyData.admin_phone,
             email: companyData.admin_email,
+            companyName: companyData.company_name,
           });
         }
       }
@@ -249,6 +251,7 @@ const NewDocument = () => {
               documentName: title,
               documentId: documentData.id,
               senderName: companySigner.name,
+              organizationName: companySigner.companyName,
               userId: user.id
             }
           });
