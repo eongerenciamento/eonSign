@@ -199,9 +199,11 @@ export default function Pricing() {
                   className="relative bg-[#273d60] text-white border-none w-80 flex-shrink-0 shadow-xl"
                 >
                   <CardHeader className="space-y-4">
-                    {plan.recommended && (
-                      <Badge className="bg-white text-[#273d60] px-3 py-1 font-bold w-fit">Mais Vendido</Badge>
-                    )}
+                    <div className="h-7">
+                      {plan.recommended && (
+                        <Badge className="bg-white text-[#273d60] px-3 py-1 font-bold w-fit">Mais Vendido</Badge>
+                      )}
+                    </div>
                     <div>
                       <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
                       <CardDescription className="text-gray-300">{plan.description}</CardDescription>
@@ -220,7 +222,7 @@ export default function Pricing() {
                   </CardHeader>
                    <CardContent className="space-y-4">
                      <div className="space-y-3">
-                       {plan.features.slice(1, 4).map((feature, idx) => (
+                       {plan.features.slice(1, 3).map((feature, idx) => (
                          <div key={idx} className="flex items-center gap-2 text-sm">
                            {feature.included ? (
                              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
@@ -232,6 +234,19 @@ export default function Pricing() {
                            </span>
                          </div>
                        ))}
+                       <div className="flex items-center gap-2 text-sm">
+                         {plan.features[4]?.included ? (
+                           <>
+                             <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                             <span className="text-white">{plan.features[4].name}</span>
+                           </>
+                         ) : (
+                           <>
+                             <X className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                             <span className="text-gray-600 line-through">{plan.features[4].name}</span>
+                           </>
+                         )}
+                       </div>
                      </div>
                     <Button
                       onClick={() => handleSelectPlan(plan)}
