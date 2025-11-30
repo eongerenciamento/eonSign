@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     const emailResponse = await resend.emails.send({
-      from: "Éon Sign <noreply@eongerenciamento.com.br>",
+      from: "Eon Gerenciamento <noreply@eongerenciamento.com.br>",
       to: [signerEmail],
       subject: `Você tem um documento para assinar - ${documentName}`,
       html: `
