@@ -13,10 +13,12 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const Reports = () => {
+  const isMobile = useIsMobile();
   const [dateFilter, setDateFilter] = useState("30");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -631,14 +633,75 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Table */}
+            {/* Table / Cards */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Relatório de Signatários</h3>
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Carregando...</div>
               ) : !signatories || signatories.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div>
+              ) : isMobile ? (
+                /* Mobile view - Cards */
+                <div className="space-y-4">
+                  {signatories.map((signer) => (
+                    <div key={signer.id} className="bg-gray-100 p-4 rounded-lg space-y-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-sm">{signer.name}</span>
+                        <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
+                      </div>
+                      
+                      <div className="flex flex-col gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Nascimento:</span>
+                          <span className="font-medium">
+                            {signer.birth_date
+                              ? format(new Date(signer.birth_date), "dd/MM/yyyy", { locale: ptBR })
+                              : "-"}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Email:</span>
+                          <span className="font-medium text-xs break-all">{signer.email}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Telefone:</span>
+                          <span className="font-medium">{signer.phone}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Documento:</span>
+                          <span className="font-medium text-xs">{signer.documents?.name || "-"}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Status:</span>
+                          <Badge
+                            className={
+                              signer.status === "signed"
+                                ? "bg-green-700 text-white hover:bg-green-700"
+                                : "bg-yellow-700 text-white hover:bg-yellow-700"
+                            }
+                          >
+                            {signer.status === "signed" ? "Assinado" : "Pendente"}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Data Assinatura:</span>
+                          <span className="font-medium text-xs">
+                            {signer.signed_at
+                              ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                              : "-"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
+                /* Desktop view - Table */
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
