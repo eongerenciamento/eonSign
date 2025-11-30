@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
 
 const PLANS = [
   { 
+    id: "free",
     name: "Grátis", 
     limit: 5, 
     price: 0, 
@@ -23,6 +25,7 @@ const PLANS = [
     ]
   },
   { 
+    id: "basic",
     name: "Básico", 
     limit: 20, 
     price: 59, 
@@ -39,6 +42,7 @@ const PLANS = [
     ]
   },
   { 
+    id: "pro",
     name: "Profissional", 
     limit: 50, 
     price: 99, 
@@ -55,6 +59,7 @@ const PLANS = [
     ]
   },
   { 
+    id: "business",
     name: "Empresarial", 
     limit: 100, 
     price: 159, 
@@ -70,6 +75,7 @@ const PLANS = [
     ]
   },
   { 
+    id: "premium",
     name: "Premium", 
     limit: 500, 
     price: 499, 
@@ -85,6 +91,7 @@ const PLANS = [
     ]
   },
   { 
+    id: "enterprise",
     name: "Enterprise", 
     limit: 1000, 
     price: 899, 
@@ -139,10 +146,12 @@ const FAQS = [
 export default function Pricing() {
   const navigate = useNavigate();
   const [showComparison, setShowComparison] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSelectPlan = (plan: typeof PLANS[0]) => {
-    // Redirecionar para página de criação de conta com plano selecionado
-    navigate(`/auth?plan=${plan.priceId}&planName=${encodeURIComponent(plan.name)}`);
+    setSelectedPlan(plan);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -347,6 +356,14 @@ export default function Pricing() {
           </Button>
         </div>
       </div>
+
+      {selectedPlan && (
+        <PlanCheckoutDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          plan={selectedPlan}
+        />
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ interface WelcomeEmailRequest {
   email: string;
   name?: string;
   userId?: string;
+  tempPassword?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -23,7 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, name, userId }: WelcomeEmailRequest = await req.json();
+    const { email, name, userId, tempPassword }: WelcomeEmailRequest = await req.json();
 
     console.log("Sending welcome email to:", email);
 
@@ -54,6 +55,16 @@ const handler = async (req: Request): Promise<Response> => {
                 <li>Armazenar documentos assinados com segurança</li>
               </ul>
             </div>
+            ${tempPassword ? `
+            <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+              <h3 style="color: #856404; margin-top: 0;">Suas credenciais de acesso:</h3>
+              <p style="color: #856404; margin: 10px 0;"><strong>E-mail:</strong> ${email}</p>
+              <p style="color: #856404; margin: 10px 0;"><strong>Senha temporária:</strong> ${tempPassword}</p>
+              <p style="color: #856404; font-size: 14px; margin-top: 15px;">
+                ⚠️ Por segurança, altere sua senha no primeiro acesso em Configurações > Perfil.
+              </p>
+            </div>
+            ` : ''}
             <p style="color: #333; font-size: 14px;">
               Comece agora mesmo acessando sua conta:
             </p>

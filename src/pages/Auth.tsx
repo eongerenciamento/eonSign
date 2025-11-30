@@ -48,8 +48,6 @@ const signupSchema = z.object({
 });
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const selectedPlan = searchParams.get('plan');
-  const selectedPlanName = searchParams.get('planName');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -101,12 +99,6 @@ export default function Auth() {
     });
     return () => subscription.unsubscribe();
   }, []);
-  useEffect(() => {
-    // Se veio da página de planos, abrir em modo signup
-    if (selectedPlan) {
-      setIsLogin(false);
-    }
-  }, [selectedPlan]);
 
   useEffect(() => {
     if (session) {
@@ -116,156 +108,46 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      if (isLogin) {
-        const validatedData = loginSchema.parse({
-          email,
-          password
-        });
-        const {
-          error
-        } = await supabase.auth.signInWithPassword({
-          email: validatedData.email,
-          password: validatedData.password
-        });
-        if (error) {
-          toast({
-            title: "Erro ao entrar",
-            description: error.message.includes("Invalid login credentials") ? "E-mail ou senha incorretos" : error.message,
-            variant: "destructive"
-          });
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        const validatedData = signupSchema.parse({
-          organizationName,
-          cnpj: cnpj.replace(/\D/g, ''),
-          adminName,
-          adminCpf: adminCpf.replace(/\D/g, ''),
-          adminPhone: adminPhone.replace(/\D/g, ''),
-          email,
-          password,
-          confirmPassword
-        });
-        const redirectUrl = `${window.location.origin}/dashboard`;
-        const {
-          data: authData,
-          error: signUpError
-        } = await supabase.auth.signUp({
-          email: validatedData.email,
-          password: validatedData.password,
-          options: {
-            emailRedirectTo: redirectUrl
-          }
-        });
-        if (signUpError) {
-          toast({
-            title: "Erro ao criar conta",
-            description: signUpError.message.includes("User already registered") ? "Este e-mail já está cadastrado" : signUpError.message,
-            variant: "destructive"
-          });
-          return;
-        }
-        if (authData.user) {
-          const {
-            error: companyError
-          } = await supabase.from('company_settings').insert({
-            user_id: authData.user.id,
-            company_name: validatedData.organizationName,
-            cnpj: validatedData.cnpj,
-            admin_name: validatedData.adminName,
-            admin_cpf: validatedData.adminCpf,
-            admin_phone: validatedData.adminPhone,
-            admin_email: validatedData.email
-          });
-          if (companyError) {
-            console.error("Error creating company settings:", companyError);
-            toast({
-              title: "Erro ao salvar dados",
-              description: "Não foi possível salvar as informações da empresa",
-              variant: "destructive"
-            });
-            return;
-          }
-
-          // Processar plano selecionado
-          if (selectedPlan && selectedPlan !== 'free') {
-            // Se for plano pago, redirecionar para checkout Stripe
-            try {
-              const planLimits: Record<string, number> = {
-                'price_1SZBDZHRTD5WvpxjeKMhFcSK': 20, // Básico
-                'price_1SZBEAHRTD5Wvpxj0pcztkPt': 50, // Profissional
-                'price_1SZBEOHRTD5WvpxjFsV37k0o': 100, // Empresarial
-                'price_1SZBEdHRTD5Wvpxj46hhdp54': 500, // Premium
-                'price_1SZBEsHRTD5Wvpxj6t1lc01Z': 1000, // Enterprise
-              };
-
-              const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke("create-stripe-checkout", {
-                body: {
-                  priceId: selectedPlan,
-                  tierName: selectedPlanName || 'Plano Selecionado',
-                  documentLimit: planLimits[selectedPlan] || 20,
-                },
-              });
-
-              if (checkoutError) throw checkoutError;
-
-              if (checkoutData.url) {
-                // Abrir checkout em nova aba
-                window.open(checkoutData.url, "_blank");
-                toast({
-                  title: "Conta criada com sucesso!",
-                  description: "Complete o pagamento na nova aba para ativar seu plano"
-                });
-              }
-            } catch (checkoutError) {
-              console.error("Error creating checkout:", checkoutError);
-              toast({
-                title: "Conta criada, mas erro no checkout",
-                description: "Você pode fazer upgrade depois nas configurações",
-                variant: "destructive"
-              });
-            }
-          } else {
-            // Plano gratuito - apenas criar subscription padrão
-            await supabase.from('user_subscriptions').insert({
-              user_id: authData.user.id,
-              stripe_customer_id: '', // Será preenchido quando criar cliente Stripe
-              plan_name: 'Grátis',
-              status: 'active',
-              document_limit: 5,
-            });
-
-            toast({
-              title: "Conta criada com sucesso!",
-              description: "Você já pode fazer login com o plano gratuito!"
-            });
-          }
-
-          try {
-            await supabase.functions.invoke('send-welcome-email', {
-              body: {
-                email: validatedData.email,
-                name: validatedData.adminName,
-                userId: authData.user.id
-              }
-            });
-          } catch (emailError) {
-            console.error("Error sending welcome email:", emailError);
-          }
-
-          setIsLogin(true);
-        }
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
+      const result = loginSchema.safeParse({ email, password });
+      
+      if (!result.success) {
+        const firstError = result.error.errors[0];
         toast({
           title: "Erro de validação",
-          description: error.errors[0].message,
-          variant: "destructive"
+          description: firstError.message,
+          variant: "destructive",
         });
+        setIsLoading(false);
+        return;
       }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Erro ao entrar",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Bem-vindo!",
+          description: "Login realizado com sucesso.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro durante o login.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -328,102 +210,40 @@ export default function Auth() {
         animationDelay: '0.3s'
       }}>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {isLogin ? <>
-                <div className="space-y-2 animate-fade-in" style={{
+            <div className="space-y-4">
+              <div className="space-y-2 animate-fade-in" style={{
               animationDelay: '0.5s'
             }}>
-                  <Label htmlFor="email" className="text-white">E-mail</Label>
-                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
-                </div>
+                <Label htmlFor="email" className="text-white">E-mail</Label>
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
+              </div>
 
-                <div className="space-y-2 animate-fade-in" style={{
+              <div className="space-y-2 animate-fade-in" style={{
               animationDelay: '0.6s'
             }}>
-                  <Label htmlFor="password" className="text-white">Senha</Label>
-                  <div className="relative">
-                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white pr-10 [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-transform hover:scale-110">
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
+                <Label htmlFor="password" className="text-white">Senha</Label>
+                <div className="relative">
+                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white pr-10 [&:-webkit-autofill]:!bg-[hsl(221,30%,35%)] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(221,30%,35%)_inset]" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-transform hover:scale-110">
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
-              </> : <>
-                <div className="space-y-4">
-                  <h3 className="text-white text-sm font-medium">Dados da Empresa</h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="organizationName" className="text-white">Nome da Organização</Label>
-                    <Input id="organizationName" type="text" value={organizationName} onChange={e => setOrganizationName(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cnpj" className="text-white">CNPJ</Label>
-                    <Input id="cnpj" type="text" value={cnpj} onChange={e => setCnpj(formatCNPJ(e.target.value))} required disabled={isLoading} maxLength={18} placeholder="00.000.000/0000-00" className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-white text-sm font-medium">Dados do Administrador</h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="adminName" className="text-white">Nome do Membro</Label>
-                    <Input id="adminName" type="text" value={adminName} onChange={e => setAdminName(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="adminCpf" className="text-white">CPF</Label>
-                    <Input id="adminCpf" type="text" value={adminCpf} onChange={e => setAdminCpf(formatCPF(e.target.value))} required disabled={isLoading} maxLength={14} placeholder="000.000.000-00" className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="adminPhone" className="text-white">Telefone</Label>
-                    <Input id="adminPhone" type="text" value={adminPhone} onChange={e => setAdminPhone(formatPhone(e.target.value))} required disabled={isLoading} maxLength={14} placeholder="(00)00000-0000" className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-white text-sm font-medium">Credenciais</h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-white">E-mail</Label>
-                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-white">Senha</Label>
-                    <div className="relative">
-                      <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white pr-10" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white">
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-white">Confirmação de Senha</Label>
-                    <div className="relative">
-                      <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required disabled={isLoading} className="bg-[hsl(221,30%,35%)] border border-white/20 text-white pr-10" />
-                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white">
-                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>}
+              </div>
+            </div>
 
             <div className="space-y-3 animate-fade-in" style={{
             animationDelay: '0.7s'
           }}>
               <Button type="submit" variant="ghost" className="w-full text-white hover:bg-transparent hover:text-white/90 transition-transform hover:scale-105" disabled={isLoading}>
-                {isLoading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
+                {isLoading ? "Carregando..." : "Entrar"}
               </Button>
 
-              {isLogin && <button type="button" onClick={handleForgotPassword} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
-                  Esqueci a senha
-                </button>}
+              <button type="button" onClick={handleForgotPassword} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
+                Esqueci a senha
+              </button>
 
-              <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
-                {isLogin ? "Criar nova conta" : "Já tenho conta"}
+              <button type="button" onClick={() => navigate('/planos')} className="w-full text-gray-50 hover:text-gray-50/80 transition-colors text-sm" disabled={isLoading}>
+                Criar nova conta
               </button>
 
               <Link to="/install" className="block w-full text-center text-gray-50 hover:text-gray-50/80 transition-colors text-sm">
