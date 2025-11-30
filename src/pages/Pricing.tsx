@@ -200,7 +200,7 @@ export default function Pricing() {
                 >
                   <CardHeader className="space-y-4">
                     {plan.recommended && (
-                      <Badge className="bg-white text-[#273d60] px-3 py-1 font-bold w-fit">Mais Popular</Badge>
+                      <Badge className="bg-white text-[#273d60] px-3 py-1 font-bold w-fit">Mais Vendido</Badge>
                     )}
                     <div>
                       <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
