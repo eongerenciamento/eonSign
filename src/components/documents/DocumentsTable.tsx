@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, MoreVertical, Move, FolderX, PenTool, Trash2 } from "lucide-react";
+import { Eye, Download, MoreVertical, Move, FolderX, PenTool, Trash2, Mail, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
@@ -283,6 +283,101 @@ export const DocumentsTable = ({
   const handleDragEnd = (e: React.DragEvent) => {
     e.currentTarget.classList.remove("opacity-50");
   };
+
+  const handleResendNotifications = async (documentId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get document details and signers
+      const { data: documentData } = await supabase
+        .from('documents')
+        .select('*, document_signers(*)')
+        .eq('id', documentId)
+        .single();
+
+      if (!documentData) {
+        toast({
+          title: "Erro",
+          description: "Documento não encontrado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get company settings
+      const { data: companyData } = await supabase
+        .from('company_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!companyData) {
+        toast({
+          title: "Erro",
+          description: "Configurações da empresa não encontradas.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Send emails and WhatsApp to pending signers
+      const pendingSigners = documentData.document_signers.filter(
+        (signer: any) => signer.status === 'pending'
+      );
+
+      if (pendingSigners.length === 0) {
+        toast({
+          title: "Nenhum signatário pendente",
+          description: "Todos os signatários já assinaram o documento.",
+        });
+        return;
+      }
+
+      toast({
+        title: "Reenviando notificações",
+        description: `Enviando para ${pendingSigners.length} signatário(s)...`,
+      });
+
+      // Send to each pending signer
+      for (const signer of pendingSigners) {
+        // Send email
+        await supabase.functions.invoke('send-signature-email', {
+          body: {
+            signerEmail: signer.email,
+            signerName: signer.name,
+            documentName: documentData.name,
+            documentId: documentData.id,
+            organizationName: companyData.company_name,
+          },
+        });
+
+        // Send WhatsApp
+        await supabase.functions.invoke('send-whatsapp-message', {
+          body: {
+            signerName: signer.name,
+            signerPhone: signer.phone,
+            documentName: documentData.name,
+            documentId: documentData.id,
+            organizationName: companyData.company_name,
+            isCompleted: false,
+          },
+        });
+      }
+
+      toast({
+        title: "Notificações reenviadas",
+        description: `Email e WhatsApp enviados para ${pendingSigners.length} signatário(s).`,
+      });
+    } catch (error) {
+      console.error("Error resending notifications:", error);
+      toast({
+        title: "Erro ao reenviar",
+        description: "Não foi possível reenviar as notificações.",
+        variant: "destructive",
+      });
+    }
+  };
   return <>
       {/* Desktop Table View */}
       <div className="hidden md:block rounded-lg overflow-hidden">
@@ -354,6 +449,17 @@ export const DocumentsTable = ({
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
                         <Download className="w-4 h-4 text-gray-500" />
                       </Button>
+                      {doc.status !== 'signed' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleResendNotifications(doc.id)}
+                          title="Reenviar notificações"
+                        >
+                          <Mail className="w-4 h-4 text-blue-500" />
+                        </Button>
+                      )}
                       {doc.signedBy === 0 && (
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
                           <Trash2 className="w-4 h-4 text-gray-500" />
@@ -414,6 +520,17 @@ export const DocumentsTable = ({
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)}>
                     <Download className="w-4 h-4 text-gray-500" />
                   </Button>
+                  {doc.status !== 'signed' && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => handleResendNotifications(doc.id)}
+                      title="Reenviar notificações"
+                    >
+                      <Mail className="w-4 h-4 text-blue-500" />
+                    </Button>
+                  )}
                   {doc.signedBy === 0 && (
                     <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
                       <Trash2 className="w-4 h-4 text-gray-500" />
