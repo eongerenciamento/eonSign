@@ -21,8 +21,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: false },
       { name: "Eon Drive", included: false },
-      { name: "Suporte prioritário", included: false },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
   { 
@@ -39,8 +37,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
       { name: "Eon Drive", included: true },
-      { name: "Suporte prioritário", included: false },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
   { 
@@ -57,8 +53,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
       { name: "Eon Drive", included: true },
-      { name: "Suporte prioritário", included: true },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
   { 
@@ -74,8 +68,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
       { name: "Eon Drive", included: true },
-      { name: "Suporte prioritário", included: true },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
   { 
@@ -91,8 +83,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
       { name: "Eon Drive", included: true },
-      { name: "Suporte prioritário", included: true },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
   { 
@@ -108,8 +98,6 @@ const PLANS = [
       { name: "Notificações por e-mail / WhatsApp", included: true },
       { name: "Geolocalização da assinatura", included: true },
       { name: "Eon Drive", included: true },
-      { name: "Suporte prioritário", included: true },
-      { name: "Armazenamento em pastas", included: true },
     ]
   },
 ];
@@ -224,7 +212,7 @@ export default function Pricing() {
                   </CardHeader>
                    <CardContent className="space-y-4">
                      <div className="space-y-3">
-                       {plan.features.slice(1, 3).map((feature, idx) => (
+                       {plan.features.slice(1).map((feature, idx) => (
                          <div key={idx} className="flex items-center gap-2 text-sm">
                            {feature.included ? (
                              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
@@ -236,19 +224,6 @@ export default function Pricing() {
                            </span>
                          </div>
                        ))}
-                       <div className="flex items-center gap-2 text-sm">
-                         {plan.features[4]?.included ? (
-                           <>
-                             <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                             <span className="text-white">{plan.features[4].name}</span>
-                           </>
-                         ) : (
-                           <>
-                             <X className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                             <span className="text-gray-600 line-through">{plan.features[4].name}</span>
-                           </>
-                         )}
-                       </div>
                      </div>
                     <Button
                       onClick={() => handleSelectPlan(plan)}
