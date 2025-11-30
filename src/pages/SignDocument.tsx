@@ -324,15 +324,13 @@ const SignDocument = () => {
             </div>
           </div>
           {document.file_url ? (
-            <div className="overflow-auto border rounded-md" style={{ maxHeight: '500px' }}>
+            <div className="overflow-auto border rounded-md" style={{ maxHeight: '60vh' }}>
               <iframe
-                src={document.file_url}
+                src={`${document.file_url}#view=FitH`}
                 className="w-full border-0"
                 style={{ 
-                  height: `${500 * pdfScale}px`,
-                  transform: `scale(${pdfScale})`,
-                  transformOrigin: 'top left',
-                  width: `${100 / pdfScale}%`
+                  height: `${60 * pdfScale}vh`,
+                  minHeight: '400px'
                 }}
                 title="Document Preview"
               />
