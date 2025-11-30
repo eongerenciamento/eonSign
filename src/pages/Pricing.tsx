@@ -196,16 +196,12 @@ export default function Pricing() {
               {PLANS.map((plan) => (
                 <Card 
                   key={plan.name} 
-                  className={`relative bg-[#273d60] text-white border-none w-80 flex-shrink-0 ${
-                    plan.recommended ? 'ring-4 ring-yellow-400 shadow-2xl scale-105' : 'shadow-xl'
-                  }`}
+                  className="relative bg-[#273d60] text-white border-none w-80 flex-shrink-0 shadow-xl"
                 >
-                  {plan.recommended && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-yellow-400 text-[#273d60] px-4 py-1 font-bold">Mais Popular</Badge>
-                    </div>
-                  )}
                   <CardHeader className="space-y-4">
+                    {plan.recommended && (
+                      <Badge className="bg-white text-[#273d60] px-3 py-1 font-bold w-fit">Mais Popular</Badge>
+                    )}
                     <div>
                       <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
                       <CardDescription className="text-gray-300">{plan.description}</CardDescription>
