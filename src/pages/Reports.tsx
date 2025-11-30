@@ -175,7 +175,7 @@ const Reports = () => {
       return;
     }
 
-    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data Assinatura"];
+    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data Assinatura", "Localização"];
     const csvData = signatories.map(s => [
       s.name,
       s.cpf || "-",
@@ -184,7 +184,8 @@ const Reports = () => {
       s.phone,
       s.documents?.name || "-",
       s.status === "signed" ? "Assinado" : s.status === "pending" ? "Pendente" : "Rejeitado",
-      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-"
+      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
+      s.signature_city && s.signature_state ? `${s.signature_city}, ${s.signature_state}` : "-"
     ]);
 
     const csvContent = [
@@ -265,7 +266,8 @@ const Reports = () => {
       s.phone,
       s.documents?.name || "-",
       s.status === "signed" ? "Assinado" : "Pendente",
-      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy", { locale: ptBR }) : "-"
+      s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy", { locale: ptBR }) : "-",
+      s.signature_city && s.signature_state ? `${s.signature_city}, ${s.signature_state}` : "-"
     ]);
 
     // Calcular totalizadores
@@ -274,7 +276,7 @@ const Reports = () => {
     const totalPending = signatories.filter(s => s.status === "pending").length;
 
     autoTable(doc, {
-      head: [["Nome / CPF", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura"]],
+      head: [["Nome / CPF", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura", "Localização"]],
       body: tableData,
       startY: filters.length > 0 ? 50 : 45,
       styles: {
@@ -290,13 +292,14 @@ const Reports = () => {
         fillColor: [245, 245, 245],
       },
       columnStyles: {
-        0: { cellWidth: 60 }, // Nome + CPF
-        1: { cellWidth: 28 }, // Nascimento
-        2: { cellWidth: 55 }, // Email
-        3: { cellWidth: 32 }, // Telefone
-        4: { cellWidth: 50 }, // Documento
-        5: { cellWidth: 25 }, // Status
-        6: { cellWidth: 30 }, // Assinatura
+        0: { cellWidth: 50 }, // Nome + CPF
+        1: { cellWidth: 24 }, // Nascimento
+        2: { cellWidth: 48 }, // Email
+        3: { cellWidth: 28 }, // Telefone
+        4: { cellWidth: 42 }, // Documento
+        5: { cellWidth: 22 }, // Status
+        6: { cellWidth: 26 }, // Assinatura
+        7: { cellWidth: 40 }, // Localização
       },
       didDrawCell: (data) => {
         // Estilizar CPF em fonte menor
@@ -713,6 +716,15 @@ const Reports = () => {
                               : "-"}
                           </span>
                         </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Localização:</span>
+                          <span className="font-medium text-xs">
+                            {signer.signature_city && signer.signature_state
+                              ? `${signer.signature_city}, ${signer.signature_state}`
+                              : "-"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -754,6 +766,7 @@ const Reports = () => {
                             <SortIcon field="signed_at" />
                           </button>
                         </TableHead>
+                        <TableHead>Localização</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -787,6 +800,11 @@ const Reports = () => {
                           <TableCell>
                             {signer.signed_at
                               ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {signer.signature_city && signer.signature_state
+                              ? `${signer.signature_city}, ${signer.signature_state}`
                               : "-"}
                           </TableCell>
                         </TableRow>

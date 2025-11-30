@@ -82,6 +82,11 @@ export type Database = {
           is_company_signer: boolean
           name: string
           phone: string
+          signature_city: string | null
+          signature_country: string | null
+          signature_latitude: number | null
+          signature_longitude: number | null
+          signature_state: string | null
           signed_at: string | null
           status: string
           updated_at: string
@@ -96,6 +101,11 @@ export type Database = {
           is_company_signer?: boolean
           name: string
           phone: string
+          signature_city?: string | null
+          signature_country?: string | null
+          signature_latitude?: number | null
+          signature_longitude?: number | null
+          signature_state?: string | null
           signed_at?: string | null
           status?: string
           updated_at?: string
@@ -110,6 +120,11 @@ export type Database = {
           is_company_signer?: boolean
           name?: string
           phone?: string
+          signature_city?: string | null
+          signature_country?: string | null
+          signature_latitude?: number | null
+          signature_longitude?: number | null
+          signature_state?: string | null
           signed_at?: string | null
           status?: string
           updated_at?: string
