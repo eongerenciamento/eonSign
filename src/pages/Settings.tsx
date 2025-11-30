@@ -11,8 +11,6 @@ import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload } from "lucide-react";
-import { EmailHistoryTab } from "@/components/settings/EmailHistoryTab";
-import { WhatsAppHistoryTab } from "@/components/settings/WhatsAppHistoryTab";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -32,9 +30,8 @@ const Settings = () => {
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // Get tab and subtab from URL params
+  // Get tab from URL params
   const activeTab = searchParams.get('tab') || 'company';
-  const activeSubTab = searchParams.get('subtab') || 'email';
 
   useEffect(() => {
     const loadData = async () => {
@@ -211,11 +208,10 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
-            <TabsTrigger value="history">Histórico</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
@@ -500,23 +496,6 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="history" className="space-y-6 mt-6">
-            <Tabs value={activeSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="email" className="mt-6">
-                <EmailHistoryTab />
-              </TabsContent>
-
-              <TabsContent value="whatsapp" className="mt-6">
-                <WhatsAppHistoryTab />
-              </TabsContent>
-            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
