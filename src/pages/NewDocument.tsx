@@ -241,9 +241,10 @@ const NewDocument = () => {
 
       if (signersError) throw signersError;
 
-      // Send email to each external signer
+      // Send email and WhatsApp to each external signer
       for (const signer of signers) {
         try {
+          // Send email
           await supabase.functions.invoke('send-signature-email', {
             body: {
               signerName: signer.name,
@@ -256,15 +257,27 @@ const NewDocument = () => {
             }
           });
           console.log(`Email sent to ${signer.email}`);
-        } catch (emailError) {
-          console.error(`Failed to send email to ${signer.email}:`, emailError);
-          // Continue even if email fails - document is already created
+
+          // Send WhatsApp
+          await supabase.functions.invoke('send-whatsapp-message', {
+            body: {
+              signerName: signer.name,
+              signerPhone: signer.phone,
+              documentName: title,
+              documentId: documentData.id,
+              organizationName: companySigner.companyName
+            }
+          });
+          console.log(`WhatsApp sent to ${signer.phone}`);
+        } catch (error) {
+          console.error(`Failed to send notification to ${signer.email}:`, error);
+          // Continue even if notification fails - document is already created
         }
       }
 
       toast({
         title: "Documento enviado!",
-        description: "O documento foi enviado com sucesso e os signatários receberão o link por e-mail.",
+        description: "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp.",
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
