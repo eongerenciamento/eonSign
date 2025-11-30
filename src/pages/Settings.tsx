@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload } from "lucide-react";
+import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -419,35 +420,7 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="subscription" className="space-y-6 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações da Assinatura</CardTitle>
-                <CardDescription>Gerenciar sua assinatura do Éon Sign</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Plano Atual</Label>
-                  <Input value="Plano Básico" disabled />
-                </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Input value="Ativo" disabled />
-                </div>
-                <div className="space-y-2">
-                  <Label>Próxima Cobrança</Label>
-                  <Input value="15/01/2025" disabled />
-                </div>
-                <div className="space-y-2">
-                  <Label>Valor</Label>
-                  <Input value="R$ 99,00/mês" disabled />
-                </div>
-                <div className="pt-4">
-                  <Button className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
-                    Gerenciar Assinatura
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <SubscriptionTab />
           </TabsContent>
 
           <TabsContent value="support" className="space-y-6 mt-6">

@@ -7,6 +7,14 @@ import { Upload, FileText, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Signer {
   name: string;
@@ -27,9 +35,30 @@ const NewDocument = () => {
     { name: "", phone: "", email: "" },
   ]);
   const [companySigner, setCompanySigner] = useState<CompanySigner | null>(null);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [limitInfo, setLimitInfo] = useState<{ current: number; limit: number; planName: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkDocumentLimit = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-document-limit");
+        
+        if (error) throw error;
+        
+        if (!data.canCreate) {
+          setLimitInfo({ current: data.current, limit: data.limit, planName: data.planName });
+          setShowLimitDialog(true);
+        }
+      } catch (error) {
+        console.error("Error checking document limit:", error);
+      }
+    };
+
+    checkDocumentLimit();
+  }, []);
 
   useEffect(() => {
     const loadCompanySigner = async () => {
@@ -491,12 +520,37 @@ const NewDocument = () => {
             <Button 
               className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" 
               onClick={handleSubmit}
+              disabled={showLimitDialog}
             >
               Enviar para Assinatura
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Limit Reached Dialog */}
+      <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limite de Documentos Atingido</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Você atingiu o limite de <strong>{limitInfo?.limit} documentos</strong> do plano{" "}
+                <strong>{limitInfo?.planName}</strong> este mês.
+              </p>
+              <p>Faça upgrade do seu plano para continuar criando documentos.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => navigate("/documentos")}>
+              Voltar
+            </Button>
+            <Button onClick={() => navigate("/configuracoes?tab=subscription")}>
+              Ver Planos
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
