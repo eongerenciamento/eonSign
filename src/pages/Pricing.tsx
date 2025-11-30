@@ -151,7 +151,7 @@ const FAQS = [
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const [showComparison, setShowComparison] = useState(false);
+  const [showComparison, setShowComparison] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -166,7 +166,7 @@ export default function Pricing() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo-eon-sign.png" alt="Eon Sign" className="h-12" />
+            <img src="/logo-eon-sign.png" alt="Eon Sign" className="h-16" />
           </div>
           <Button 
             variant="ghost" 
@@ -222,21 +222,27 @@ export default function Pricing() {
                       </p>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      {plan.features.slice(0, 3).map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm">
-                          {feature.included ? (
-                            <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                          ) : (
-                            <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className={feature.included ? 'text-white' : 'text-gray-400'}>
-                            {feature.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                   <CardContent className="space-y-4">
+                     <div className="space-y-3">
+                       <div className="flex items-center gap-2 text-sm">
+                         <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                         <span className="text-white font-medium">
+                           {plan.limit >= 1000 ? '1000 documentos/mês' : `${plan.limit} documentos/mês`}
+                         </span>
+                       </div>
+                       {plan.features.slice(1, 4).map((feature, idx) => (
+                         <div key={idx} className="flex items-center gap-2 text-sm">
+                           {feature.included ? (
+                             <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                           ) : (
+                             <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                           )}
+                           <span className={feature.included ? 'text-white' : 'text-gray-400'}>
+                             {feature.name}
+                           </span>
+                         </div>
+                       ))}
+                     </div>
                     <Button
                       onClick={() => handleSelectPlan(plan)}
                       className="w-full bg-white text-[#273d60] hover:bg-gray-100 font-bold"
