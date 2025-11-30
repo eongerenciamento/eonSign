@@ -248,8 +248,8 @@ const Reports = () => {
       body: tableData,
       startY: filters.length > 0 ? 50 : 45,
       styles: {
-        fontSize: 8,
-        cellPadding: 3,
+        fontSize: 9,
+        cellPadding: 4,
       },
       headStyles: {
         fillColor: [39, 61, 96],
@@ -260,14 +260,14 @@ const Reports = () => {
         fillColor: [245, 245, 245],
       },
       columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 22 },
-        3: { cellWidth: 35 },
-        4: { cellWidth: 25 },
-        5: { cellWidth: 30 },
-        6: { cellWidth: 20 },
-        7: { cellWidth: 22 },
+        0: { cellWidth: 40 }, // Nome
+        1: { cellWidth: 30 }, // CPF/CNPJ
+        2: { cellWidth: 25 }, // Nascimento
+        3: { cellWidth: 50 }, // Email
+        4: { cellWidth: 30 }, // Telefone
+        5: { cellWidth: 45 }, // Documento
+        6: { cellWidth: 22 }, // Status
+        7: { cellWidth: 28 }, // Assinatura
       },
     });
 
