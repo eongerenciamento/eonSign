@@ -246,7 +246,7 @@ export function SubscriptionTab() {
                   {usage.current} / 5
                 </span>
               </div>
-              <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-600" />
+              <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-300" />
               <p className="text-xs text-gray-600">
                 {usage.current >= 4 
                   ? "Você está próximo do limite. Considere fazer upgrade." 
