@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, Crown, Loader2 } from "lucide-react";
+import { Check, Crown, Loader2, X } from "lucide-react";
 
 const SUBSCRIPTION_TIERS = [
   { name: "Grátis", limit: 5, price: 0, priceId: "free", description: "Ideal para testes" },
@@ -207,7 +207,7 @@ export function SubscriptionTab() {
             {SUBSCRIPTION_TIERS.filter((t) => 
               t.limit > subscription.document_limit && t.priceId !== "free"
             ).map((tier) => (
-              <Card key={tier.name} className="relative flex-shrink-0 w-[300px] snap-start">
+              <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
                   <CardDescription>{tier.description}</CardDescription>
@@ -219,10 +219,26 @@ export function SubscriptionTab() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-600" />
-                    <span>
-                      {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
-                    </span>
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>
+                        {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Assinatura digital ICP-Brasil</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Notificações por email/WhatsApp</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Geolocalização da assinatura</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Eon Drive</span>
                     </div>
                   </div>
                   <Button
@@ -279,11 +295,11 @@ export function SubscriptionTab() {
           return (
             <Card
               key={tier.name}
-              className={`relative flex-shrink-0 w-[300px] snap-start ${isRecommended ? "border-primary shadow-lg" : ""}`}
+              className={`relative flex-shrink-0 w-[320px] snap-start ${isRecommended ? "border-primary shadow-lg pt-8" : ""}`}
             >
               {isRecommended && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary">Recomendado</Badge>
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
+                  <Badge className="bg-primary whitespace-nowrap">Recomendado</Badge>
                 </div>
               )}
               <CardHeader>
@@ -299,18 +315,38 @@ export function SubscriptionTab() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>
                       {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Assinatura digital ICP-Brasil</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span>Notificações por email e WhatsApp</span>
+                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Notificações por email/WhatsApp</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {tier.priceId === "free" ? (
+                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    ) : (
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    )}
+                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
+                      Geolocalização da assinatura
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {tier.priceId === "free" ? (
+                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    ) : (
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    )}
+                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
+                      Eon Drive
+                    </span>
                   </div>
                 </div>
                 <Button
