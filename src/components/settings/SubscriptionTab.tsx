@@ -241,22 +241,16 @@ export function SubscriptionTab() {
             </p>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="font-medium text-gray-600">Uso de Documentos</span>
+                <span className="font-medium text-gray-600">Consumo</span>
                 <span className="font-bold text-gray-600">
                   {usage.current} / 5
                 </span>
               </div>
               <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-300" />
-              <p className="text-xs text-gray-600">
-                {usage.current >= 4 
-                  ? "Você está próximo do limite. Considere fazer upgrade." 
-                  : `Você usou ${usage.current} de 5 documentos disponíveis neste mês.`}
-              </p>
             </div>
             <Button
               onClick={handleManageSubscription}
-              variant="outline"
-              className="w-full"
+              className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
             >
               Extrato de Pagamentos
             </Button>
