@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, MoreVertical, Move, FolderX, PenTool, Trash2, Mail, MessageCircle } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 export interface Document {
   id: string;
@@ -23,6 +22,7 @@ export interface Document {
 export interface Folder {
   id: string;
   name: string;
+  parent_folder_id?: string | null;
 }
 interface DocumentsTableProps {
   documents: Document[];
@@ -69,6 +69,24 @@ export const DocumentsTable = ({
     toast
   } = useToast();
   const navigate = useNavigate();
+
+  // Organize folders hierarchically
+  const organizeHierarchicalFolders = () => {
+    const parentFolders = folders.filter(f => !f.parent_folder_id);
+    const result: Array<{ folder: Folder; level: number }> = [];
+    
+    parentFolders.forEach(parent => {
+      result.push({ folder: parent, level: 0 });
+      const children = folders.filter(f => f.parent_folder_id === parent.id);
+      children.forEach(child => {
+        result.push({ folder: child, level: 1 });
+      });
+    });
+    
+    return result;
+  };
+
+  const hierarchicalFolders = organizeHierarchicalFolders();
 
   const handleSignDocument = (documentId: string) => {
     navigate(`/assinar/${documentId}`);
@@ -424,9 +442,16 @@ export const DocumentsTable = ({
                             <SelectValue placeholder="Selecionar pasta" />
                           </SelectTrigger>
                           <SelectContent className="bg-white z-50">
-                            {folders.map(folder => <SelectItem key={folder.id} value={folder.id} className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700">
-                                {folder.name}
-                              </SelectItem>)}
+                            {hierarchicalFolders.map(({ folder, level }) => (
+                              <SelectItem 
+                                key={folder.id} 
+                                value={folder.id} 
+                                className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700"
+                                style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                              >
+                                {level > 0 && "└─ "}{folder.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>}
                     </div>
@@ -465,30 +490,6 @@ export const DocumentsTable = ({
                           <Trash2 className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
-                      {showFolderActions && allFolders.length > 0 && <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                              <MoreVertical className="w-4 h-4 text-gray-500" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white z-50">
-                            <DropdownMenuSub>
-                              <DropdownMenuSubTrigger>
-                                <Move className="w-4 h-4 mr-2" />
-                                Mover para
-                              </DropdownMenuSubTrigger>
-                              <DropdownMenuSubContent className="bg-white z-50">
-                                {doc.folderId && <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
-                                    <FolderX className="w-4 h-4 mr-2" />
-                                    Remover da pasta
-                                  </DropdownMenuItem>}
-                                {allFolders.map(folder => <DropdownMenuItem key={folder.id} onClick={() => handleMoveToFolder(doc.id, folder.id)}>
-                                    📁 {folder.name}
-                                  </DropdownMenuItem>)}
-                              </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                          </DropdownMenuContent>
-                        </DropdownMenu>}
                     </div>
                   </TableCell>
                 </TableRow>;
@@ -570,35 +571,18 @@ export const DocumentsTable = ({
                       <SelectValue placeholder="Selecionar pasta" />
                     </SelectTrigger>
                     <SelectContent className="bg-white z-50">
-                      {folders.map(folder => <SelectItem key={folder.id} value={folder.id} className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700">
-                          {folder.name}
-                        </SelectItem>)}
+                      {hierarchicalFolders.map(({ folder, level }) => (
+                        <SelectItem 
+                          key={folder.id} 
+                          value={folder.id} 
+                          className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700"
+                          style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                        >
+                          {level > 0 && "└─ "}{folder.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>}
-                {showFolderActions && allFolders.length > 0 && <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent">
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="bg-white z-50">
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <Move className="w-4 h-4 mr-2" />
-                          Mover para
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="bg-white z-50">
-                          {doc.folderId && <DropdownMenuItem onClick={() => handleRemoveFromFolder(doc.id)}>
-                              <FolderX className="w-4 h-4 mr-2" />
-                              Remover da pasta
-                            </DropdownMenuItem>}
-                          {allFolders.map(folder => <DropdownMenuItem key={folder.id} onClick={() => handleMoveToFolder(doc.id, folder.id)}>
-                              📁 {folder.name}
-                            </DropdownMenuItem>)}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                    </DropdownMenuContent>
-                  </DropdownMenu>}
               </div>
             </div>;
       })}
