@@ -198,10 +198,10 @@ export default function Pricing() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#273d60] mb-4">
+        <h1 className="text-4xl font-bold mb-4 md:text-3xl text-gray-600">
           Planos e Preços
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="mb-8 max-w-2xl mx-auto text-lg text-gray-500">
           Escolha o plano ideal para o volume de documentos da sua empresa
         </p>
       </div>
