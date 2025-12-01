@@ -79,6 +79,7 @@ export function SubscriptionTab() {
           documentLimit: tier.limit,
           email: user.email,
           organizationName: companyData?.company_name || "Organização",
+          userId: user.id,
         },
       });
 

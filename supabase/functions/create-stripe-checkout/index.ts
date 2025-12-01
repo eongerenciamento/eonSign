@@ -20,11 +20,11 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { priceId, tierName, documentLimit, email, organizationName } = await req.json();
+    const { priceId, tierName, documentLimit, email, organizationName, userId } = await req.json();
     if (!priceId || !tierName || !documentLimit || !email || !organizationName) {
       throw new Error("Missing required fields: priceId, tierName, documentLimit, email, organizationName");
     }
-    logStep("Request data", { priceId, tierName, documentLimit, email, organizationName });
+    logStep("Request data", { priceId, tierName, documentLimit, email, organizationName, userId });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -59,6 +59,7 @@ serve(async (req) => {
         organization_name: organizationName,
         tier_name: tierName,
         document_limit: documentLimit.toString(),
+        user_id: userId || "",
       }
     });
 
