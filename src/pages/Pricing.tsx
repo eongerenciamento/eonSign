@@ -201,8 +201,14 @@ export default function Pricing() {
         <h1 className="text-4xl font-bold mb-4 md:text-3xl text-gray-600">
           Planos e Preços
         </h1>
-        <p className="mb-8 max-w-2xl mx-auto text-lg text-gray-500">
+        <p className="mb-2 max-w-2xl mx-auto text-lg text-gray-500">
           Escolha o plano ideal para o volume de documentos da sua empresa
+        </p>
+        <p className="mb-8 max-w-2xl mx-auto text-sm text-gray-400">
+          Se seu volume de assinaturas é maior entre em contato:{" "}
+          <a href="mailto:contato@eongerenciamento.com.br" className="underline hover:text-gray-500">
+            contato@eongerenciamento.com.br
+          </a>
         </p>
       </div>
 
