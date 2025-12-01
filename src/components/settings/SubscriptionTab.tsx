@@ -268,28 +268,32 @@ export function SubscriptionTab() {
   return (
     <div className="space-y-6">
       {usage && (
-        <Card className="bg-gray-100 border-0">
-          <CardContent className="pt-6 space-y-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Você está no plano <strong>GRÁTIS</strong>
-            </p>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium text-gray-600">Consumo</span>
-                <span className="font-bold text-gray-600">
-                  {usage.current} / 5
-                </span>
+        <>
+          <Card className="bg-gray-100 border-0">
+            <CardContent className="pt-6 space-y-4">
+              <p className="text-sm text-gray-600 mb-2">
+                Você está no plano <strong>GRÁTIS</strong>
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium text-gray-600">Consumo</span>
+                  <span className="font-bold text-gray-600">
+                    {usage.current} / 5
+                  </span>
+                </div>
+                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
               </div>
-              <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-300" />
-            </div>
+            </CardContent>
+          </Card>
+          <div className="flex justify-end">
             <Button
               onClick={handleManageSubscription}
-              className="ml-auto rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
+              className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
             >
               Extrato de Pagamentos
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </>
       )}
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory">
