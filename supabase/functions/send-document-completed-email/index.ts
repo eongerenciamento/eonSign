@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Enviar email para cada signatário
     const emailPromises = recipients.map(async (email) => {
       return await resend.emails.send({
-        from: "Eon Gerenciamento <noreply@eongerenciamento.com.br>",
+        from: "Eon Sign <noreply@eongerenciamento.com.br>",
         to: [email],
         subject: `Documento Assinado - ${documentName}`,
         html: `
