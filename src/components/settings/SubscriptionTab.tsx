@@ -185,7 +185,7 @@ export function SubscriptionTab() {
                   {processingCheckout ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price}`
+                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price},00 / mês`
                   )}
                 </Button>
               )}
@@ -214,8 +214,7 @@ export function SubscriptionTab() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-3xl font-bold">R$ {tier.price}</p>
-                    <p className="text-sm text-muted-foreground">por mês</p>
+                    <p className="text-3xl font-bold">R$ {tier.price},00 <span className="text-lg font-normal text-muted-foreground">/ mês</span></p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
@@ -309,9 +308,12 @@ export function SubscriptionTab() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-3xl font-bold">
-                    {tier.price === 0 ? "Grátis" : `R$ ${tier.price}`}
+                    {tier.price === 0 ? "Grátis" : (
+                      <>
+                        R$ {tier.price},00 <span className="text-lg font-normal text-muted-foreground">/ mês</span>
+                      </>
+                    )}
                   </p>
-                  {tier.price > 0 && <p className="text-sm text-muted-foreground">por mês</p>}
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
