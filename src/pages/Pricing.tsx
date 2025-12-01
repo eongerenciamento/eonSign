@@ -141,13 +141,13 @@ const PLANS = [{
 }, {
   id: "enterprise",
   name: "Enterprise",
-  limit: 9999,
+  limit: 200,
   price: 289.90,
   priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
-  description: "Documentos ilimitados",
+  description: "Para alto volume",
   features: [{
     name: "Quantidade de documentos / envelopes",
-    value: "Ilimitado"
+    value: "200"
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
