@@ -224,7 +224,7 @@ export default function Pricing() {
                     </div>
                     <div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-white">
+                        <span className="font-bold text-white text-xl">
                           {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
                         </span>
                         {plan.price > 0 && <span className="text-gray-300">/mês</span>}
