@@ -160,19 +160,28 @@ export function SubscriptionTab() {
               </div>
             </div>
 
-            {nextTier && (
+            <div className="flex gap-3">
+              {nextTier && (
+                <Button
+                  onClick={() => handleUpgrade(nextTier)}
+                  disabled={processingCheckout}
+                  className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
+                >
+                  {processingCheckout ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price}`
+                  )}
+                </Button>
+              )}
               <Button
-                onClick={() => handleUpgrade(nextTier)}
-                disabled={processingCheckout}
-                className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
+                onClick={handleManageSubscription}
+                variant="outline"
+                className="flex-1"
               >
-                {processingCheckout ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price}`
-                )}
+                Extrato de Pagamentos
               </Button>
-            )}
+            </div>
           </CardContent>
         </Card>
 
@@ -224,18 +233,9 @@ export function SubscriptionTab() {
   // User on free tier - show all paid tiers
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Escolha seu Plano</CardTitle>
-          <CardDescription>
-            Faça upgrade conforme sua necessidade de volume de documentos
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
       {usage && (
         <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6 space-y-3">
+          <CardContent className="pt-6 space-y-4">
             <p className="text-sm text-yellow-800 mb-2">
               Você está no plano <strong>Grátis</strong> com limite de 5 documentos por mês.
             </p>
@@ -253,6 +253,13 @@ export function SubscriptionTab() {
                   : `Você usou ${usage.current} de 5 documentos disponíveis neste mês.`}
               </p>
             </div>
+            <Button
+              onClick={handleManageSubscription}
+              variant="outline"
+              className="w-full"
+            >
+              Extrato de Pagamentos
+            </Button>
           </CardContent>
         </Card>
       )}
