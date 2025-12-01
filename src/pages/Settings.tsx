@@ -208,7 +208,7 @@ const Settings = () => {
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
-        <Tabs value={activeTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
