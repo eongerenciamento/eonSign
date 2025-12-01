@@ -141,18 +141,22 @@ export function SubscriptionTab() {
           <CardContent className="space-y-6">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Documentos este mês</span>
-                  <span className="font-medium">
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="font-medium">Uso de Documentos</span>
+                  <span className="font-bold text-primary">
                     {usage?.current || 0} / {subscription.document_limit}
                   </span>
                 </div>
-                <Progress value={usagePercent} className="h-2" />
-                {usagePercent >= 80 && (
-                  <p className="text-xs text-yellow-600">
-                    Você está próximo do limite. Considere fazer upgrade.
-                  </p>
-                )}
+                <Progress value={usagePercent} className="h-3" />
+                <p className="text-xs text-muted-foreground">
+                  {usagePercent >= 80 ? (
+                    <span className="text-yellow-600 font-medium">
+                      Você está próximo do limite. Considere fazer upgrade.
+                    </span>
+                  ) : (
+                    `Você usou ${usage?.current || 0} de ${subscription.document_limit} documentos disponíveis neste mês.`
+                  )}
+                </p>
               </div>
             </div>
 
@@ -200,7 +204,7 @@ export function SubscriptionTab() {
                   <Button
                     onClick={() => handleUpgrade(tier)}
                     disabled={processingCheckout}
-                    className="w-full"
+                    className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"
                   >
                     {processingCheckout ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -231,12 +235,24 @@ export function SubscriptionTab() {
 
       {usage && (
         <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
-            <p className="text-sm text-yellow-800">
+          <CardContent className="pt-6 space-y-3">
+            <p className="text-sm text-yellow-800 mb-2">
               Você está no plano <strong>Grátis</strong> com limite de 5 documentos por mês.
-              <br />
-              Uso atual: <strong>{usage.current} / 5</strong> documentos este mês.
             </p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="font-medium text-yellow-900">Uso de Documentos</span>
+                <span className="font-bold text-yellow-900">
+                  {usage.current} / 5
+                </span>
+              </div>
+              <Progress value={(usage.current / 5) * 100} className="h-3 bg-yellow-100" />
+              <p className="text-xs text-yellow-700">
+                {usage.current >= 4 
+                  ? "Você está próximo do limite. Considere fazer upgrade." 
+                  : `Você usou ${usage.current} de 5 documentos disponíveis neste mês.`}
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -284,8 +300,8 @@ export function SubscriptionTab() {
                 <Button
                   onClick={() => handleUpgrade(tier)}
                   disabled={processingCheckout || tier.priceId === "free"}
-                  className="w-full"
-                  variant={tier.priceId === "free" ? "outline" : "default"}
+                  className={tier.priceId === "free" ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
+                  variant={tier.priceId === "free" ? "outline" : undefined}
                 >
                   {processingCheckout ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
