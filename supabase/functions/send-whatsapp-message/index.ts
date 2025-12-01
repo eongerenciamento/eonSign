@@ -31,11 +31,18 @@ const handler = async (req: Request): Promise<Response> => {
     const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
     const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const fromNumber = Deno.env.get("TWILIO_WHATSAPP_NUMBER");
+    const templateInvitation = Deno.env.get("TWILIO_TEMPLATE_INVITATION");
+    const templateCompleted = Deno.env.get("TWILIO_TEMPLATE_COMPLETED");
     const APP_URL = Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
 
     if (!accountSid || !authToken || !fromNumber) {
       console.error("Twilio credentials not configured");
       throw new Error("Twilio credentials not configured");
+    }
+
+    if (!templateInvitation || !templateCompleted) {
+      console.error("WhatsApp templates not configured");
+      throw new Error("WhatsApp templates not configured");
     }
 
     // Formatar número para WhatsApp (remover formatação e adicionar código do país se necessário)
@@ -44,44 +51,43 @@ const handler = async (req: Request): Promise<Response> => {
       cleanPhone = "55" + cleanPhone;
     }
 
-    console.log(`Sending WhatsApp to ${cleanPhone} for document ${documentId}`);
-
     const signatureUrl = `${APP_URL}/assinar/${documentId}`;
 
-    let messageBody: string;
+    const templateSid = isCompleted ? templateCompleted : templateInvitation;
+    const templateType = isCompleted ? "document_completed" : "signature_invitation";
 
-    if (isCompleted) {
-      // Mensagem para documento completamente assinado
-      messageBody = `Olá ${signerName}! 🎉
-
-O documento *${documentName}* foi assinado por todos os signatários! ✅
-
-Você receberá o documento assinado por e-mail.
-
-_Eon Sign - Sistema de Assinatura Digital_`;
-    } else {
-      // Mensagem para convite de assinatura
-      messageBody = `Olá ${signerName}! 👋
-
-*${organizationName}* enviou um documento para você assinar digitalmente.
-
-📄 *Documento:* ${documentName}
-
-Clique no link abaixo para visualizar e assinar:
-${signatureUrl}
-
-_Eon Sign - Sistema de Assinatura Digital_`;
-    }
+    console.log(`Sending WhatsApp to ${cleanPhone} for document ${documentId} using template ${templateType} (${templateSid})`);
 
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-
     const credentials = btoa(`${accountSid}:${authToken}`);
 
-    const body = new URLSearchParams({
-      To: `whatsapp:+${cleanPhone}`,
-      From: `whatsapp:${fromNumber}`,
-      Body: messageBody,
-    });
+    let body: URLSearchParams;
+
+    if (isCompleted) {
+      // Template de documento completamente assinado
+      body = new URLSearchParams({
+        To: `whatsapp:+${cleanPhone}`,
+        From: `whatsapp:${fromNumber}`,
+        ContentSid: templateSid,
+        ContentVariables: JSON.stringify({
+          "1": signerName,     // {{1}} - Nome do signatário
+          "2": documentName    // {{2}} - Nome do documento
+        }),
+      });
+    } else {
+      // Template de convite de assinatura
+      body = new URLSearchParams({
+        To: `whatsapp:+${cleanPhone}`,
+        From: `whatsapp:${fromNumber}`,
+        ContentSid: templateSid,
+        ContentVariables: JSON.stringify({
+          "1": signerName,        // {{1}} - Nome do signatário
+          "2": organizationName,  // {{2}} - Nome da empresa
+          "3": documentName,      // {{3}} - Nome do documento
+          "4": signatureUrl       // {{4}} - Link para assinar
+        }),
+      });
+    }
 
     const response = await fetch(url, {
       method: "POST",
