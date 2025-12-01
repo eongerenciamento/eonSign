@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
       subject: "Bem-vindo ao Éon Sign!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
+          <div style="padding: 0; text-align: center;">
             <img src="${BANNER_URL}" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block;" />
           </div>
           <div style="padding: 30px; background: #f9f9f9;">
