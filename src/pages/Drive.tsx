@@ -183,7 +183,8 @@ const Drive = () => {
         title: "Pasta excluída",
         description: "A pasta foi excluída com sucesso.",
       });
-      loadFolders();
+      await loadFolders();
+      await loadAllFolders();
       if (selectedFolder === folderId) {
         setSelectedFolder(null);
       }
