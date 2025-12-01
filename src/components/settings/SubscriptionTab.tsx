@@ -234,20 +234,20 @@ export function SubscriptionTab() {
   return (
     <div className="space-y-6">
       {usage && (
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6 space-y-4">
-            <p className="text-sm text-yellow-800 mb-2">
-              Você está no plano <strong>Grátis</strong> com limite de 5 documentos por mês.
+            <p className="text-sm text-gray-600 mb-2">
+              Você está no plano <strong>GRÁTIS</strong>
             </p>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="font-medium text-yellow-900">Uso de Documentos</span>
-                <span className="font-bold text-yellow-900">
+                <span className="font-medium text-gray-600">Uso de Documentos</span>
+                <span className="font-bold text-gray-600">
                   {usage.current} / 5
                 </span>
               </div>
-              <Progress value={(usage.current / 5) * 100} className="h-3 bg-yellow-100" />
-              <p className="text-xs text-yellow-700">
+              <Progress value={(usage.current / 5) * 100} className="h-3" />
+              <p className="text-xs text-gray-600">
                 {usage.current >= 4 
                   ? "Você está próximo do limite. Considere fazer upgrade." 
                   : `Você usou ${usage.current} de 5 documentos disponíveis neste mês.`}
