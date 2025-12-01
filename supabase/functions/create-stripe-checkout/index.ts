@@ -52,6 +52,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      allow_promotion_codes: true,
       success_url: `${origin}/auth?checkout=success`,
       cancel_url: `${origin}/planos?checkout=canceled`,
       metadata: {
