@@ -206,7 +206,7 @@ export default function Pricing() {
         </p>
         <p className="mb-8 max-w-2xl mx-auto text-sm text-gray-400">
           Se seu volume de assinaturas é maior entre em contato:{" "}
-          <a href="mailto:contato@eongerenciamento.com.br" className="underline hover:text-gray-500">
+          <a href="mailto:contato@eongerenciamento.com.br" className="underline text-primary">
             contato@eongerenciamento.com.br
           </a>
         </p>
