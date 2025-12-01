@@ -216,7 +216,7 @@ export default function Pricing() {
               {PLANS.map(plan => <Card key={plan.name} className="relative bg-[#273d60] text-white border-none w-96 flex-shrink-0 shadow-xl">
                   <CardHeader className="space-y-4">
                     <div className="h-7 flex justify-center">
-                      {plan.recommended && <Badge className="py-1 font-bold w-fit text-primary-foreground px-[20px] border-primary bg-primary">Mais Vendido</Badge>}
+                      {plan.recommended && <Badge className="py-1 font-bold w-fit px-[20px] border-primary bg-white text-gray-600">Mais Vendido</Badge>}
                     </div>
                     <div>
                       <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
