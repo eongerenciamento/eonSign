@@ -262,14 +262,12 @@ export function SubscriptionTab() {
               </div>
               <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-300" />
             </div>
-            {subscription?.stripe_customer_id && (
-              <Button
-                onClick={handleManageSubscription}
-                className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
-              >
-                Extrato de Pagamentos
-              </Button>
-            )}
+            <Button
+              onClick={handleManageSubscription}
+              className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
+            >
+              Extrato de Pagamentos
+            </Button>
           </CardContent>
         </Card>
       )}
