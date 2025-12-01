@@ -203,11 +203,11 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
             {SUBSCRIPTION_TIERS.filter((t) => 
               t.limit > subscription.document_limit && t.priceId !== "free"
             ).map((tier) => (
-              <Card key={tier.name} className="relative">
+              <Card key={tier.name} className="relative flex-shrink-0 w-[300px] snap-start">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
                   <CardDescription>{tier.description}</CardDescription>
@@ -273,13 +273,13 @@ export function SubscriptionTab() {
         </Card>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
           const isRecommended = index === 2; // Professional tier
           return (
             <Card
               key={tier.name}
-              className={`relative ${isRecommended ? "border-primary shadow-lg" : ""}`}
+              className={`relative flex-shrink-0 w-[300px] snap-start ${isRecommended ? "border-primary shadow-lg" : ""}`}
             >
               {isRecommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
