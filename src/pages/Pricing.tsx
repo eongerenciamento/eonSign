@@ -259,7 +259,7 @@ export default function Pricing() {
                         {plan.price > 0 && <span className="text-gray-300">/mês</span>}
                       </div>
                       <p className="text-sm text-gray-300 mt-1">
-                        {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos/mês`}
+                        {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos`}
                       </p>
                     </div>
                   </CardHeader>
