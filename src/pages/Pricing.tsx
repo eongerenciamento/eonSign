@@ -184,12 +184,12 @@ export default function Pricing() {
   return <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white">
-        <div className="container mx-auto px-4 bg-[#273d60] py-0">
-        <div className="flex items-center justify-between bg-[#273d60] my-0 py-[20px]">
+        <div className="container mx-auto px-4 py-0 bg-transparent">
+        <div className="flex items-center justify-between my-0 py-[20px] bg-transparent">
           <div className="flex items-center gap-2">
             <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
           </div>
-          <Button variant="ghost" onClick={() => navigate('/auth')} className="text-primary-foreground bg-transparent">
+          <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
             Já tenho conta
           </Button>
         </div>
