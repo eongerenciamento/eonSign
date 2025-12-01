@@ -162,7 +162,7 @@ export function SubscriptionTab() {
                     {usage?.current || 0} / {subscription.document_limit}
                   </span>
                 </div>
-                <Progress value={usagePercent} className="h-3 bg-gray-300" />
+                <Progress value={usagePercent} className="h-1.5 bg-gray-300" />
                 <p className="text-xs text-muted-foreground">
                   {usagePercent >= 80 ? (
                     <span className="text-yellow-600 font-medium">
