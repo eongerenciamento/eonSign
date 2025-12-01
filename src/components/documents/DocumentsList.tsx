@@ -64,7 +64,10 @@ export const DocumentsList = ({
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
             } ${dragOverId === document.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""}`}
           >
-            <div className="flex items-center gap-3 flex-1">
+            <div 
+              className="flex items-center gap-3 flex-1 cursor-pointer"
+              onClick={() => onViewDocument(document.id)}
+            >
               <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
               <span className="text-sm text-gray-600 truncate">{document.name}</span>
             </div>
@@ -134,6 +137,7 @@ export const DocumentsList = ({
           draggable
           onDragStart={(e) => handleDragStart(e, document.id)}
           onDragEnd={handleDragEnd}
+          onClick={() => onViewDocument(document.id)}
           className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative ${
             dragOverId === document.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""
           }`}
