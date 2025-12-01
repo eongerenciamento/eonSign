@@ -243,7 +243,7 @@ export default function Pricing() {
                            </span>
                          </div>)}
                      </div>
-                    <Button onClick={() => handleSelectPlan(plan)} className="w-full bg-white text-[#273d60] hover:bg-gray-100 font-bold" variant="secondary">
+                    <Button onClick={() => handleSelectPlan(plan)} variant="secondary" className="w-full font-bold text-primary-foreground bg-slate-400 hover:bg-slate-300">
                       {plan.price === 0 ? 'Começar Grátis' : 'Escolher Plano'}
                     </Button>
                   </CardContent>
