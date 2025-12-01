@@ -203,7 +203,7 @@ export default function Auth() {
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
       }}>
-          <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/064fa19f-41fd-43f6-a45f-95f030679937.png" />
+          <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/2a7be3f3-4a04-400c-abe6-8905590ba40d.png" />
         </div>
 
         <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/20 animate-fade-in" style={{
