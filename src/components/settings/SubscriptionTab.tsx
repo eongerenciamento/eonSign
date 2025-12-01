@@ -220,7 +220,7 @@ export function SubscriptionTab() {
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>
-                        {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
+                        {tier.limit >= 1000 ? "Documentos/envelopes ilimitados" : `Até ${tier.limit} documentos/envelopes`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
@@ -234,6 +234,10 @@ export function SubscriptionTab() {
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Geolocalização da assinatura</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Face ID</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -319,7 +323,7 @@ export function SubscriptionTab() {
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>
-                      {tier.limit >= 1000 ? "Documentos ilimitados" : `Até ${tier.limit} documentos/mês`}
+                      {tier.limit >= 1000 ? "Documentos/envelopes ilimitados" : `Até ${tier.limit} documentos/envelopes`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -338,6 +342,16 @@ export function SubscriptionTab() {
                     )}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Geolocalização da assinatura
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {tier.priceId === "free" ? (
+                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    ) : (
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    )}
+                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
+                      Face ID
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
