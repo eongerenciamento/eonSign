@@ -284,7 +284,7 @@ export function SubscriptionTab() {
             </div>
             <Button
               onClick={handleManageSubscription}
-              className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
+              className="ml-auto rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
             >
               Extrato de Pagamentos
             </Button>
