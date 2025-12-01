@@ -27,7 +27,7 @@ const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<"name" | "signed_at" | "status">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Debounce para busca
   useEffect(() => {
@@ -567,7 +567,7 @@ const Reports = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
-                  placeholder="Buscar nome, CPF/CNPJ ou email..."
+                  placeholder="Busca por Nome, CPF/CNPJ ou email..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-10 rounded-full text-sm placeholder:text-xs"
@@ -719,11 +719,18 @@ const Reports = () => {
                         
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Localização:</span>
-                          <span className="font-medium text-xs">
-                            {signer.signature_city && signer.signature_state
-                              ? `${signer.signature_city}, ${signer.signature_state}`
-                              : "-"}
-                          </span>
+                          {signer.signature_city && signer.signature_state ? (
+                            <a
+                              href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium text-xs text-blue-600 hover:underline"
+                            >
+                              {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
+                            </a>
+                          ) : (
+                            <span className="font-medium text-xs">-</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -803,9 +810,18 @@ const Reports = () => {
                               : "-"}
                           </TableCell>
                           <TableCell>
-                            {signer.signature_city && signer.signature_state
-                              ? `${signer.signature_city}, ${signer.signature_state}`
-                              : "-"}
+                            {signer.signature_city && signer.signature_state ? (
+                              <a
+                                href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
+                              </a>
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
