@@ -203,7 +203,7 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-          <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory">
+              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-full">
             {SUBSCRIPTION_TIERS.filter((t) => 
               t.limit > subscription.document_limit && t.priceId !== "free"
             ).map((tier) => (
@@ -296,7 +296,7 @@ export function SubscriptionTab() {
         </>
       )}
 
-      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory">
+      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-full">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
           const isRecommended = index === 2; // Professional tier
           return (
