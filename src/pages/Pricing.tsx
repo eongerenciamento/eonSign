@@ -184,7 +184,7 @@ export default function Pricing() {
   return <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white">
-        <div className="container mx-auto px-4 py-4 bg-[#273d60]">
+        <div className="container mx-auto px-4 bg-[#273d60] py-[10px]">
         <div className="flex items-center justify-between bg-[#273d60] my-0 py-[20px]">
           <div className="flex items-center gap-2">
             <img alt="Eon Sign" className="h-16" src="/lovable-uploads/d4bf99d6-8dd0-406b-bd7f-cadf9408e307.png" />
