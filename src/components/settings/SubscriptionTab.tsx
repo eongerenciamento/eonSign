@@ -207,7 +207,7 @@ export function SubscriptionTab() {
             {SUBSCRIPTION_TIERS.filter((t) => 
               t.limit > subscription.document_limit && t.priceId !== "free"
             ).map((tier) => (
-              <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start">
+              <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
                   <CardDescription>{tier.description}</CardDescription>
@@ -295,7 +295,7 @@ export function SubscriptionTab() {
           return (
             <Card
               key={tier.name}
-              className={`relative flex-shrink-0 w-[320px] snap-start ${isRecommended ? "border-primary shadow-lg pt-8" : ""}`}
+              className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}
             >
               {isRecommended && (
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
