@@ -33,8 +33,8 @@ serve(async (req) => {
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     
     const user = userData.user;
-    if (!user) throw new Error("User not authenticated");
-    logStep("User authenticated", { userId: user.id });
+    if (!user?.email) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Get user's subscription to find customer_id
     const { data: subscription } = await supabaseClient
@@ -43,18 +43,29 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    if (!subscription?.stripe_customer_id) {
-      throw new Error("No Stripe customer found for this user");
-    }
-
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
+    let customerId = subscription?.stripe_customer_id;
+
+    // If no customer_id in database, try to find by email in Stripe
+    if (!customerId) {
+      logStep("No customer_id in database, searching by email");
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      
+      if (customers.data.length === 0) {
+        throw new Error("Você ainda não possui histórico de pagamentos. Faça upgrade para um plano pago para acessar o extrato.");
+      }
+      
+      customerId = customers.data[0].id;
+      logStep("Found customer by email", { customerId });
+    }
+
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
+      customer: customerId,
       return_url: `${origin}/configuracoes?tab=subscription`,
     });
 
