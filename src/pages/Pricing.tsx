@@ -26,10 +26,10 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: false
   }, {
-    name: "Face ID",
+    name: "Eon Drive",
     included: false
   }, {
-    name: "Eon Drive",
+    name: "Face ID",
     included: false
   }]
 }, {
@@ -53,11 +53,11 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: true
   }, {
-    name: "Face ID",
-    included: false
-  }, {
     name: "Eon Drive",
     included: true
+  }, {
+    name: "Face ID",
+    included: false
   }]
 }, {
   id: "pro",
@@ -80,10 +80,10 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: true
   }, {
-    name: "Face ID",
+    name: "Eon Drive",
     included: true
   }, {
-    name: "Eon Drive",
+    name: "Face ID",
     included: true
   }]
 }, {
@@ -106,10 +106,10 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: true
   }, {
-    name: "Face ID",
+    name: "Eon Drive",
     included: true
   }, {
-    name: "Eon Drive",
+    name: "Face ID",
     included: true
   }]
 }, {
@@ -132,10 +132,10 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: true
   }, {
-    name: "Face ID",
+    name: "Eon Drive",
     included: true
   }, {
-    name: "Eon Drive",
+    name: "Face ID",
     included: true
   }]
 }, {
@@ -158,10 +158,10 @@ const PLANS = [{
     name: "Geolocalização da assinatura",
     included: true
   }, {
-    name: "Face ID",
+    name: "Eon Drive",
     included: true
   }, {
-    name: "Eon Drive",
+    name: "Face ID",
     included: true
   }]
 }];
