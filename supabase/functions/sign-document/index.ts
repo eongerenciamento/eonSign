@@ -100,6 +100,14 @@ serve(async (req) => {
   }
 
   try {
+    // Capturar IP do cliente
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                     req.headers.get('x-real-ip') ||
+                     req.headers.get('cf-connecting-ip') ||
+                     null;
+    
+    console.log("Client IP:", clientIp);
+
     const { documentId, signerId, cpf, birthDate, latitude, longitude } = await req.json();
 
     // Validar entrada
@@ -213,6 +221,7 @@ serve(async (req) => {
         signature_city: city,
         signature_state: state,
         signature_country: country,
+        signature_ip: clientIp,
       })
       .eq("id", signerId);
 

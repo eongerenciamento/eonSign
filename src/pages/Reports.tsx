@@ -95,6 +95,7 @@ const Reports = () => {
         .from("document_signers")
         .select(`
           *,
+          signature_ip,
           documents!inner(
             user_id,
             name
@@ -175,7 +176,7 @@ const Reports = () => {
       return;
     }
 
-    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data Assinatura", "Localização"];
+    const headers = ["Nome", "CPF/CNPJ", "Data de Nascimento", "Email", "Telefone", "Documento", "Status", "Data Assinatura", "IP", "Localização"];
     const csvData = signatories.map(s => [
       s.name,
       s.cpf || "-",
@@ -185,6 +186,7 @@ const Reports = () => {
       s.documents?.name || "-",
       s.status === "signed" ? "Assinado" : s.status === "pending" ? "Pendente" : "Rejeitado",
       s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "-",
+      s.signature_ip || "-",
       s.signature_city && s.signature_state ? `${s.signature_city}, ${s.signature_state}` : "-"
     ]);
 
@@ -267,6 +269,7 @@ const Reports = () => {
       s.documents?.name || "-",
       s.status === "signed" ? "Assinado" : "Pendente",
       s.signed_at ? format(new Date(s.signed_at), "dd/MM/yyyy", { locale: ptBR }) : "-",
+      s.signature_ip || "-",
       s.signature_city && s.signature_state ? `${s.signature_city}, ${s.signature_state}` : "-"
     ]);
 
@@ -276,7 +279,7 @@ const Reports = () => {
     const totalPending = signatories.filter(s => s.status === "pending").length;
 
     autoTable(doc, {
-      head: [["Nome / CPF", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura", "Localização"]],
+      head: [["Nome / CPF", "Nascimento", "Email", "Telefone", "Documento", "Status", "Assinatura", "IP", "Localização"]],
       body: tableData,
       startY: filters.length > 0 ? 50 : 45,
       styles: {
@@ -292,14 +295,15 @@ const Reports = () => {
         fillColor: [245, 245, 245],
       },
       columnStyles: {
-        0: { cellWidth: 50 }, // Nome + CPF
-        1: { cellWidth: 24 }, // Nascimento
-        2: { cellWidth: 48 }, // Email
-        3: { cellWidth: 28 }, // Telefone
-        4: { cellWidth: 42 }, // Documento
-        5: { cellWidth: 22 }, // Status
-        6: { cellWidth: 26 }, // Assinatura
-        7: { cellWidth: 40 }, // Localização
+        0: { cellWidth: 46 }, // Nome + CPF
+        1: { cellWidth: 22 }, // Nascimento
+        2: { cellWidth: 44 }, // Email
+        3: { cellWidth: 26 }, // Telefone
+        4: { cellWidth: 38 }, // Documento
+        5: { cellWidth: 20 }, // Status
+        6: { cellWidth: 24 }, // Assinatura
+        7: { cellWidth: 28 }, // IP
+        8: { cellWidth: 38 }, // Localização
       },
       didDrawCell: (data) => {
         // Estilizar CPF em fonte menor
@@ -710,11 +714,16 @@ const Reports = () => {
                         
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Data Assinatura:</span>
-                          <span className="font-medium text-xs">
-                            {signer.signed_at
-                              ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
-                              : "-"}
-                          </span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-medium text-xs">
+                              {signer.signed_at
+                                ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                                : "-"}
+                            </span>
+                            {signer.signature_ip && (
+                              <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="flex justify-between">
@@ -805,9 +814,16 @@ const Reports = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {signer.signed_at
-                              ? format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
-                              : "-"}
+                            {signer.signed_at ? (
+                              <div className="flex flex-col">
+                                <span>{format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}</span>
+                                {signer.signature_ip && (
+                                  <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>
+                                )}
+                              </div>
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                           <TableCell>
                             {signer.signature_city && signer.signature_state ? (

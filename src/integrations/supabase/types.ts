@@ -84,6 +84,7 @@ export type Database = {
           phone: string
           signature_city: string | null
           signature_country: string | null
+          signature_ip: string | null
           signature_latitude: number | null
           signature_longitude: number | null
           signature_state: string | null
@@ -103,6 +104,7 @@ export type Database = {
           phone: string
           signature_city?: string | null
           signature_country?: string | null
+          signature_ip?: string | null
           signature_latitude?: number | null
           signature_longitude?: number | null
           signature_state?: string | null
@@ -122,6 +124,7 @@ export type Database = {
           phone?: string
           signature_city?: string | null
           signature_country?: string | null
+          signature_ip?: string | null
           signature_latitude?: number | null
           signature_longitude?: number | null
           signature_state?: string | null
