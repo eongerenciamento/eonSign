@@ -14,7 +14,7 @@ const PLANS = [{
   priceId: "free",
   description: "Ideal para testes",
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "5"
   }, {
     name: "Assinatura digital ICP-Brasil",
@@ -38,7 +38,7 @@ const PLANS = [{
   description: "Para pequenas empresas",
   recommended: false,
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "20"
   }, {
     name: "Assinatura digital ICP-Brasil",
@@ -62,7 +62,7 @@ const PLANS = [{
   description: "Para empresas em crescimento",
   recommended: true,
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "50"
   }, {
     name: "Assinatura digital ICP-Brasil",
@@ -85,7 +85,7 @@ const PLANS = [{
   priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o",
   description: "Para empresas estabelecidas",
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "100"
   }, {
     name: "Assinatura digital ICP-Brasil",
@@ -108,7 +108,7 @@ const PLANS = [{
   priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54",
   description: "Para grandes volumes",
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "500"
   }, {
     name: "Assinatura digital ICP-Brasil",
@@ -131,7 +131,7 @@ const PLANS = [{
   priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z",
   description: "Documentos ilimitados",
   features: [{
-    name: "Quantidade de documentos",
+    name: "Quantidade de documentos / envelopes",
     value: "1000"
   }, {
     name: "Assinatura digital ICP-Brasil",
