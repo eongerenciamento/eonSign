@@ -9,11 +9,11 @@ import { Check, Crown, Loader2, X } from "lucide-react";
 
 const SUBSCRIPTION_TIERS = [
   { name: "Grátis", limit: 5, price: 0, priceId: "free", description: "Ideal para testes" },
-  { name: "Básico", limit: 20, price: 59, priceId: "price_1SZBDZHRTD5WvpxjeKMhFcSK", description: "Para pequenas empresas" },
-  { name: "Profissional", limit: 50, price: 99, priceId: "price_1SZBEAHRTD5Wvpxj0pcztkPt", description: "Para empresas em crescimento" },
-  { name: "Empresarial", limit: 100, price: 159, priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o", description: "Para empresas estabelecidas" },
-  { name: "Premium", limit: 500, price: 499, priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54", description: "Para grandes volumes" },
-  { name: "Enterprise", limit: 1000, price: 899, priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z", description: "Documentos ilimitados" },
+  { name: "Básico", limit: 20, price: 54.90, priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj", description: "Para pequenas empresas" },
+  { name: "Profissional", limit: 50, price: 89.90, priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0", description: "Para empresas em crescimento" },
+  { name: "Empresarial", limit: 100, price: 159.90, priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb", description: "Para empresas estabelecidas" },
+  { name: "Premium", limit: 150, price: 209.90, priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C", description: "Para grandes volumes" },
+  { name: "Enterprise", limit: 9999, price: 289.90, priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX", description: "Documentos ilimitados" },
 ];
 
 export function SubscriptionTab() {
@@ -185,7 +185,7 @@ export function SubscriptionTab() {
                   {processingCheckout ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price},00 / mês`
+                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`
                   )}
                 </Button>
               )}
@@ -214,7 +214,7 @@ export function SubscriptionTab() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-3xl font-bold">R$ {tier.price},00 <span className="text-lg font-normal text-muted-foreground">/ mês</span></p>
+                    <p className="text-3xl font-bold">R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span></p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
@@ -310,7 +310,7 @@ export function SubscriptionTab() {
                   <p className="text-3xl font-bold">
                     {tier.price === 0 ? "Grátis" : (
                       <>
-                        R$ {tier.price},00 <span className="text-lg font-normal text-muted-foreground">/ mês</span>
+                        R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span>
                       </>
                     )}
                   </p>

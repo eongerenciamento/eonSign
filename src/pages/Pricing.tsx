@@ -33,8 +33,8 @@ const PLANS = [{
   id: "basic",
   name: "Básico",
   limit: 20,
-  price: 59,
-  priceId: "price_1SZBDZHRTD5WvpxjeKMhFcSK",
+  price: 54.90,
+  priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj",
   description: "Para pequenas empresas",
   recommended: false,
   features: [{
@@ -57,8 +57,8 @@ const PLANS = [{
   id: "pro",
   name: "Profissional",
   limit: 50,
-  price: 99,
-  priceId: "price_1SZBEAHRTD5Wvpxj0pcztkPt",
+  price: 89.90,
+  priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0",
   description: "Para empresas em crescimento",
   recommended: true,
   features: [{
@@ -81,8 +81,8 @@ const PLANS = [{
   id: "business",
   name: "Empresarial",
   limit: 100,
-  price: 159,
-  priceId: "price_1SZBEOHRTD5WvpxjFsV37k0o",
+  price: 159.90,
+  priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
   description: "Para empresas estabelecidas",
   features: [{
     name: "Quantidade de documentos / envelopes",
@@ -103,13 +103,13 @@ const PLANS = [{
 }, {
   id: "premium",
   name: "Premium",
-  limit: 500,
-  price: 499,
-  priceId: "price_1SZBEdHRTD5Wvpxj46hhdp54",
+  limit: 150,
+  price: 209.90,
+  priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
   description: "Para grandes volumes",
   features: [{
     name: "Quantidade de documentos / envelopes",
-    value: "500"
+    value: "150"
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
@@ -126,13 +126,13 @@ const PLANS = [{
 }, {
   id: "enterprise",
   name: "Enterprise",
-  limit: 1000,
-  price: 899,
-  priceId: "price_1SZBEsHRTD5Wvpxj6t1lc01Z",
+  limit: 9999,
+  price: 289.90,
+  priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
   description: "Documentos ilimitados",
   features: [{
     name: "Quantidade de documentos / envelopes",
-    value: "1000"
+    value: "Ilimitado"
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
@@ -225,7 +225,7 @@ export default function Pricing() {
                     <div>
                       <div className="flex items-baseline gap-1">
                         <span className="font-bold text-white text-xl">
-                          {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
+                          {plan.price === 0 ? 'Grátis' : `R$ ${plan.price.toFixed(2).replace('.', ',')}`}
                         </span>
                         {plan.price > 0 && <span className="text-gray-300">/mês</span>}
                       </div>
@@ -280,7 +280,7 @@ export default function Pricing() {
                       {PLANS.map(plan => <th key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
                           <div className="font-semibold">{plan.name}</div>
                           <div className="text-sm text-muted-foreground font-normal">
-                            {plan.price === 0 ? 'Grátis' : <><span className="text-xs">R$</span> {plan.price}/mês</>}
+                            {plan.price === 0 ? 'Grátis' : <><span className="text-xs">R$</span> {plan.price.toFixed(2).replace('.', ',')}/mês</>}
                           </div>
                         </th>)}
                     </tr>
