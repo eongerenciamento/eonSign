@@ -60,11 +60,25 @@ export function SubscriptionTab() {
 
     setProcessingCheckout(true);
     try {
+      // Get user email and organization name
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        throw new Error("Email do usuário não encontrado");
+      }
+
+      const { data: companyData } = await supabase
+        .from("company_settings")
+        .select("company_name")
+        .eq("user_id", user.id)
+        .single();
+
       const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
           priceId: tier.priceId,
           tierName: tier.name,
           documentLimit: tier.limit,
+          email: user.email,
+          organizationName: companyData?.company_name || "Organização",
         },
       });
 
@@ -248,12 +262,14 @@ export function SubscriptionTab() {
               </div>
               <Progress value={(usage.current / 5) * 100} className="h-3 bg-gray-300" />
             </div>
-            <Button
-              onClick={handleManageSubscription}
-              className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
-            >
-              Extrato de Pagamentos
-            </Button>
+            {subscription?.stripe_customer_id && (
+              <Button
+                onClick={handleManageSubscription}
+                className="w-full rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f]"
+              >
+                Extrato de Pagamentos
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
