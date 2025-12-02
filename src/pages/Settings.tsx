@@ -305,6 +305,11 @@ const Settings = () => {
                     </div>
                   </div>
 
+                  <div className="grid gap-2">
+                    <Label htmlFor="street">Endereço</Label>
+                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600" />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
@@ -315,11 +320,6 @@ const Settings = () => {
                       <Label htmlFor="neighborhood">Bairro</Label>
                       <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" className="text-gray-600" />
                     </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="street">Endereço</Label>
-                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
