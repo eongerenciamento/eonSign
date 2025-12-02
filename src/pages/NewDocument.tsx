@@ -506,7 +506,7 @@ const NewDocument = () => {
 
             {/* Signers Section */}
             <div className="space-y-4">
-              <Label className="text-base font-semibold text-gray-600">Signatários</Label>
+              <Label className="text-base font-semibold text-gray-600">Signatário Interno</Label>
               
               {/* Company Signer (Read-only) */}
               {companySigner && <div className="p-4 border rounded-lg space-y-3 bg-primary/5">
