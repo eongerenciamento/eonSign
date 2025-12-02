@@ -17,6 +17,7 @@ export interface Document {
   signerStatuses?: ("signed" | "pending" | "rejected")[];
   signerNames?: string[];
   folderId?: string | null;
+  fileUrl?: string | null;
 }
 
 export interface Folder {
