@@ -348,36 +348,34 @@ const Settings = () => {
                       <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="company-email">E-mail</Label>
-                        <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
-                      </div>
-                      
-                      <div className="flex gap-3">
-                        <Button variant="outline" className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90 gap-2" onClick={() => {
-                          setLogo(null);
-                          setCompanyName("");
-                          setCnpj("");
-                          setCep("");
-                          setStreet("");
-                          setNeighborhood("");
-                          setCity("");
-                          setState("");
-                          setAdminName("");
-                          setAdminCpf("");
-                          setPhone("");
-                          setCompanyEmail("");
-                        }}>
-                          <X className="w-4 h-4" />
-                          Cancelar
-                        </Button>
-                        <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 gap-2" onClick={handleSaveCompany}>
-                          <Check className="w-4 h-4" />
-                          Salvar
-                        </Button>
-                      </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="company-email">E-mail</Label>
+                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
                     </div>
+                  </div>
+
+                  <div className="flex gap-3 justify-end pt-6">
+                    <Button variant="outline" className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90 gap-2" onClick={() => {
+                      setLogo(null);
+                      setCompanyName("");
+                      setCnpj("");
+                      setCep("");
+                      setStreet("");
+                      setNeighborhood("");
+                      setCity("");
+                      setState("");
+                      setAdminName("");
+                      setAdminCpf("");
+                      setPhone("");
+                      setCompanyEmail("");
+                    }}>
+                      <X className="w-4 h-4" />
+                      Cancelar
+                    </Button>
+                    <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 gap-2" onClick={handleSaveCompany}>
+                      <Check className="w-4 h-4" />
+                      Salvar
+                    </Button>
                   </div>
                 </div>
               </CardContent>
