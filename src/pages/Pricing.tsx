@@ -7,6 +7,16 @@ import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 const PLANS = [{
   id: "free",
   name: "Grátis",
@@ -166,6 +176,7 @@ const PLANS = [{
     included: true
   }]
 }];
+
 const FAQS = [{
   question: "Como funciona a contagem de documentos?",
   answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
@@ -191,48 +202,52 @@ const FAQS = [{
   question: "Os documentos ficam armazenados com segurança?",
   answer: "Sim, todos os documentos são armazenados com criptografia em servidores seguros, com acesso restrito apenas ao proprietário da conta."
 }];
+
 export default function Pricing() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showComparison, setShowComparison] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const handleSelectPlan = (plan: typeof PLANS[0]) => {
     setSelectedPlan(plan);
     setIsDialogOpen(true);
   };
-  return <div className="min-h-screen bg-white">
+
+  return (
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white">
         <div className="container mx-auto px-4 py-0 bg-transparent">
-        {isMobile ? (
-          <div className="flex flex-col items-center my-0 py-[20px] bg-transparent gap-4">
-            <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
-            <div className="flex items-center justify-between gap-3 w-full">
-              <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
-                Certificado Digital A1 R$109,90
-              </Button>
-              <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600 p-0 h-auto">
-                Já tenho conta
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between my-0 py-[20px] bg-transparent">
-            <div className="flex items-center gap-2">
+          {isMobile ? (
+            <div className="flex flex-col items-center my-0 py-[20px] bg-transparent gap-4">
               <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
+              <div className="flex items-center justify-between gap-3 w-full">
+                <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
+                  Certificado Digital A1 R$109,90
+                </Button>
+                <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600 p-0 h-auto">
+                  Já tenho conta
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
-                Certificado Digital A1 R$109,90
-              </Button>
-              <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
-                Já tenho conta
-              </Button>
+          ) : (
+            <div className="flex items-center justify-between my-0 py-[20px] bg-transparent">
+              <div className="flex items-center gap-2">
+                <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
+                  Certificado Digital A1 R$109,90
+                </Button>
+                <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
+                  Já tenho conta
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
 
       {/* Hero Section */}
@@ -255,10 +270,9 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pb-16">
         <div className="relative">
           <div className="overflow-x-auto scrollbar-hide pb-4">
-            <div className="flex gap-5 px-4" style={{
-            width: 'max-content'
-          }}>
-              {PLANS.map(plan => <Card key={plan.name} className={`relative bg-white border-2 w-80 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
+            <div className="flex gap-5 px-4" style={{ width: 'max-content' }}>
+              {PLANS.map(plan => (
+                <Card key={plan.name} className={`relative bg-white border-2 w-80 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
                   <CardHeader className="space-y-3 pb-4 pt-5 px-5">
                     <div className="h-6 flex justify-center">
                       {plan.recommended && <Badge className="py-1 font-bold w-fit px-[16px] bg-[#273d60] text-white border-0 text-xs">Mais Vendido</Badge>}
@@ -276,28 +290,30 @@ export default function Pricing() {
                       </div>
                     </div>
                   </CardHeader>
-                   <CardContent className="space-y-5 px-5 pb-5">
-                     <div className="space-y-2">
-                       <div className="flex items-center gap-2 text-sm">
-                         <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                         <span className="text-gray-700">
-                           Até <strong>{plan.limit}</strong> documentos / envelopes
-                         </span>
-                       </div>
-                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-2 text-sm">
-                           {feature.included ? (
-                             <>
-                               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                               <span className="text-gray-700">{feature.name}</span>
-                             </>
-                           ) : (
-                             <>
-                               <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                               <span className="text-gray-400 line-through">{feature.name}</span>
-                             </>
-                           )}
-                         </div>)}
-                     </div>
+                  <CardContent className="space-y-5 px-5 pb-5">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span className="text-gray-600">
+                          Até <strong>{plan.limit}</strong> documentos / envelopes
+                        </span>
+                      </div>
+                      {plan.features.slice(1).map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm">
+                          {feature.included ? (
+                            <>
+                              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                              <span className="text-gray-600">{feature.name}</span>
+                            </>
+                          ) : (
+                            <>
+                              <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <span className="text-gray-400 line-through">{feature.name}</span>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                     <Button 
                       onClick={() => handleSelectPlan(plan)} 
                       className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-12 text-sm"
@@ -305,80 +321,110 @@ export default function Pricing() {
                       {plan.price === 0 ? 'Começar Grátis' : 'Fazer Upgrade'}
                     </Button>
                   </CardContent>
-                </Card>)}
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Comparison Table Toggle */}
+      {/* Comparison Table */}
       <div className="container mx-auto px-4 pb-8">
         <div className="max-w-7xl mx-auto">
-          <Button variant="ghost" className="w-full text-[#273d60] hover:bg-gray-100" onClick={() => setShowComparison(!showComparison)}>
-            {showComparison ? <>
-                <ChevronUp className="mr-2 h-4 w-4" />
-                Ocultar Tabela Comparativa
-              </> : <>
-                <ChevronDown className="mr-2 h-4 w-4" />
-                Ver Tabela Comparativa Completa
-              </>}
-          </Button>
+          <Collapsible open={showComparison} onOpenChange={setShowComparison}>
+            <Button 
+              variant="ghost" 
+              className="w-full text-[#273d60] hover:bg-gray-100" 
+              onClick={() => setShowComparison(!showComparison)}
+            >
+              {showComparison ? (
+                <>
+                  <ChevronUp className="mr-2 h-4 w-4" />
+                  Ocultar Tabela Comparativa
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="mr-2 h-4 w-4" />
+                  Ver Tabela Comparativa Completa
+                </>
+              )}
+            </Button>
+            <CollapsibleContent>
+              <Card className="mt-4 border border-gray-200 rounded-lg shadow-none">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto scrollbar-hide">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="sticky left-0 bg-white z-10 text-left py-4 px-4 min-w-[200px] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none text-gray-700 font-semibold">
+                            Recursos
+                          </TableHead>
+                          {PLANS.map(plan => (
+                            <TableHead key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
+                              <div className="font-semibold text-gray-700">{plan.name}</div>
+                              <div className="text-sm text-gray-500 font-normal">
+                                {plan.price === 0 ? 'Grátis' : <>{plan.price.toFixed(2).replace('.', ',')}/mês</>}
+                              </div>
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {PLANS[0].features.map((_, featureIdx) => (
+                          <TableRow key={featureIdx} className={featureIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <TableCell className="sticky left-0 z-10 py-4 px-4 text-sm shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none text-gray-600 bg-inherit">
+                              {PLANS[0].features[featureIdx].name.includes('/')
+                                ? <>
+                                    {PLANS[0].features[featureIdx].name.split('/')[0]}/<br className="md:hidden" />{PLANS[0].features[featureIdx].name.split('/')[1]}
+                                  </>
+                                : PLANS[0].features[featureIdx].name
+                              }
+                            </TableCell>
+                            {PLANS.map(plan => (
+                              <TableCell key={plan.name} className="text-center py-4 px-4">
+                                {featureIdx === 0 ? (
+                                  <span className="text-sm font-medium text-gray-600">{plan.features[featureIdx].value || plan.limit}</span>
+                                ) : plan.features[featureIdx].included ? (
+                                  <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                ) : (
+                                  <X className="h-5 w-5 text-gray-400 mx-auto" />
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
-
-      {/* Comparison Table */}
-      {showComparison && <div className="container mx-auto px-4 pb-16">
-          <Card className="max-w-7xl mx-auto border-0 shadow-none">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className="sticky left-0 bg-card z-10 text-left py-4 px-4 min-w-[200px] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">Recursos</th>
-                      {PLANS.map(plan => <th key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
-                          <div className="font-semibold">{plan.name}</div>
-                          <div className="text-sm text-muted-foreground font-normal">
-                            {plan.price === 0 ? 'Grátis' : <>{plan.price.toFixed(2).replace('.', ',')}/mês</>}
-                          </div>
-                        </th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {PLANS[0].features.map((_, featureIdx) => <tr key={featureIdx}>
-                        <td className="sticky left-0 bg-card z-10 py-4 px-4 text-sm shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
-                          {PLANS[0].features[featureIdx].name}
-                        </td>
-                        {PLANS.map(plan => <td key={plan.name} className="text-center py-4 px-4">
-                            {featureIdx === 0 ? <span className="text-sm font-medium">{plan.features[featureIdx].value || plan.limit}</span> : plan.features[featureIdx].included ? <Check className="h-5 w-5 text-green-600 mx-auto" /> : <X className="h-5 w-5 text-gray-400 mx-auto" />}
-                          </td>)}
-                      </tr>)}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>}
 
       {/* FAQ Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4 text-gray-600">
+          <h2 className="text-3xl font-bold text-center mb-4 text-gray-700">
             Perguntas Frequentes
           </h2>
           <p className="text-center mb-12 text-gray-500 text-base">
             Tire suas dúvidas sobre nossos planos e funcionalidades
           </p>
-          <Card>
+          <Card className="border">
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
-                {FAQS.map((faq, idx) => <AccordionItem key={idx} value={`item-${idx}`}>
+                {FAQS.map((faq, idx) => (
+                  <AccordionItem key={idx} value={`item-${idx}`} className="border-b">
                     <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-left">
                       {faq.answer}
                     </AccordionContent>
-                  </AccordionItem>)}
+                  </AccordionItem>
+                ))}
               </Accordion>
             </CardContent>
           </Card>
@@ -400,6 +446,16 @@ export default function Pricing() {
         </div>
       </div>
 
+      {/* Footer Logo */}
+      <div className="flex justify-center pt-0 pb-4">
+        <img 
+          src="/lovable-uploads/Eon_Tecnologia-4.png" 
+          alt="Eon" 
+          className="h-36"
+        />
+      </div>
+
       {selectedPlan && <PlanCheckoutDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} plan={selectedPlan} />}
-    </div>;
+    </div>
+  );
 }
