@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ interface UserProfileSheetProps {
   userAvatar: string | null;
   organization: string;
   onAvatarChange: (url: string) => void;
+  onProfileUpdate?: () => void;
 }
 
 export function UserProfileSheet({
@@ -27,6 +28,7 @@ export function UserProfileSheet({
   userAvatar,
   organization,
   onAvatarChange,
+  onProfileUpdate,
 }: UserProfileSheetProps) {
   const navigate = useNavigate();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +44,34 @@ export function UserProfileSheet({
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Sincronizar estados quando as props mudarem
+  useEffect(() => {
+    setName(userName);
+    setEmail(userEmail);
+    setAvatar(userAvatar);
+  }, [userName, userEmail, userAvatar, open]);
+
+  // Carregar telefone do company_settings
+  useEffect(() => {
+    const loadPhone = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('company_settings')
+          .select('admin_phone')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data?.admin_phone) {
+          setPhone(data.admin_phone);
+        }
+      }
+    };
+    if (open) {
+      loadPhone();
+    }
+  }, [open]);
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -123,7 +153,7 @@ export function UserProfileSheet({
       setConfirmPassword("");
     }
 
-    // Atualizar dados do perfil
+    // Atualizar dados do perfil no user_metadata
     const { error } = await supabase.auth.updateUser({
       data: {
         name,
@@ -134,14 +164,37 @@ export function UserProfileSheet({
 
     if (error) {
       toast.error("Erro ao salvar alterações");
-    } else {
-      // Atualizar callback com nova URL do avatar
-      if (avatar) {
-        onAvatarChange(avatar);
-      }
-      toast.success("Alterações salvas com sucesso!");
-      onOpenChange(false);
+      return;
     }
+
+    // Atualizar company_settings
+    const { error: companyError } = await supabase
+      .from('company_settings')
+      .update({
+        admin_name: name,
+        admin_phone: phone,
+        admin_email: email,
+        logo_url: avatar,
+      })
+      .eq('user_id', user.id);
+
+    if (companyError) {
+      toast.error("Erro ao atualizar configurações da empresa");
+      return;
+    }
+
+    // Atualizar callback com nova URL do avatar
+    if (avatar) {
+      onAvatarChange(avatar);
+    }
+    
+    // Notificar o parent para atualizar dados
+    if (onProfileUpdate) {
+      onProfileUpdate();
+    }
+
+    toast.success("Alterações salvas com sucesso!");
+    onOpenChange(false);
   };
 
   const handleLogout = async () => {
