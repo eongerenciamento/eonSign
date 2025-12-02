@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Building2, CreditCard, HelpCircle } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle, X, Check } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { useQuery } from "@tanstack/react-query";
@@ -260,29 +260,38 @@ const Settings = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Logo Upload */}
-                <div className="flex items-center gap-6">
-                  <div className="relative w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => logoInputRef.current?.click()}>
-                    {logo ? <img src={logo} alt="Logo" className="w-full h-full rounded-full object-cover" /> : <Upload className="w-8 h-8 text-muted-foreground" />}
-                  </div>
-                  <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                  <div>
-                    <p className="text-sm font-medium">Logo da Empresa</p>
-                    <p className="text-xs text-muted-foreground">
-                      Clique para fazer upload
-                    </p>
+                <div className="flex justify-end">
+                  <div className="relative">
+                    <div className="relative w-20 h-20 rounded-full bg-muted border-2 border-muted-foreground/25 flex items-center justify-center overflow-hidden">
+                      {logo ? (
+                        <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full" />
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                    >
+                      <Upload className="w-4 h-4" />
+                    </button>
+                    <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
                   </div>
                 </div>
 
                 {/* Company Data */}
                 <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="company-name">Nome da Empresa</Label>
-                    <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" />
-                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="company-name">Nome da Empresa</Label>
+                      <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="cnpj">CNPJ</Label>
-                    <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} />
+                    <div className="grid gap-2">
+                      <Label htmlFor="cnpj">CNPJ</Label>
+                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -316,14 +325,16 @@ const Settings = () => {
 
                   <Separator className="my-4" />
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="admin-name">Nome do Sócio Administrador</Label>
-                    <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" />
-                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="admin-name">Nome do Sócio Administrador</Label>
+                      <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="user-id">ID do Usuário</Label>
-                    <Input id="user-id" value={user?.id || ""} disabled />
+                    <div className="grid gap-2">
+                      <Label htmlFor="user-id">ID do Usuário</Label>
+                      <Input id="user-id" value={user?.id || ""} disabled />
+                    </div>
                   </div>
 
                   <div className="grid gap-2">
@@ -331,19 +342,21 @@ const Settings = () => {
                     <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} />
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="company-phone">Telefone</Label>
-                    <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
-                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="company-phone">Telefone</Label>
+                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="company-email">E-mail</Label>
-                    <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
+                    <div className="grid gap-2">
+                      <Label htmlFor="company-email">E-mail</Label>
+                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <Button variant="outline" className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90" onClick={() => {
+                  <Button variant="outline" className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90 gap-2" onClick={() => {
                   setLogo(null);
                   setCompanyName("");
                   setCnpj("");
@@ -357,9 +370,11 @@ const Settings = () => {
                   setPhone("");
                   setCompanyEmail("");
                 }}>
+                    <X className="w-4 h-4" />
                     Cancelar
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" onClick={handleSaveCompany}>
+                  <Button className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 gap-2" onClick={handleSaveCompany}>
+                    <Check className="w-4 h-4" />
                     Salvar
                   </Button>
                 </div>
