@@ -322,7 +322,7 @@ export function SubscriptionTab() {
           
           <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto rounded-lg max-w-6xl mx-auto">
+            <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50 border-0">
@@ -584,7 +584,7 @@ export function SubscriptionTab() {
         
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto rounded-lg max-w-6xl mx-auto">
+            <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50 border-0">

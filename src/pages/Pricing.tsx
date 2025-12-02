@@ -330,7 +330,7 @@ export default function Pricing() {
       {showComparison && <div className="container mx-auto px-4 pb-16">
           <Card className="max-w-7xl mx-auto border-0 shadow-none">
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scrollbar-hide">
                 <table className="w-full">
                   <thead>
                     <tr>
