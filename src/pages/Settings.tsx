@@ -433,48 +433,58 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="support" className="space-y-6 mt-6">
+            <div className="flex justify-end mb-6">
+              <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
+                Abrir Novo Ticket
+              </Button>
+            </div>
+
             <Card>
-              <CardHeader>
-                <CardTitle>Suporte</CardTitle>
-                <CardDescription>Central de ajuda e tickets de suporte</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Precisa de ajuda? Entre em contato com nosso suporte ou consulte seus tickets abertos.
-                  </p>
-                  <div className="grid gap-3">
-                    <Button className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
-                      Abrir Novo Ticket
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      Ver Meus Tickets
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      Central de Ajuda
-                    </Button>
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div className="space-y-2">
-                  <Label>E-mail de Suporte</Label>
-                  <Input value="suporte@eonsign.com.br" disabled />
-                </div>
-                <div className="space-y-2">
-                  <Label>Horário de Atendimento</Label>
-                  <Input value="Segunda a Sexta, 9h às 18h" disabled />
-                </div>
-
-                <div className="pt-4">
-                  <Button 
-                    variant="destructive" 
-                    className="w-full"
-                    onClick={handleLogout}
-                  >
-                    Sair do Sistema
-                  </Button>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título do Ticket</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Data de Abertura</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número do Ticket</th>
+                        <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Example rows - replace with actual data */}
+                      <tr className="bg-white border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm">Problema com assinatura de documento</td>
+                        <td className="p-4 text-sm text-gray-600">30/11/2025</td>
+                        <td className="p-4 text-sm text-gray-600">#12345</td>
+                        <td className="p-4 text-right">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Em Andamento
+                          </span>
+                        </td>
+                      </tr>
+                      <tr className="bg-gray-100 border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm">Dúvida sobre planos</td>
+                        <td className="p-4 text-sm text-gray-600">28/11/2025</td>
+                        <td className="p-4 text-sm text-gray-600">#12344</td>
+                        <td className="p-4 text-right">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Resolvido
+                          </span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm">Erro ao fazer upload</td>
+                        <td className="p-4 text-sm text-gray-600">25/11/2025</td>
+                        <td className="p-4 text-sm text-gray-600">#12343</td>
+                        <td className="p-4 text-right">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Resolvido
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
