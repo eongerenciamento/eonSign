@@ -255,8 +255,8 @@ const Settings = () => {
           <TabsContent value="company" className="space-y-6 mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Informações da Empresa</CardTitle>
-                <CardDescription>Dados cadastrais da empresa</CardDescription>
+                <CardTitle className="text-gray-600 text-base">Informações da Empresa</CardTitle>
+                
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Logo Upload */}
