@@ -589,9 +589,9 @@ const NewDocument = () => {
                   </div>
                   {files.map((file, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <FileText className="w-6 h-6 text-primary flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{file.name}</p>
+                      <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="font-medium text-sm md:text-base text-gray-600 truncate">{file.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
