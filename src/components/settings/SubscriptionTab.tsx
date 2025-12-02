@@ -326,12 +326,12 @@ export function SubscriptionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
-                      <TableHead className="w-[200px] font-semibold text-gray-700">Recurso</TableHead>
+                      <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static">Recurso</TableHead>
                       {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                           <div className="flex flex-col items-center gap-1">
                             <span className="font-bold text-[#273d60]">{tier.name}</span>
-                            <span className="text-sm text-gray-500 font-normal">
-                              {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                            <span className="text-sm text-gray-500 font-normal md:text-sm">
+                              {tier.price === 0 ? "Grátis" : <><span className="text-[5px] md:text-sm">R$</span> {tier.price.toFixed(2).replace('.', ',')}</>}
                             </span>
                           </div>
                         </TableHead>)}
@@ -339,37 +339,37 @@ export function SubscriptionTab() {
                   </TableHeader>
                   <TableBody>
                     <TableRow className="bg-white">
-                      <TableCell className="font-medium">Quantidade de documentos / envelopes</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos / envelopes</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium">Assinatura digital ICP-Brasil</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Assinatura digital ICP-Brasil</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white">
-                      <TableCell className="font-medium">Notificações por e-mail / WhatsApp</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Notificações por e-mail / WhatsApp</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium">Geolocalização da assinatura</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Geolocalização da assinatura</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white">
-                      <TableCell className="font-medium">Eon Drive</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Eon Drive</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium">Face ID</TableCell>
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Face ID</TableCell>
                       {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
@@ -588,12 +588,12 @@ export function SubscriptionTab() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
-                    <TableHead className="w-[200px] font-semibold text-gray-700">Recurso</TableHead>
+                    <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static">Recurso</TableHead>
                     {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-bold text-[#273d60]">{tier.name}</span>
-                          <span className="text-sm text-gray-500 font-normal">
-                            {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                          <span className="text-sm text-gray-500 font-normal md:text-sm">
+                            {tier.price === 0 ? "Grátis" : <><span className="text-[5px] md:text-sm">R$</span> {tier.price.toFixed(2).replace('.', ',')}</>}
                           </span>
                         </div>
                       </TableHead>)}
@@ -601,37 +601,37 @@ export function SubscriptionTab() {
                 </TableHeader>
                 <TableBody>
                   <TableRow className="bg-white">
-                    <TableCell className="font-medium">Quantidade de documentos / envelopes</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos / envelopes</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium">Assinatura digital ICP-Brasil</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Assinatura digital ICP-Brasil</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white">
-                    <TableCell className="font-medium">Notificações por e-mail / WhatsApp</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Notificações por e-mail / WhatsApp</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium">Geolocalização da assinatura</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Geolocalização da assinatura</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white">
-                    <TableCell className="font-medium">Eon Drive</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Eon Drive</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium">Face ID</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Face ID</TableCell>
                     {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
