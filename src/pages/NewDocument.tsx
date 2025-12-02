@@ -530,7 +530,7 @@ const NewDocument = () => {
                 </div>}
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-600">Signatários Externos</p>
+                <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
                 
               </div>
               {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
