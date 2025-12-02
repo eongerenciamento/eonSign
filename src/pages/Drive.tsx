@@ -698,6 +698,9 @@ const Drive = () => {
                   >
                     <ZoomIn className="h-4 w-4" />
                   </Button>
+                  <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">
+                    {viewerZoom}%
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -707,6 +710,7 @@ const Drive = () => {
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
+                  <div className="h-6 w-px bg-gray-300 mx-1" />
                   <Button
                     variant="ghost"
                     size="icon"
@@ -716,6 +720,7 @@ const Drive = () => {
                   >
                     <RotateCw className="h-4 w-4" />
                   </Button>
+                  <div className="h-6 w-px bg-gray-300 mx-1" />
                   <Button
                     variant="ghost"
                     size="icon"
