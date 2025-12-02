@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, X, Plus } from "lucide-react";
+import { Upload, FileText, X, Plus, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ const NewDocument = () => {
     { name: "", phone: "", email: "" },
   ]);
   const [companySigner, setCompanySigner] = useState<CompanySigner | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [limitInfo, setLimitInfo] = useState<{
     current: number;
@@ -315,6 +316,7 @@ const NewDocument = () => {
         }
       }
 
+      setIsSubmitted(true);
       toast({
         title: "Documento enviado!",
         description: "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp.",
@@ -341,9 +343,20 @@ const NewDocument = () => {
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
         <div>
           <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Envie um documento para assinatura digital
-          </p>
+          <div className="mt-2 space-y-1">
+            <div className={`flex items-center gap-2 text-xs ${file !== null ? 'text-green-600' : 'text-gray-500'}`}>
+              {file !== null && <Check className="w-3 h-3" />}
+              <span>Faça upload de 1 ou mais documentos</span>
+            </div>
+            <div className={`flex items-center gap-2 text-xs ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`}>
+              {signers.some(signer => signer.name && signer.phone && signer.email) && <Check className="w-3 h-3" />}
+              <span>Adicione pelo menos 1 signatário</span>
+            </div>
+            <div className={`flex items-center gap-2 text-xs ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`}>
+              {isSubmitted && <Check className="w-3 h-3" />}
+              <span>Clique no botão enviar</span>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6 bg-card p-6 rounded-lg border">
