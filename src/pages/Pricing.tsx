@@ -311,9 +311,8 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pb-8">
         <div className="max-w-7xl mx-auto">
           <Collapsible open={showComparison} onOpenChange={setShowComparison}>
-            <Button 
-              variant="ghost" 
-              className="w-full text-[#273d60] hover:bg-gray-100" 
+            <button 
+              className="w-full flex items-center justify-center py-2 text-gray-500 cursor-pointer" 
               onClick={() => setShowComparison(!showComparison)}
             >
               {showComparison ? (
@@ -327,7 +326,7 @@ export default function Pricing() {
                   Ver Tabela Comparativa Completa
                 </>
               )}
-            </Button>
+            </button>
             <CollapsibleContent>
               <Card className="mt-4 border border-gray-200 rounded-lg shadow-none">
                 <CardContent className="p-0">
