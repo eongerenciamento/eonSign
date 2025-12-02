@@ -405,11 +405,11 @@ export default function Pricing() {
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
             <Facebook className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
           </a>
-          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
-            <Youtube className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
-          </a>
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
             <Linkedin className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
+            <Youtube className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
           </a>
         </div>
       </div>
