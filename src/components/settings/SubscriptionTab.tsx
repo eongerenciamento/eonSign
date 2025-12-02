@@ -520,9 +520,9 @@ export function SubscriptionTab() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-3xl font-bold text-gray-600">
+                  <p className="font-bold text-gray-600 text-xl">
                     {tier.price === 0 ? "Grátis" : <>
-                        R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span>
+                        R$ {tier.price.toFixed(2).replace('.', ',')} <span className="font-normal text-muted-foreground text-base">/ mês</span>
                       </>}
                   </p>
                 </div>
