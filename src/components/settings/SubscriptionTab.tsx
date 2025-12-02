@@ -9,45 +9,79 @@ import { Check, Crown, Loader2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-const SUBSCRIPTION_TIERS = [
-  { name: "Grátis", limit: 5, price: 0, priceId: "free", description: "Ideal para testes" },
-  { name: "Básico", limit: 20, price: 54.90, priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj", description: "Para pequenas empresas" },
-  { name: "Profissional", limit: 50, price: 89.90, priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0", description: "Para empresas em crescimento" },
-  { name: "Empresarial", limit: 100, price: 159.90, priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb", description: "Para empresas estabelecidas" },
-  { name: "Premium", limit: 150, price: 209.90, priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C", description: "Para grandes volumes" },
-  { name: "Enterprise", limit: 200, price: 289.90, priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX", description: "Documentos ilimitados" },
-];
-
+const SUBSCRIPTION_TIERS = [{
+  name: "Grátis",
+  limit: 5,
+  price: 0,
+  priceId: "free",
+  description: "Ideal para testes"
+}, {
+  name: "Básico",
+  limit: 20,
+  price: 54.90,
+  priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj",
+  description: "Para pequenas empresas"
+}, {
+  name: "Profissional",
+  limit: 50,
+  price: 89.90,
+  priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0",
+  description: "Para empresas em crescimento"
+}, {
+  name: "Empresarial",
+  limit: 100,
+  price: 159.90,
+  priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
+  description: "Para empresas estabelecidas"
+}, {
+  name: "Premium",
+  limit: 150,
+  price: 209.90,
+  priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
+  description: "Para grandes volumes"
+}, {
+  name: "Enterprise",
+  limit: 200,
+  price: 289.90,
+  priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
+  description: "Documentos ilimitados"
+}];
 export function SubscriptionTab() {
   const [subscription, setSubscription] = useState<any>(null);
-  const [usage, setUsage] = useState<{ current: number; limit: number } | null>(null);
+  const [usage, setUsage] = useState<{
+    current: number;
+    limit: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingCheckout, setProcessingCheckout] = useState(false);
   const [isComparisonOpen, setIsComparisonOpen] = useState(true);
-
   useEffect(() => {
     loadSubscriptionData();
   }, []);
-
   const loadSubscriptionData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       // Load subscription
-      const { data: subData } = await supabase
-        .from("user_subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
+      const {
+        data: subData
+      } = await supabase.from("user_subscriptions").select("*").eq("user_id", user.id).single();
       setSubscription(subData);
 
       // Load usage
-      const { data: limitData } = await supabase.functions.invoke("check-document-limit");
+      const {
+        data: limitData
+      } = await supabase.functions.invoke("check-document-limit");
       if (limitData) {
-        setUsage({ current: limitData.current, limit: limitData.limit });
+        setUsage({
+          current: limitData.current,
+          limit: limitData.limit
+        });
       }
     } catch (error) {
       console.error("Error loading subscription:", error);
@@ -55,40 +89,39 @@ export function SubscriptionTab() {
       setLoading(false);
     }
   };
-
   const handleUpgrade = async (tier: typeof SUBSCRIPTION_TIERS[0]) => {
     if (tier.priceId === "free") {
       toast.info("Você já está no plano gratuito");
       return;
     }
-
     setProcessingCheckout(true);
     try {
       // Get user email and organization name
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user?.email) {
         throw new Error("Email do usuário não encontrado");
       }
-
-      const { data: companyData } = await supabase
-        .from("company_settings")
-        .select("company_name")
-        .eq("user_id", user.id)
-        .single();
-
-      const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
+      const {
+        data: companyData
+      } = await supabase.from("company_settings").select("company_name").eq("user_id", user.id).single();
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
           priceId: tier.priceId,
           tierName: tier.name,
           documentLimit: tier.limit,
           email: user.email,
           organizationName: companyData?.company_name || "Organização",
-          userId: user.id,
-        },
+          userId: user.id
+        }
       });
-
       if (error) throw error;
-
       if (data.url) {
         window.open(data.url, "_blank");
       }
@@ -99,13 +132,13 @@ export function SubscriptionTab() {
       setProcessingCheckout(false);
     }
   };
-
   const handleManageSubscription = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke("create-stripe-portal");
-
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("create-stripe-portal");
       if (error) throw error;
-
       if (data.url) {
         window.open(data.url, "_blank");
       }
@@ -114,36 +147,46 @@ export function SubscriptionTab() {
       toast.error(error.message || "Erro ao abrir portal de gerenciamento");
     }
   };
-
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; label: string }> = {
-      active: { variant: "default", label: "Ativo" },
-      trialing: { variant: "secondary", label: "Teste" },
-      past_due: { variant: "destructive", label: "Vencido" },
-      canceled: { variant: "destructive", label: "Cancelado" },
+    const variants: Record<string, {
+      variant: "default" | "secondary" | "destructive";
+      label: string;
+    }> = {
+      active: {
+        variant: "default",
+        label: "Ativo"
+      },
+      trialing: {
+        variant: "secondary",
+        label: "Teste"
+      },
+      past_due: {
+        variant: "destructive",
+        label: "Vencido"
+      },
+      canceled: {
+        variant: "destructive",
+        label: "Cancelado"
+      }
     };
-    const config = variants[status] || { variant: "secondary", label: status };
+    const config = variants[status] || {
+      variant: "secondary",
+      label: status
+    };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
+    return <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
 
   // User has active tier
   if (subscription && subscription.status === "active") {
-    const usagePercent = usage ? (usage.current / subscription.document_limit) * 100 : 0;
+    const usagePercent = usage ? usage.current / subscription.document_limit * 100 : 0;
     const currentTierIndex = SUBSCRIPTION_TIERS.findIndex(t => t.name === subscription.plan_name);
-    const nextTier = currentTierIndex >= 0 && currentTierIndex < SUBSCRIPTION_TIERS.length - 1 
-      ? SUBSCRIPTION_TIERS[currentTierIndex + 1] 
-      : null;
-
-    return (
-      <div className="space-y-6">
+    const nextTier = currentTierIndex >= 0 && currentTierIndex < SUBSCRIPTION_TIERS.length - 1 ? SUBSCRIPTION_TIERS[currentTierIndex + 1] : null;
+    return <div className="space-y-6">
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Plano Atual */}
@@ -162,9 +205,7 @@ export function SubscriptionTab() {
             <CardContent className="pt-6">
               <p className="text-sm text-gray-600 mb-2">Valor</p>
               <p className="text-xl font-bold text-gray-900">
-                {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price 
-                  ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace('.', ',')}`
-                  : "R$ 0,00"}
+                {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace('.', ',')}` : "R$ 0,00"}
               </p>
               <p className="text-xs text-gray-500 mt-1">por mês</p>
             </CardContent>
@@ -175,13 +216,11 @@ export function SubscriptionTab() {
             <CardContent className="pt-6">
               <p className="text-sm text-gray-600 mb-2">Renovação</p>
               <p className="text-xl font-bold text-gray-900">
-                {subscription?.current_period_end 
-                  ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR', { 
-                      day: '2-digit', 
-                      month: '2-digit',
-                      year: 'numeric'
-                    })
-                  : '-'}
+                {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              }) : '-'}
               </p>
             </CardContent>
           </Card>
@@ -194,35 +233,19 @@ export function SubscriptionTab() {
                 {usage?.current || 0} / {subscription.document_limit}
               </p>
               <Progress value={usagePercent} className="h-2 bg-gray-300" />
-              {usagePercent >= 80 && (
-                <p className="text-xs text-yellow-600 font-medium mt-2">
+              {usagePercent >= 80 && <p className="text-xs text-yellow-600 font-medium mt-2">
                   Próximo do limite
-                </p>
-              )}
+                </p>}
             </CardContent>
           </Card>
         </div>
 
         {/* Botões de ação */}
         <div className="flex gap-3">
-          {nextTier && (
-            <Button
-              onClick={() => handleUpgrade(nextTier)}
-              disabled={processingCheckout}
-              className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
-            >
-              {processingCheckout ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`
-              )}
-            </Button>
-          )}
-          <Button
-            onClick={handleManageSubscription}
-            variant="outline"
-            className="flex-1"
-          >
+          {nextTier && <Button onClick={() => handleUpgrade(nextTier)} disabled={processingCheckout} className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white">
+              {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`}
+            </Button>}
+          <Button onClick={handleManageSubscription} variant="outline" className="flex-1">
             Extrato de Pagamentos
           </Button>
         </div>
@@ -231,10 +254,7 @@ export function SubscriptionTab() {
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
               <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
-            {SUBSCRIPTION_TIERS.filter((t) => 
-              t.limit > subscription.document_limit && t.priceId !== "free"
-            ).map((tier) => (
-              <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
+            {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
                   <CardDescription>{tier.description}</CardDescription>
@@ -271,42 +291,25 @@ export function SubscriptionTab() {
                       <span>Eon Drive</span>
                     </div>
                   </div>
-                  <Button
-                    onClick={() => handleUpgrade(tier)}
-                    disabled={processingCheckout}
-                    className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"
-                  >
-                    {processingCheckout ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Fazer Upgrade"
-                    )}
+                  <Button onClick={() => handleUpgrade(tier)} disabled={processingCheckout} className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white">
+                    {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fazer Upgrade"}
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
 
         {/* Comparison Table */}
         <div className="space-y-4">
           <div className="flex justify-center">
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              {isComparisonOpen ? (
-                <>
+            <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900">
+              {isComparisonOpen ? <>
                   <ChevronUp className="h-4 w-4 mr-2" />
                   Ocultar Tabela Comparativa
-                </>
-              ) : (
-                <>
+                </> : <>
                   <ChevronDown className="h-4 w-4 mr-2" />
                   Mostrar Tabela Comparativa
-                </>
-              )}
+                </>}
             </Button>
           </div>
           
@@ -317,78 +320,52 @@ export function SubscriptionTab() {
                   <TableHeader>
                     <TableRow className="bg-gray-50">
                       <TableHead className="w-[200px] font-semibold text-gray-700">Recurso</TableHead>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableHead key={tier.name} className="text-center">
+                      {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                           <div className="flex flex-col items-center gap-1">
                             <span className="font-bold text-[#273d60]">{tier.name}</span>
                             <span className="text-sm text-gray-500 font-normal">
                               {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
                             </span>
                           </div>
-                        </TableHead>
-                      ))}
+                        </TableHead>)}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow className="bg-white">
                       <TableCell className="font-medium">Quantidade de documentos / envelopes</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
-                        </TableCell>
-                      ))}
+                        </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
                       <TableCell className="font-medium">Assinatura digital ICP-Brasil</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        </TableCell>
-                      ))}
+                        </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white">
                       <TableCell className="font-medium">Notificações por e-mail / WhatsApp</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        </TableCell>
-                      ))}
+                        </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
                       <TableCell className="font-medium">Geolocalização da assinatura</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                          {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                        </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white">
                       <TableCell className="font-medium">Eon Drive</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                          {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                        </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50">
                       <TableCell className="font-medium">Face ID</TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier, index) => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" || index === 1 ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
+                      {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
+                          {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                        </TableCell>)}
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -458,20 +435,18 @@ export function SubscriptionTab() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // User on free tier - show all paid tiers
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Grid com 4 cards de informação */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Plano Atual */}
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
             <p className="text-sm text-gray-600 mb-2">Plano Atual</p>
-            <p className="text-xl font-bold text-gray-900 mb-1">
+            <p className="text-xl font-bold mb-1 text-gray-600">
               Grátis
             </p>
             <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -484,7 +459,7 @@ export function SubscriptionTab() {
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
             <p className="text-sm text-gray-600 mb-2">Valor</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-xl font-bold text-gray-600">
               R$ 0,00
             </p>
             <p className="text-xs text-gray-500 mt-1">por mês</p>
@@ -495,7 +470,7 @@ export function SubscriptionTab() {
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
             <p className="text-sm text-gray-600 mb-2">Renovação</p>
-            <p className="text-xl font-bold text-gray-900">-</p>
+            <p className="text-xl font-bold text-gray-600">-</p>
             <p className="text-xs text-gray-500 mt-1">Plano gratuito</p>
           </CardContent>
         </Card>
@@ -504,42 +479,31 @@ export function SubscriptionTab() {
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
             <p className="text-sm text-gray-600 mb-2">Consumo</p>
-            <p className="text-xl font-bold text-gray-900 mb-3">
+            <p className="text-xl font-bold mb-3 text-gray-600">
               {usage?.current || 0} / 5
             </p>
-            <Progress value={((usage?.current || 0) / 5) * 100} className="h-2 bg-gray-300" />
-            {(usage?.current || 0) >= 4 && (
-              <p className="text-xs text-yellow-600 font-medium mt-2">
+            <Progress value={(usage?.current || 0) / 5 * 100} className="h-2 bg-gray-300" />
+            {(usage?.current || 0) >= 4 && <p className="text-xs text-yellow-600 font-medium mt-2">
                 Próximo do limite
-              </p>
-            )}
+              </p>}
           </CardContent>
         </Card>
       </div>
 
       {/* Botão de ação */}
       <div className="flex justify-start">
-        <Button
-          onClick={handleManageSubscription}
-          className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
-        >
+        <Button onClick={handleManageSubscription} className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6">
           Extrato de Pagamentos
         </Button>
       </div>
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
-          const isRecommended = index === 2; // Professional tier
-          return (
-            <Card
-              key={tier.name}
-              className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}
-            >
-              {isRecommended && (
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
+        const isRecommended = index === 2; // Professional tier
+        return <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}>
+              {isRecommended && <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
                   <Badge className="bg-primary whitespace-nowrap">Recomendado</Badge>
-                </div>
-              )}
+                </div>}
               <CardHeader>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
@@ -547,11 +511,9 @@ export function SubscriptionTab() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-3xl font-bold">
-                    {tier.price === 0 ? "Grátis" : (
-                      <>
+                    {tier.price === 0 ? "Grátis" : <>
                         R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span>
-                      </>
-                    )}
+                      </>}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -570,75 +532,43 @@ export function SubscriptionTab() {
                     <span>Notificações por email/WhatsApp</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    {tier.priceId === "free" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
+                    {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Geolocalização da assinatura
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    {tier.priceId === "free" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
+                    {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Face ID
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    {tier.priceId === "free" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
+                    {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Eon Drive
                     </span>
                   </div>
                 </div>
-                <Button
-                  onClick={() => handleUpgrade(tier)}
-                  disabled={processingCheckout || tier.priceId === "free"}
-                  className={tier.priceId === "free" ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
-                  variant={tier.priceId === "free" ? "outline" : undefined}
-                >
-                  {processingCheckout ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : tier.priceId === "free" ? (
-                    "Plano Atual"
-                  ) : (
-                    "Fazer Upgrade"
-                  )}
+                <Button onClick={() => handleUpgrade(tier)} disabled={processingCheckout || tier.priceId === "free"} className={tier.priceId === "free" ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"} variant={tier.priceId === "free" ? "outline" : undefined}>
+                  {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : tier.priceId === "free" ? "Plano Atual" : "Fazer Upgrade"}
                 </Button>
               </CardContent>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
 
       {/* Comparison Table */}
       <div className="space-y-4">
         <div className="flex justify-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            {isComparisonOpen ? (
-              <>
+          <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900">
+            {isComparisonOpen ? <>
                 <ChevronUp className="h-4 w-4 mr-2" />
                 Ocultar Tabela Comparativa
-              </>
-            ) : (
-              <>
+              </> : <>
                 <ChevronDown className="h-4 w-4 mr-2" />
                 Mostrar Tabela Comparativa
-              </>
-            )}
+              </>}
           </Button>
         </div>
         
@@ -649,78 +579,52 @@ export function SubscriptionTab() {
                 <TableHeader>
                   <TableRow className="bg-gray-50">
                     <TableHead className="w-[200px] font-semibold text-gray-700">Recurso</TableHead>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableHead key={tier.name} className="text-center">
+                    {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-bold text-[#273d60]">{tier.name}</span>
                           <span className="text-sm text-gray-500 font-normal">
                             {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
                           </span>
                         </div>
-                      </TableHead>
-                    ))}
+                      </TableHead>)}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow className="bg-white">
                     <TableCell className="font-medium">Quantidade de documentos / envelopes</TableCell>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableCell key={tier.name} className="text-center">
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
-                      </TableCell>
-                    ))}
+                      </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
                     <TableCell className="font-medium">Assinatura digital ICP-Brasil</TableCell>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableCell key={tier.name} className="text-center">
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
-                      </TableCell>
-                    ))}
+                      </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white">
                     <TableCell className="font-medium">Notificações por e-mail / WhatsApp</TableCell>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableCell key={tier.name} className="text-center">
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
-                      </TableCell>
-                    ))}
+                      </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
                     <TableCell className="font-medium">Geolocalização da assinatura</TableCell>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                        {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                      </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white">
                     <TableCell className="font-medium">Eon Drive</TableCell>
-                    {SUBSCRIPTION_TIERS.map(tier => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                        {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                      </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50">
                     <TableCell className="font-medium">Face ID</TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier, index) => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" || index === 1 ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
+                    {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
+                        {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
+                      </TableCell>)}
                   </TableRow>
                 </TableBody>
               </Table>
@@ -790,6 +694,5 @@ export function SubscriptionTab() {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
