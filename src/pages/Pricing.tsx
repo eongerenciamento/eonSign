@@ -30,7 +30,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: false
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: false
   }]
 }, {
@@ -57,7 +57,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: true
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: false
   }]
 }, {
@@ -84,7 +84,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: true
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: true
   }]
 }, {
@@ -110,7 +110,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: true
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: true
   }]
 }, {
@@ -136,7 +136,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: true
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: true
   }]
 }, {
@@ -162,7 +162,7 @@ const PLANS = [{
     name: "Eon Drive",
     included: true
   }, {
-    name: "Face ID",
+    name: "Biometria facial",
     included: true
   }]
 }];
