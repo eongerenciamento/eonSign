@@ -502,6 +502,16 @@ const Settings = () => {
                 </p>
               </CardContent>
             </Card>
+
+            {/* Footer Logo */}
+            <div className="flex justify-center pt-12 pb-4">
+              <img 
+                src="/logo-eon-sign.png" 
+                alt="Eon Sign" 
+                className="h-8 opacity-60 grayscale"
+                style={{ filter: 'grayscale(100%) brightness(0.4)' }}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

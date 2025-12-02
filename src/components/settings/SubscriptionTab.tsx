@@ -700,9 +700,19 @@ export function SubscriptionTab() {
                   Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive.
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
+              </Accordion>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Footer Logo */}
+      <div className="flex justify-center pt-12 pb-4">
+        <img 
+          src="/logo-eon-sign.png" 
+          alt="Eon Sign" 
+          className="h-8 opacity-60 grayscale"
+          style={{ filter: 'grayscale(100%) brightness(0.4)' }}
+        />
       </div>
     </div>;
 }
