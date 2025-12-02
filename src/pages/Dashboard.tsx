@@ -36,7 +36,7 @@ const Dashboard = () => {
       error: docsError
     } = await supabase.from("documents").select("*").eq("user_id", userData.user.id).order("created_at", {
       ascending: false
-    }).limit(10);
+    }).limit(5);
     if (docsError) {
       console.error("Error loading documents:", docsError);
       return;
@@ -117,7 +117,7 @@ const Dashboard = () => {
         {/* Recent Documents */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-sm text-gray-600">
               Documentos Recentes
             </h2>
           </div>
