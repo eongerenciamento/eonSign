@@ -12,6 +12,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Document } from "./DocumentsTable";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface Folder {
   id: string;
@@ -39,6 +40,7 @@ export const DocumentsList = ({
   allFolders,
 }: DocumentsListProps) => {
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const handleDragStart = (e: React.DragEvent, documentId: string) => {
     e.dataTransfer.setData("documentId", documentId);
@@ -52,6 +54,94 @@ export const DocumentsList = ({
   };
 
   if (viewMode === "list") {
+    // Layout mobile diferente
+    if (isMobile) {
+      return (
+        <div className="space-y-0">
+          {documents.map((document, index) => (
+            <div
+              key={document.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, document.id)}
+              onDragEnd={handleDragEnd}
+              className={`flex items-center justify-between p-3 group ${
+                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+              } ${dragOverId === document.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""}`}
+            >
+              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => onViewDocument(document.id)}
+                >
+                  <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-600 truncate">{document.name}</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(document.createdAt).toLocaleDateString('pt-BR')}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 ml-2">
+                <div className="flex flex-col gap-0.5">
+                  {document.signerNames && document.signerNames.length > 0 ? (
+                    document.signerNames.map((name, idx) => (
+                      <span key={idx} className="text-[10px] text-gray-600 whitespace-nowrap">
+                        {name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[10px] text-gray-600">-</span>
+                  )}
+                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent flex-shrink-0">
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white z-50">
+                    <DropdownMenuItem onClick={() => onViewDocument(document.id)}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visualizar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDownloadDocument(document.id)}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Baixar
+                    </DropdownMenuItem>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <Move className="w-4 h-4 mr-2" />
+                        Mover para
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="bg-white z-50">
+                        {allFolders.map((folder) => (
+                          <DropdownMenuItem
+                            key={folder.id}
+                            onClick={() => onMoveToFolder(document.id, folder.id)}
+                          >
+                            📁 {folder.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuItem
+                      onClick={() => onRemoveFromFolder(document.id)}
+                      className="text-destructive"
+                    >
+                      <FolderMinus className="w-4 h-4 mr-2" />
+                      Remover da pasta
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Layout desktop
     return (
       <div className="space-y-0">
         {documents.map((document, index) => (
