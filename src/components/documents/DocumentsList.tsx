@@ -60,18 +60,24 @@ export const DocumentsList = ({
             draggable
             onDragStart={(e) => handleDragStart(e, document.id)}
             onDragEnd={handleDragEnd}
-            className={`flex items-center justify-between p-3 group ${
+            className={`grid grid-cols-12 gap-3 items-center p-3 group ${
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
             } ${dragOverId === document.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""}`}
           >
             <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer"
+              className="col-span-5 flex items-center gap-3 cursor-pointer"
               onClick={() => onViewDocument(document.id)}
             >
               <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
               <span className="text-sm text-gray-600 truncate">{document.name}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="col-span-2 text-sm text-gray-600">
+              {new Date(document.createdAt).toLocaleDateString('pt-BR')}
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {document.signedBy}/{document.signers}
+            </div>
+            <div className="col-span-3 flex items-center gap-1 justify-end">
               <Button
                 variant="ghost"
                 size="icon"

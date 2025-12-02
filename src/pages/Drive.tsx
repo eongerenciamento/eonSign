@@ -692,7 +692,7 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
                     onClick={() => setViewerZoom(Math.min(viewerZoom + 25, 200))}
                     title="Zoom In"
                   >
@@ -704,7 +704,7 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
                     onClick={() => setViewerZoom(Math.max(viewerZoom - 25, 50))}
                     title="Zoom Out"
                   >
@@ -714,7 +714,7 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
                     onClick={() => setViewerRotation((viewerRotation + 90) % 360)}
                     title="Rotacionar"
                   >
@@ -724,7 +724,7 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
                     onClick={async () => {
                       if (viewerUrl) {
                         const link = document.createElement('a');
