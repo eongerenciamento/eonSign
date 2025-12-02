@@ -14,6 +14,7 @@ import { Upload, Building2, CreditCard, HelpCircle, X, Check } from "lucide-reac
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { useQuery } from "@tanstack/react-query";
+import logo from "@/assets/logo.png";
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -506,7 +507,7 @@ const Settings = () => {
             {/* Footer Logo */}
             <div className="flex justify-center pt-12 pb-4">
               <img 
-                src="/logo-eon-sign.png" 
+                src={logo} 
                 alt="Eon Sign" 
                 className="h-16 opacity-50 grayscale"
                 style={{ filter: 'grayscale(100%) brightness(0.6)' }}
