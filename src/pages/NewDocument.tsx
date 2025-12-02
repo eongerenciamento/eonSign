@@ -500,7 +500,7 @@ const NewDocument = () => {
                     <Check className="w-3 h-3" />
                   </motion.div>}
               </AnimatePresence>
-              <span>Adicione pelo menos 1 signatário (máx. {maxSigners} para {isEnvelope ? 'envelope' : 'documento'})</span>
+              <span>Adicione pelo menos 1 signatário{isEnvelope ? ' (máx. 20 para envelope)' : ''}</span>
             </motion.div>
             
             <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`} initial={{
