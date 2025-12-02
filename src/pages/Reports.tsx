@@ -592,7 +592,7 @@ const Reports = () => {
                   <FileDown className="h-4 w-4" />
                 </Button>
                 <Button onClick={handleExportPDF} disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
-                  <FileText className="h-4 w-4" />
+                  <Download className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -789,7 +789,7 @@ const Reports = () => {
                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-sm font-medium px-4">
+                    <span className="text-xs font-medium px-4 text-gray-500">
                       <span className="hidden md:inline">Página</span><span className="md:hidden">Pág.</span> {currentPage} de {totalPages}
                     </span>
                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
