@@ -208,7 +208,7 @@ export default function Pricing() {
         {isMobile ? (
           <div className="flex flex-col items-center my-0 py-[20px] bg-transparent gap-4">
             <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
-            <div className="flex items-center justify-start gap-3 w-full">
+            <div className="flex items-center justify-between gap-3 w-full">
               <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
                 Certificado Digital A1 R$109,90
               </Button>
