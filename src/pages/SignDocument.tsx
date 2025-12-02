@@ -8,7 +8,29 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, FileText, Loader2, Plus, Minus, Download } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
 import logo from "@/assets/logo-sign.png";
+
+// Schemas de validação
+const emailSchema = z.string()
+  .trim()
+  .min(1, "E-mail é obrigatório")
+  .email("Formato de e-mail inválido")
+  .max(255, "E-mail deve ter no máximo 255 caracteres");
+
+const birthDateSchema = z.string()
+  .min(1, "Data de nascimento é obrigatória")
+  .refine((date) => {
+    if (!date) return false;
+    const birth = new Date(date);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 18;
+  }, "Você deve ter pelo menos 18 anos para assinar documentos");
 
 interface Signer {
   id: string;
@@ -35,9 +57,11 @@ const SignDocument = () => {
   const [signers, setSigners] = useState<Signer[]>([]);
   const [currentSigner, setCurrentSigner] = useState<Signer | null>(null);
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [cpf, setCpf] = useState("");
   const [cpfValid, setCpfValid] = useState<boolean | null>(null);
   const [birthDate, setBirthDate] = useState("");
+  const [birthDateError, setBirthDateError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigning, setIsSigning] = useState(false);
   const [isIdentified, setIsIdentified] = useState(false);
@@ -100,9 +124,31 @@ const SignDocument = () => {
     }
   };
 
+  const validateEmail = (value: string): boolean => {
+    try {
+      emailSchema.parse(value);
+      setEmailError(null);
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setEmailError(error.errors[0].message);
+      }
+      return false;
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value.length > 0) {
+      validateEmail(value);
+    } else {
+      setEmailError(null);
+    }
+  };
+
   const handleIdentify = async () => {
-    if (!email) {
-      toast.error("Por favor, informe seu e-mail");
+    if (!validateEmail(email)) {
       return;
     }
 
@@ -427,12 +473,28 @@ const SignDocument = () => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   placeholder="seu@email.com"
+                  maxLength={255}
+                  className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {emailError && (
+                  <p className="text-xs text-red-500 mt-1">{emailError}</p>
+                )}
               </div>
-              <Button onClick={handleIdentify} className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
-                Identificar
+              <Button 
+                onClick={handleIdentify} 
+                disabled={isLoading || !email || !!emailError}
+                className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Identificando...
+                  </>
+                ) : (
+                  "Identificar"
+                )}
               </Button>
             </div>
           </Card>
@@ -565,20 +627,40 @@ const SignDocument = () => {
                       id="birthDate"
                       type="date"
                       value={birthDate}
-                      onChange={(e) => setBirthDate(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setBirthDate(value);
+                        if (value) {
+                          try {
+                            birthDateSchema.parse(value);
+                            setBirthDateError(null);
+                          } catch (error) {
+                            if (error instanceof z.ZodError) {
+                              setBirthDateError(error.errors[0].message);
+                            }
+                          }
+                        } else {
+                          setBirthDateError(null);
+                        }
+                      }}
                       max={(() => {
                         const today = new Date();
                         today.setFullYear(today.getFullYear() - 18);
                         return today.toISOString().split('T')[0];
                       })()}
+                      className={birthDateError ? "border-red-500 focus-visible:ring-red-500" : ""}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Você deve ter pelo menos 18 anos
-                    </p>
+                    {birthDateError ? (
+                      <p className="text-xs text-red-500 mt-1">{birthDateError}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Você deve ter pelo menos 18 anos
+                      </p>
+                    )}
                   </div>
                   <Button
                     onClick={handleSign}
-                    disabled={isSigning || !cpf || !birthDate}
+                    disabled={isSigning || !cpf || !birthDate || cpfValid === false || !!birthDateError}
                     className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
                   >
                     {isSigning ? (
