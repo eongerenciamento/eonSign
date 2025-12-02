@@ -153,17 +153,17 @@ export function SubscriptionTab() {
               {getStatusBadge(subscription.status)}
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             <div className="grid gap-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">Uso de Documentos</span>
+              <div className="space-y-1">
+                <Progress value={usagePercent} className="h-2 bg-gray-300" />
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Uso de Documentos</span>
                   <span className="font-bold text-primary">
                     {usage?.current || 0} / {subscription.document_limit}
                   </span>
                 </div>
-                <Progress value={usagePercent} className="h-2 bg-gray-300" />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground pt-1">
                   {usagePercent >= 80 ? (
                     <span className="text-yellow-600 font-medium">
                       Você está próximo do limite. Considere fazer upgrade.
@@ -269,19 +269,19 @@ export function SubscriptionTab() {
     <div className="space-y-6">
       {usage && (
         <>
-          <Card className="bg-gray-100 border-0 max-w-md">
-            <CardContent className="pt-6 space-y-4">
-              <p className="text-sm text-gray-600 mb-2">
+          <Card className="bg-gray-100 border-0 max-w-sm">
+            <CardContent className="pt-4 space-y-3">
+              <p className="text-sm text-gray-600 mb-1">
                 Você está no plano <strong>GRÁTIS</strong>
               </p>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium text-gray-600">Consumo</span>
+              <div className="space-y-1">
+                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Consumo</span>
                   <span className="font-bold text-gray-600">
                     {usage.current} / 5
                   </span>
                 </div>
-                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
               </div>
             </CardContent>
           </Card>
