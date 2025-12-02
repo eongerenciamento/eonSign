@@ -461,7 +461,7 @@ export function SubscriptionTab() {
                 Ativo
               </Badge>
             </div>
-            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
+            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-primary">
               Extrato de Pagamentos
             </Button>
           </CardContent>
