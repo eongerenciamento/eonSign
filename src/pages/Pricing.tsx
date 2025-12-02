@@ -258,38 +258,51 @@ export default function Pricing() {
             <div className="flex gap-6 px-4" style={{
             width: 'max-content'
           }}>
-              {PLANS.map(plan => <Card key={plan.name} className="relative bg-[#273d60] text-white border-none w-96 flex-shrink-0 shadow-xl">
-                  <CardHeader className="space-y-4">
+              {PLANS.map(plan => <Card key={plan.name} className={`relative bg-white border-2 w-96 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
+                  <CardHeader className="space-y-4 pb-6">
                     <div className="h-7 flex justify-center">
-                      {plan.recommended && <Badge className="py-1 font-bold w-fit px-[20px] border-primary bg-white text-gray-600">Mais Vendido</Badge>}
+                      {plan.recommended && <Badge className="py-1 font-bold w-fit px-[20px] bg-[#273d60] text-white border-0">Mais Vendido</Badge>}
                     </div>
                     <div>
-                      <CardTitle className="text-2xl text-white">{plan.name}</CardTitle>
-                      <CardDescription className="text-gray-300">{plan.description}</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-gray-800">{plan.name}</CardTitle>
+                      <CardDescription className="text-gray-500 text-base mt-2">{plan.description}</CardDescription>
                     </div>
-                    <div>
+                    <div className="pt-2">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-white text-xl">
+                        <span className="font-bold text-gray-900 text-4xl">
                           {plan.price === 0 ? 'Grátis' : `R$ ${plan.price.toFixed(2).replace('.', ',')}`}
                         </span>
-                        {plan.price > 0 && <span className="text-gray-300">/mês</span>}
+                        {plan.price > 0 && <span className="text-gray-500 text-lg">/mês</span>}
                       </div>
-                      <p className="text-sm text-gray-300 mt-1">
-                        {plan.limit >= 1000 ? 'Documentos ilimitados' : `${plan.limit} documentos`}
-                      </p>
                     </div>
                   </CardHeader>
-                   <CardContent className="space-y-4">
+                   <CardContent className="space-y-6">
                      <div className="space-y-3">
-                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-2 text-sm">
-                           {feature.included ? <Check className="h-4 w-4 text-green-400 flex-shrink-0" /> : <X className="h-4 w-4 text-gray-400 flex-shrink-0" />}
-                           <span className={feature.included ? 'text-white' : 'text-gray-400'}>
-                             {feature.name}
-                           </span>
+                       <div className="flex items-center gap-3 text-base">
+                         <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                         <span className="text-gray-700">
+                           Até <strong>{plan.limit} documentos / envelopes</strong>
+                         </span>
+                       </div>
+                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-3 text-base">
+                           {feature.included ? (
+                             <>
+                               <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                               <span className="text-gray-700">{feature.name}</span>
+                             </>
+                           ) : (
+                             <>
+                               <X className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                               <span className="text-gray-400 line-through">{feature.name}</span>
+                             </>
+                           )}
                          </div>)}
                      </div>
-                    <Button onClick={() => handleSelectPlan(plan)} variant="secondary" className="w-full font-bold text-primary-foreground bg-gray-400 hover:bg-gray-300">
-                      {plan.price === 0 ? 'Começar Grátis' : 'Escolher Plano'}
+                    <Button 
+                      onClick={() => handleSelectPlan(plan)} 
+                      className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-14 text-base"
+                    >
+                      {plan.price === 0 ? 'Começar Grátis' : 'Fazer Upgrade'}
                     </Button>
                   </CardContent>
                 </Card>)}
