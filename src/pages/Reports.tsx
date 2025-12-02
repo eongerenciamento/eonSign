@@ -647,8 +647,8 @@ const Reports = () => {
             <Card className="p-6 bg-gray-100 border-0">
               <h3 className="text-lg font-semibold mb-4">Relatório de Signatários</h3>
               {isLoading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : !signatories || signatories.length === 0 ? <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div> : isMobile ? (/* Mobile view - Cards */
-            <div className="space-y-4">
-                  {signatories.map((signer, index) => <div key={signer.id} className={`py-4 rounded-lg space-y-3 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+            <div className="space-y-4 -mx-8">
+                  {signatories.map((signer, index) => <div key={signer.id} className={`py-4 px-8 space-y-3 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
                       <div className="flex flex-col gap-1">
                         <span className="font-medium text-sm">{signer.name}</span>
                         <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
