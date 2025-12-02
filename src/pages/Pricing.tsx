@@ -370,15 +370,27 @@ export default function Pricing() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {PLANS[0].features.map((_, featureIdx) => (
+                        {PLANS[0].features.map((_, featureIdx) => {
+                          const featureName = PLANS[0].features[featureIdx].name;
+                          const renderFeatureName = () => {
+                            if (featureName === "Assinatura digital ICP-Brasil") {
+                              return <>Assinatura digital<br className="md:hidden" />ICP-Brasil</>;
+                            }
+                            if (featureName === "Notificações por e-mail / WhatsApp") {
+                              return <>Notificações por<br className="md:hidden" />e-mail / WhatsApp</>;
+                            }
+                            if (featureName === "Geolocalização da assinatura") {
+                              return <>Geolocalização<br className="md:hidden" />da assinatura</>;
+                            }
+                            if (featureName.includes('/')) {
+                              return <>{featureName.split('/')[0]}/<br className="md:hidden" />{featureName.split('/')[1]}</>;
+                            }
+                            return featureName;
+                          };
+                          return (
                           <TableRow key={featureIdx} className={featureIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                             <TableCell className="sticky left-0 z-10 py-4 px-4 text-sm shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none text-gray-600 bg-inherit">
-                              {PLANS[0].features[featureIdx].name.includes('/')
-                                ? <>
-                                    {PLANS[0].features[featureIdx].name.split('/')[0]}/<br className="md:hidden" />{PLANS[0].features[featureIdx].name.split('/')[1]}
-                                  </>
-                                : PLANS[0].features[featureIdx].name
-                              }
+                              {renderFeatureName()}
                             </TableCell>
                             {PLANS.map(plan => (
                               <TableCell key={plan.name} className="text-center py-4 px-4">
@@ -392,7 +404,8 @@ export default function Pricing() {
                               </TableCell>
                             ))}
                           </TableRow>
-                        ))}
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
