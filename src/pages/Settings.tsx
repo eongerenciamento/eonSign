@@ -435,7 +435,7 @@ const Settings = () => {
                 </div>
 
                 {/* Mobile Card View */}
-                <div className="md:hidden space-y-0">
+                <div className="md:hidden space-y-2">
                   {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
                     // Extract category and priority from description
                     const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
@@ -444,7 +444,7 @@ const Settings = () => {
                     const priority = priorityMatch ? priorityMatch[1] : '-';
                     
                     return (
-                      <div key={ticket.id} className={`p-4 space-y-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                      <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
                         <div>
                           <p className="text-xs text-gray-500">Título</p>
                           <p className="text-sm font-medium">{ticket.title}</p>
