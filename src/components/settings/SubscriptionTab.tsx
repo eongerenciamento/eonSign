@@ -391,50 +391,50 @@ export function SubscriptionTab() {
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funciona a contagem de documentos?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Como funciona a contagem de documentos?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso mudar de plano depois?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso mudar de plano depois?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-3" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Sim, todas as assinaturas realizadas através do Eon Sign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-4" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso cancelar minha assinatura?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso cancelar minha assinatura?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-5" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-6" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Existe período de teste gratuito?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Existe período de teste gratuito?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-7" className="border-b">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-8">
-                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Os documentos ficam armazenados com segurança?</AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Os documentos ficam armazenados com segurança?</AccordionTrigger>
+                  <AccordionContent className="text-left">
                     Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive.
                   </AccordionContent>
                 </AccordionItem>
@@ -653,50 +653,50 @@ export function SubscriptionTab() {
           <CardContent className="p-6">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funciona a contagem de documentos?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Como funciona a contagem de documentos?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso mudar de plano depois?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso mudar de plano depois?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Sim, todas as assinaturas realizadas através do Eon Sign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso cancelar minha assinatura?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso cancelar minha assinatura?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-5" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-6" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Existe período de teste gratuito?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Existe período de teste gratuito?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-7" className="border-b">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-8">
-                <AccordionTrigger className="text-sm md:text-base text-gray-600">Os documentos ficam armazenados com segurança?</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Os documentos ficam armazenados com segurança?</AccordionTrigger>
+                <AccordionContent className="text-left">
                   Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive.
                 </AccordionContent>
               </AccordionItem>
