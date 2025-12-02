@@ -157,9 +157,17 @@ const Settings = () => {
   const handleCnpjChange = (value: string) => {
     setCnpj(formatCNPJ(value));
   };
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 5) return `${numbers.slice(0, 2)}.${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}.${numbers.slice(2, 5)}-${numbers.slice(5, 8)}`;
+  };
+
   const handleCepChange = async (value: string) => {
     const numbers = value.replace(/\D/g, "");
-    setCep(numbers);
+    const formatted = formatCEP(value);
+    setCep(formatted);
     if (numbers.length === 8) {
       try {
         const response = await fetch(`https://viacep.com.br/ws/${numbers}/json/`);
@@ -300,7 +308,7 @@ const Settings = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
-                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" maxLength={8} inputMode="numeric" />
+                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" />
                     </div>
 
                     <div className="grid gap-2">
