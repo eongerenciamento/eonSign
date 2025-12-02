@@ -706,11 +706,11 @@ export function SubscriptionTab() {
       </div>
 
       {/* Footer Logo */}
-      <div className="flex justify-center pt-8 pb-4">
+      <div className="flex justify-center pt-4 pb-4">
         <img 
           src="/lovable-uploads/Eon_Tecnologia-4.png" 
           alt="Eon" 
-          className="h-24"
+          className="h-32"
         />
       </div>
     </div>;
