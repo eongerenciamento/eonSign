@@ -348,8 +348,19 @@ const NewDocument = () => {
             <motion.div 
               className={`flex items-center gap-2 text-xs transition-colors duration-300 ${file !== null ? 'text-green-600' : 'text-gray-500'}`}
               initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                scale: file === null ? [1, 1.02, 1] : 1
+              }}
+              transition={{ 
+                duration: 0.3,
+                scale: {
+                  repeat: file === null ? Infinity : 0,
+                  duration: 2,
+                  ease: "easeInOut"
+                }
+              }}
             >
               <AnimatePresence mode="wait">
                 {file !== null && (
@@ -369,8 +380,20 @@ const NewDocument = () => {
             <motion.div 
               className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`}
               initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                scale: (file !== null && !signers.some(signer => signer.name && signer.phone && signer.email)) ? [1, 1.02, 1] : 1
+              }}
+              transition={{ 
+                duration: 0.3, 
+                delay: 0.1,
+                scale: {
+                  repeat: (file !== null && !signers.some(signer => signer.name && signer.phone && signer.email)) ? Infinity : 0,
+                  duration: 2,
+                  ease: "easeInOut"
+                }
+              }}
             >
               <AnimatePresence mode="wait">
                 {signers.some(signer => signer.name && signer.phone && signer.email) && (
@@ -390,8 +413,20 @@ const NewDocument = () => {
             <motion.div 
               className={`flex items-center gap-2 text-xs transition-colors duration-300 ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`}
               initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                scale: (file !== null && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted) ? [1, 1.02, 1] : 1
+              }}
+              transition={{ 
+                duration: 0.3, 
+                delay: 0.2,
+                scale: {
+                  repeat: (file !== null && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted) ? Infinity : 0,
+                  duration: 2,
+                  ease: "easeInOut"
+                }
+              }}
             >
               <AnimatePresence mode="wait">
                 {isSubmitted && (
