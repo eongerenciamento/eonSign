@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, ChevronDown, ChevronUp, Instagram, Facebook, Youtube } from "lucide-react";
+import { Check, X, ChevronDown, ChevronUp, Instagram, Facebook, Youtube, Linkedin } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -408,9 +408,12 @@ export default function Pricing() {
           <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
             <Youtube className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
           </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
+            <Linkedin className="h-5 w-5 md:h-6 md:w-6" strokeWidth={1} />
+          </a>
         </div>
       </div>
-      <div className="text-center pb-6 text-gray-400 text-xs">
+      <div className="text-center pb-6 md:-mt-6 text-gray-400 text-xs">
         © {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.
       </div>
 
