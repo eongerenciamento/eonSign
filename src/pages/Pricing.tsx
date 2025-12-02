@@ -8,15 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 const PLANS = [{
   id: "free",
   name: "Grátis",
@@ -176,7 +168,6 @@ const PLANS = [{
     included: true
   }]
 }];
-
 const FAQS = [{
   question: "Como funciona a contagem de documentos?",
   answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
@@ -202,26 +193,22 @@ const FAQS = [{
   question: "Os documentos ficam armazenados com segurança?",
   answer: "Sim, todos os documentos são armazenados com criptografia em servidores seguros, com acesso restrito apenas ao proprietário da conta."
 }];
-
 export default function Pricing() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showComparison, setShowComparison] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const handleSelectPlan = (plan: typeof PLANS[0]) => {
     setSelectedPlan(plan);
     setIsDialogOpen(true);
   };
-
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-gray-100">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <img alt="Eon Sign" className="h-32" src="/lovable-uploads/Eon_Tecnologia-4.png" />
+            <img alt="Eon Sign" src="/lovable-uploads/e33cb056-9434-47f1-ac08-7b9bc7d05176.png" className="h-15" />
             <Button variant="ghost" onClick={() => navigate('/auth')} className="text-slate-600">
               Já tenho conta
             </Button>
@@ -249,9 +236,10 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pb-16">
         <div className="relative">
           <div className="overflow-x-auto scrollbar-hide pb-4">
-            <div className="flex gap-5 px-4" style={{ width: 'max-content' }}>
-              {PLANS.map(plan => (
-                <Card key={plan.name} className={`relative bg-white border-2 w-80 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
+            <div className="flex gap-5 px-4" style={{
+            width: 'max-content'
+          }}>
+              {PLANS.map(plan => <Card key={plan.name} className={`relative bg-white border-2 w-80 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
                   <CardHeader className="space-y-3 pb-4 pt-5 px-5">
                     <div className="h-6 flex justify-center">
                       {plan.recommended && <Badge className="py-1 font-bold w-fit px-[16px] bg-[#273d60] text-white border-0 text-xs">Mais Vendido</Badge>}
@@ -277,31 +265,21 @@ export default function Pricing() {
                           Até <strong>{plan.limit}</strong> documentos / envelopes
                         </span>
                       </div>
-                      {plan.features.slice(1).map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm">
-                          {feature.included ? (
-                            <>
+                      {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-2 text-sm">
+                          {feature.included ? <>
                               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                               <span className="text-gray-600">{feature.name}</span>
-                            </>
-                          ) : (
-                            <>
+                            </> : <>
                               <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
                               <span className="text-gray-400 line-through">{feature.name}</span>
-                            </>
-                          )}
-                        </div>
-                      ))}
+                            </>}
+                        </div>)}
                     </div>
-                    <Button 
-                      onClick={() => handleSelectPlan(plan)} 
-                      className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-12 text-sm"
-                    >
+                    <Button onClick={() => handleSelectPlan(plan)} className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-12 text-sm">
                       {plan.price === 0 ? 'Começar Grátis' : 'Fazer Upgrade'}
                     </Button>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -311,21 +289,14 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pb-8">
         <div className="max-w-7xl mx-auto">
           <Collapsible open={showComparison} onOpenChange={setShowComparison}>
-            <button 
-              className="w-full flex items-center justify-center py-2 text-gray-500 cursor-pointer" 
-              onClick={() => setShowComparison(!showComparison)}
-            >
-              {showComparison ? (
-                <>
+            <button className="w-full flex items-center justify-center py-2 text-gray-500 cursor-pointer" onClick={() => setShowComparison(!showComparison)}>
+              {showComparison ? <>
                   <ChevronUp className="mr-2 h-4 w-4" />
                   Ocultar Tabela Comparativa
-                </>
-              ) : (
-                <>
+                </> : <>
                   <ChevronDown className="mr-2 h-4 w-4" />
                   Ver Tabela Comparativa Completa
-                </>
-              )}
+                </>}
             </button>
             <CollapsibleContent>
               <Card className="mt-4 border border-gray-200 rounded-lg shadow-none">
@@ -337,53 +308,41 @@ export default function Pricing() {
                           <TableHead className="sticky left-0 bg-white z-10 text-left py-4 px-4 min-w-[200px] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none text-gray-700 font-semibold">
                             Recursos
                           </TableHead>
-                          {PLANS.map(plan => (
-                            <TableHead key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
+                          {PLANS.map(plan => <TableHead key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
                               <div className="font-semibold text-gray-700">{plan.name}</div>
                               <div className="text-sm text-gray-500 font-normal">
                                 {plan.price === 0 ? 'Grátis' : <>{plan.price.toFixed(2).replace('.', ',')}/mês</>}
                               </div>
-                            </TableHead>
-                          ))}
+                            </TableHead>)}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {PLANS[0].features.map((_, featureIdx) => {
-                          const featureName = PLANS[0].features[featureIdx].name;
-                          const renderFeatureName = () => {
-                            if (featureName === "Assinatura digital ICP-Brasil") {
-                              return <>Assinatura digital<br className="md:hidden" />ICP-Brasil</>;
-                            }
-                            if (featureName === "Notificações por e-mail / WhatsApp") {
-                              return <>Notificações por<br className="md:hidden" />e-mail / WhatsApp</>;
-                            }
-                            if (featureName === "Geolocalização da assinatura") {
-                              return <>Geolocalização<br className="md:hidden" />da assinatura</>;
-                            }
-                            if (featureName.includes('/')) {
-                              return <>{featureName.split('/')[0]}/<br className="md:hidden" />{featureName.split('/')[1]}</>;
-                            }
-                            return featureName;
-                          };
-                          return (
-                          <TableRow key={featureIdx} className={featureIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        const featureName = PLANS[0].features[featureIdx].name;
+                        const renderFeatureName = () => {
+                          if (featureName === "Assinatura digital ICP-Brasil") {
+                            return <>Assinatura digital<br className="md:hidden" />ICP-Brasil</>;
+                          }
+                          if (featureName === "Notificações por e-mail / WhatsApp") {
+                            return <>Notificações por<br className="md:hidden" />e-mail / WhatsApp</>;
+                          }
+                          if (featureName === "Geolocalização da assinatura") {
+                            return <>Geolocalização<br className="md:hidden" />da assinatura</>;
+                          }
+                          if (featureName.includes('/')) {
+                            return <>{featureName.split('/')[0]}/<br className="md:hidden" />{featureName.split('/')[1]}</>;
+                          }
+                          return featureName;
+                        };
+                        return <TableRow key={featureIdx} className={featureIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                             <TableCell className="sticky left-0 z-10 py-4 px-4 text-sm shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none text-gray-600 bg-inherit">
                               {renderFeatureName()}
                             </TableCell>
-                            {PLANS.map(plan => (
-                              <TableCell key={plan.name} className="text-center py-4 px-4">
-                                {featureIdx === 0 ? (
-                                  <span className="text-sm font-medium text-gray-600">{plan.features[featureIdx].value || plan.limit}</span>
-                                ) : plan.features[featureIdx].included ? (
-                                  <Check className="h-5 w-5 text-green-600 mx-auto" />
-                                ) : (
-                                  <X className="h-5 w-5 text-gray-400 mx-auto" />
-                                )}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                          );
-                        })}
+                            {PLANS.map(plan => <TableCell key={plan.name} className="text-center py-4 px-4">
+                                {featureIdx === 0 ? <span className="text-sm font-medium text-gray-600">{plan.features[featureIdx].value || plan.limit}</span> : plan.features[featureIdx].included ? <Check className="h-5 w-5 text-green-600 mx-auto" /> : <X className="h-5 w-5 text-gray-400 mx-auto" />}
+                              </TableCell>)}
+                          </TableRow>;
+                      })}
                       </TableBody>
                     </Table>
                   </div>
@@ -406,16 +365,14 @@ export default function Pricing() {
           <Card className="border">
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
-                {FAQS.map((faq, idx) => (
-                  <AccordionItem key={idx} value={`item-${idx}`} className="border-b">
+                {FAQS.map((faq, idx) => <AccordionItem key={idx} value={`item-${idx}`} className="border-b">
                     <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-left">
                       {faq.answer}
                     </AccordionContent>
-                  </AccordionItem>
-                ))}
+                  </AccordionItem>)}
               </Accordion>
             </CardContent>
           </Card>
@@ -439,15 +396,11 @@ export default function Pricing() {
 
       {/* Footer Logo */}
       <div className="relative flex items-center justify-center pt-0 pb-4 px-8">
-        <img 
-          src="/lovable-uploads/Eon_Tecnologia-4.png" 
-          alt="Eon" 
-          className="h-36"
-        />
+        <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
         <div className="absolute right-8 flex items-center gap-4">
           <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
             </svg>
           </a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
@@ -463,6 +416,5 @@ export default function Pricing() {
       </div>
 
       {selectedPlan && <PlanCheckoutDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} plan={selectedPlan} />}
-    </div>
-  );
+    </div>;
 }
