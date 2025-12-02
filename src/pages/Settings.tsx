@@ -391,7 +391,7 @@ const Settings = () => {
               <CreateTicketSheet onTicketCreated={() => refetchTickets()} />
             </div>
 
-            <Card className="border-0">
+            <Card className="border-0 bg-transparent md:bg-card">
               <CardContent className="p-0">
                 {/* Desktop Table View */}
                 <div className="overflow-x-auto hidden md:block">
