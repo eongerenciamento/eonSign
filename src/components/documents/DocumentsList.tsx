@@ -101,16 +101,16 @@ export const DocumentsList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white z-50">
-                    <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700">
+                    <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                       <Eye className="w-4 h-4 mr-2 text-gray-500" />
                       Visualizar
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700">
+                    <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                       <Download className="w-4 h-4 mr-2 text-gray-500" />
                       Baixar
                     </DropdownMenuItem>
                     <DropdownMenuSub>
-                      <DropdownMenuSubTrigger className="text-gray-700">
+                      <DropdownMenuSubTrigger className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                         <Move className="w-4 h-4 mr-2 text-gray-500" />
                         Mover para
                       </DropdownMenuSubTrigger>
@@ -119,7 +119,7 @@ export const DocumentsList = ({
                           <DropdownMenuItem
                             key={folder.id}
                             onClick={() => onMoveToFolder(document.id, folder.id)}
-                            className="text-gray-700"
+                            className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700"
                           >
                             📁 {folder.name}
                           </DropdownMenuItem>
@@ -128,7 +128,7 @@ export const DocumentsList = ({
                     </DropdownMenuSub>
                     <DropdownMenuItem
                       onClick={() => onRemoveFromFolder(document.id)}
-                      className="text-destructive"
+                      className="text-destructive focus:bg-transparent focus:text-destructive hover:bg-transparent hover:text-destructive"
                     >
                       <FolderMinus className="w-4 h-4 mr-2" />
                       Remover da pasta
@@ -197,7 +197,7 @@ export const DocumentsList = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white z-50">
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="text-gray-700">
+                    <DropdownMenuSubTrigger className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                       <Move className="w-4 h-4 mr-2 text-gray-500" />
                       Mover para
                     </DropdownMenuSubTrigger>
@@ -206,7 +206,7 @@ export const DocumentsList = ({
                         <DropdownMenuItem
                           key={folder.id}
                           onClick={() => onMoveToFolder(document.id, folder.id)}
-                          className="text-gray-700"
+                          className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700"
                         >
                           📁 {folder.name}
                         </DropdownMenuItem>
@@ -215,7 +215,7 @@ export const DocumentsList = ({
                   </DropdownMenuSub>
                   <DropdownMenuItem
                     onClick={() => onRemoveFromFolder(document.id)}
-                    className="text-destructive"
+                    className="text-destructive focus:bg-transparent focus:text-destructive hover:bg-transparent hover:text-destructive"
                   >
                     <FolderMinus className="w-4 h-4 mr-2" />
                     Remover da pasta
@@ -256,16 +256,16 @@ export const DocumentsList = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white z-50">
-                <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700">
+                <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                   <Eye className="w-4 h-4 mr-2 text-gray-500" />
                   Visualizar
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700">
+                <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                   <Download className="w-4 h-4 mr-2 text-gray-500" />
                   Baixar
                 </DropdownMenuItem>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-gray-700">
+                  <DropdownMenuSubTrigger className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700">
                     <Move className="w-4 h-4 mr-2 text-gray-500" />
                     Mover para
                   </DropdownMenuSubTrigger>
@@ -274,7 +274,7 @@ export const DocumentsList = ({
                       <DropdownMenuItem
                         key={folder.id}
                         onClick={() => onMoveToFolder(document.id, folder.id)}
-                        className="text-gray-700"
+                        className="text-gray-700 focus:bg-transparent focus:text-gray-700 hover:bg-transparent hover:text-gray-700"
                       >
                         📁 {folder.name}
                       </DropdownMenuItem>
@@ -282,7 +282,7 @@ export const DocumentsList = ({
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuItem
-                  className="text-destructive"
+                  className="text-destructive focus:bg-transparent focus:text-destructive hover:bg-transparent hover:text-destructive"
                   onClick={() => onRemoveFromFolder(document.id)}
                 >
                   <FolderMinus className="w-4 h-4 mr-2" />
