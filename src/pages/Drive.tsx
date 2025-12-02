@@ -13,6 +13,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Drive = () => {
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -28,6 +34,9 @@ const Drive = () => {
   const [dateTo, setDateTo] = useState<Date>();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [showFolderFilters, setShowFolderFilters] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerDocumentName, setViewerDocumentName] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -573,7 +582,7 @@ const Drive = () => {
                     const storagePath = extractStoragePath(doc.fileUrl);
                     const { data, error } = await supabase.storage
                       .from('documents')
-                      .createSignedUrl(storagePath, 60);
+                      .createSignedUrl(storagePath, 300);
                     
                     if (error) {
                       toast({
@@ -582,7 +591,9 @@ const Drive = () => {
                         variant: "destructive",
                       });
                     } else if (data?.signedUrl) {
-                      window.open(data.signedUrl, '_blank');
+                      setViewerUrl(data.signedUrl);
+                      setViewerDocumentName(doc.name);
+                      setViewerOpen(true);
                     }
                   }
                 }}
@@ -656,6 +667,27 @@ const Drive = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Visualização do Documento */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-[90vh] p-0">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center justify-between">
+              <span className="truncate">{viewerDocumentName}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden p-4">
+            {viewerUrl && (
+              <iframe
+                src={`${viewerUrl}#view=Fit&zoom=page-fit`}
+                className="w-full h-full border-0 rounded-md"
+                style={{ height: 'calc(90vh - 80px)' }}
+                title="Document Preview"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
