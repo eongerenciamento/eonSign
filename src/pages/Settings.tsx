@@ -11,11 +11,13 @@ import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { open: sidebarOpen } = useSidebar();
   const [user, setUser] = useState<User | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("");
@@ -208,7 +210,7 @@ const Settings = () => {
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className={`w-full mx-auto ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'}`}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
