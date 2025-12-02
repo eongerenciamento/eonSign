@@ -296,41 +296,41 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-name">Nome da Empresa</Label>
-                      <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" />
+                      <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" className="text-gray-600" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="cnpj">CNPJ</Label>
-                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} inputMode="numeric" />
+                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} inputMode="numeric" className="text-gray-600" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
-                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" />
+                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-gray-600" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="neighborhood">Bairro</Label>
-                      <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" />
+                      <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" className="text-gray-600" />
                     </div>
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="street">Endereço</Label>
-                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." />
+                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="city">Cidade</Label>
-                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Cidade" />
+                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Cidade" className="text-gray-600" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="state">Estado</Label>
-                      <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="UF" maxLength={2} />
+                      <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="UF" maxLength={2} className="text-gray-600" />
                     </div>
                   </div>
 
@@ -339,31 +339,31 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="admin-name">Nome do Sócio Administrador</Label>
-                      <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" />
+                      <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" className="text-gray-600" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="user-id">ID do Usuário</Label>
-                      <Input id="user-id" value={user?.id || ""} disabled />
+                      <Input id="user-id" value={user?.id || ""} disabled className="text-gray-600" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
-                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" />
+                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" className="text-gray-600" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-phone">Telefone</Label>
-                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" />
+                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="text-gray-600" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="company-email">E-mail</Label>
-                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
+                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" className="text-gray-600" />
                     </div>
                   </div>
 
