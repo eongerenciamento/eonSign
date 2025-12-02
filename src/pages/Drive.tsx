@@ -756,7 +756,7 @@ const Drive = () => {
                 
                 {/* Container com overflow para scroll */}
                 <div 
-                  className="w-full overflow-auto flex items-center justify-center"
+                  className={`w-full overflow-auto flex ${viewerZoom >= 100 ? 'items-start justify-start' : 'items-center justify-center'}`}
                   style={{ height: 'calc(90vh - 120px)' }}
                 >
                   {/* Wrapper do conteúdo com dimensões dinâmicas baseadas no zoom */}
@@ -765,8 +765,8 @@ const Drive = () => {
                       width: `${viewerZoom}%`,
                       height: `${viewerZoom}%`,
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      alignItems: viewerZoom >= 100 ? 'flex-start' : 'center',
+                      justifyContent: viewerZoom >= 100 ? 'flex-start' : 'center',
                       transition: 'all 0.3s ease',
                     }}
                   >
