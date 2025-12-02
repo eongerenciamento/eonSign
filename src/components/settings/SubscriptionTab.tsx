@@ -710,8 +710,8 @@ export function SubscriptionTab() {
         <img 
           src="/logo-eon-sign.png" 
           alt="Eon Sign" 
-          className="h-8 opacity-60 grayscale"
-          style={{ filter: 'grayscale(100%) brightness(0.4)' }}
+          className="h-16 opacity-50 grayscale"
+          style={{ filter: 'grayscale(100%) brightness(0.6)' }}
         />
       </div>
     </div>;
