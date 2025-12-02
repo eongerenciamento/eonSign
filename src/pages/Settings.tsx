@@ -12,7 +12,7 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload, Building2, CreditCard, HelpCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
-import { CreateTicketDialog } from "@/components/settings/CreateTicketDialog";
+import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { useQuery } from "@tanstack/react-query";
 const Settings = () => {
   const navigate = useNavigate();
@@ -354,7 +354,7 @@ const Settings = () => {
 
           <TabsContent value="support" className="space-y-6 mt-6">
             <div className="flex justify-end mb-6">
-              <CreateTicketDialog onTicketCreated={() => refetchTickets()} />
+              <CreateTicketSheet onTicketCreated={() => refetchTickets()} />
             </div>
 
             <Card>
