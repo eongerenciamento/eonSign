@@ -47,6 +47,54 @@ const NewDocument = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Play subtle completion sound
+  const playCompletionSound = (frequency: number = 800) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    } catch (error) {
+      // Silently fail if audio is not supported
+      console.log('Audio feedback not available');
+    }
+  };
+
+  // Track step 1 completion (file upload)
+  useEffect(() => {
+    if (file !== null) {
+      playCompletionSound(800); // Mid-high frequency
+    }
+  }, [file]);
+
+  // Track step 2 completion (signers added)
+  useEffect(() => {
+    const hasCompleteSigner = signers.some(
+      signer => signer.name && signer.phone && signer.email
+    );
+    if (hasCompleteSigner) {
+      playCompletionSound(900); // Slightly higher frequency
+    }
+  }, [signers]);
+
+  // Track step 3 completion (submitted)
+  useEffect(() => {
+    if (isSubmitted) {
+      playCompletionSound(1000); // Highest frequency for final step
+    }
+  }, [isSubmitted]);
+
   useEffect(() => {
     const checkLimit = async () => {
       try {
