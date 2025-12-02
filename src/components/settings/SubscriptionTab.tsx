@@ -708,10 +708,9 @@ export function SubscriptionTab() {
       {/* Footer Logo */}
       <div className="flex justify-center pt-12 pb-4">
         <img 
-          src="/logo-eon-sign.png" 
+          src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" 
           alt="Eon Sign" 
-          className="h-16 opacity-50 grayscale"
-          style={{ filter: 'grayscale(100%) brightness(0.6)' }}
+          className="h-16 opacity-40"
         />
       </div>
     </div>;
