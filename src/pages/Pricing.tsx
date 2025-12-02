@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 const PLANS = [{
   id: "free",
   name: "Grátis",
@@ -192,6 +193,7 @@ const FAQS = [{
 }];
 export default function Pricing() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [showComparison, setShowComparison] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -203,19 +205,33 @@ export default function Pricing() {
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white">
         <div className="container mx-auto px-4 py-0 bg-transparent">
-        <div className="flex items-center justify-between my-0 py-[20px] bg-transparent">
-          <div className="flex items-center gap-2">
+        {isMobile ? (
+          <div className="flex flex-col items-center my-0 py-[20px] bg-transparent gap-4">
             <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
+            <div className="flex flex-col items-start gap-2 w-full">
+              <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
+                Certificado Digital A1 R$109,90
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600 self-start p-0 h-auto">
+                Já tenho conta
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
-              Certificado Digital A1 R$109,90
-            </Button>
-            <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
-              Já tenho conta
-            </Button>
+        ) : (
+          <div className="flex items-center justify-between my-0 py-[20px] bg-transparent">
+            <div className="flex items-center gap-2">
+              <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full bg-gray-400 hover:bg-gray-300">
+                Certificado Digital A1 R$109,90
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
+                Já tenho conta
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       </div>
 
@@ -309,7 +325,7 @@ export default function Pricing() {
                       {PLANS.map(plan => <th key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
                           <div className="font-semibold">{plan.name}</div>
                           <div className="text-sm text-muted-foreground font-normal">
-                            {plan.price === 0 ? 'Grátis' : <><span className="text-xs">R$</span> {plan.price.toFixed(2).replace('.', ',')}/mês</>}
+                            {plan.price === 0 ? 'Grátis' : <>{plan.price.toFixed(2).replace('.', ',')}/mês</>}
                           </div>
                         </th>)}
                     </tr>
