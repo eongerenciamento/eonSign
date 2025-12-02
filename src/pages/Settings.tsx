@@ -254,31 +254,29 @@ const Settings = () => {
 
           <TabsContent value="company" className="space-y-6 mt-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-gray-600 text-base">Informações da Empresa</CardTitle>
                 
+                {/* Logo Upload */}
+                <div className="relative">
+                  <div className="relative w-14 h-14 rounded-full bg-muted border-2 border-muted-foreground/25 flex items-center justify-center overflow-hidden">
+                    {logo ? (
+                      <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full" />
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                  >
+                    <Upload className="w-3 h-3" />
+                  </button>
+                  <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Logo Upload */}
-                <div className="flex justify-end">
-                  <div className="relative">
-                    <div className="relative w-20 h-20 rounded-full bg-muted border-2 border-muted-foreground/25 flex items-center justify-center overflow-hidden">
-                      {logo ? (
-                        <img src={logo} alt="Logo" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full" />
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => logoInputRef.current?.click()}
-                      className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                    >
-                      <Upload className="w-4 h-4" />
-                    </button>
-                    <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                  </div>
-                </div>
 
                 {/* Company Data */}
                 <div className="grid gap-4">
@@ -337,9 +335,11 @@ const Settings = () => {
                     </div>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
-                    <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} />
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
+                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} />
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
