@@ -561,9 +561,9 @@ const NewDocument = () => {
               </> : files.length === 1 ? (
                 // Single document - simple view
                 <div className="flex items-center justify-center gap-4">
-                  <FileText className="w-8 h-8 text-primary" />
+                  <FileText className="w-8 h-8 text-gray-500" />
                   <div className="flex-1 text-left">
-                    <p className="font-medium">{files[0].name}</p>
+                    <p className="font-medium text-sm text-gray-600">{files[0].name}</p>
                     <p className="text-sm text-muted-foreground">
                       {(files[0].size / 1024 / 1024).toFixed(2)} MB
                     </p>
@@ -571,8 +571,8 @@ const NewDocument = () => {
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(0)} className="h-8 w-8 hover:bg-transparent hover:text-gray-500">
                     <X className="w-4 h-4 text-gray-500" />
                   </Button>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="h-8 w-8">
-                    <Plus className="w-4 h-4" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="h-8 w-8 hover:bg-transparent hover:text-gray-500">
+                    <Plus className="w-4 h-4 text-gray-500" />
                   </Button>
                   <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
                 </div>
