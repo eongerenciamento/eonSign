@@ -207,7 +207,7 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-5xl mx-auto">
+              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
             {SUBSCRIPTION_TIERS.filter((t) => 
               t.limit > subscription.document_limit && t.priceId !== "free"
             ).map((tier) => (
@@ -289,7 +289,7 @@ export function SubscriptionTab() {
           
           <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
             <CollapsibleContent>
-              <div className="overflow-x-auto border rounded-lg max-w-4xl mx-auto">
+              <div className="overflow-x-auto border rounded-lg max-w-5xl mx-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
@@ -471,7 +471,7 @@ export function SubscriptionTab() {
         </>
       )}
 
-      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-5xl mx-auto">
+      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
           const isRecommended = index === 2; // Professional tier
           return (
@@ -588,7 +588,7 @@ export function SubscriptionTab() {
         
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto border rounded-lg max-w-4xl mx-auto">
+            <div className="overflow-x-auto border rounded-lg max-w-5xl mx-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
