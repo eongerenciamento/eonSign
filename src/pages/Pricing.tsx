@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -199,10 +199,38 @@ export default function Pricing() {
   const [showComparison, setShowComparison] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const handleSelectPlan = (plan: typeof PLANS[0]) => {
     setSelectedPlan(plan);
     setIsDialogOpen(true);
   };
+
+  const handleDotClick = (index: number) => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 320 + 20; // card width (w-80 = 320px) + gap (gap-5 = 20px)
+      scrollContainerRef.current.scrollTo({
+        left: index * cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const cardWidth = 320 + 20;
+      const scrollLeft = container.scrollLeft;
+      const index = Math.round(scrollLeft / cardWidth);
+      setActiveCardIndex(Math.min(index, PLANS.length - 1));
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
   return <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-gray-100">
@@ -231,7 +259,10 @@ export default function Pricing() {
       {/* Pricing Cards - Horizontal Scroll */}
       <div className="container mx-auto px-4 pb-16">
         <div className="relative">
-          <div className="overflow-x-auto scrollbar-hide pb-4">
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto scrollbar-hide pb-4"
+          >
             <div className="flex gap-5 px-4" style={{
             width: 'max-content'
           }}>
@@ -277,6 +308,22 @@ export default function Pricing() {
                   </CardContent>
                 </Card>)}
             </div>
+          </div>
+          
+          {/* Navigation Dots */}
+          <div className="flex justify-center gap-2 mt-4">
+            {PLANS.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => handleDotClick(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  activeCardIndex === index 
+                    ? 'w-6 bg-[#273d60]' 
+                    : 'w-2 bg-gray-300 hover:bg-gray-400'
+                }`}
+                aria-label={`Go to plan ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>
