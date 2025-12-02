@@ -218,10 +218,10 @@ export default function Pricing() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold mb-4 md:text-3xl text-gray-600">
+        <h1 className="text-4xl font-bold mb-4 text-gray-600 md:text-xl">
           Planos e Preços
         </h1>
-        <p className="mb-2 max-w-2xl mx-auto text-lg text-gray-500">
+        <p className="mb-2 max-w-2xl mx-auto text-gray-500 text-base">
           Escolha o plano ideal para o volume de documentos da sua empresa
         </p>
         <p className="mb-8 max-w-2xl mx-auto text-sm text-gray-400">
@@ -356,10 +356,10 @@ export default function Pricing() {
       {/* FAQ Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4 text-gray-700">
+          <h2 className="font-bold text-center mb-4 text-xl text-gray-600">
             Perguntas Frequentes
           </h2>
-          <p className="text-center mb-12 text-gray-500 text-base">
+          <p className="text-center mb-12 text-base text-gray-500">
             Tire suas dúvidas sobre nossos planos e funcionalidades
           </p>
           <Card className="border">
