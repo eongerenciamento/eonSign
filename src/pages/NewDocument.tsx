@@ -544,7 +544,7 @@ const NewDocument = () => {
 
         <div className="space-y-6 bg-card p-6 rounded-lg border">
           {/* Drag and Drop Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+          <div className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
             {files.length === 0 ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="font-medium mb-2 text-base text-gray-600">
@@ -578,11 +578,11 @@ const NewDocument = () => {
                 </div>
               ) : (
                 // Multiple documents - envelope view
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <FolderOpen className="w-5 h-5 text-gray-500" />
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-xs font-medium text-gray-600">
                         Envelope ({files.length}/{MAX_DOCUMENTS} docs)
                       </p>
                     </div>
@@ -591,7 +591,7 @@ const NewDocument = () => {
                     </p>
                   </div>
                   {files.map((file, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                       <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left">
                         <p className="font-medium text-sm md:text-base text-gray-600 truncate">{file.name}</p>
