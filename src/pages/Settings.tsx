@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 
 const Settings = () => {
@@ -210,9 +210,18 @@ const Settings = () => {
 
         <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="company">Empresa</TabsTrigger>
-            <TabsTrigger value="subscription">Assinatura</TabsTrigger>
-            <TabsTrigger value="support">Suporte</TabsTrigger>
+            <TabsTrigger value="company" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden md:inline">Empresa</span>
+            </TabsTrigger>
+            <TabsTrigger value="subscription" className="gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden md:inline">Assinatura</span>
+            </TabsTrigger>
+            <TabsTrigger value="support" className="gap-2">
+              <HelpCircle className="h-4 w-4" />
+              <span className="hidden md:inline">Suporte</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
