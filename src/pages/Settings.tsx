@@ -12,7 +12,6 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload, Building2, CreditCard, HelpCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
-
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -33,19 +32,18 @@ const Settings = () => {
 
   // Get tab from URL params
   const activeTab = searchParams.get('tab') || 'company';
-
   useEffect(() => {
     const loadData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       setUser(user);
-
       if (user) {
-        const { data: companyData } = await supabase
-          .from('company_settings')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
+        const {
+          data: companyData
+        } = await supabase.from('company_settings').select('*').eq('user_id', user.id).single();
         if (companyData) {
           setCompanyName(companyData.company_name);
           setCnpj(companyData.cnpj);
@@ -62,12 +60,12 @@ const Settings = () => {
         }
       }
     };
-
     loadData();
   }, []);
-
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast.error("Erro ao sair");
     } else {
@@ -75,15 +73,12 @@ const Settings = () => {
       navigate("/auth");
     }
   };
-
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
-    if (numbers.length <= 7)
-      return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
+    if (numbers.length <= 7) return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
     return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
-
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 3) return numbers;
@@ -91,7 +86,6 @@ const Settings = () => {
     if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
     return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
-
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
@@ -100,28 +94,22 @@ const Settings = () => {
     if (numbers.length <= 12) return `${numbers.slice(0, 2)}.${numbers.slice(2, 5)}.${numbers.slice(5, 8)}/${numbers.slice(8)}`;
     return `${numbers.slice(0, 2)}.${numbers.slice(2, 5)}.${numbers.slice(5, 8)}/${numbers.slice(8, 12)}-${numbers.slice(12, 14)}`;
   };
-
   const handlePhoneChange = (value: string) => {
     setPhone(formatPhone(value));
   };
-
   const handleCpfChange = (value: string) => {
     setAdminCpf(formatCPF(value));
   };
-
   const handleCnpjChange = (value: string) => {
     setCnpj(formatCNPJ(value));
   };
-
   const handleCepChange = async (value: string) => {
     const numbers = value.replace(/\D/g, "");
     setCep(numbers);
-
     if (numbers.length === 8) {
       try {
         const response = await fetch(`https://viacep.com.br/ws/${numbers}/json/`);
         const data = await response.json();
-
         if (!data.erro) {
           setStreet(data.logradouro || "");
           setNeighborhood(data.bairro || "");
@@ -135,7 +123,6 @@ const Settings = () => {
       }
     }
   };
-
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -146,21 +133,15 @@ const Settings = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleSaveCompany = async () => {
     if (!user) return;
-
     if (!companyName || !cnpj || !cep || !street || !neighborhood || !city || !state || !adminName || !adminCpf || !phone || !companyEmail) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
-
-    const { data: existingData } = await supabase
-      .from('company_settings')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-
+    const {
+      data: existingData
+    } = await supabase.from('company_settings').select('id').eq('user_id', user.id).single();
     const companyData = {
       user_id: user.id,
       company_name: companyName,
@@ -174,41 +155,34 @@ const Settings = () => {
       admin_name: adminName,
       admin_cpf: adminCpf,
       admin_phone: phone,
-      admin_email: companyEmail,
+      admin_email: companyEmail
     };
-
     if (existingData) {
-      const { error } = await supabase
-        .from('company_settings')
-        .update(companyData)
-        .eq('user_id', user.id);
-
+      const {
+        error
+      } = await supabase.from('company_settings').update(companyData).eq('user_id', user.id);
       if (error) {
         toast.error("Erro ao salvar dados da empresa");
         return;
       }
     } else {
-      const { error } = await supabase
-        .from('company_settings')
-        .insert([companyData]);
-
+      const {
+        error
+      } = await supabase.from('company_settings').insert([companyData]);
       if (error) {
         toast.error("Erro ao salvar dados da empresa");
         return;
       }
     }
-
     toast.success("Dados da empresa salvos com sucesso!");
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
         <div>
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
+        <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
@@ -233,27 +207,10 @@ const Settings = () => {
               <CardContent className="space-y-6">
                 {/* Logo Upload */}
                 <div className="flex items-center gap-6">
-                  <div
-                    className="relative w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-                    onClick={() => logoInputRef.current?.click()}
-                  >
-                    {logo ? (
-                      <img
-                        src={logo}
-                        alt="Logo"
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <Upload className="w-8 h-8 text-muted-foreground" />
-                    )}
+                  <div className="relative w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => logoInputRef.current?.click()}>
+                    {logo ? <img src={logo} alt="Logo" className="w-full h-full rounded-full object-cover" /> : <Upload className="w-8 h-8 text-muted-foreground" />}
                   </div>
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="hidden"
-                  />
+                  <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
                   <div>
                     <p className="text-sm font-medium">Logo da Empresa</p>
                     <p className="text-xs text-muted-foreground">
@@ -266,78 +223,40 @@ const Settings = () => {
                 <div className="grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="company-name">Nome da Empresa</Label>
-                    <Input
-                      id="company-name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="Digite o nome da empresa"
-                    />
+                    <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="cnpj">CNPJ</Label>
-                    <Input
-                      id="cnpj"
-                      value={cnpj}
-                      onChange={(e) => handleCnpjChange(e.target.value)}
-                      placeholder="00.000.000/0000-00"
-                      maxLength={18}
-                    />
+                    <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
-                      <Input
-                        id="cep"
-                        value={cep}
-                        onChange={(e) => handleCepChange(e.target.value)}
-                        placeholder="00000-000"
-                        maxLength={8}
-                      />
+                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" maxLength={8} />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="neighborhood">Bairro</Label>
-                      <Input
-                        id="neighborhood"
-                        value={neighborhood}
-                        onChange={(e) => setNeighborhood(e.target.value)}
-                        placeholder="Bairro"
-                      />
+                      <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" />
                     </div>
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="street">Endereço</Label>
-                    <Input
-                      id="street"
-                      value={street}
-                      onChange={(e) => setStreet(e.target.value)}
-                      placeholder="Rua, Avenida..."
-                    />
+                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="city">Cidade</Label>
-                      <Input
-                        id="city"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="Cidade"
-                      />
+                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Cidade" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="state">Estado</Label>
-                      <Input
-                        id="state"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        placeholder="UF"
-                        maxLength={2}
-                      />
+                      <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="UF" maxLength={2} />
                     </div>
                   </div>
 
@@ -345,82 +264,48 @@ const Settings = () => {
 
                   <div className="grid gap-2">
                     <Label htmlFor="admin-name">Nome do Sócio Administrador</Label>
-                    <Input
-                      id="admin-name"
-                      value={adminName}
-                      onChange={(e) => setAdminName(e.target.value)}
-                      placeholder="Nome completo"
-                    />
+                    <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="user-id">ID do Usuário</Label>
-                    <Input
-                      id="user-id"
-                      value={user?.id || ""}
-                      disabled
-                    />
+                    <Input id="user-id" value={user?.id || ""} disabled />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
-                    <Input
-                      id="admin-cpf"
-                      value={adminCpf}
-                      onChange={(e) => handleCpfChange(e.target.value)}
-                      placeholder="000.000.000-00"
-                      maxLength={14}
-                    />
+                    <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="company-phone">Telefone</Label>
-                    <Input
-                      id="company-phone"
-                      value={phone}
-                      onChange={(e) => handlePhoneChange(e.target.value)}
-                      placeholder="(00)00000-0000"
-                      maxLength={14}
-                    />
+                    <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="company-email">E-mail</Label>
-                    <Input
-                      id="company-email"
-                      type="email"
-                      value={companyEmail}
-                      onChange={(e) => setCompanyEmail(e.target.value)}
-                      placeholder="contato@empresa.com"
-                    />
+                    <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" />
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <Button
-                    variant="outline"
-                    className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90"
-                    onClick={() => {
-                      setLogo(null);
-                      setCompanyName("");
-                      setCnpj("");
-                      setCep("");
-                      setStreet("");
-                      setNeighborhood("");
-                      setCity("");
-                      setState("");
-                      setAdminName("");
-                      setAdminCpf("");
-                      setPhone("");
-                      setCompanyEmail("");
-                    }}
-                  >
+                  <Button variant="outline" className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90" onClick={() => {
+                  setLogo(null);
+                  setCompanyName("");
+                  setCnpj("");
+                  setCep("");
+                  setStreet("");
+                  setNeighborhood("");
+                  setCity("");
+                  setState("");
+                  setAdminName("");
+                  setAdminCpf("");
+                  setPhone("");
+                  setCompanyEmail("");
+                }}>
                     Cancelar
                   </Button>
-                  <Button
-                    className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
-                    onClick={handleSaveCompany}
-                  >
+                  <Button className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" onClick={handleSaveCompany}>
                     Salvar
                   </Button>
                 </div>
@@ -434,8 +319,8 @@ const Settings = () => {
 
           <TabsContent value="support" className="space-y-6 mt-6">
             <div className="flex justify-end mb-6">
-              <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90">
-                Abrir Novo Ticket
+              <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 font-normal rounded-full">
+                  Abrir Ticket
               </Button>
             </div>
 
@@ -491,8 +376,6 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Settings;
