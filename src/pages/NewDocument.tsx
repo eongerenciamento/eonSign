@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, X, Plus, Check } from "lucide-react";
+import { Upload, FileText, X, Plus, Check, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -578,11 +578,14 @@ const NewDocument = () => {
                 </div>
               ) : (
                 // Multiple documents - envelope view
-                <div className="space-y-3">
+                <div className="space-y-3 text-left">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">
-                      📁 Envelope ({files.length}/{MAX_DOCUMENTS} documentos)
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4 text-gray-500" />
+                      <p className="text-sm font-medium text-gray-600">
+                        Envelope ({files.length}/{MAX_DOCUMENTS} documentos)
+                      </p>
+                    </div>
                     <p className="text-xs text-blue-600 font-medium">
                       1 crédito
                     </p>
