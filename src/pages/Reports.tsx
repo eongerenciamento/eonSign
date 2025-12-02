@@ -406,7 +406,7 @@ const Reports = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-primary/10">
                 <TrendingUp className="w-6 h-6 text-primary" />
@@ -418,7 +418,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-success/10">
                 <FileCheck className="w-6 h-6 text-success" />
@@ -430,7 +430,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-warning/10">
                 <Clock className="w-6 h-6 text-warning" />
@@ -442,7 +442,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-accent/10">
                 <Users className="w-6 h-6 text-accent" />
@@ -457,7 +457,7 @@ const Reports = () => {
 
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <h3 className="text-lg font-semibold mb-4">Documentos por Status</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -499,7 +499,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-100 border-0">
             <h3 className="text-lg font-semibold mb-4">Top Signatários</h3>
             <div className="space-y-4">
               {[{
@@ -530,7 +530,7 @@ const Reports = () => {
         </div>
 
         {/* Activity Timeline */}
-        <Card className="p-6">
+        <Card className="p-6 bg-gray-100 border-0">
           <h3 className="text-lg font-semibold mb-4">Atividade Recente</h3>
           <div className="space-y-4">
             {[{
@@ -658,7 +658,7 @@ const Reports = () => {
             )}
 
             {/* Table / Cards */}
-            <Card className="p-6">
+            <Card className="p-6 bg-gray-100 border-0">
               <h3 className="text-lg font-semibold mb-4">Relatório de Signatários</h3>
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Carregando...</div>
