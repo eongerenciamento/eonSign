@@ -82,6 +82,17 @@ export default function Auth() {
     }
     return numbers.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1)$2-$3');
   };
+  // Aplicar cor de fundo azul ao html e body para cobrir o notch no mobile
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = '#273d60';
+    document.body.style.backgroundColor = '#273d60';
+    
+    return () => {
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
+
   useEffect(() => {
     const {
       data: {
@@ -198,7 +209,7 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
