@@ -701,11 +701,11 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-gray-500"
                     onClick={() => setViewerZoom(Math.min(viewerZoom + 25, 200))}
                     title="Zoom In"
                   >
-                    <ZoomIn className="h-4 w-4" />
+                    <ZoomIn className="h-4 w-4 text-gray-500" />
                   </Button>
                   <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">
                     {viewerZoom}%
@@ -713,27 +713,27 @@ const Drive = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-gray-500"
                     onClick={() => setViewerZoom(Math.max(viewerZoom - 25, 50))}
                     title="Zoom Out"
                   >
-                    <ZoomOut className="h-4 w-4" />
+                    <ZoomOut className="h-4 w-4 text-gray-500" />
                   </Button>
                   <div className="h-6 w-px bg-gray-300 mx-1" />
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-gray-500"
                     onClick={() => setViewerRotation((viewerRotation + 90) % 360)}
                     title="Rotacionar"
                   >
-                    <RotateCw className="h-4 w-4" />
+                    <RotateCw className="h-4 w-4 text-gray-500" />
                   </Button>
                   <div className="h-6 w-px bg-gray-300 mx-1" />
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                    className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent hover:text-gray-500"
                     onClick={async () => {
                       if (viewerUrl) {
                         const link = document.createElement('a');
@@ -750,7 +750,7 @@ const Drive = () => {
                     }}
                     title="Download"
                   >
-                    <Download className="h-4 w-4" />
+                    <Download className="h-4 w-4 text-gray-500" />
                   </Button>
                 </div>
                 
