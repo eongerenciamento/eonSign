@@ -533,7 +533,7 @@ const NewDocument = () => {
                 <p className="text-sm font-medium text-gray-600">Signatários Externos</p>
                 
               </div>
-              {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted/20">
+              {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
                   {signers.length > 1 && <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 hover:bg-transparent active:bg-transparent focus:bg-transparent" onClick={() => removeSigner(index)}>
                       <X className="w-4 h-4" />
                     </Button>}
