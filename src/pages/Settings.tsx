@@ -36,36 +36,55 @@ const Settings = () => {
   const activeTab = searchParams.get('tab') || 'company';
 
   // Fetch support tickets
-  const { data: tickets, refetch: refetchTickets } = useQuery({
+  const {
+    data: tickets,
+    refetch: refetchTickets
+  } = useQuery({
     queryKey: ['support-tickets', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
+      const {
+        data,
+        error
+      } = await supabase.from('support_tickets').select('*').eq('user_id', user.id).order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user
   });
-
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-      aberto: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Aberto' },
-      em_andamento: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Em Andamento' },
-      resolvido: { bg: 'bg-green-100', text: 'text-green-800', label: 'Resolvido' },
-      fechado: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Fechado' },
+    const statusConfig: Record<string, {
+      bg: string;
+      text: string;
+      label: string;
+    }> = {
+      aberto: {
+        bg: 'bg-blue-100',
+        text: 'text-blue-800',
+        label: 'Aberto'
+      },
+      em_andamento: {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-800',
+        label: 'Em Andamento'
+      },
+      resolvido: {
+        bg: 'bg-green-100',
+        text: 'text-green-800',
+        label: 'Resolvido'
+      },
+      fechado: {
+        bg: 'bg-gray-100',
+        text: 'text-gray-800',
+        label: 'Fechado'
+      }
     };
-    
     const config = statusConfig[status] || statusConfig.aberto;
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         {config.label}
-      </span>
-    );
+      </span>;
   };
   useEffect(() => {
     const loadData = async () => {
@@ -364,24 +383,21 @@ const Settings = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Título</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Data de Abertura</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Abertura</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Categoria</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Prioridade</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número do Ticket</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Ticket</th>
                         <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {tickets && tickets.length > 0 ? (
-                        tickets.map((ticket, index) => {
-                          // Extract category and priority from description
-                          const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                          const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                          const category = categoryMatch ? categoryMatch[1] : '-';
-                          const priority = priorityMatch ? priorityMatch[1] : '-';
-
-                          return (
-                            <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                      {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
+                      // Extract category and priority from description
+                      const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                      const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                      const category = categoryMatch ? categoryMatch[1] : '-';
+                      const priority = priorityMatch ? priorityMatch[1] : '-';
+                      return <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
                               <td className="p-4 text-sm">{ticket.title}</td>
                               <td className="p-4 text-sm text-gray-600">
                                 {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
@@ -392,16 +408,12 @@ const Settings = () => {
                               <td className="p-4 text-right">
                                 {getStatusBadge(ticket.status)}
                               </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
+                            </tr>;
+                    }) : <tr>
                           <td colSpan={6} className="p-8 text-center text-sm text-gray-500">
                             Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
                           </td>
-                        </tr>
-                      )}
+                        </tr>}
                     </tbody>
                   </table>
                 </div>
