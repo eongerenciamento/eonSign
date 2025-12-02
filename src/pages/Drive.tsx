@@ -68,6 +68,7 @@ const Drive = () => {
         signers: doc.signers,
         signedBy: doc.signed_by,
         folderId: doc.folder_id,
+        fileUrl: doc.file_url,
         signerStatuses: [],
         signerNames: [],
       }));
@@ -560,35 +561,45 @@ const Drive = () => {
               <DocumentsList
                 documents={filteredDocuments}
                 viewMode={viewMode}
-                onViewDocument={(documentId) => {
+                onViewDocument={async (documentId) => {
                   const doc = documents.find(d => d.id === documentId);
-                  if (doc?.folderId) {
-                    supabase.storage
+                  if (doc?.fileUrl) {
+                    const { data, error } = await supabase.storage
                       .from('documents')
-                      .createSignedUrl(doc.name, 60)
-                      .then(({ data }) => {
-                        if (data?.signedUrl) {
-                          window.open(data.signedUrl, '_blank');
-                        }
+                      .createSignedUrl(doc.fileUrl, 60);
+                    
+                    if (error) {
+                      toast({
+                        title: "Erro ao visualizar documento",
+                        description: error.message,
+                        variant: "destructive",
                       });
+                    } else if (data?.signedUrl) {
+                      window.open(data.signedUrl, '_blank');
+                    }
                   }
                 }}
-                onDownloadDocument={(documentId) => {
+                onDownloadDocument={async (documentId) => {
                   const doc = documents.find(d => d.id === documentId);
-                  if (doc?.folderId) {
-                    supabase.storage
+                  if (doc?.fileUrl) {
+                    const { data, error } = await supabase.storage
                       .from('documents')
-                      .createSignedUrl(doc.name, 60)
-                      .then(({ data }) => {
-                        if (data?.signedUrl) {
-                          const link = document.createElement('a');
-                          link.href = data.signedUrl;
-                          link.download = doc.name;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }
+                      .createSignedUrl(doc.fileUrl, 60);
+                    
+                    if (error) {
+                      toast({
+                        title: "Erro ao baixar documento",
+                        description: error.message,
+                        variant: "destructive",
                       });
+                    } else if (data?.signedUrl) {
+                      const link = document.createElement('a');
+                      link.href = data.signedUrl;
+                      link.download = doc.name;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
                   }
                 }}
                 onMoveToFolder={async (documentId, folderId) => {
