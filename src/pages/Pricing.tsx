@@ -333,10 +333,10 @@ export default function Pricing() {
       {/* FAQ Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-[#273d60] text-center mb-4">
+          <h2 className="text-3xl font-bold text-center mb-4 text-gray-600">
             Perguntas Frequentes
           </h2>
-          <p className="text-gray-600 text-center mb-12">
+          <p className="text-center mb-12 text-gray-500 text-base">
             Tire suas dúvidas sobre nossos planos e funcionalidades
           </p>
           <Card>
