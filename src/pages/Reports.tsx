@@ -645,7 +645,7 @@ const Reports = () => {
 
             {/* Table / Cards */}
             <Card className="p-6 bg-gray-100 border-0">
-              <h3 className="text-lg font-semibold mb-4">Relatório de Signatários</h3>
+              <h3 className="text-sm md:text-lg font-semibold mb-4 text-gray-600">Relatório de Signatários</h3>
               {isLoading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : !signatories || signatories.length === 0 ? <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div> : isMobile ? (/* Mobile view - Cards */
             <div className="space-y-4 -mx-8">
                   {signatories.map((signer, index) => <div key={signer.id} className={`py-4 px-8 space-y-3 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
@@ -790,7 +790,7 @@ const Reports = () => {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <span className="text-sm font-medium px-4">
-                      Página {currentPage} de {totalPages}
+                      <span className="hidden md:inline">Página</span><span className="md:hidden">Pág.</span> {currentPage} de {totalPages}
                     </span>
                     <Button variant="outline" size="icon" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
                       <ChevronRight className="h-4 w-4" />
