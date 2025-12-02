@@ -179,7 +179,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto bg-[#273d60]">
-        {!collapsed && <button onClick={() => window.open('https://eongerenciamento.com.br', '_blank')} className="w-full mb-3 px-4 py-2 rounded-lg bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 transition-opacity text-xs bg-[#283e61]/75 font-light">
+        {!collapsed && <button onClick={() => window.open('https://eongerenciamento.com.br', '_blank')} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-[#283e61]/100 font-light">
             Certificado Digital A1 R$109.90    
           </button>}
         
