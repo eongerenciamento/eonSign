@@ -326,6 +326,39 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          status: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -440,6 +473,7 @@ export type Database = {
         | "unpaid"
         | "trialing"
         | "incomplete"
+      ticket_status: "aberto" | "em_andamento" | "resolvido" | "fechado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -575,6 +609,7 @@ export const Constants = {
         "trialing",
         "incomplete",
       ],
+      ticket_status: ["aberto", "em_andamento", "resolvido", "fechado"],
     },
   },
 } as const
