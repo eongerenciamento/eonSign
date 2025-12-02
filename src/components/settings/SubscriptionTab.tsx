@@ -307,7 +307,7 @@ export function SubscriptionTab() {
         {/* Comparison Table */}
         <div className="space-y-4">
           <div className="flex justify-center">
-            <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900">
+            <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent">
               {isComparisonOpen ? <>
                   <ChevronUp className="h-4 w-4 mr-2" />
                   Ocultar Tabela Comparativa
@@ -565,7 +565,7 @@ export function SubscriptionTab() {
       {/* Comparison Table */}
       <div className="space-y-4">
         <div className="flex justify-center">
-          <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900">
+          <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent">
             {isComparisonOpen ? <>
                 <ChevronUp className="h-4 w-4 mr-2" />
                 Ocultar Tabela Comparativa
