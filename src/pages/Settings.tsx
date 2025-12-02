@@ -357,7 +357,7 @@ const Settings = () => {
               <CreateTicketSheet onTicketCreated={() => refetchTickets()} />
             </div>
 
-            <Card>
+            <Card className="border-0">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -365,27 +365,39 @@ const Settings = () => {
                       <tr className="border-b">
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Título</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Data de Abertura</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Categoria</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Prioridade</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Número do Ticket</th>
                         <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {tickets && tickets.length > 0 ? (
-                        tickets.map((ticket, index) => (
-                          <tr key={ticket.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
-                            <td className="p-4 text-sm">{ticket.title}</td>
-                            <td className="p-4 text-sm text-gray-600">
-                              {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
-                            </td>
-                            <td className="p-4 text-sm text-gray-600">{ticket.ticket_number}</td>
-                            <td className="p-4 text-right">
-                              {getStatusBadge(ticket.status)}
-                            </td>
-                          </tr>
-                        ))
+                        tickets.map((ticket, index) => {
+                          // Extract category and priority from description
+                          const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                          const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                          const category = categoryMatch ? categoryMatch[1] : '-';
+                          const priority = priorityMatch ? priorityMatch[1] : '-';
+
+                          return (
+                            <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                              <td className="p-4 text-sm">{ticket.title}</td>
+                              <td className="p-4 text-sm text-gray-600">
+                                {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
+                              </td>
+                              <td className="p-4 text-sm text-gray-600 capitalize">{category}</td>
+                              <td className="p-4 text-sm text-gray-600 capitalize">{priority}</td>
+                              <td className="p-4 text-sm text-gray-600">{ticket.ticket_number}</td>
+                              <td className="p-4 text-right">
+                                {getStatusBadge(ticket.status)}
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
-                          <td colSpan={4} className="p-8 text-center text-sm text-gray-500">
+                          <td colSpan={6} className="p-8 text-center text-sm text-gray-500">
                             Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
                           </td>
                         </tr>
