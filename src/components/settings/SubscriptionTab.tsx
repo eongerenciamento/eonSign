@@ -339,37 +339,37 @@ export function SubscriptionTab() {
                   </TableHeader>
                   <TableBody>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificação por<br className="md:hidden" />E-mail / WhatsApp</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificação por<br className="md:hidden" />E-mail / WhatsApp</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização<br className="md:hidden" />da assinatura</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização<br className="md:hidden" />da assinatura</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Biometria facial</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Biometria facial</TableCell>
                       {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
@@ -601,37 +601,37 @@ export function SubscriptionTab() {
                 </TableHeader>
                 <TableBody>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificação por<br className="md:hidden" />E-mail / WhatsApp</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificação por<br className="md:hidden" />E-mail / WhatsApp</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização<br className="md:hidden" />da assinatura</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização<br className="md:hidden" />da assinatura</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Biometria facial</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Biometria facial</TableCell>
                     {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
