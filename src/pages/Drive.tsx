@@ -764,16 +764,22 @@ const Drive = () => {
                     style={{
                       width: `${viewerZoom}%`,
                       height: `${viewerZoom}%`,
-                      transform: `rotate(${viewerRotation}deg)`,
-                      transformOrigin: 'center center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       transition: 'all 0.3s ease',
-                      minWidth: viewerZoom > 100 ? `${viewerZoom}%` : undefined,
-                      minHeight: viewerZoom > 100 ? `${viewerZoom}%` : undefined,
                     }}
                   >
                     <iframe
                       src={`${viewerUrl}#view=Fit`}
-                      className="w-full h-full border-0 rounded-md bg-white shadow-lg"
+                      style={{
+                        width: `${10000 / viewerZoom}%`,
+                        height: `${10000 / viewerZoom}%`,
+                        transform: `rotate(${viewerRotation}deg)`,
+                        transformOrigin: 'center center',
+                        border: 0,
+                      }}
+                      className="rounded-md bg-white shadow-lg"
                       title="Document Preview"
                     />
                   </div>
