@@ -267,16 +267,16 @@ export function SubscriptionTab() {
 
         {/* Comparison Table */}
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen} className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Comparativo de Planos</h3>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm">
-                {isComparisonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-          </div>
           <CollapsibleContent>
             <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <h3 className="text-lg font-semibold">Comparativo de Planos</h3>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    {isComparisonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+              </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
@@ -289,6 +289,14 @@ export function SubscriptionTab() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">Preço/mês</TableCell>
+                        {SUBSCRIPTION_TIERS.map(tier => (
+                          <TableCell key={tier.name} className="text-center font-bold">
+                            {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                          </TableCell>
+                        ))}
+                      </TableRow>
                       <TableRow>
                         <TableCell className="font-medium">Documentos/mês</TableCell>
                         {SUBSCRIPTION_TIERS.map(tier => (
@@ -326,18 +334,6 @@ export function SubscriptionTab() {
                         ))}
                       </TableRow>
                       <TableRow>
-                        <TableCell className="font-medium">Face ID</TableCell>
-                        {SUBSCRIPTION_TIERS.map(tier => (
-                          <TableCell key={tier.name} className="text-center">
-                            {tier.priceId === "free" ? (
-                              <X className="h-4 w-4 text-gray-400 mx-auto" />
-                            ) : (
-                              <Check className="h-4 w-4 text-green-600 mx-auto" />
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
                         <TableCell className="font-medium">Eon Drive</TableCell>
                         {SUBSCRIPTION_TIERS.map(tier => (
                           <TableCell key={tier.name} className="text-center">
@@ -350,10 +346,14 @@ export function SubscriptionTab() {
                         ))}
                       </TableRow>
                       <TableRow>
-                        <TableCell className="font-medium">Preço/mês</TableCell>
-                        {SUBSCRIPTION_TIERS.map(tier => (
-                          <TableCell key={tier.name} className="text-center font-bold">
-                            {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                        <TableCell className="font-medium">Face ID</TableCell>
+                        {SUBSCRIPTION_TIERS.map((tier, index) => (
+                          <TableCell key={tier.name} className="text-center">
+                            {tier.priceId === "free" || index === 1 ? (
+                              <X className="h-4 w-4 text-gray-400 mx-auto" />
+                            ) : (
+                              <Check className="h-4 w-4 text-green-600 mx-auto" />
+                            )}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -532,16 +532,16 @@ export function SubscriptionTab() {
 
       {/* Comparison Table */}
       <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen} className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Comparativo de Planos</h3>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
-              {isComparisonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
         <CollapsibleContent>
           <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <h3 className="text-lg font-semibold">Comparativo de Planos</h3>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  {isComparisonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+            </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
@@ -554,6 +554,14 @@ export function SubscriptionTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Preço/mês</TableCell>
+                      {SUBSCRIPTION_TIERS.map(tier => (
+                        <TableCell key={tier.name} className="text-center font-bold">
+                          {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                        </TableCell>
+                      ))}
+                    </TableRow>
                     <TableRow>
                       <TableCell className="font-medium">Documentos/mês</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => (
@@ -591,18 +599,6 @@ export function SubscriptionTab() {
                       ))}
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">Face ID</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow>
                       <TableCell className="font-medium">Eon Drive</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => (
                         <TableCell key={tier.name} className="text-center">
@@ -615,10 +611,14 @@ export function SubscriptionTab() {
                       ))}
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">Preço/mês</TableCell>
-                      {SUBSCRIPTION_TIERS.map(tier => (
-                        <TableCell key={tier.name} className="text-center font-bold">
-                          {tier.price === 0 ? "Grátis" : `R$ ${tier.price.toFixed(2).replace('.', ',')}`}
+                      <TableCell className="font-medium">Face ID</TableCell>
+                      {SUBSCRIPTION_TIERS.map((tier, index) => (
+                        <TableCell key={tier.name} className="text-center">
+                          {tier.priceId === "free" || index === 1 ? (
+                            <X className="h-4 w-4 text-gray-400 mx-auto" />
+                          ) : (
+                            <Check className="h-4 w-4 text-green-600 mx-auto" />
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
