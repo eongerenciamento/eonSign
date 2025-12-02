@@ -544,7 +544,7 @@ const NewDocument = () => {
 
         <div className="space-y-6 bg-card p-6 rounded-lg border">
           {/* Drag and Drop Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+          <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
             {files.length === 0 ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="font-medium mb-2 text-base text-gray-600">
@@ -605,10 +605,11 @@ const NewDocument = () => {
                     </div>
                   ))}
                   {files.length < MAX_DOCUMENTS && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="w-full mt-2">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar mais documentos
-                    </Button>
+                    <div className="flex justify-end">
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}>
+                        <Plus className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </div>
                   )}
                   <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
                 </div>
