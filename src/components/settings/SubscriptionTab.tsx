@@ -144,65 +144,88 @@ export function SubscriptionTab() {
 
     return (
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  {subscription.plan_name}
-                  {subscription.plan_name !== "Grátis" && <Crown className="h-5 w-5 text-yellow-500" />}
-                </CardTitle>
-                <CardDescription>Seu plano atual</CardDescription>
-              </div>
+        {/* Grid com 4 cards de informação */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Plano Atual */}
+          <Card className="bg-gray-100 border-0">
+            <CardContent className="pt-6">
+              <p className="text-sm text-gray-600 mb-2">Plano Atual</p>
+              <p className="text-xl font-bold text-gray-900 mb-1">
+                {subscription.plan_name}
+              </p>
               {getStatusBadge(subscription.status)}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div className="space-y-1">
-                <Progress value={usagePercent} className="h-2 bg-gray-300" />
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Uso de Documentos</span>
-                  <span className="font-bold text-primary">
-                    {usage?.current || 0} / {subscription.document_limit}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground pt-1">
-                  {usagePercent >= 80 ? (
-                    <span className="text-yellow-600 font-medium">
-                      Você está próximo do limite. Considere fazer upgrade.
-                    </span>
-                  ) : (
-                    `Você usou ${usage?.current || 0} de ${subscription.document_limit} documentos disponíveis neste mês.`
-                  )}
-                </p>
-              </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="flex gap-3">
-              {nextTier && (
-                <Button
-                  onClick={() => handleUpgrade(nextTier)}
-                  disabled={processingCheckout}
-                  className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
-                >
-                  {processingCheckout ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`
-                  )}
-                </Button>
+          {/* Card 2: Valor */}
+          <Card className="bg-gray-100 border-0">
+            <CardContent className="pt-6">
+              <p className="text-sm text-gray-600 mb-2">Valor</p>
+              <p className="text-xl font-bold text-gray-900">
+                {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price 
+                  ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace('.', ',')}`
+                  : "R$ 0,00"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">por mês</p>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Data de Renovação */}
+          <Card className="bg-gray-100 border-0">
+            <CardContent className="pt-6">
+              <p className="text-sm text-gray-600 mb-2">Renovação</p>
+              <p className="text-xl font-bold text-gray-900">
+                {subscription?.current_period_end 
+                  ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR', { 
+                      day: '2-digit', 
+                      month: '2-digit',
+                      year: 'numeric'
+                    })
+                  : '-'}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Consumo */}
+          <Card className="bg-gray-100 border-0">
+            <CardContent className="pt-6">
+              <p className="text-sm text-gray-600 mb-2">Consumo</p>
+              <p className="text-xl font-bold text-gray-900 mb-3">
+                {usage?.current || 0} / {subscription.document_limit}
+              </p>
+              <Progress value={usagePercent} className="h-2 bg-gray-300" />
+              {usagePercent >= 80 && (
+                <p className="text-xs text-yellow-600 font-medium mt-2">
+                  Próximo do limite
+                </p>
               )}
-              <Button
-                onClick={handleManageSubscription}
-                variant="outline"
-                className="flex-1"
-              >
-                Extrato de Pagamentos
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Botões de ação */}
+        <div className="flex gap-3">
+          {nextTier && (
+            <Button
+              onClick={() => handleUpgrade(nextTier)}
+              disabled={processingCheckout}
+              className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
+            >
+              {processingCheckout ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`
+              )}
+            </Button>
+          )}
+          <Button
+            onClick={handleManageSubscription}
+            variant="outline"
+            className="flex-1"
+          >
+            Extrato de Pagamentos
+          </Button>
+        </div>
 
         {/* Show upgrade options */}
         <div>
@@ -442,34 +465,67 @@ export function SubscriptionTab() {
   // User on free tier - show all paid tiers
   return (
     <div className="space-y-6">
-      {usage && (
-        <>
-          <Card className="bg-gray-100 border-0 max-w-sm">
-            <CardContent className="pt-4 space-y-3">
-              <p className="text-sm text-gray-600 mb-1">
-                Você está no plano <strong>GRÁTIS</strong>
+      {/* Grid com 4 cards de informação */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Plano Atual */}
+        <Card className="bg-gray-100 border-0">
+          <CardContent className="pt-6">
+            <p className="text-sm text-gray-600 mb-2">Plano Atual</p>
+            <p className="text-xl font-bold text-gray-900 mb-1">
+              Grátis
+            </p>
+            <Badge variant="secondary" className="bg-green-100 text-green-700">
+              Ativo
+            </Badge>
+          </CardContent>
+        </Card>
+
+        {/* Card 2: Valor */}
+        <Card className="bg-gray-100 border-0">
+          <CardContent className="pt-6">
+            <p className="text-sm text-gray-600 mb-2">Valor</p>
+            <p className="text-xl font-bold text-gray-900">
+              R$ 0,00
+            </p>
+            <p className="text-xs text-gray-500 mt-1">por mês</p>
+          </CardContent>
+        </Card>
+
+        {/* Card 3: Data de Renovação */}
+        <Card className="bg-gray-100 border-0">
+          <CardContent className="pt-6">
+            <p className="text-sm text-gray-600 mb-2">Renovação</p>
+            <p className="text-xl font-bold text-gray-900">-</p>
+            <p className="text-xs text-gray-500 mt-1">Plano gratuito</p>
+          </CardContent>
+        </Card>
+
+        {/* Card 4: Consumo */}
+        <Card className="bg-gray-100 border-0">
+          <CardContent className="pt-6">
+            <p className="text-sm text-gray-600 mb-2">Consumo</p>
+            <p className="text-xl font-bold text-gray-900 mb-3">
+              {usage?.current || 0} / 5
+            </p>
+            <Progress value={((usage?.current || 0) / 5) * 100} className="h-2 bg-gray-300" />
+            {(usage?.current || 0) >= 4 && (
+              <p className="text-xs text-yellow-600 font-medium mt-2">
+                Próximo do limite
               </p>
-              <div className="space-y-1">
-                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">Consumo</span>
-                  <span className="font-bold text-gray-600">
-                    {usage.current} / 5
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <div className="flex justify-start">
-            <Button
-              onClick={handleManageSubscription}
-              className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
-            >
-              Extrato de Pagamentos
-            </Button>
-          </div>
-        </>
-      )}
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Botão de ação */}
+      <div className="flex justify-start">
+        <Button
+          onClick={handleManageSubscription}
+          className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
+        >
+          Extrato de Pagamentos
+        </Button>
+      </div>
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
