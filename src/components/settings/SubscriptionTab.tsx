@@ -192,13 +192,13 @@ export function SubscriptionTab() {
           {/* Card 1: Plano Atual */}
           <Card className="bg-gray-100 border-0">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-600 mb-2">Plano Atual</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Plano Atual</p>
+                {getStatusBadge(subscription.status)}
+              </div>
               <p className="text-xl font-bold text-gray-900 mb-1">
                 {subscription.plan_name}
               </p>
-              <div className="mb-2">
-                {getStatusBadge(subscription.status)}
-              </div>
               <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
                 Extrato de Pagamentos
               </Button>
@@ -452,15 +452,15 @@ export function SubscriptionTab() {
         {/* Card 1: Plano Atual */}
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Plano Atual</p>
-            <p className="text-xl font-bold mb-1 text-gray-600">
-              Grátis
-            </p>
-            <div className="mb-2">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">Plano Atual</p>
               <Badge variant="secondary" className="bg-green-100 text-green-700">
                 Ativo
               </Badge>
             </div>
+            <p className="text-xl font-bold mb-1 text-gray-600">
+              Grátis
+            </p>
             <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-primary">
               Extrato de Pagamentos
             </Button>
