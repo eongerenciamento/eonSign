@@ -254,7 +254,7 @@ export function UserProfileSheet({
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="text-base"
+              className="text-base bg-gray-100 border-none"
               placeholder="Digite seu nome"
             />
           </div>
@@ -267,7 +267,7 @@ export function UserProfileSheet({
               id="role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="text-base"
+              className="text-base bg-gray-100 border-none"
               placeholder="Digite seu cargo"
             />
           </div>
@@ -281,7 +281,7 @@ export function UserProfileSheet({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="text-base"
+              className="text-base bg-gray-100 border-none"
               placeholder="Digite seu e-mail"
             />
           </div>
@@ -294,7 +294,7 @@ export function UserProfileSheet({
               id="phone"
               value={phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
-              className="text-base"
+              className="text-base bg-gray-100 border-none"
               placeholder="(00)00000-0000"
               maxLength={14}
             />
@@ -321,7 +321,7 @@ export function UserProfileSheet({
                     type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="text-base pr-10"
+                    className="text-base pr-10 bg-gray-100 border-none"
                     placeholder="Digite sua senha atual"
                   />
                   <button
@@ -348,7 +348,7 @@ export function UserProfileSheet({
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="text-base pr-10"
+                    className="text-base pr-10 bg-gray-100 border-none"
                     placeholder="Digite sua nova senha"
                   />
                   <button
@@ -375,7 +375,7 @@ export function UserProfileSheet({
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="text-base pr-10"
+                    className="text-base pr-10 bg-gray-100 border-none"
                     placeholder="Confirme sua nova senha"
                   />
                   <button
@@ -397,26 +397,25 @@ export function UserProfileSheet({
 
         <div className="grid grid-cols-3 gap-4 mt-8">
           <Button
-            variant="outline"
-            className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90 border-none"
+            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
+          </Button>
+          <Button
+            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
             onClick={() => onOpenChange(false)}
           >
             <X className="w-4 h-4 mr-2" />
             Cancelar
           </Button>
           <Button
-            className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90"
+            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
             onClick={handleSave}
           >
             <Check className="w-4 h-4 mr-2" />
             Salvar
-          </Button>
-          <Button
-            className="bg-red-100 text-red-600 hover:bg-red-200"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
           </Button>
         </div>
       </SheetContent>
