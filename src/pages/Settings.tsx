@@ -330,9 +330,9 @@ const Settings = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título do Ticket</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Data de Abertura</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número do Ticket</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título  </th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">​Abertura</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número </th>
                         <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
                       </tr>
                     </thead>
