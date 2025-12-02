@@ -258,7 +258,7 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-              <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
+              <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
             {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
@@ -320,7 +320,7 @@ export function SubscriptionTab() {
           
           <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
+            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
@@ -501,7 +501,7 @@ export function SubscriptionTab() {
       </div>
 
 
-      <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
+      <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
         {SUBSCRIPTION_TIERS.map((tier, index) => {
         const isRecommended = index === 2; // Professional tier
         return <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}>
@@ -578,7 +578,7 @@ export function SubscriptionTab() {
         
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
+            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
