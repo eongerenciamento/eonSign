@@ -4,7 +4,7 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +37,8 @@ const Drive = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerDocumentName, setViewerDocumentName] = useState("");
+  const [viewerZoom, setViewerZoom] = useState(100);
+  const [viewerRotation, setViewerRotation] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -669,21 +671,87 @@ const Drive = () => {
       </div>
 
       {/* Modal de Visualização do Documento */}
-      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+      <Dialog open={viewerOpen} onOpenChange={(open) => {
+        setViewerOpen(open);
+        if (!open) {
+          setViewerZoom(100);
+          setViewerRotation(0);
+        }
+      }}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-[90vh] p-0">
           <DialogHeader className="p-4 border-b">
             <DialogTitle className="flex items-center justify-between">
-              <span className="truncate">{viewerDocumentName}</span>
+              <span className="truncate flex-1">{viewerDocumentName}</span>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setViewerZoom(Math.min(viewerZoom + 25, 200))}
+                  title="Zoom In"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setViewerZoom(Math.max(viewerZoom - 25, 50))}
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setViewerRotation((viewerRotation + 90) % 360)}
+                  title="Rotacionar"
+                >
+                  <RotateCw className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={async () => {
+                    if (viewerUrl) {
+                      const link = document.createElement('a');
+                      link.href = viewerUrl;
+                      link.download = viewerDocumentName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast({
+                        title: "Download iniciado",
+                        description: "O documento está sendo baixado.",
+                      });
+                    }
+                  }}
+                  title="Download"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden p-4">
+          <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-gray-50">
             {viewerUrl && (
-              <iframe
-                src={`${viewerUrl}#view=Fit&zoom=page-fit`}
-                className="w-full h-full border-0 rounded-md"
-                style={{ height: 'calc(90vh - 80px)' }}
-                title="Document Preview"
-              />
+              <div
+                style={{
+                  transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
+                  transformOrigin: 'center',
+                  transition: 'transform 0.3s ease',
+                  width: '100%',
+                  height: 'calc(90vh - 120px)',
+                }}
+              >
+                <iframe
+                  src={`${viewerUrl}#view=Fit`}
+                  className="w-full h-full border-0 rounded-md bg-white shadow-lg"
+                  title="Document Preview"
+                />
+              </div>
             )}
           </div>
         </DialogContent>
