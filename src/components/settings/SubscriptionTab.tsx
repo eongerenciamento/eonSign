@@ -162,7 +162,7 @@ export function SubscriptionTab() {
                     {usage?.current || 0} / {subscription.document_limit}
                   </span>
                 </div>
-                <Progress value={usagePercent} className="h-1.5 bg-gray-300" />
+                <Progress value={usagePercent} className="h-2 bg-gray-300" />
                 <p className="text-xs text-muted-foreground">
                   {usagePercent >= 80 ? (
                     <span className="text-yellow-600 font-medium">
@@ -281,11 +281,11 @@ export function SubscriptionTab() {
                     {usage.current} / 5
                   </span>
                 </div>
-                <Progress value={(usage.current / 5) * 100} className="h-1 bg-gray-300" />
+                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
               </div>
             </CardContent>
           </Card>
-          <div className="flex justify-end">
+          <div className="flex justify-start">
             <Button
               onClick={handleManageSubscription}
               className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6"
