@@ -218,7 +218,7 @@ export default function Pricing() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold mb-4 text-gray-600 md:text-lg">Planos</h1>
+        <h1 className="text-4xl font-bold mb-4 text-gray-600 md:text-xl">Planos</h1>
         <p className="mb-2 max-w-2xl mx-auto text-gray-500 text-base">Escolha o plano ideal para sua empresa</p>
         <p className="mb-8 max-w-2xl mx-auto text-sm text-gray-400">
           Se seu volume de assinaturas é maior entre em contato:{" "}
