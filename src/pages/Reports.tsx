@@ -597,11 +597,11 @@ const Reports = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white">
                     <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
                       PDF
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
-                      <FileDown className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
                       XLS
                     </DropdownMenuItem>
                   </DropdownMenuContent>
