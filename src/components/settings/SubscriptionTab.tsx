@@ -197,6 +197,9 @@ export function SubscriptionTab() {
                 {subscription.plan_name}
               </p>
               {getStatusBadge(subscription.status)}
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+                Extrato de Pagamentos
+              </Button>
             </CardContent>
           </Card>
 
@@ -208,9 +211,6 @@ export function SubscriptionTab() {
                 {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace('.', ',')}` : "R$ 0,00"}
               </p>
               <p className="text-xs text-gray-500 mt-1">por mês</p>
-              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
-                Extrato de Pagamentos
-              </Button>
             </CardContent>
           </Card>
 
@@ -253,7 +253,7 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
+              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory w-full">
             {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
@@ -452,6 +452,9 @@ export function SubscriptionTab() {
             <Badge variant="secondary" className="bg-green-100 text-green-700">
               Ativo
             </Badge>
+            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+              Extrato de Pagamentos
+            </Button>
           </CardContent>
         </Card>
 
@@ -463,9 +466,6 @@ export function SubscriptionTab() {
               R$ 0,00
             </p>
             <p className="text-xs text-gray-500 mt-1">por mês</p>
-            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
-              Extrato de Pagamentos
-            </Button>
           </CardContent>
         </Card>
 
@@ -494,7 +494,7 @@ export function SubscriptionTab() {
       </div>
 
 
-      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
+      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory w-full">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
         const isRecommended = index === 2; // Professional tier
         return <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}>
