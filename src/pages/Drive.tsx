@@ -759,16 +759,16 @@ const Drive = () => {
                   className="w-full overflow-auto flex items-center justify-center"
                   style={{ height: 'calc(90vh - 120px)' }}
                 >
-                  {/* Wrapper do conteúdo com transformação */}
+                  {/* Wrapper do conteúdo com dimensões dinâmicas baseadas no zoom */}
                   <div
                     style={{
-                      transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
+                      width: `${viewerZoom}%`,
+                      height: `${viewerZoom}%`,
+                      transform: `rotate(${viewerRotation}deg)`,
                       transformOrigin: 'center center',
-                      transition: 'transform 0.3s ease',
-                      width: '100%',
-                      height: '100%',
-                      minWidth: '100%',
-                      minHeight: '100%',
+                      transition: 'all 0.3s ease',
+                      minWidth: viewerZoom > 100 ? `${viewerZoom}%` : undefined,
+                      minHeight: viewerZoom > 100 ? `${viewerZoom}%` : undefined,
                     }}
                   >
                     <iframe
