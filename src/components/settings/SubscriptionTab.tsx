@@ -48,7 +48,9 @@ const SUBSCRIPTION_TIERS = [{
   description: "Documentos ilimitados"
 }];
 export function SubscriptionTab() {
-  const { state } = useSidebar();
+  const {
+    state
+  } = useSidebar();
   const sidebarOpen = state === "expanded";
   const [subscription, setSubscription] = useState<any>(null);
   const [usage, setUsage] = useState<{
@@ -444,7 +446,7 @@ export function SubscriptionTab() {
   }
 
   // User on free tier - show all paid tiers
-    return <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Grid com 4 cards de informação */}
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
         {/* Card 1: Plano Atual */}
@@ -509,12 +511,12 @@ export function SubscriptionTab() {
                   <Badge className="bg-primary whitespace-nowrap">Recomendado</Badge>
                 </div>}
               <CardHeader>
-                <CardTitle className="text-lg">{tier.name}</CardTitle>
+                <CardTitle className="text-lg text-gray-600">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-3xl font-bold">
+                  <p className="text-3xl font-bold text-gray-600">
                     {tier.price === 0 ? "Grátis" : <>
                         R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span>
                       </>}
