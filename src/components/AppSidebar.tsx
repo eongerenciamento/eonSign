@@ -179,14 +179,9 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto bg-[#273d60]">
-        {!collapsed && (
-          <button 
-            onClick={() => window.open('https://eongerenciamento.com.br', '_blank')}
-            className="w-full mb-3 px-4 py-2 rounded-lg bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            Adquirir Certificado Digital
-          </button>
-        )}
+        {!collapsed && <button onClick={() => window.open('https://eongerenciamento.com.br', '_blank')} className="w-full mb-3 px-4 py-2 rounded-lg bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 transition-opacity text-xs font-normal">
+            Certificado Digital A1 R$119,90    
+          </button>}
         
         {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors">
             <Avatar className="h-10 w-10">
