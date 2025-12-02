@@ -208,6 +208,9 @@ export function SubscriptionTab() {
                 {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace('.', ',')}` : "R$ 0,00"}
               </p>
               <p className="text-xs text-gray-500 mt-1">por mês</p>
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+                Extrato de Pagamentos
+              </Button>
             </CardContent>
           </Card>
 
@@ -240,15 +243,12 @@ export function SubscriptionTab() {
           </Card>
         </div>
 
-        {/* Botões de ação */}
-        <div className="flex gap-3">
-          {nextTier && <Button onClick={() => handleUpgrade(nextTier)} disabled={processingCheckout} className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white">
-              {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`}
-            </Button>}
-          <Button onClick={handleManageSubscription} variant="outline" className="flex-1">
-            Extrato de Pagamentos
+        {/* Botão de ação */}
+        {nextTier && <div>
+          <Button onClick={() => handleUpgrade(nextTier)} disabled={processingCheckout} className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white">
+            {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`}
           </Button>
-        </div>
+        </div>}
 
         {/* Show upgrade options */}
         <div>
@@ -463,6 +463,9 @@ export function SubscriptionTab() {
               R$ 0,00
             </p>
             <p className="text-xs text-gray-500 mt-1">por mês</p>
+            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+              Extrato de Pagamentos
+            </Button>
           </CardContent>
         </Card>
 
@@ -490,12 +493,6 @@ export function SubscriptionTab() {
         </Card>
       </div>
 
-      {/* Botão de ação */}
-      <div className="flex justify-start">
-        <Button onClick={handleManageSubscription} className="rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#273d60] hover:to-[#001f3f] px-6">
-          Extrato de Pagamentos
-        </Button>
-      </div>
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
