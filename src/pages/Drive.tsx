@@ -754,21 +754,29 @@ const Drive = () => {
                   </Button>
                 </div>
                 
-                {/* Documento com transformações */}
-                <div
-                  style={{
-                    transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
-                    transformOrigin: 'center',
-                    transition: 'transform 0.3s ease',
-                    width: '100%',
-                    height: 'calc(90vh - 120px)',
-                  }}
+                {/* Container com overflow para scroll */}
+                <div 
+                  className="w-full overflow-auto flex items-center justify-center"
+                  style={{ height: 'calc(90vh - 120px)' }}
                 >
-                  <iframe
-                    src={`${viewerUrl}#view=Fit`}
-                    className="w-full h-full border-0 rounded-md bg-white shadow-lg"
-                    title="Document Preview"
-                  />
+                  {/* Wrapper do conteúdo com transformação */}
+                  <div
+                    style={{
+                      transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
+                      transformOrigin: 'center center',
+                      transition: 'transform 0.3s ease',
+                      width: '100%',
+                      height: '100%',
+                      minWidth: '100%',
+                      minHeight: '100%',
+                    }}
+                  >
+                    <iframe
+                      src={`${viewerUrl}#view=Fit`}
+                      className="w-full h-full border-0 rounded-md bg-white shadow-lg"
+                      title="Document Preview"
+                    />
+                  </div>
                 </div>
               </div>
             )}
