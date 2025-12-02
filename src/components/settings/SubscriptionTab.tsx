@@ -271,29 +271,29 @@ export function SubscriptionTab() {
                     <p className="text-3xl font-bold">R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span></p>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>
                         {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Assinatura digital ICP-Brasil</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Notificações por email/WhatsApp</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Geolocalização da assinatura</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Eon Drive</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       {tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                       <span className={tier.name === "Básico" ? "text-gray-400 line-through" : ""}>Biometria facial</span>
                     </div>
@@ -527,33 +527,33 @@ export function SubscriptionTab() {
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>
                       {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Assinatura digital ICP-Brasil</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Notificações por email/WhatsApp</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Geolocalização da assinatura
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
                       Eon Drive
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     {tier.priceId === "free" || tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}>
                       Biometria facial
