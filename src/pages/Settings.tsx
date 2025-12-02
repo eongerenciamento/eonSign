@@ -209,7 +209,7 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={(value) => navigate(`/configuracoes?tab=${value}`)} className="w-full">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="company">Empresa</TabsTrigger>
             <TabsTrigger value="subscription">Assinatura</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
