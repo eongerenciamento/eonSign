@@ -293,14 +293,14 @@ const Settings = () => {
 
                     <div className="grid gap-2">
                       <Label htmlFor="cnpj">CNPJ</Label>
-                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} />
+                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} inputMode="numeric" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
-                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" maxLength={8} />
+                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" maxLength={8} inputMode="numeric" />
                     </div>
 
                     <div className="grid gap-2">
@@ -343,14 +343,14 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
-                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} />
+                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-phone">Telefone</Label>
-                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
+                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" />
                     </div>
 
                     <div className="grid gap-2">
