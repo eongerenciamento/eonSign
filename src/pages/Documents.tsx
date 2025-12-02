@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, CheckCircle, User, Users, Filter, CalendarIcon } from "lucide-react";
+import { Search, CheckCircle, User, Users, SlidersHorizontal, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -178,7 +178,7 @@ const Documents = () => {
               onClick={() => setShowFilters(!showFilters)}
               className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
             >
-              <Filter className="w-5 h-5 text-gray-600" />
+              <SlidersHorizontal className="w-5 h-5 text-gray-600" />
             </Button>
             <UploadDialog />
           </div>
