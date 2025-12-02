@@ -269,7 +269,7 @@ export function SubscriptionTab() {
     <div className="space-y-6">
       {usage && (
         <>
-          <Card className="bg-gray-100 border-0">
+          <Card className="bg-gray-100 border-0 max-w-md">
             <CardContent className="pt-6 space-y-4">
               <p className="text-sm text-gray-600 mb-2">
                 Você está no plano <strong>GRÁTIS</strong>
@@ -281,7 +281,7 @@ export function SubscriptionTab() {
                     {usage.current} / 5
                   </span>
                 </div>
-                <Progress value={(usage.current / 5) * 100} className="h-2 bg-gray-300" />
+                <Progress value={(usage.current / 5) * 100} className="h-1 bg-gray-300" />
               </div>
             </CardContent>
           </Card>
