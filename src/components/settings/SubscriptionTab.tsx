@@ -245,6 +245,11 @@ export function SubscriptionTab() {
           </Card>
         </div>
 
+        {/* Title */}
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-600">Faça o Upgrade do seu Plano</h2>
+        </div>
+
         {/* Botão de ação */}
         {nextTier && <div>
           <Button onClick={() => handleUpgrade(nextTier)} disabled={processingCheckout} className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white">
@@ -497,6 +502,10 @@ export function SubscriptionTab() {
         </Card>
       </div>
 
+      {/* Title */}
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-gray-600">Faça o Upgrade do seu Plano</h2>
+      </div>
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
         {SUBSCRIPTION_TIERS.map((tier, index) => {
