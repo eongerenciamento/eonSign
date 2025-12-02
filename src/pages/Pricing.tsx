@@ -221,7 +221,7 @@ export default function Pricing() {
       <div className="sticky top-0 z-50 bg-gray-100">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <img alt="Eon Sign" className="h-16" src="/lovable-uploads/Eon_Tecnologia-4.png" />
+            <img alt="Eon Sign" className="h-32" src="/lovable-uploads/Eon_Tecnologia-4.png" />
             <Button variant="ghost" onClick={() => navigate('/auth')} className="text-slate-600">
               Já tenho conta
             </Button>
