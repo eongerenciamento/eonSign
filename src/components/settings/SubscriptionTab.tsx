@@ -9,7 +9,6 @@ import { Check, Crown, Loader2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import logo from "@/assets/logo.png";
 const SUBSCRIPTION_TIERS = [{
   name: "Grátis",
   limit: 5,
@@ -709,7 +708,7 @@ export function SubscriptionTab() {
       {/* Footer Logo */}
       <div className="flex justify-center pt-12 pb-4">
         <img 
-          src={logo} 
+          src="/logo-eon-sign.png" 
           alt="Eon Sign" 
           className="h-16 opacity-50 grayscale"
           style={{ filter: 'grayscale(100%) brightness(0.6)' }}
