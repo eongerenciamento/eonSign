@@ -315,13 +315,13 @@ export default function Pricing() {
 
       {/* Comparison Table */}
       {showComparison && <div className="container mx-auto px-4 pb-16">
-          <Card className="max-w-7xl mx-auto">
+          <Card className="max-w-7xl mx-auto border-0 shadow-none">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="sticky left-0 bg-card z-10 text-left py-4 px-4 min-w-[200px]">Recursos</th>
+                    <tr>
+                      <th className="sticky left-0 bg-card z-10 text-left py-4 px-4 min-w-[200px] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">Recursos</th>
                       {PLANS.map(plan => <th key={plan.name} className="text-center py-4 px-4 min-w-[120px]">
                           <div className="font-semibold">{plan.name}</div>
                           <div className="text-sm text-muted-foreground font-normal">
@@ -331,8 +331,8 @@ export default function Pricing() {
                     </tr>
                   </thead>
                   <tbody>
-                    {PLANS[0].features.map((_, featureIdx) => <tr key={featureIdx} className="border-b">
-                        <td className="sticky left-0 bg-card z-10 py-4 px-4 text-sm">
+                    {PLANS[0].features.map((_, featureIdx) => <tr key={featureIdx}>
+                        <td className="sticky left-0 bg-card z-10 py-4 px-4 text-sm shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
                           {PLANS[0].features[featureIdx].name}
                         </td>
                         {PLANS.map(plan => <td key={plan.name} className="text-center py-4 px-4">
@@ -359,7 +359,7 @@ export default function Pricing() {
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
                 {FAQS.map((faq, idx) => <AccordionItem key={idx} value={`item-${idx}`}>
-                    <AccordionTrigger className="text-left">
+                    <AccordionTrigger className="text-left text-sm md:text-base text-gray-600">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground">
