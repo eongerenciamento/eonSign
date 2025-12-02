@@ -255,44 +255,44 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pb-16">
         <div className="relative">
           <div className="overflow-x-auto scrollbar-hide pb-4">
-            <div className="flex gap-6 px-4" style={{
+            <div className="flex gap-5 px-4" style={{
             width: 'max-content'
           }}>
-              {PLANS.map(plan => <Card key={plan.name} className={`relative bg-white border-2 w-96 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
-                  <CardHeader className="space-y-4 pb-6">
-                    <div className="h-7 flex justify-center">
-                      {plan.recommended && <Badge className="py-1 font-bold w-fit px-[20px] bg-[#273d60] text-white border-0">Mais Vendido</Badge>}
+              {PLANS.map(plan => <Card key={plan.name} className={`relative bg-white border-2 w-80 flex-shrink-0 shadow-lg ${plan.recommended ? 'border-[#273d60]' : 'border-gray-200'}`}>
+                  <CardHeader className="space-y-3 pb-4 pt-5 px-5">
+                    <div className="h-6 flex justify-center">
+                      {plan.recommended && <Badge className="py-1 font-bold w-fit px-[16px] bg-[#273d60] text-white border-0 text-xs">Mais Vendido</Badge>}
                     </div>
                     <div>
-                      <CardTitle className="text-3xl font-bold text-gray-800">{plan.name}</CardTitle>
-                      <CardDescription className="text-gray-500 text-base mt-2">{plan.description}</CardDescription>
+                      <CardTitle className="text-2xl font-bold text-gray-600">{plan.name}</CardTitle>
+                      <CardDescription className="text-gray-500 text-sm mt-1">{plan.description}</CardDescription>
                     </div>
-                    <div className="pt-2">
+                    <div className="pt-1">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-gray-900 text-4xl">
+                        <span className="font-bold text-gray-600 text-3xl">
                           {plan.price === 0 ? 'Grátis' : `R$ ${plan.price.toFixed(2).replace('.', ',')}`}
                         </span>
-                        {plan.price > 0 && <span className="text-gray-500 text-lg">/mês</span>}
+                        {plan.price > 0 && <span className="text-gray-500 text-base">/mês</span>}
                       </div>
                     </div>
                   </CardHeader>
-                   <CardContent className="space-y-6">
-                     <div className="space-y-3">
-                       <div className="flex items-center gap-3 text-base">
-                         <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                   <CardContent className="space-y-5 px-5 pb-5">
+                     <div className="space-y-2">
+                       <div className="flex items-center gap-2 text-sm">
+                         <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                          <span className="text-gray-700">
-                           Até <strong>{plan.limit} documentos / envelopes</strong>
+                           Até <strong>{plan.limit}</strong> documentos / envelopes
                          </span>
                        </div>
-                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-3 text-base">
+                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-2 text-sm">
                            {feature.included ? (
                              <>
-                               <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                                <span className="text-gray-700">{feature.name}</span>
                              </>
                            ) : (
                              <>
-                               <X className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                               <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                <span className="text-gray-400 line-through">{feature.name}</span>
                              </>
                            )}
@@ -300,7 +300,7 @@ export default function Pricing() {
                      </div>
                     <Button 
                       onClick={() => handleSelectPlan(plan)} 
-                      className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-14 text-base"
+                      className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-12 text-sm"
                     >
                       {plan.price === 0 ? 'Começar Grátis' : 'Fazer Upgrade'}
                     </Button>
