@@ -368,7 +368,7 @@ const Settings = () => {
                   </div>
 
                   <div className="flex gap-3 justify-end pt-6">
-                    <Button variant="outline" className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90 gap-2" onClick={() => {
+                    <Button variant="outline" className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90 gap-2 px-4" onClick={() => {
                       setLogo(null);
                       setCompanyName("");
                       setCnpj("");
@@ -385,7 +385,7 @@ const Settings = () => {
                       <X className="w-4 h-4" />
                       Cancelar
                     </Button>
-                    <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 gap-2" onClick={handleSaveCompany}>
+                    <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 gap-2 px-4" onClick={handleSaveCompany}>
                       <Check className="w-4 h-4" />
                       Salvar
                     </Button>
