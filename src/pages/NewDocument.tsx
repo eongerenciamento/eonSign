@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, FileText, X, Plus, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -344,18 +345,68 @@ const NewDocument = () => {
         <div>
           <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
           <div className="mt-2 space-y-1">
-            <div className={`flex items-center gap-2 text-xs ${file !== null ? 'text-green-600' : 'text-gray-500'}`}>
-              {file !== null && <Check className="w-3 h-3" />}
+            <motion.div 
+              className={`flex items-center gap-2 text-xs transition-colors duration-300 ${file !== null ? 'text-green-600' : 'text-gray-500'}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AnimatePresence mode="wait">
+                {file !== null && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  >
+                    <Check className="w-3 h-3" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <span>Faça upload de 1 ou mais documentos</span>
-            </div>
-            <div className={`flex items-center gap-2 text-xs ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`}>
-              {signers.some(signer => signer.name && signer.phone && signer.email) && <Check className="w-3 h-3" />}
+            </motion.div>
+            
+            <motion.div 
+              className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <AnimatePresence mode="wait">
+                {signers.some(signer => signer.name && signer.phone && signer.email) && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  >
+                    <Check className="w-3 h-3" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <span>Adicione pelo menos 1 signatário</span>
-            </div>
-            <div className={`flex items-center gap-2 text-xs ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`}>
-              {isSubmitted && <Check className="w-3 h-3" />}
+            </motion.div>
+            
+            <motion.div 
+              className={`flex items-center gap-2 text-xs transition-colors duration-300 ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <AnimatePresence mode="wait">
+                {isSubmitted && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  >
+                    <Check className="w-3 h-3" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <span>Clique no botão enviar</span>
-            </div>
+            </motion.div>
           </div>
         </div>
 
