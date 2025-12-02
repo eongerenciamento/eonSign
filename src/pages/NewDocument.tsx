@@ -605,8 +605,8 @@ const NewDocument = () => {
                     </div>
                   ))}
                   {files.length < MAX_DOCUMENTS && (
-                    <div className="flex justify-end">
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}>
+                    <div className="flex justify-end mt-3">
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-gray-500" onClick={() => fileInputRef.current?.click()}>
                         <Plus className="w-4 h-4 text-gray-500" />
                       </Button>
                     </div>
