@@ -506,10 +506,9 @@ const Settings = () => {
             {/* Footer Logo */}
             <div className="flex justify-center pt-12 pb-4">
               <img 
-                src="/logo-eon-sign.png" 
-                alt="Eon Sign" 
-                className="h-16 opacity-50 grayscale"
-                style={{ filter: 'grayscale(100%) brightness(0.6)' }}
+                src="/lovable-uploads/Eon_Tecnologia-4.png" 
+                alt="Eon" 
+                className="h-16"
               />
             </div>
           </TabsContent>
