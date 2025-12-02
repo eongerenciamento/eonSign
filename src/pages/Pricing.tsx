@@ -224,8 +224,8 @@ export default function Pricing() {
             <div className="flex flex-col items-center my-0 py-[20px] bg-transparent gap-4">
               <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
               <div className="flex items-center justify-between gap-3 w-full">
-                <Button size="sm" onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full h-8 px-3">
-                  Certificado Digital A1 R$109,90
+                <Button size="sm" onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full h-8 px-3">
+                  Certificado A1 R$109,90
                 </Button>
                 <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600 p-0 h-auto">
                   Já tenho conta
@@ -238,8 +238,8 @@ export default function Pricing() {
                 <img alt="Eon Sign" className="h-16" src="/lovable-uploads/1a011367-0097-4688-b76d-39b5e65a5c2b.png" />
               </div>
               <div className="flex items-center gap-3">
-                <Button size="sm" onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20Digital%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full h-8 px-3">
-                  Certificado Digital A1 R$109,90
+                <Button size="sm" onClick={() => window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20adquirir%20um%20Certificado%20A1', '_blank')} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 text-xs font-light rounded-full h-8 px-3">
+                  Certificado A1 R$109,90
                 </Button>
                 <Button variant="ghost" onClick={() => navigate('/auth')} className="bg-transparent text-slate-600">
                   Já tenho conta
