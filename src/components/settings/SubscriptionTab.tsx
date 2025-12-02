@@ -9,6 +9,7 @@ import { Check, Crown, Loader2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useSidebar } from "@/components/ui/sidebar";
 const SUBSCRIPTION_TIERS = [{
   name: "Grátis",
   limit: 5,
@@ -47,6 +48,8 @@ const SUBSCRIPTION_TIERS = [{
   description: "Documentos ilimitados"
 }];
 export function SubscriptionTab() {
+  const { state } = useSidebar();
+  const sidebarOpen = state === "expanded";
   const [subscription, setSubscription] = useState<any>(null);
   const [usage, setUsage] = useState<{
     current: number;
@@ -196,8 +199,10 @@ export function SubscriptionTab() {
               <p className="text-xl font-bold text-gray-900 mb-1">
                 {subscription.plan_name}
               </p>
-              {getStatusBadge(subscription.status)}
-              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+              <div className="mb-2">
+                {getStatusBadge(subscription.status)}
+              </div>
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
                 Extrato de Pagamentos
               </Button>
             </CardContent>
@@ -253,7 +258,7 @@ export function SubscriptionTab() {
         {/* Show upgrade options */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
-              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory w-full">
+              <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
             {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
                   <CardTitle className="text-lg">{tier.name}</CardTitle>
@@ -314,8 +319,8 @@ export function SubscriptionTab() {
           </div>
           
           <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
-            <CollapsibleContent>
-              <div className="overflow-x-auto border rounded-lg max-w-6xl mx-auto">
+          <CollapsibleContent>
+            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
@@ -449,10 +454,12 @@ export function SubscriptionTab() {
             <p className="text-xl font-bold mb-1 text-gray-600">
               Grátis
             </p>
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
-              Ativo
-            </Badge>
-            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900 mt-2">
+            <div className="mb-2">
+              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                Ativo
+              </Badge>
+            </div>
+            <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
               Extrato de Pagamentos
             </Button>
           </CardContent>
@@ -494,7 +501,7 @@ export function SubscriptionTab() {
       </div>
 
 
-      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory w-full">
+      <div className={`flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
         {SUBSCRIPTION_TIERS.map((tier, index) => {
         const isRecommended = index === 2; // Professional tier
         return <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}>
@@ -571,7 +578,7 @@ export function SubscriptionTab() {
         
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto border rounded-lg max-w-6xl mx-auto">
+            <div className={`overflow-x-auto border rounded-lg ${sidebarOpen ? 'max-w-5xl' : 'max-w-full'} mx-auto`}>
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
