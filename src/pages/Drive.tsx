@@ -4,7 +4,7 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, Filter, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, SlidersHorizontal, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -468,7 +468,7 @@ const Drive = () => {
                 onClick={() => setShowFilters(!showFilters)}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
-                <Filter className="w-5 h-5 text-gray-600" />
+                <SlidersHorizontal className="w-5 h-5 text-gray-600" />
               </Button>
               <Button
                 variant="ghost"
@@ -521,7 +521,7 @@ const Drive = () => {
                 onClick={() => setShowFolderFilters(!showFolderFilters)}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
-                <Filter className="w-5 h-5 text-gray-600" />
+                <SlidersHorizontal className="w-5 h-5 text-gray-600" />
               </Button>
               <Button
                 variant="ghost"
