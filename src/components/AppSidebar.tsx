@@ -60,9 +60,23 @@ export function AppSidebar() {
       } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
-        setName(user.user_metadata?.name || "");
-        setOrganization(user.user_metadata?.organization || "");
-        setAvatarUrl(user.user_metadata?.avatar_url || null);
+        // Buscar dados do company_settings
+        const { data: companyData } = await supabase
+          .from('company_settings')
+          .select('admin_name, company_name, logo_url, admin_phone')
+          .eq('user_id', user.id)
+          .single();
+
+        if (companyData) {
+          setName(companyData.admin_name || user.user_metadata?.name || "");
+          setOrganization(companyData.company_name || user.user_metadata?.organization || "");
+          setAvatarUrl(companyData.logo_url || user.user_metadata?.avatar_url || null);
+        } else {
+          // Fallback para user_metadata se não houver company_settings
+          setName(user.user_metadata?.name || "");
+          setOrganization(user.user_metadata?.organization || "");
+          setAvatarUrl(user.user_metadata?.avatar_url || null);
+        }
 
         // Buscar documentos pendentes
         const {
@@ -125,6 +139,27 @@ export function AppSidebar() {
     if (name) return name.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
+  };
+
+  const handleProfileUpdate = async () => {
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: companyData } = await supabase
+        .from('company_settings')
+        .select('admin_name, company_name, logo_url')
+        .eq('user_id', user.id)
+        .single();
+
+      if (companyData) {
+        setName(companyData.admin_name || user.user_metadata?.name || "");
+        setOrganization(companyData.company_name || user.user_metadata?.organization || "");
+        setAvatarUrl(companyData.logo_url || user.user_metadata?.avatar_url || null);
+      }
+    }
   };
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
@@ -211,6 +246,6 @@ export function AppSidebar() {
           </button>}
       </div>
 
-      <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} userName={name} userEmail={user?.email || ""} userAvatar={avatarUrl} organization={organization} onAvatarChange={setAvatarUrl} />
+      <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} userName={name} userEmail={user?.email || ""} userAvatar={avatarUrl} organization={organization} onAvatarChange={setAvatarUrl} onProfileUpdate={handleProfileUpdate} />
     </Sidebar>;
 }
