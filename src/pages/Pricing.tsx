@@ -439,9 +439,9 @@ export default function Pricing() {
 
       {/* Footer Logo */}
       <div className="flex flex-col items-center pt-0 px-8">
-        <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
+        <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36 -mb-6" />
       </div>
-      <div className="text-center -mt-4 text-gray-400 text-xs">
+      <div className="text-center text-gray-400 text-xs">
         © {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.
       </div>
       <div className="flex items-center justify-center gap-4 py-6">
