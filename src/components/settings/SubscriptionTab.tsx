@@ -274,7 +274,7 @@ export function SubscriptionTab() {
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>
-                        {tier.limit >= 1000 ? "Documentos/envelopes ilimitados" : `Até ${tier.limit} documentos/envelopes`}
+                        {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
@@ -330,16 +330,16 @@ export function SubscriptionTab() {
                       {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                           <div className="flex flex-col items-center gap-1">
                             <span className="font-bold text-[#273d60]">{tier.name}</span>
-                            <span className="text-sm text-gray-500 font-normal md:text-sm">
-                              {tier.price === 0 ? "Grátis" : <><span className="text-[5px] md:text-sm">R$</span> {tier.price.toFixed(2).replace('.', ',')}</>}
+                            <span className="text-sm text-gray-500 font-normal">
+                              {tier.price === 0 ? "Grátis" : tier.price.toFixed(2).replace('.', ',')}
                             </span>
                           </div>
                         </TableHead>)}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow className="bg-white">
-                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos / envelopes</TableCell>
+                  <TableRow className="bg-white">
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
                         </TableCell>)}
@@ -530,7 +530,7 @@ export function SubscriptionTab() {
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>
-                      {tier.limit >= 1000 ? "Documentos/envelopes ilimitados" : `Até ${tier.limit} documentos/envelopes`}
+                      {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -592,8 +592,8 @@ export function SubscriptionTab() {
                     {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-bold text-[#273d60]">{tier.name}</span>
-                          <span className="text-sm text-gray-500 font-normal md:text-sm">
-                            {tier.price === 0 ? "Grátis" : <><span className="text-[5px] md:text-sm">R$</span> {tier.price.toFixed(2).replace('.', ',')}</>}
+                          <span className="text-sm text-gray-500 font-normal">
+                            {tier.price === 0 ? "Grátis" : tier.price.toFixed(2).replace('.', ',')}
                           </span>
                         </div>
                       </TableHead>)}
@@ -601,7 +601,7 @@ export function SubscriptionTab() {
                 </TableHeader>
                 <TableBody>
                   <TableRow className="bg-white">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos / envelopes</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
                       </TableCell>)}
