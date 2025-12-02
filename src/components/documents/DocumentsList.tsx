@@ -101,17 +101,17 @@ export const DocumentsList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white z-50">
-                    <DropdownMenuItem onClick={() => onViewDocument(document.id)}>
-                      <Eye className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700">
+                      <Eye className="w-4 h-4 mr-2 text-gray-500" />
                       Visualizar
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDownloadDocument(document.id)}>
-                      <Download className="w-4 h-4 mr-2" />
+                    <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700">
+                      <Download className="w-4 h-4 mr-2 text-gray-500" />
                       Baixar
                     </DropdownMenuItem>
                     <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                        <Move className="w-4 h-4 mr-2" />
+                      <DropdownMenuSubTrigger className="text-gray-700">
+                        <Move className="w-4 h-4 mr-2 text-gray-500" />
                         Mover para
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-white z-50">
@@ -119,6 +119,7 @@ export const DocumentsList = ({
                           <DropdownMenuItem
                             key={folder.id}
                             onClick={() => onMoveToFolder(document.id, folder.id)}
+                            className="text-gray-700"
                           >
                             📁 {folder.name}
                           </DropdownMenuItem>
@@ -196,8 +197,8 @@ export const DocumentsList = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white z-50">
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <Move className="w-4 h-4 mr-2" />
+                    <DropdownMenuSubTrigger className="text-gray-700">
+                      <Move className="w-4 h-4 mr-2 text-gray-500" />
                       Mover para
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="bg-white z-50">
@@ -205,6 +206,7 @@ export const DocumentsList = ({
                         <DropdownMenuItem
                           key={folder.id}
                           onClick={() => onMoveToFolder(document.id, folder.id)}
+                          className="text-gray-700"
                         >
                           📁 {folder.name}
                         </DropdownMenuItem>
@@ -254,17 +256,17 @@ export const DocumentsList = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white z-50">
-                <DropdownMenuItem onClick={() => onViewDocument(document.id)}>
-                  <Eye className="w-4 h-4 mr-2" />
+                <DropdownMenuItem onClick={() => onViewDocument(document.id)} className="text-gray-700">
+                  <Eye className="w-4 h-4 mr-2 text-gray-500" />
                   Visualizar
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDownloadDocument(document.id)}>
-                  <Download className="w-4 h-4 mr-2" />
+                <DropdownMenuItem onClick={() => onDownloadDocument(document.id)} className="text-gray-700">
+                  <Download className="w-4 h-4 mr-2 text-gray-500" />
                   Baixar
                 </DropdownMenuItem>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <Move className="w-4 h-4 mr-2" />
+                  <DropdownMenuSubTrigger className="text-gray-700">
+                    <Move className="w-4 h-4 mr-2 text-gray-500" />
                     Mover para
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="bg-white z-50">
@@ -272,6 +274,7 @@ export const DocumentsList = ({
                       <DropdownMenuItem
                         key={folder.id}
                         onClick={() => onMoveToFolder(document.id, folder.id)}
+                        className="text-gray-700"
                       >
                         📁 {folder.name}
                       </DropdownMenuItem>
