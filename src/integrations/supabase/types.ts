@@ -145,6 +145,7 @@ export type Database = {
       documents: {
         Row: {
           created_at: string
+          envelope_id: string | null
           file_url: string | null
           folder_id: string | null
           id: string
@@ -157,6 +158,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          envelope_id?: string | null
           file_url?: string | null
           folder_id?: string | null
           id?: string
@@ -169,6 +171,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          envelope_id?: string | null
           file_url?: string | null
           folder_id?: string | null
           id?: string
@@ -180,6 +183,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_envelope_id_fkey"
+            columns: ["envelope_id"]
+            isOneToOne: false
+            referencedRelation: "envelopes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_folder_id_fkey"
             columns: ["folder_id"]
@@ -224,6 +234,33 @@ export type Database = {
           sent_at?: string
           status?: string
           subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      envelopes: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

@@ -19,8 +19,12 @@ interface CompanySigner extends Signer {
   companyName: string;
 }
 const NewDocument = () => {
+  const MAX_DOCUMENTS = 10;
+  const MAX_SIGNERS_ENVELOPE = 20;
+  const MAX_SIGNERS_DOCUMENT = 99;
+  
   const [dragActive, setDragActive] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [title, setTitle] = useState("");
   const [signers, setSigners] = useState<Signer[]>([{
     name: "",
@@ -40,6 +44,9 @@ const NewDocument = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
+  
+  const isEnvelope = files.length >= 2;
+  const maxSigners = isEnvelope ? MAX_SIGNERS_ENVELOPE : MAX_SIGNERS_DOCUMENT;
 
   // Play subtle completion sound
   const playCompletionSound = (frequency: number = 800) => {
@@ -63,10 +70,10 @@ const NewDocument = () => {
 
   // Track step 1 completion (file upload)
   useEffect(() => {
-    if (file !== null) {
+    if (files.length > 0) {
       playCompletionSound(800); // Mid-high frequency
     }
-  }, [file]);
+  }, [files]);
 
   // Track step 2 completion (signers added)
   useEffect(() => {
@@ -144,31 +151,54 @@ const NewDocument = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === "application/pdf") {
-        setFile(droppedFile);
-      } else {
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type === "application/pdf");
+      
+      if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
           description: "Por favor, envie apenas arquivos PDF.",
           variant: "destructive"
         });
+        return;
       }
+      
+      if (files.length + newFiles.length > MAX_DOCUMENTS) {
+        toast({
+          title: "Limite excedido",
+          description: `Você pode enviar no máximo ${MAX_DOCUMENTS} documentos.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setFiles([...files, ...newFiles]);
     }
   };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.type === "application/pdf") {
-        setFile(selectedFile);
-      } else {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files).filter(f => f.type === "application/pdf");
+      
+      if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
           description: "Por favor, envie apenas arquivos PDF.",
           variant: "destructive"
         });
+        return;
       }
+      
+      if (files.length + newFiles.length > MAX_DOCUMENTS) {
+        toast({
+          title: "Limite excedido",
+          description: `Você pode enviar no máximo ${MAX_DOCUMENTS} documentos.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setFiles([...files, ...newFiles]);
     }
   };
   const formatPhone = (value: string) => {
@@ -198,15 +228,20 @@ const NewDocument = () => {
       setSigners(signers.filter((_, i) => i !== index));
     }
   };
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+  
   const handleSubmit = async () => {
-    if (!file || !title) {
+    if (files.length === 0 || !title) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha o título e selecione um arquivo.",
+        description: "Por favor, preencha o título e selecione pelo menos um arquivo.",
         variant: "destructive"
       });
       return;
     }
+    
     const hasEmptySigner = signers.some(signer => !signer.name || !signer.phone || !signer.email);
     if (hasEmptySigner) {
       toast({
@@ -216,6 +251,17 @@ const NewDocument = () => {
       });
       return;
     }
+    
+    // Validate signers limit based on mode
+    if (signers.length > maxSigners) {
+      toast({
+        title: "Limite de signatários",
+        description: `${isEnvelope ? 'Envelopes' : 'Documentos'} permitem no máximo ${maxSigners} signatários externos.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!companySigner) {
       toast({
         title: "Erro",
@@ -233,71 +279,103 @@ const NewDocument = () => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Upload PDF to storage
-      const timestamp = Date.now();
-      // Sanitize filename: remove special characters, spaces, and accents
-      const sanitizedFileName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
-      .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars and spaces with underscore
-      .replace(/__+/g, '_'); // Replace multiple underscores with single
-      const filePath = `${user.id}/${timestamp}-${sanitizedFileName}`;
-      const {
-        error: uploadError
-      } = await supabase.storage.from('documents').upload(filePath, file);
-      if (uploadError) throw uploadError;
+      let envelopeId: string | null = null;
+      
+      // If envelope mode (2+ documents), create envelope first
+      if (isEnvelope) {
+        const { data: envelopeData, error: envelopeError } = await supabase
+          .from('envelopes')
+          .insert({
+            title: title,
+            user_id: user.id,
+            status: 'pending'
+          })
+          .select()
+          .single();
+          
+        if (envelopeError) throw envelopeError;
+        envelopeId = envelopeData.id;
+      }
 
-      // Get public URL
-      const {
-        data: {
-          publicUrl
-        }
-      } = supabase.storage.from('documents').getPublicUrl(filePath);
+      const documentIds: string[] = [];
+      
+      // Upload and create documents
+      for (const file of files) {
+        // Upload PDF to storage
+        const timestamp = Date.now();
+        const sanitizedFileName = file.name.normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove accents
+          .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars and spaces with underscore
+          .replace(/__+/g, '_'); // Replace multiple underscores with single
+        const filePath = `${user.id}/${timestamp}-${sanitizedFileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file);
+        if (uploadError) throw uploadError;
 
-      // Create document record
-      const totalSigners = signers.length + 1; // +1 for company signer
-      const {
-        data: documentData,
-        error: docError
-      } = await supabase.from('documents').insert({
-        name: title,
-        file_url: publicUrl,
-        user_id: user.id,
-        status: 'pending',
-        signers: totalSigners,
-        signed_by: 0
-      }).select().single();
-      if (docError) throw docError;
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('documents')
+          .getPublicUrl(filePath);
 
-      // Create company signer record
-      const {
-        error: companySignerError
-      } = await supabase.from('document_signers').insert({
-        document_id: documentData.id,
-        name: companySigner.name,
-        email: companySigner.email,
-        phone: companySigner.phone,
-        cpf: companySigner.cpf,
-        is_company_signer: true,
-        status: 'pending'
-      });
-      if (companySignerError) throw companySignerError;
+        // Create document record
+        const totalSigners = signers.length + 1; // +1 for company signer
+        const { data: documentData, error: docError } = await supabase
+          .from('documents')
+          .insert({
+            name: isEnvelope ? `${title} - ${file.name}` : title,
+            file_url: publicUrl,
+            user_id: user.id,
+            status: 'pending',
+            signers: totalSigners,
+            signed_by: 0,
+            envelope_id: envelopeId
+          })
+          .select()
+          .single();
+        if (docError) throw docError;
+        
+        documentIds.push(documentData.id);
+      }
+      
+      // Use first document for signer creation (all docs in envelope share signers)
+      const firstDocumentId = documentIds[0];
 
-      // Create external signers records
-      const externalSigners = signers.map(signer => ({
-        document_id: documentData.id,
-        name: signer.name,
-        email: signer.email,
-        phone: signer.phone,
-        cpf: null,
-        // Will be filled by signer
-        is_company_signer: false,
-        status: 'pending'
-      }));
-      const {
-        error: signersError
-      } = await supabase.from('document_signers').insert(externalSigners);
-      if (signersError) throw signersError;
+      // Create signers for all documents in envelope (or single document)
+      for (const docId of documentIds) {
+        // Create company signer record
+        const { error: companySignerError } = await supabase
+          .from('document_signers')
+          .insert({
+            document_id: docId,
+            name: companySigner.name,
+            email: companySigner.email,
+            phone: companySigner.phone,
+            cpf: companySigner.cpf,
+            is_company_signer: true,
+            status: 'pending'
+          });
+        if (companySignerError) throw companySignerError;
 
-      // Send email and WhatsApp to each external signer
+        // Create external signers records
+        const externalSigners = signers.map(signer => ({
+          document_id: docId,
+          name: signer.name,
+          email: signer.email,
+          phone: signer.phone,
+          cpf: null,
+          is_company_signer: false,
+          status: 'pending'
+        }));
+        
+        const { error: signersError } = await supabase
+          .from('document_signers')
+          .insert(externalSigners);
+        if (signersError) throw signersError;
+      }
+
+      // Send email and WhatsApp to each external signer (send first doc ID for signature link)
       for (const signer of signers) {
         try {
           // Send email
@@ -306,7 +384,7 @@ const NewDocument = () => {
               signerName: signer.name,
               signerEmail: signer.email,
               documentName: title,
-              documentId: documentData.id,
+              documentId: firstDocumentId,
               senderName: companySigner.name,
               organizationName: companySigner.companyName,
               userId: user.id
@@ -320,20 +398,23 @@ const NewDocument = () => {
               signerName: signer.name,
               signerPhone: signer.phone,
               documentName: title,
-              documentId: documentData.id,
+              documentId: firstDocumentId,
               organizationName: companySigner.companyName
             }
           });
           console.log(`WhatsApp sent to ${signer.phone}`);
         } catch (error) {
           console.error(`Failed to send notification to ${signer.email}:`, error);
-          // Continue even if notification fails - document is already created
+          // Continue even if notification fails - documents are already created
         }
       }
+      
       setIsSubmitted(true);
       toast({
-        title: "Documento enviado!",
-        description: "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
+        title: isEnvelope ? "Envelope enviado!" : "Documento enviado!",
+        description: isEnvelope 
+          ? `Envelope com ${files.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.`
+          : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
@@ -344,34 +425,28 @@ const NewDocument = () => {
       });
     }
   };
-  const removeFile = () => {
-    setFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
   return <Layout>
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
         <div>
           <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
           <div className="mt-2 space-y-1">
-            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${file !== null ? 'text-green-600' : 'text-gray-500'}`} initial={{
+            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${files.length > 0 ? 'text-green-600' : 'text-gray-500'}`} initial={{
             opacity: 0,
             x: -10
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: file === null ? [1, 1.02, 1] : 1
+            scale: files.length === 0 ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             scale: {
-              repeat: file === null ? Infinity : 0,
+              repeat: files.length === 0 ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
           }}>
               <AnimatePresence mode="wait">
-                {file !== null && <motion.div initial={{
+                {files.length > 0 && <motion.div initial={{
                 scale: 0,
                 rotate: -180
               }} animate={{
@@ -388,7 +463,7 @@ const NewDocument = () => {
                     <Check className="w-3 h-3" />
                   </motion.div>}
               </AnimatePresence>
-              <span>Faça upload de 1 ou mais documentos</span>
+              <span>Faça upload de 1 ou mais documentos (máx. {MAX_DOCUMENTS})</span>
             </motion.div>
             
             <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`} initial={{
@@ -397,12 +472,12 @@ const NewDocument = () => {
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: file !== null && !signers.some(signer => signer.name && signer.phone && signer.email) ? [1, 1.02, 1] : 1
+            scale: files.length > 0 && !signers.some(signer => signer.name && signer.phone && signer.email) ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             delay: 0.1,
             scale: {
-              repeat: file !== null && !signers.some(signer => signer.name && signer.phone && signer.email) ? Infinity : 0,
+              repeat: files.length > 0 && !signers.some(signer => signer.name && signer.phone && signer.email) ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
@@ -425,7 +500,7 @@ const NewDocument = () => {
                     <Check className="w-3 h-3" />
                   </motion.div>}
               </AnimatePresence>
-              <span>Adicione pelo menos 1 signatário</span>
+              <span>Adicione pelo menos 1 signatário (máx. {maxSigners} para {isEnvelope ? 'envelope' : 'documento'})</span>
             </motion.div>
             
             <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`} initial={{
@@ -434,12 +509,12 @@ const NewDocument = () => {
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: file !== null && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? [1, 1.02, 1] : 1
+            scale: files.length > 0 && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             delay: 0.2,
             scale: {
-              repeat: file !== null && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? Infinity : 0,
+              repeat: files.length > 0 && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
@@ -470,30 +545,49 @@ const NewDocument = () => {
         <div className="space-y-6 bg-card p-6 rounded-lg border">
           {/* Drag and Drop Area */}
           <div className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
-            {!file ? <>
+            {files.length === 0 ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="font-medium mb-2 text-base text-gray-600">
-                  Arraste e solte seu documento aqui
+                  Arraste e solte seus documentos aqui
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">ou</p>
                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-[#273d60] text-primary-foreground">
-                  Selecionar Arquivo
+                  Selecionar Arquivos
                 </Button>
-                <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="hidden" />
+                <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
                 <p className="text-xs text-muted-foreground mt-4">
-                  Apenas arquivos PDF são aceitos
+                  Apenas arquivos PDF • Máximo {MAX_DOCUMENTS} documentos
                 </p>
-              </> : <div className="flex items-center justify-center gap-4">
-                <FileText className="w-8 h-8 text-primary" />
-                <div className="flex-1 text-left">
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
+              </> : <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-600">
+                    {isEnvelope ? '📁 Envelope' : '📄 Documento'} ({files.length}/{MAX_DOCUMENTS} {files.length === 1 ? 'documento' : 'documentos'})
+                  </p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    {isEnvelope ? '1 crédito' : `${files.length} ${files.length === 1 ? 'crédito' : 'créditos'}`}
                   </p>
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={removeFile}>
-                  <X className="w-4 h-4" />
-                </Button>
+                {files.map((file, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <FileText className="w-6 h-6 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeFile(index)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                {files.length < MAX_DOCUMENTS && (
+                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="w-full mt-2">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar mais documentos
+                  </Button>
+                )}
+                <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
               </div>}
           </div>
 
