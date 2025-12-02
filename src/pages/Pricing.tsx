@@ -272,7 +272,7 @@ export default function Pricing() {
                         </div>)}
                     </div>
                     <Button onClick={() => handleSelectPlan(plan)} className="w-full font-bold text-white bg-[#273d60] hover:bg-[#1e2d47] rounded-xl h-12 text-sm">
-                      {plan.price === 0 ? 'Começar Grátis' : 'Fazer Upgrade'}
+                      {plan.price === 0 ? 'Começar Grátis' : 'Assinar'}
                     </Button>
                   </CardContent>
                 </Card>)}
