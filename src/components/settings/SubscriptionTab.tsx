@@ -322,11 +322,11 @@ export function SubscriptionTab() {
           
           <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto border rounded-lg max-w-6xl mx-auto">
+            <div className="overflow-x-auto rounded-lg max-w-6xl mx-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static">Recurso</TableHead>
+                    <TableRow className="bg-gray-50 border-0">
+                      <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Recurso</TableHead>
                       {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                           <div className="flex flex-col items-center gap-1">
                             <span className="font-bold text-[#273d60]">{tier.name}</span>
@@ -338,38 +338,38 @@ export function SubscriptionTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                  <TableRow className="bg-white">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                  <TableRow className="bg-white border-0">
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
                         </TableCell>)}
                     </TableRow>
-                    <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Assinatura digital ICP-Brasil</TableCell>
+                    <TableRow className="bg-gray-50 border-0">
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital ICP-Brasil</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
-                    <TableRow className="bg-white">
-                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Notificações por e-mail / WhatsApp</TableCell>
+                    <TableRow className="bg-white border-0">
+                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificações por e-mail / WhatsApp</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
                     </TableRow>
-                    <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Geolocalização da assinatura</TableCell>
+                    <TableRow className="bg-gray-50 border-0">
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização da assinatura</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
-                    <TableRow className="bg-white">
-                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Eon Drive</TableCell>
+                    <TableRow className="bg-white border-0">
+                      <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
                     </TableRow>
-                    <TableRow className="bg-gray-50">
-                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Face ID</TableCell>
+                    <TableRow className="bg-gray-50 border-0">
+                      <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Face ID</TableCell>
                       {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                           {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                         </TableCell>)}
@@ -391,49 +391,49 @@ export function SubscriptionTab() {
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1" className="border-b">
-                  <AccordionTrigger>Como funciona a contagem de documentos?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funciona a contagem de documentos?</AccordionTrigger>
                   <AccordionContent>
                     Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2" className="border-b">
-                  <AccordionTrigger>Posso mudar de plano depois?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso mudar de plano depois?</AccordionTrigger>
                   <AccordionContent>
                     Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-3" className="border-b">
-                  <AccordionTrigger>As assinaturas digitais têm validade jurídica?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
                   <AccordionContent>
                     Sim, todas as assinaturas realizadas através do Eon Sign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-4" className="border-b">
-                  <AccordionTrigger>Posso cancelar minha assinatura?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso cancelar minha assinatura?</AccordionTrigger>
                   <AccordionContent>
                     Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-5" className="border-b">
-                  <AccordionTrigger>Como funcionam as notificações por WhatsApp?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
                   <AccordionContent>
                     Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-6" className="border-b">
-                  <AccordionTrigger>Existe período de teste gratuito?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Existe período de teste gratuito?</AccordionTrigger>
                   <AccordionContent>
                     Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-7" className="border-b">
-                  <AccordionTrigger>Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
                   <AccordionContent>
                     Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-8">
-                  <AccordionTrigger>Os documentos ficam armazenados com segurança?</AccordionTrigger>
+                  <AccordionTrigger className="text-sm md:text-base text-gray-600">Os documentos ficam armazenados com segurança?</AccordionTrigger>
                   <AccordionContent>
                     Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive.
                   </AccordionContent>
@@ -584,11 +584,11 @@ export function SubscriptionTab() {
         
         <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
           <CollapsibleContent>
-            <div className="overflow-x-auto border rounded-lg max-w-6xl mx-auto">
+            <div className="overflow-x-auto rounded-lg max-w-6xl mx-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50">
-                    <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static">Recurso</TableHead>
+                  <TableRow className="bg-gray-50 border-0">
+                    <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Recurso</TableHead>
                     {SUBSCRIPTION_TIERS.map(tier => <TableHead key={tier.name} className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-bold text-[#273d60]">{tier.name}</span>
@@ -600,38 +600,38 @@ export function SubscriptionTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow className="bg-white">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                  <TableRow className="bg-white border-0">
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
                       </TableCell>)}
                   </TableRow>
-                  <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Assinatura digital ICP-Brasil</TableCell>
+                  <TableRow className="bg-gray-50 border-0">
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital ICP-Brasil</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
-                  <TableRow className="bg-white">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Notificações por e-mail / WhatsApp</TableCell>
+                  <TableRow className="bg-white border-0">
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Notificações por e-mail / WhatsApp</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
                   </TableRow>
-                  <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Geolocalização da assinatura</TableCell>
+                  <TableRow className="bg-gray-50 border-0">
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Geolocalização da assinatura</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
-                  <TableRow className="bg-white">
-                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static">Eon Drive</TableCell>
+                  <TableRow className="bg-white border-0">
+                    <TableCell className="font-medium sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Eon Drive</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
                   </TableRow>
-                  <TableRow className="bg-gray-50">
-                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static">Face ID</TableCell>
+                  <TableRow className="bg-gray-50 border-0">
+                    <TableCell className="font-medium sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Face ID</TableCell>
                     {SUBSCRIPTION_TIERS.map((tier, index) => <TableCell key={tier.name} className="text-center">
                         {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-600 mx-auto" />}
                       </TableCell>)}
@@ -653,49 +653,49 @@ export function SubscriptionTab() {
           <CardContent className="p-6">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1" className="border-b">
-                <AccordionTrigger>Como funciona a contagem de documentos?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funciona a contagem de documentos?</AccordionTrigger>
                 <AccordionContent>
                   Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2" className="border-b">
-                <AccordionTrigger>Posso mudar de plano depois?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso mudar de plano depois?</AccordionTrigger>
                 <AccordionContent>
                   Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-b">
-                <AccordionTrigger>As assinaturas digitais têm validade jurídica?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">As assinaturas digitais têm validade jurídica?</AccordionTrigger>
                 <AccordionContent>
                   Sim, todas as assinaturas realizadas através do Eon Sign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4" className="border-b">
-                <AccordionTrigger>Posso cancelar minha assinatura?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso cancelar minha assinatura?</AccordionTrigger>
                 <AccordionContent>
                   Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-5" className="border-b">
-                <AccordionTrigger>Como funcionam as notificações por WhatsApp?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Como funcionam as notificações por WhatsApp?</AccordionTrigger>
                 <AccordionContent>
                   Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-6" className="border-b">
-                <AccordionTrigger>Existe período de teste gratuito?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Existe período de teste gratuito?</AccordionTrigger>
                 <AccordionContent>
                   Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-7" className="border-b">
-                <AccordionTrigger>Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
                 <AccordionContent>
                   Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-8">
-                <AccordionTrigger>Os documentos ficam armazenados com segurança?</AccordionTrigger>
+                <AccordionTrigger className="text-sm md:text-base text-gray-600">Os documentos ficam armazenados com segurança?</AccordionTrigger>
                 <AccordionContent>
                   Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive.
                 </AccordionContent>
