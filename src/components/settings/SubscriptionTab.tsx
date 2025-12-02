@@ -186,7 +186,7 @@ export function SubscriptionTab() {
     const usagePercent = usage ? usage.current / subscription.document_limit * 100 : 0;
     const currentTierIndex = SUBSCRIPTION_TIERS.findIndex(t => t.name === subscription.plan_name);
     const nextTier = currentTierIndex >= 0 && currentTierIndex < SUBSCRIPTION_TIERS.length - 1 ? SUBSCRIPTION_TIERS[currentTierIndex + 1] : null;
-    return <div className="space-y-6">
+    return <div className="space-y-10">
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {/* Card 1: Plano Atual */}
@@ -253,8 +253,8 @@ export function SubscriptionTab() {
         </div>}
 
         {/* Show upgrade options */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Planos Disponíveis para Upgrade</h3>
+        <div className="pt-4">
+          <h3 className="text-lg font-semibold mb-6">Planos Disponíveis para Upgrade</h3>
               <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
             {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
                 <CardHeader>
@@ -302,7 +302,7 @@ export function SubscriptionTab() {
         </div>
 
         {/* Comparison Table */}
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
           <div className="flex justify-center">
             <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent">
               {isComparisonOpen ? <>
@@ -377,7 +377,7 @@ export function SubscriptionTab() {
         </div>
 
         {/* FAQ */}
-        <div className="space-y-4 max-w-6xl mx-auto">
+        <div className="space-y-6 max-w-6xl mx-auto pt-4">
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
             <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
@@ -441,7 +441,7 @@ export function SubscriptionTab() {
   }
 
   // User on free tier - show all paid tiers
-  return <div className="space-y-6">
+  return <div className="space-y-10">
       {/* Grid com 4 cards de informação */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {/* Card 1: Plano Atual */}
@@ -560,7 +560,7 @@ export function SubscriptionTab() {
       </div>
 
       {/* Comparison Table */}
-      <div className="space-y-4">
+      <div className="space-y-4 pt-4">
         <div className="flex justify-center">
           <Button variant="ghost" onClick={() => setIsComparisonOpen(!isComparisonOpen)} className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent">
             {isComparisonOpen ? <>
@@ -635,7 +635,7 @@ export function SubscriptionTab() {
       </div>
 
       {/* FAQ */}
-      <div className="space-y-4 max-w-6xl mx-auto">
+      <div className="space-y-6 max-w-6xl mx-auto pt-4">
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
           <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
