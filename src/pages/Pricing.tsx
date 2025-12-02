@@ -245,10 +245,10 @@ export default function Pricing() {
       </div>
 
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold mb-4 text-gray-600 md:text-xl">Planos</h1>
-        <p className="mb-2 max-w-2xl mx-auto text-gray-500 text-base">Escolha o plano ideal para sua empresa</p>
-        <p className="mb-8 max-w-2xl mx-auto text-sm text-gray-400">
+      <div className="container mx-auto px-4 py-6 text-center">
+        <h1 className="text-4xl font-bold mb-2 text-gray-600 md:text-xl">Planos</h1>
+        <p className="mb-1 max-w-2xl mx-auto text-gray-500 text-base">Escolha o plano ideal para sua empresa</p>
+        <p className="mb-4 max-w-2xl mx-auto text-sm text-gray-400">
           Se seu volume de assinaturas é maior entre em contato:{" "}
           <a href="mailto:contato@eongerenciamento.com.br" className="underline text-primary">
             contato@eongerenciamento.com.br
@@ -257,7 +257,7 @@ export default function Pricing() {
       </div>
 
       {/* Pricing Cards - Horizontal Scroll */}
-      <div className="container mx-auto px-4 pb-16">
+      <div className="container mx-auto px-4 pb-8">
         <div className="relative">
           <div 
             ref={scrollContainerRef}
