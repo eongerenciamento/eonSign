@@ -410,6 +410,9 @@ export default function Pricing() {
           </a>
         </div>
       </div>
+      <div className="text-center pb-6 text-gray-400 text-xs">
+        © {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.
+      </div>
 
       {selectedPlan && <PlanCheckoutDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} plan={selectedPlan} />}
     </div>;
