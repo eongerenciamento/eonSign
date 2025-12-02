@@ -472,11 +472,11 @@ const NewDocument = () => {
           <div className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
             {!file ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium mb-2">
+                <p className="font-medium mb-2 text-base text-gray-600">
                   Arraste e solte seu documento aqui
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">ou</p>
-                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 hover:bg-gray-100 hover:text-gray-600">
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 hover:bg-gray-100 hover:text-gray-600 rounded-full shadow-none border-transparent">
                   Selecionar Arquivo
                 </Button>
                 <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="hidden" />
