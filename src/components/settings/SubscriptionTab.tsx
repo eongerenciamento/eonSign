@@ -291,11 +291,11 @@ export function SubscriptionTab() {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Face ID</span>
+                      <span>Eon Drive</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Eon Drive</span>
+                      {tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                      <span className={tier.name === "Básico" ? "text-gray-400 line-through" : ""}>Face ID</span>
                     </div>
                   </div>
                   <Button onClick={() => handleUpgrade(tier)} disabled={processingCheckout} className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white">
@@ -550,13 +550,13 @@ export function SubscriptionTab() {
                   <div className="flex items-center gap-2 text-sm">
                     {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
                     <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
-                      Face ID
+                      Eon Drive
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
-                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
-                      Eon Drive
+                    {tier.priceId === "free" || tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                    <span className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}>
+                      Face ID
                     </span>
                   </div>
                 </div>
