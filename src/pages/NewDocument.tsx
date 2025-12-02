@@ -578,7 +578,7 @@ const NewDocument = () => {
                 </div>
               ) : (
                 // Multiple documents - envelope view
-                <div className="space-y-2 bg-blue-50 p-3 rounded-lg">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <FolderOpen className="w-5 h-5 text-gray-500" />
@@ -591,7 +591,7 @@ const NewDocument = () => {
                     </p>
                   </div>
                   {files.map((file, index) => (
-                    <div key={index} className="flex items-center gap-3 p-2 bg-white rounded-lg">
+                    <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                       <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left">
                         <p className="font-medium text-sm md:text-base text-gray-600 truncate">{file.name}</p>
@@ -606,7 +606,7 @@ const NewDocument = () => {
                   ))}
                   {files.length < MAX_DOCUMENTS && (
                     <div className="flex justify-end">
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={() => fileInputRef.current?.click()}>
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}>
                         <Plus className="w-4 h-4 text-gray-500" />
                       </Button>
                     </div>
