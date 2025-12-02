@@ -248,10 +248,10 @@ export default function Pricing() {
                     </div>
                     <div className="pt-1">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-gray-600 text-3xl">
+                        <span className="font-bold text-gray-600 text-xl">
                           {plan.price === 0 ? 'Grátis' : `R$ ${plan.price.toFixed(2).replace('.', ',')}`}
                         </span>
-                        {plan.price > 0 && <span className="text-gray-500 text-base">/mês</span>}
+                        {plan.price > 0 && <span className="text-gray-500 text-sm">/mês</span>}
                       </div>
                     </div>
                   </CardHeader>
