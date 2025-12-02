@@ -12,6 +12,8 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { Upload, Building2, CreditCard, HelpCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
+import { CreateTicketDialog } from "@/components/settings/CreateTicketDialog";
+import { useQuery } from "@tanstack/react-query";
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -32,6 +34,39 @@ const Settings = () => {
 
   // Get tab from URL params
   const activeTab = searchParams.get('tab') || 'company';
+
+  // Fetch support tickets
+  const { data: tickets, refetch: refetchTickets } = useQuery({
+    queryKey: ['support-tickets', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+      aberto: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Aberto' },
+      em_andamento: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Em Andamento' },
+      resolvido: { bg: 'bg-green-100', text: 'text-green-800', label: 'Resolvido' },
+      fechado: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Fechado' },
+    };
+    
+    const config = statusConfig[status] || statusConfig.aberto;
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+        {config.label}
+      </span>
+    );
+  };
   useEffect(() => {
     const loadData = async () => {
       const {
@@ -319,9 +354,7 @@ const Settings = () => {
 
           <TabsContent value="support" className="space-y-6 mt-6">
             <div className="flex justify-end mb-6">
-              <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 font-normal rounded-full">
-                  Abrir Ticket
-              </Button>
+              <CreateTicketDialog onTicketCreated={() => refetchTickets()} />
             </div>
 
             <Card>
@@ -330,44 +363,33 @@ const Settings = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título  </th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">​Abertura</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número </th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Data de Abertura</th>
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Número do Ticket</th>
                         <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {/* Example rows - replace with actual data */}
-                      <tr className="bg-white border-b hover:bg-gray-50">
-                        <td className="p-4 text-sm">Problema com assinatura de documento</td>
-                        <td className="p-4 text-sm text-gray-600">30/11/2025</td>
-                        <td className="p-4 text-sm text-gray-600">#12345</td>
-                        <td className="p-4 text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Em Andamento
-                          </span>
-                        </td>
-                      </tr>
-                      <tr className="bg-gray-100 border-b hover:bg-gray-50">
-                        <td className="p-4 text-sm">Dúvida sobre planos</td>
-                        <td className="p-4 text-sm text-gray-600">28/11/2025</td>
-                        <td className="p-4 text-sm text-gray-600">#12344</td>
-                        <td className="p-4 text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Resolvido
-                          </span>
-                        </td>
-                      </tr>
-                      <tr className="bg-white border-b hover:bg-gray-50">
-                        <td className="p-4 text-sm">Erro ao fazer upload</td>
-                        <td className="p-4 text-sm text-gray-600">25/11/2025</td>
-                        <td className="p-4 text-sm text-gray-600">#12343</td>
-                        <td className="p-4 text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Resolvido
-                          </span>
-                        </td>
-                      </tr>
+                      {tickets && tickets.length > 0 ? (
+                        tickets.map((ticket, index) => (
+                          <tr key={ticket.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                            <td className="p-4 text-sm">{ticket.title}</td>
+                            <td className="p-4 text-sm text-gray-600">
+                              {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
+                            </td>
+                            <td className="p-4 text-sm text-gray-600">{ticket.ticket_number}</td>
+                            <td className="p-4 text-right">
+                              {getStatusBadge(ticket.status)}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-sm text-gray-500">
+                            Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
