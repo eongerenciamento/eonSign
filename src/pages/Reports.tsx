@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -588,12 +589,23 @@ const Reports = () => {
                 <Button onClick={() => setShowFilters(!showFilters)} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
                   <SlidersHorizontal className="h-4 w-4" />
                 </Button>
-                <Button onClick={handleExportCSV} disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
-                  <FileDown className="h-4 w-4" />
-                </Button>
-                <Button onClick={handleExportPDF} disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
-                  <Download className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white">
+                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                      <FileText className="h-4 w-4 mr-2" />
+                      PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
+                      <FileDown className="h-4 w-4 mr-2" />
+                      XLS
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
