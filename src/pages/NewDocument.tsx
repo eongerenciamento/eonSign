@@ -548,47 +548,68 @@ const NewDocument = () => {
             {files.length === 0 ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="font-medium mb-2 text-base text-gray-600">
-                  Arraste e solte seus documentos aqui
+                  Arraste e solte seu documento aqui
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">ou</p>
                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-[#273d60] text-primary-foreground">
-                  Selecionar Arquivos
+                  Selecionar Arquivo
                 </Button>
                 <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
                 <p className="text-xs text-muted-foreground mt-4">
-                  Apenas arquivos PDF • Máximo {MAX_DOCUMENTS} documentos
+                  Apenas arquivos PDF são aceitos
                 </p>
-              </> : <div className="space-y-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-600">
-                    {isEnvelope ? '📁 Envelope' : '📄 Documento'} ({files.length}/{MAX_DOCUMENTS} {files.length === 1 ? 'documento' : 'documentos'})
-                  </p>
-                  <p className="text-xs text-blue-600 font-medium">
-                    {isEnvelope ? '1 crédito' : `${files.length} ${files.length === 1 ? 'crédito' : 'créditos'}`}
-                  </p>
-                </div>
-                {files.map((file, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <FileText className="w-6 h-6 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeFile(index)}>
-                      <X className="w-4 h-4" />
-                    </Button>
+              </> : files.length === 1 ? (
+                // Single document - simple view
+                <div className="flex items-center justify-center gap-4">
+                  <FileText className="w-8 h-8 text-primary" />
+                  <div className="flex-1 text-left">
+                    <p className="font-medium">{files[0].name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {(files[0].size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
-                ))}
-                {files.length < MAX_DOCUMENTS && (
-                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="w-full mt-2">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar mais documentos
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(0)} className="h-8 w-8">
+                    <X className="w-4 h-4" />
                   </Button>
-                )}
-                <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
-              </div>}
+                  <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="h-8 w-8">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
+                </div>
+              ) : (
+                // Multiple documents - envelope view
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-600">
+                      📁 Envelope ({files.length}/{MAX_DOCUMENTS} documentos)
+                    </p>
+                    <p className="text-xs text-blue-600 font-medium">
+                      1 crédito
+                    </p>
+                  </div>
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <FileText className="w-6 h-6 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeFile(index)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {files.length < MAX_DOCUMENTS && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="w-full mt-2">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar mais documentos
+                    </Button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
+                </div>
+              )}
           </div>
 
           {/* Form Fields */}
