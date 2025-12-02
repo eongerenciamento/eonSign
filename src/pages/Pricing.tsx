@@ -359,10 +359,10 @@ export default function Pricing() {
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
                 {FAQS.map((faq, idx) => <AccordionItem key={idx} value={`item-${idx}`}>
-                    <AccordionTrigger className="text-left text-sm md:text-base text-gray-600">
+                    <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
+                    <AccordionContent className="text-muted-foreground text-left">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>)}
