@@ -479,6 +479,16 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Contact Email Section */}
+            <Card className="border bg-gray-50">
+              <CardContent className="p-6 text-center">
+                <p className="text-sm text-gray-600 mb-2">Precisa de mais ajuda?</p>
+                <p className="text-sm text-gray-900">
+                  Entre em contato: <a href="mailto:contato@eongerenciamento.com.br" className="text-[#273d60] font-semibold hover:underline">contato@eongerenciamento.com.br</a>
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
