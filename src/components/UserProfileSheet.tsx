@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Lock, Upload, LogOut, Check, Eye, EyeOff } from "lucide-react";
+import { Lock, Upload, LogOut, Check, Eye, EyeOff, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -165,21 +165,21 @@ export function UserProfileSheet({
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader className="mb-8">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-2xl font-bold text-gray-700">
-              Editar Perfil
+            <SheetTitle className="text-sm text-gray-600 text-left">
+              Perfil do Usuário
             </SheetTitle>
             <div className="relative">
-              <Avatar className="h-16 w-16">
+              <Avatar className="h-12 w-12">
                 {avatar && <AvatarImage src={avatar} />}
-                <AvatarFallback className="bg-gradient-to-br from-[#274d60] to-[#001a4d] text-white text-xl">
+                <AvatarFallback className="bg-gradient-to-br from-[#274d60] to-[#001a4d] text-white text-base">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <button
                 onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#274d60] to-[#001a4d] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#274d60] to-[#001a4d] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
               >
-                <Upload className="w-4 h-4" />
+                <Upload className="w-3 h-3" />
               </button>
               <input
                 ref={avatarInputRef}
@@ -342,20 +342,28 @@ export function UserProfileSheet({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-8">
+        <div className="grid grid-cols-3 gap-4 mt-8">
           <Button
-            className="bg-gradient-to-r from-[#274d60] to-[#001a4d] text-white hover:opacity-90"
-            onClick={handleLogout}
+            variant="outline"
+            className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90 border-none"
+            onClick={() => onOpenChange(false)}
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
+            <X className="w-4 h-4 mr-2" />
+            Cancelar
           </Button>
           <Button
-            className="bg-gradient-to-r from-[#274d60] to-[#001a4d] text-white hover:opacity-90"
+            className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90"
             onClick={handleSave}
           >
             <Check className="w-4 h-4 mr-2" />
             Salvar
+          </Button>
+          <Button
+            className="bg-red-100 text-red-600 hover:bg-red-200"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
           </Button>
         </div>
       </SheetContent>
