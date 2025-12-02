@@ -664,7 +664,7 @@ const NewDocument = () => {
 
                   <div className="grid gap-2">
                     <Label htmlFor={`phone-${index}`}>Telefone</Label>
-                    <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} />
+                    <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" />
                   </div>
 
                   <div className="grid gap-2">
