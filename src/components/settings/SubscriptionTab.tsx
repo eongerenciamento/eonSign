@@ -646,7 +646,7 @@ export function SubscriptionTab() {
       {/* FAQ */}
       <div className="space-y-6 max-w-6xl mx-auto pt-4">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
+          <h2 className="font-bold text-gray-700 text-xl">Perguntas Frequentes</h2>
           <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
         </div>
         <Card className="border">
