@@ -783,19 +783,24 @@ const Reports = () => {
                     registros
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="rounded-full">
                       Primeira
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
+                    <Button size="icon" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="rounded-full h-8 w-8 bg-[#273d60] hover:bg-[#1e2f4d] text-white border-0">
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-xs font-medium px-4 text-gray-500">
-                      <span className="hidden md:inline">Página</span><span className="md:hidden">Pág.</span> {currentPage} de {totalPages}
-                    </span>
-                    <Button variant="outline" size="icon" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
+                    <div className="flex flex-col items-center px-4">
+                      <span className="text-xs font-medium text-gray-500">
+                        <span className="hidden md:inline">Página</span><span className="md:hidden">Pág.</span>
+                      </span>
+                      <span className="text-xs font-medium text-gray-500">
+                        {currentPage} de {totalPages}
+                      </span>
+                    </div>
+                    <Button size="icon" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="rounded-full h-8 w-8 bg-[#273d60] hover:bg-[#273d60]/90 text-white border-0">
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="rounded-full">
                       Última
                     </Button>
                   </div>
