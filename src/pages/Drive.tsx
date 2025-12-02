@@ -687,8 +687,8 @@ const Drive = () => {
           <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-gray-50">
             {viewerUrl && (
               <div className="relative w-full h-full flex items-center justify-center">
-                {/* Card branco com transparência de 50% */}
-                <div className="absolute top-4 right-4 bg-white/50 backdrop-blur-sm rounded-lg p-2 flex items-center gap-2 shadow-lg z-10">
+                {/* Card branco sem transparência */}
+                <div className="absolute top-4 right-4 bg-white rounded-lg p-2 flex items-center gap-2 shadow-lg z-10">
                   <Button
                     variant="ghost"
                     size="icon"
