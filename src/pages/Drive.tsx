@@ -680,77 +680,82 @@ const Drive = () => {
       }}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-[90vh] p-0">
           <DialogHeader className="p-4 border-b">
-            <DialogTitle className="flex items-center justify-between">
-              <span className="truncate flex-1">{viewerDocumentName}</span>
-              <div className="flex items-center gap-2 ml-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setViewerZoom(Math.min(viewerZoom + 25, 200))}
-                  title="Zoom In"
-                >
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setViewerZoom(Math.max(viewerZoom - 25, 50))}
-                  title="Zoom Out"
-                >
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setViewerRotation((viewerRotation + 90) % 360)}
-                  title="Rotacionar"
-                >
-                  <RotateCw className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={async () => {
-                    if (viewerUrl) {
-                      const link = document.createElement('a');
-                      link.href = viewerUrl;
-                      link.download = viewerDocumentName;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      toast({
-                        title: "Download iniciado",
-                        description: "O documento está sendo baixado.",
-                      });
-                    }
-                  }}
-                  title="Download"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
+            <DialogTitle>
+              <span className="truncate">{viewerDocumentName}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-gray-50">
             {viewerUrl && (
-              <div
-                style={{
-                  transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
-                  transformOrigin: 'center',
-                  transition: 'transform 0.3s ease',
-                  width: '100%',
-                  height: 'calc(90vh - 120px)',
-                }}
-              >
-                <iframe
-                  src={`${viewerUrl}#view=Fit`}
-                  className="w-full h-full border-0 rounded-md bg-white shadow-lg"
-                  title="Document Preview"
-                />
+              <div className="relative w-full h-full flex items-center justify-center">
+                {/* Card branco com transparência de 50% */}
+                <div className="absolute top-4 right-4 bg-white/50 backdrop-blur-sm rounded-lg p-2 flex items-center gap-2 shadow-lg z-10">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setViewerZoom(Math.min(viewerZoom + 25, 200))}
+                    title="Zoom In"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setViewerZoom(Math.max(viewerZoom - 25, 50))}
+                    title="Zoom Out"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setViewerRotation((viewerRotation + 90) % 360)}
+                    title="Rotacionar"
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={async () => {
+                      if (viewerUrl) {
+                        const link = document.createElement('a');
+                        link.href = viewerUrl;
+                        link.download = viewerDocumentName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        toast({
+                          title: "Download iniciado",
+                          description: "O documento está sendo baixado.",
+                        });
+                      }
+                    }}
+                    title="Download"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {/* Documento com transformações */}
+                <div
+                  style={{
+                    transform: `scale(${viewerZoom / 100}) rotate(${viewerRotation}deg)`,
+                    transformOrigin: 'center',
+                    transition: 'transform 0.3s ease',
+                    width: '100%',
+                    height: 'calc(90vh - 120px)',
+                  }}
+                >
+                  <iframe
+                    src={`${viewerUrl}#view=Fit`}
+                    className="w-full h-full border-0 rounded-md bg-white shadow-lg"
+                    title="Document Preview"
+                  />
+                </div>
               </div>
             )}
           </div>
