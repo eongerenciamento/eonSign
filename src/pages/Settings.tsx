@@ -393,7 +393,8 @@ const Settings = () => {
 
             <Card className="border-0">
               <CardContent className="p-0">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="overflow-x-auto hidden md:block">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
@@ -431,6 +432,50 @@ const Settings = () => {
                         </tr>}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-0">
+                  {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
+                    // Extract category and priority from description
+                    const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                    const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                    const category = categoryMatch ? categoryMatch[1] : '-';
+                    const priority = priorityMatch ? priorityMatch[1] : '-';
+                    
+                    return (
+                      <div key={ticket.id} className={`p-4 space-y-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                        <div>
+                          <p className="text-xs text-gray-500">Título</p>
+                          <p className="text-sm font-medium">{ticket.title}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Abertura</p>
+                          <p className="text-sm text-gray-600">{new Date(ticket.created_at).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Categoria</p>
+                          <p className="text-sm text-gray-600 capitalize">{category}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Prioridade</p>
+                          <p className="text-sm text-gray-600 capitalize">{priority}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Ticket</p>
+                          <p className="text-sm text-gray-600">{ticket.ticket_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Status</p>
+                          <div className="mt-1">{getStatusBadge(ticket.status)}</div>
+                        </div>
+                      </div>
+                    );
+                  }) : (
+                    <div className="p-8 text-center text-sm text-gray-500">
+                      Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
