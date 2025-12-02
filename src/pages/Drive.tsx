@@ -66,7 +66,10 @@ const Drive = () => {
 
     const { data, error } = await supabase
       .from("documents")
-      .select("*")
+      .select(`
+        *,
+        document_signers(name, is_company_signer)
+      `)
       .eq("user_id", userData.user.id)
       .eq("status", "signed");
 
@@ -77,18 +80,24 @@ const Drive = () => {
         variant: "destructive",
       });
     } else if (data) {
-      const mappedDocs: Document[] = data.map(doc => ({
-        id: doc.id,
-        name: doc.name,
-        createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
-        status: doc.status as "pending" | "signed" | "expired" | "in_progress",
-        signers: doc.signers,
-        signedBy: doc.signed_by,
-        folderId: doc.folder_id,
-        fileUrl: doc.file_url,
-        signerStatuses: [],
-        signerNames: [],
-      }));
+      const mappedDocs: Document[] = data.map(doc => {
+        const externalSigners = (doc.document_signers || [])
+          .filter((signer: any) => !signer.is_company_signer)
+          .map((signer: any) => signer.name);
+
+        return {
+          id: doc.id,
+          name: doc.name,
+          createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+          status: doc.status as "pending" | "signed" | "expired" | "in_progress",
+          signers: doc.signers,
+          signedBy: doc.signed_by,
+          folderId: doc.folder_id,
+          fileUrl: doc.file_url,
+          signerStatuses: [],
+          signerNames: externalSigners,
+        };
+      });
       setDocuments(mappedDocs);
     }
   };

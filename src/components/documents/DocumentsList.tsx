@@ -74,8 +74,10 @@ export const DocumentsList = ({
             <div className="col-span-2 text-sm text-gray-600">
               {new Date(document.createdAt).toLocaleDateString('pt-BR')}
             </div>
-            <div className="col-span-2 text-sm text-gray-600">
-              {document.signedBy}/{document.signers}
+            <div className="col-span-2 text-[10px] text-gray-600 leading-tight">
+              {document.signerNames && document.signerNames.length > 0 
+                ? document.signerNames.join(", ")
+                : "-"}
             </div>
             <div className="col-span-3 flex items-center gap-1 justify-end">
               <Button
