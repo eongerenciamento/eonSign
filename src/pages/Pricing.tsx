@@ -456,10 +456,10 @@ export default function Pricing() {
           </svg>
         </a>
         <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-400">
-          <span className="text-xl font-semibold">f</span>
+          <span className="text-2xl font-semibold">f</span>
         </a>
         <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-400">
-          <span className="text-base font-semibold">in</span>
+          <span className="text-xl font-semibold">in</span>
         </a>
         <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-400">
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
