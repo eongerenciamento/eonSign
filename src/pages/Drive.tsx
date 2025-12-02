@@ -678,7 +678,7 @@ const Drive = () => {
           setViewerRotation(0);
         }
       }}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-[90vh] p-0 rounded-2xl overflow-hidden">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-[90vh] p-0 rounded-2xl overflow-hidden animate-fade-in">
           <DialogHeader className="p-4 border-b bg-white/30 backdrop-blur-sm">
             <DialogTitle>
               <span className="truncate">{viewerDocumentName}</span>
