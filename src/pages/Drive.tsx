@@ -43,6 +43,12 @@ const Drive = () => {
     filterDocuments();
   }, [searchQuery, sortBy, documents, selectedFolder, dateFrom, dateTo]);
 
+  const extractStoragePath = (fileUrl: string): string => {
+    // Extract path from URL format: https://{project}.supabase.co/storage/v1/object/public/documents/{path}
+    const match = fileUrl.match(/\/storage\/v1\/object\/public\/documents\/(.+)$/);
+    return match ? match[1] : fileUrl;
+  };
+
   const loadDocuments = async () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
@@ -564,9 +570,10 @@ const Drive = () => {
                 onViewDocument={async (documentId) => {
                   const doc = documents.find(d => d.id === documentId);
                   if (doc?.fileUrl) {
+                    const storagePath = extractStoragePath(doc.fileUrl);
                     const { data, error } = await supabase.storage
                       .from('documents')
-                      .createSignedUrl(doc.fileUrl, 60);
+                      .createSignedUrl(storagePath, 60);
                     
                     if (error) {
                       toast({
@@ -582,9 +589,10 @@ const Drive = () => {
                 onDownloadDocument={async (documentId) => {
                   const doc = documents.find(d => d.id === documentId);
                   if (doc?.fileUrl) {
+                    const storagePath = extractStoragePath(doc.fileUrl);
                     const { data, error } = await supabase.storage
                       .from('documents')
-                      .createSignedUrl(doc.fileUrl, 60);
+                      .createSignedUrl(storagePath, 60);
                     
                     if (error) {
                       toast({
