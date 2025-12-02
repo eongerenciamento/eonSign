@@ -191,7 +191,7 @@ export function SubscriptionTab() {
     const nextTier = currentTierIndex >= 0 && currentTierIndex < SUBSCRIPTION_TIERS.length - 1 ? SUBSCRIPTION_TIERS[currentTierIndex + 1] : null;
     return <div className="space-y-6">
         {/* Grid com 4 cards de informação */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
           {/* Card 1: Plano Atual */}
           <Card className="bg-gray-100 border-0">
             <CardContent className="pt-6">
@@ -380,7 +380,7 @@ export function SubscriptionTab() {
         </div>
 
         {/* FAQ */}
-        <div className="space-y-4">
+        <div className={`space-y-4 ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
             <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
@@ -444,9 +444,9 @@ export function SubscriptionTab() {
   }
 
   // User on free tier - show all paid tiers
-  return <div className="space-y-6">
+    return <div className="space-y-6">
       {/* Grid com 4 cards de informação */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
         {/* Card 1: Plano Atual */}
         <Card className="bg-gray-100 border-0">
           <CardContent className="pt-6">
@@ -638,7 +638,7 @@ export function SubscriptionTab() {
       </div>
 
       {/* FAQ */}
-      <div className="space-y-4">
+      <div className={`space-y-4 ${sidebarOpen ? 'max-w-4xl' : 'max-w-6xl'} mx-auto`}>
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
           <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
