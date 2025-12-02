@@ -568,8 +568,8 @@ const NewDocument = () => {
                       {(files[0].size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(0)} className="h-8 w-8">
-                    <X className="w-4 h-4" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(0)} className="h-8 w-8 hover:bg-transparent hover:text-gray-500">
+                    <X className="w-4 h-4 text-gray-500" />
                   </Button>
                   <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="h-8 w-8">
                     <Plus className="w-4 h-4" />
@@ -599,8 +599,8 @@ const NewDocument = () => {
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeFile(index)}>
-                        <X className="w-4 h-4" />
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0 hover:bg-transparent hover:text-gray-500" onClick={() => removeFile(index)}>
+                        <X className="w-4 h-4 text-gray-500" />
                       </Button>
                     </div>
                   ))}
