@@ -16,15 +16,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import { useBryStatusSync } from "@/hooks/useBryStatusSync";
 
-interface DocumentWithBry extends Document {
-  bry_envelope_uuid?: string | null;
-}
-
 const Documents = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   
-  const [documents, setDocuments] = useState<DocumentWithBry[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -78,7 +74,7 @@ const Documents = () => {
           folderId: doc.folder_id,
           signerStatuses,
           signerNames,
-          bry_envelope_uuid: doc.bry_envelope_uuid,
+          bryEnvelopeUuid: doc.bry_envelope_uuid,
         };
       })
     );

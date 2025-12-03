@@ -8,13 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useBryStatusSync } from "@/hooks/useBryStatusSync";
 
-interface DocumentWithBry extends Document {
-  bry_envelope_uuid?: string | null;
-}
-
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [documents, setDocuments] = useState<DocumentWithBry[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [pendingByOwner, setPendingByOwner] = useState(0);
   const [pendingByExternal, setPendingByExternal] = useState(0);
 
@@ -66,7 +62,7 @@ const Dashboard = () => {
         folderId: doc.folder_id,
         signerStatuses,
         signerNames,
-        bry_envelope_uuid: doc.bry_envelope_uuid,
+        bryEnvelopeUuid: doc.bry_envelope_uuid,
       };
     }));
     setDocuments(documentsWithSigners);
