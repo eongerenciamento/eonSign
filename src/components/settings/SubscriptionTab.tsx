@@ -439,7 +439,7 @@ export function SubscriptionTab() {
                 <AccordionItem value="item-7" className="border-b">
                   <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
                   <AccordionContent className="text-left">
-                    Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
+                    Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações &gt; Membros. Os membros convidados utilizam a assinatura da organização, sem necessidade de assinatura individual.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-8">
@@ -545,6 +545,10 @@ export function SubscriptionTab() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Usuários <strong>ilimitados</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Assinatura digital ICP-Brasil</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -617,7 +621,13 @@ export function SubscriptionTab() {
                       </TableCell>)}
                   </TableRow>
                   <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Usuários <strong>ilimitados</strong></TableCell>
+                    {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                        <Check className="h-4 w-4 text-green-600 mx-auto" />
+                      </TableCell>)}
+                  </TableRow>
+                  <TableRow className="bg-white border-0">
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         <Check className="h-4 w-4 text-green-600 mx-auto" />
                       </TableCell>)}
@@ -701,7 +711,7 @@ export function SubscriptionTab() {
               <AccordionItem value="item-7" className="border-b">
                 <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">Posso ter múltiplos usuários na minha conta?</AccordionTrigger>
                 <AccordionContent className="text-left">
-                  Atualmente cada conta é individual e vinculada a uma empresa/CNPJ. Para múltiplos usuários na mesma organização, cada um precisa ter sua própria conta. Estamos trabalhando em funcionalidades de equipe para os próximos meses.
+                  Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações &gt; Membros. Os membros convidados utilizam a assinatura da organização, sem necessidade de assinatura individual.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-8">
