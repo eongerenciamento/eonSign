@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.bry-download-signed]
 verify_jwt = false
+
+[functions.bry-register-webhook]
+verify_jwt = false
+
+[functions.bry-sync-status]
+verify_jwt = false

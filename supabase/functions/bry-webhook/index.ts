@@ -74,6 +74,11 @@ async function downloadSignedDocument(envelopeUuid: string, documentUuid: string
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log('=== BRY WEBHOOK CALLED ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -83,10 +88,18 @@ const handler = async (req: Request): Promise<Response> => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    const payload: BryWebhookPayload = await req.json();
-    console.log('BRy webhook received:', JSON.stringify(payload));
+    const rawBody = await req.text();
+    console.log('Raw webhook body:', rawBody);
+    
+    const payload: BryWebhookPayload = JSON.parse(rawBody);
+    console.log('BRy webhook parsed payload:', JSON.stringify(payload));
 
     const { event, uuid, signerNonce, signerEmail, documentUuid } = payload;
+    console.log('Event:', event);
+    console.log('UUID:', uuid);
+    console.log('Signer Nonce:', signerNonce);
+    console.log('Signer Email:', signerEmail);
+    console.log('Document UUID:', documentUuid);
 
     // Buscar documento pelo envelope UUID
     const { data: document, error: docError } = await supabase
@@ -95,15 +108,43 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('bry_envelope_uuid', uuid)
       .maybeSingle();
 
-    if (docError || !document) {
+    if (docError) {
+      console.error('Database error finding document:', docError);
+    }
+
+    if (!document) {
       console.error('Document not found for envelope UUID:', uuid);
-      return new Response(JSON.stringify({ error: 'Document not found' }), {
+      // Tentar buscar por nonce do signatário
+      if (signerNonce) {
+        console.log('Attempting to find document by signer nonce:', signerNonce);
+        const { data: signerData } = await supabase
+          .from('document_signers')
+          .select('document_id')
+          .eq('bry_signer_nonce', signerNonce)
+          .maybeSingle();
+        
+        if (signerData) {
+          console.log('Found document via signer nonce:', signerData.document_id);
+          const { data: docByNonce } = await supabase
+            .from('documents')
+            .select('*')
+            .eq('id', signerData.document_id)
+            .single();
+          
+          if (docByNonce) {
+            console.log('Document found by nonce fallback');
+            // Continuar com este documento
+          }
+        }
+      }
+      
+      return new Response(JSON.stringify({ error: 'Document not found', uuid, signerNonce }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Found document:', document.id);
+    console.log('Found document:', document.id, '- Name:', document.name);
 
     if (event === 'SIGNER_COMPLETED' || event === 'SIGNATURE_COMPLETED') {
       // Atualizar status do signatário específico
