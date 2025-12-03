@@ -97,6 +97,7 @@ const Dashboard = () => {
       });
       const signerNames = (signersData || []).map(s => s.name);
       const signerEmails = (signersData || []).map(s => s.email);
+      const signerPhones = (signersData || []).map(s => s.phone);
       const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
       
       // Format envelope documents for the dialog
@@ -122,6 +123,7 @@ const Dashboard = () => {
         signerStatuses,
         signerNames,
         signerEmails,
+        signerPhones,
         bryEnvelopeUuid: item.bry_envelope_uuid,
         isEnvelope: item.isEnvelope,
         documentCount: item.documentCount,
