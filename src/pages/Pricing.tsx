@@ -255,7 +255,7 @@ export default function Pricing() {
       <div className="sticky top-0 z-50 bg-[#273d60]">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <img alt="Eon Sign" className="h-14" src="/lovable-uploads/86300fa7-7f6a-4b88-b2b9-978491efec2c.png" />
+            <img alt="Eon Sign" className="h-14" src="/lovable-uploads/fc810cbe-ebda-4a80-8af1-7cd65ba4a288.png" />
             <Button variant="ghost" onClick={() => navigate('/auth')} className="hover:bg-transparent text-primary-foreground">
               Já tenho conta
             </Button>
