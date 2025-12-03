@@ -298,15 +298,16 @@ const NewDocument = () => {
       }
 
       const documentIds: string[] = [];
+      const fileContents: { docId: string; base64: string }[] = [];
       
       // Upload and create documents
       for (const file of files) {
         // Upload PDF to storage
         const timestamp = Date.now();
         const sanitizedFileName = file.name.normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Remove accents
-          .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars and spaces with underscore
-          .replace(/__+/g, '_'); // Replace multiple underscores with single
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z0-9.-]/g, '_')
+          .replace(/__+/g, '_');
         const filePath = `${user.id}/${timestamp}-${sanitizedFileName}`;
         
         const { error: uploadError } = await supabase.storage
@@ -320,7 +321,7 @@ const NewDocument = () => {
           .getPublicUrl(filePath);
 
         // Create document record
-        const totalSigners = signers.length + 1; // +1 for company signer
+        const totalSigners = signers.length + 1;
         const { data: documentData, error: docError } = await supabase
           .from('documents')
           .insert({
@@ -337,14 +338,19 @@ const NewDocument = () => {
         if (docError) throw docError;
         
         documentIds.push(documentData.id);
+
+        // Convert file to base64 for BRy
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        fileContents.push({ docId: documentData.id, base64 });
       }
       
-      // Use first document for signer creation (all docs in envelope share signers)
       const firstDocumentId = documentIds[0];
 
-      // Create signers for all documents in envelope (or single document)
+      // Create signers for all documents
       for (const docId of documentIds) {
-        // Create company signer record
         const { error: companySignerError } = await supabase
           .from('document_signers')
           .insert({
@@ -358,7 +364,6 @@ const NewDocument = () => {
           });
         if (companySignerError) throw companySignerError;
 
-        // Create external signers records
         const externalSigners = signers.map(signer => ({
           document_id: docId,
           name: signer.name,
@@ -375,10 +380,44 @@ const NewDocument = () => {
         if (signersError) throw signersError;
       }
 
-      // Send email and WhatsApp to each external signer (send first doc ID for signature link)
+      // Create BRy envelope for each document
+      const brySignerLinks: Map<string, string> = new Map();
+      
+      for (const fileContent of fileContents) {
+        try {
+          const allSigners = [
+            { name: companySigner.name, email: companySigner.email, phone: companySigner.phone },
+            ...signers
+          ];
+          
+          const { data: bryData, error: bryError } = await supabase.functions.invoke('bry-create-envelope', {
+            body: {
+              documentId: fileContent.docId,
+              title: title,
+              signers: allSigners,
+              documentBase64: fileContent.base64,
+              userId: user.id
+            }
+          });
+          
+          if (bryError) {
+            console.error('BRy envelope creation failed:', bryError);
+          } else if (bryData?.signerLinks) {
+            for (const link of bryData.signerLinks) {
+              brySignerLinks.set(link.email, link.link);
+            }
+            console.log('BRy envelope created:', bryData.envelopeUuid);
+          }
+        } catch (bryErr) {
+          console.error('Error creating BRy envelope:', bryErr);
+        }
+      }
+
+      // Send notifications with BRy links
       for (const signer of signers) {
         try {
-          // Send email
+          const bryLink = brySignerLinks.get(signer.email);
+          
           await supabase.functions.invoke('send-signature-email', {
             body: {
               signerName: signer.name,
@@ -387,25 +426,23 @@ const NewDocument = () => {
               documentId: firstDocumentId,
               senderName: companySigner.name,
               organizationName: companySigner.companyName,
-              userId: user.id
+              userId: user.id,
+              brySignerLink: bryLink
             }
           });
-          console.log(`Email sent to ${signer.email}`);
 
-          // Send WhatsApp
           await supabase.functions.invoke('send-whatsapp-message', {
             body: {
               signerName: signer.name,
               signerPhone: signer.phone,
               documentName: title,
               documentId: firstDocumentId,
-              organizationName: companySigner.companyName
+              organizationName: companySigner.companyName,
+              brySignerLink: bryLink
             }
           });
-          console.log(`WhatsApp sent to ${signer.phone}`);
         } catch (error) {
           console.error(`Failed to send notification to ${signer.email}:`, error);
-          // Continue even if notification fails - documents are already created
         }
       }
       

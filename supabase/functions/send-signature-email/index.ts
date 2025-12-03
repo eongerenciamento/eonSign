@@ -19,6 +19,7 @@ interface SignatureEmailRequest {
   senderName: string;
   organizationName: string;
   userId: string;
+  brySignerLink?: string; // Link da BRy se disponível
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -27,16 +28,23 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerEmail, documentName, documentId, senderName, organizationName, userId }: SignatureEmailRequest = await req.json();
+    const { signerName, signerEmail, documentName, documentId, senderName, organizationName, userId, brySignerLink }: SignatureEmailRequest = await req.json();
 
     console.log("Sending signature email to:", signerEmail);
+    console.log("BRy link provided:", brySignerLink ? "Yes" : "No");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // URL para página de assinatura - usa APP_URL configurável
+    // URL para página de assinatura - usa link BRy se disponível, senão link interno
     const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
-    const signatureUrl = `${APP_URL}/assinar/${documentId}`;
+    const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
+
+    // Texto diferente se for BRy
+    const isBrySignature = !!brySignerLink;
+    const instructionText = isBrySignature 
+      ? "Clique no botão abaixo para visualizar e assinar o documento digitalmente com certificado ICP-Brasil."
+      : "Clique no botão abaixo para visualizar e assinar o documento. Você precisará informar seu CPF/CNPJ para concluir a assinatura.";
 
     const emailResponse = await resend.emails.send({
       from: "Eon Sign <noreply@eongerenciamento.com.br>",
@@ -56,8 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="margin: 0; color: #666;"><strong>Documento:</strong> ${documentName}</p>
             </div>
             <p style="color: #333; font-size: 14px;">
-              Clique no botão abaixo para visualizar e assinar o documento. 
-              Você precisará informar seu CPF/CNPJ para concluir a assinatura.
+              ${instructionText}
             </p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${signatureUrl}" 

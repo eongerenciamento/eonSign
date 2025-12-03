@@ -13,6 +13,7 @@ interface WhatsAppMessageRequest {
   documentId: string;
   organizationName: string;
   isCompleted?: boolean;
+  brySignerLink?: string; // Link da BRy se disponível
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -21,7 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerPhone, documentName, documentId, organizationName, isCompleted }: WhatsAppMessageRequest = await req.json();
+    const { signerName, signerPhone, documentName, documentId, organizationName, isCompleted, brySignerLink }: WhatsAppMessageRequest = await req.json();
 
     // Initialize Supabase client for logging
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -51,7 +52,10 @@ const handler = async (req: Request): Promise<Response> => {
       cleanPhone = "55" + cleanPhone;
     }
 
-    const signatureUrl = `${APP_URL}/assinar/${documentId}`;
+    // Usar link BRy se disponível, senão link interno
+    const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
+    console.log(`Using signature URL: ${signatureUrl}`);
+    console.log(`BRy link provided: ${brySignerLink ? 'Yes' : 'No'}`);
 
     const templateSid = isCompleted ? templateCompleted : templateInvitation;
     const templateType = isCompleted ? "document_completed" : "signature_invitation";
@@ -84,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
           "1": signerName,        // {{1}} - Nome do signatário
           "2": organizationName,  // {{2}} - Nome da empresa
           "3": documentName,      // {{3}} - Nome do documento
-          "4": signatureUrl       // {{4}} - Link para assinar
+          "4": signatureUrl       // {{4}} - Link para assinar (BRy ou interno)
         }),
       });
     }
