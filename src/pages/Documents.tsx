@@ -107,6 +107,18 @@ const Documents = () => {
         const signerEmails = (signersData || []).map(s => s.email);
         const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
 
+        // Format envelope documents for the dialog
+        const envelopeDocuments = item.envelopeDocuments?.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          file_url: doc.file_url,
+          status: doc.status,
+          signed_by: doc.signed_by,
+          signers: doc.signers,
+          bry_signed_file_url: doc.bry_signed_file_url,
+          bry_envelope_uuid: doc.bry_envelope_uuid,
+        }));
+
         return {
           id: item.id,
           name: item.name,
@@ -122,6 +134,7 @@ const Documents = () => {
           isEnvelope: item.isEnvelope,
           documentCount: item.documentCount,
           envelopeId: item.envelope_id,
+          envelopeDocuments,
         };
       })
     );

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,6 +9,19 @@ import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpe
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { EnvelopeDocumentsDialog } from "./EnvelopeDocumentsDialog";
+
+export interface EnvelopeDocument {
+  id: string;
+  name: string;
+  file_url: string | null;
+  status: string;
+  signed_by: number;
+  signers: number;
+  bry_signed_file_url?: string | null;
+  bry_envelope_uuid?: string | null;
+}
+
 export interface Document {
   id: string;
   name: string;
@@ -24,6 +38,7 @@ export interface Document {
   isEnvelope?: boolean;
   documentCount?: number;
   envelopeId?: string | null;
+  envelopeDocuments?: EnvelopeDocument[];
 }
 
 export interface Folder {
@@ -76,6 +91,20 @@ export const DocumentsTable = ({
     toast
   } = useToast();
   const navigate = useNavigate();
+  
+  // Envelope documents dialog state
+  const [envelopeDialogOpen, setEnvelopeDialogOpen] = useState(false);
+  const [selectedEnvelope, setSelectedEnvelope] = useState<{ title: string; documents: EnvelopeDocument[] } | null>(null);
+
+  const handleOpenEnvelopeDialog = (doc: Document) => {
+    if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
+      setSelectedEnvelope({
+        title: doc.name,
+        documents: doc.envelopeDocuments,
+      });
+      setEnvelopeDialogOpen(true);
+    }
+  };
 
   // Organize folders hierarchically
   const organizeHierarchicalFolders = () => {
@@ -608,7 +637,10 @@ export const DocumentsTable = ({
             const progressPercentage = doc.signedBy / doc.signers * 100;
             return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:opacity-80`}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div 
+                      className={`flex items-center gap-2 ${doc.isEnvelope ? 'cursor-pointer hover:opacity-70' : ''}`}
+                      onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
+                    >
                       {doc.isEnvelope ? (
                         <FolderOpen className="w-5 h-5 text-gray-500 flex-shrink-0" />
                       ) : (
@@ -817,7 +849,10 @@ export const DocumentsTable = ({
                   )}
                 </div>
                 
-                <div className="space-y-1">
+                <div 
+                  className={`space-y-1 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
+                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
+                >
                   <div className="flex items-center gap-2">
                     {doc.isEnvelope ? (
                       <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -877,5 +912,13 @@ export const DocumentsTable = ({
             </div>;
       })}
       </div>
+
+      {/* Envelope Documents Dialog */}
+      <EnvelopeDocumentsDialog
+        open={envelopeDialogOpen}
+        onOpenChange={setEnvelopeDialogOpen}
+        envelopeTitle={selectedEnvelope?.title || ''}
+        documents={selectedEnvelope?.documents || []}
+      />
     </>;
 };
