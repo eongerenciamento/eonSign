@@ -3,12 +3,24 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, X, Plus, Check, FolderOpen } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, FileText, X, Plus, Check, FolderOpen, Shield, MapPin, Mail, MessageSquare, Smartphone, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
+type AuthenticationOption = 'IP' | 'GEOLOCATION' | 'OTP_EMAIL' | 'OTP_PHONE' | 'OTP_WHATSAPP' | 'SELFIE';
+
+const AUTHENTICATION_OPTIONS: { id: AuthenticationOption; label: string; description: string; icon: React.ElementType }[] = [
+  { id: 'IP', label: 'IP', description: 'Captura o IP do signatário', icon: Shield },
+  { id: 'GEOLOCATION', label: 'Geolocalização', description: 'Captura coordenadas geográficas', icon: MapPin },
+  { id: 'OTP_EMAIL', label: 'OTP por E-mail', description: 'Código de verificação por e-mail', icon: Mail },
+  { id: 'OTP_PHONE', label: 'OTP por SMS', description: 'Código de verificação por SMS', icon: Smartphone },
+  { id: 'OTP_WHATSAPP', label: 'OTP por WhatsApp', description: 'Código de verificação por WhatsApp', icon: MessageSquare },
+  { id: 'SELFIE', label: 'Selfie', description: 'Foto do signatário no momento da assinatura', icon: Camera },
+];
 interface Signer {
   name: string;
   phone: string;
@@ -39,6 +51,7 @@ const NewDocument = () => {
     limit: number;
     planName: string;
   } | null>(null);
+  const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['IP', 'GEOLOCATION']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -231,6 +244,14 @@ const NewDocument = () => {
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
+
+  const toggleAuthOption = (option: AuthenticationOption) => {
+    setAuthOptions(prev => 
+      prev.includes(option) 
+        ? prev.filter(o => o !== option)
+        : [...prev, option]
+    );
+  };
   
   const handleSubmit = async () => {
     if (files.length === 0 || !title) {
@@ -396,7 +417,8 @@ const NewDocument = () => {
               title: title,
               signers: allSigners,
               documentBase64: fileContent.base64,
-              userId: user.id
+              userId: user.id,
+              authenticationOptions: authOptions
             }
           });
           
@@ -720,6 +742,46 @@ const NewDocument = () => {
                   <Plus className="w-5 h-5" />
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Authentication Options Section */}
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Selecione os métodos de autenticação que serão exigidos dos signatários
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {AUTHENTICATION_OPTIONS.map((option) => {
+                const Icon = option.icon;
+                const isSelected = authOptions.includes(option.id);
+                return (
+                  <div
+                    key={option.id}
+                    onClick={() => toggleAuthOption(option.id)}
+                    className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                      isSelected 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-muted-foreground/25 hover:border-primary/50'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleAuthOption(option.id)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <Icon className="w-3.5 h-3.5 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">{option.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{option.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

@@ -12,12 +12,16 @@ interface Signer {
   phone: string;
 }
 
+// Available authentication options for BRy
+type AuthenticationOption = 'IP' | 'GEOLOCATION' | 'OTP_EMAIL' | 'OTP_PHONE' | 'OTP_WHATSAPP' | 'SELFIE';
+
 interface CreateEnvelopeRequest {
   documentId: string;
   title: string;
   signers: Signer[];
   documentBase64: string;
   userId: string;
+  authenticationOptions?: AuthenticationOption[];
 }
 
 async function getToken(): Promise<string> {
@@ -58,12 +62,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { documentId, title, signers, documentBase64, userId }: CreateEnvelopeRequest = await req.json();
+    const { documentId, title, signers, documentBase64, userId, authenticationOptions }: CreateEnvelopeRequest = await req.json();
 
     console.log('Creating BRy envelope for document:', documentId);
     console.log('Title:', title);
     console.log('Number of signers:', signers.length);
     console.log('Signers data:', JSON.stringify(signers.map(s => ({ name: s.name, email: s.email, phone: s.phone }))));
+    console.log('Authentication options:', authenticationOptions);
 
     // Obter token da BRy
     const accessToken = await getToken();
@@ -73,6 +78,11 @@ const handler = async (req: Request): Promise<Response> => {
     const apiBaseUrl = environment === 'production'
       ? 'https://easysign.bry.com.br'
       : 'https://easysign.hom.bry.com.br';
+
+    // Default authentication options if not provided
+    const selectedAuthOptions = authenticationOptions && authenticationOptions.length > 0 
+      ? authenticationOptions 
+      : ['IP', 'GEOLOCATION'];
 
     // Preparar dados dos signatários para a BRy com formato E.164
     const signersData = signers.map(signer => {
@@ -91,7 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
         name: signer.name,
         email: signer.email,
         phone: phone, // Formato E.164: +5591988981359
-        authenticationOptions: ['GEOLOCATION', 'IP', 'OTP_EMAIL'],
+        authenticationOptions: selectedAuthOptions,
       };
     });
 
