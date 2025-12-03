@@ -3,12 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { X, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BrySigningDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   signingUrl: string | null;
   documentName: string;
+  documentId: string | null;
   onSigningComplete?: () => void;
 }
 
@@ -17,15 +19,30 @@ export const BrySigningDialog = ({
   onOpenChange,
   signingUrl,
   documentName,
+  documentId,
   onSigningComplete
 }: BrySigningDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [signingStatus, setSigningStatus] = useState<"idle" | "signed" | "error">("idle");
+  const [signingStatus, setSigningStatus] = useState<"idle" | "signed" | "error" | "syncing">("idle");
 
-  // Handle messages from BRy iframe
-  const handleMessage = useCallback((event: MessageEvent) => {
-    if (event.data === "signed") {
+  // Sync signature status with database via BRy API
+  const syncSignatureStatus = useCallback(async () => {
+    if (!documentId) return;
+
+    setSigningStatus("syncing");
+
+    try {
+      // Call the bry-sync-status function to sync status from BRy
+      const { error } = await supabase.functions.invoke('bry-sync-status', {
+        body: { documentId }
+      });
+
+      if (error) {
+        console.error('Error syncing BRy status:', error);
+        // Even if sync fails, still show success since BRy confirmed signing
+      }
+
       setSigningStatus("signed");
       toast({
         title: "Documento assinado!",
@@ -37,6 +54,27 @@ export const BrySigningDialog = ({
         onOpenChange(false);
         onSigningComplete?.();
       }, 2000);
+    } catch (error) {
+      console.error('Error syncing signature status:', error);
+      // Still show success since BRy confirmed signing
+      setSigningStatus("signed");
+      toast({
+        title: "Documento assinado!",
+        description: "Sua assinatura foi registrada. A sincronização será concluída em breve.",
+      });
+      
+      setTimeout(() => {
+        onOpenChange(false);
+        onSigningComplete?.();
+      }, 2000);
+    }
+  }, [documentId, toast, onOpenChange, onSigningComplete]);
+
+  // Handle messages from BRy iframe
+  const handleMessage = useCallback((event: MessageEvent) => {
+    if (event.data === "signed") {
+      // Sync status with database before showing success
+      syncSignatureStatus();
     }
     
     if (event.data === "error") {
@@ -47,7 +85,7 @@ export const BrySigningDialog = ({
         variant: "destructive",
       });
     }
-  }, [toast, onOpenChange, onSigningComplete]);
+  }, [toast, syncSignatureStatus]);
 
   useEffect(() => {
     if (open) {
@@ -91,6 +129,17 @@ export const BrySigningDialog = ({
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">Carregando interface de assinatura...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Syncing overlay */}
+          {signingStatus === "syncing" && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-20">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="text-lg font-medium">Sincronizando assinatura...</p>
+                <p className="text-sm text-muted-foreground">Aguarde um momento</p>
               </div>
             </div>
           )}

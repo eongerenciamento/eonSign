@@ -104,6 +104,7 @@ export const DocumentsTable = ({
   const [signingDialogOpen, setSigningDialogOpen] = useState(false);
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
   const [signingDocumentName, setSigningDocumentName] = useState("");
+  const [signingDocumentId, setSigningDocumentId] = useState<string | null>(null);
 
   const handleOpenEnvelopeDialog = (doc: Document) => {
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
@@ -160,6 +161,7 @@ export const DocumentsTable = ({
           // Abrir modal com iframe BRy
           setSigningUrl(signerData.bry_signer_link);
           setSigningDocumentName(documentName);
+          setSigningDocumentId(documentId);
           setSigningDialogOpen(true);
           return;
         }
@@ -964,6 +966,7 @@ export const DocumentsTable = ({
         onOpenChange={setSigningDialogOpen}
         signingUrl={signingUrl}
         documentName={signingDocumentName}
+        documentId={signingDocumentId}
         onSigningComplete={handleSigningComplete}
       />
     </>;
