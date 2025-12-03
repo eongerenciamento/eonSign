@@ -34,6 +34,60 @@ interface BryWebhookPayload {
   documentUuid?: string;
 }
 
+// Função para converter ArrayBuffer para base64
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+// Função para converter base64 para ArrayBuffer
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+// Função para carimbar o PDF
+async function stampPdf(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer | null> {
+  try {
+    const base64Pdf = arrayBufferToBase64(pdfBuffer);
+    console.log('Calling stamp API...');
+    
+    const response = await fetch('https://example.com/fw/v1/pdf/carimbar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pdf: base64Pdf }),
+    });
+
+    if (!response.ok) {
+      console.error('Stamp API failed:', response.status);
+      return null;
+    }
+
+    const result = await response.json();
+    
+    if (result.pdf) {
+      console.log('PDF stamped successfully');
+      return base64ToArrayBuffer(result.pdf);
+    }
+    
+    console.error('Stamp API response missing pdf field');
+    return null;
+  } catch (error) {
+    console.error('Error stamping PDF:', error);
+    return null;
+  }
+}
+
 async function downloadSignedDocument(envelopeUuid: string, documentUuid: string): Promise<ArrayBuffer | null> {
   try {
     const clientId = Deno.env.get('BRY_CLIENT_ID');
@@ -254,15 +308,27 @@ const handler = async (req: Request): Promise<Response> => {
       const docUuidForDownload = document.bry_document_uuid || documentUuid || '';
       console.log('Document UUID for download:', docUuidForDownload);
       
-      const signedPdf = await downloadSignedDocument(envelopeUuid, docUuidForDownload);
+      let signedPdf = await downloadSignedDocument(envelopeUuid, docUuidForDownload);
 
       if (signedPdf) {
+        // Carimbar o PDF antes de fazer upload
+        console.log('Stamping signed PDF...');
+        const stampedPdf = await stampPdf(signedPdf);
+        
+        // Usar PDF carimbado se disponível, senão usar original
+        const finalPdf = stampedPdf || signedPdf;
+        if (stampedPdf) {
+          console.log('Using stamped PDF');
+        } else {
+          console.log('Stamp failed, using original signed PDF');
+        }
+
         // Fazer upload do documento assinado para o Storage
         const fileName = `${document.user_id}/${document.id}_signed.pdf`;
         
         const { error: uploadError } = await supabase.storage
           .from('documents')
-          .upload(fileName, signedPdf, {
+          .upload(fileName, finalPdf, {
             contentType: 'application/pdf',
             upsert: true,
           });
