@@ -260,8 +260,8 @@ async function syncSingleDocument(
       hasChanges = true;
     }
 
-    // Verificar se todos assinaram
-    const envelopeCompleted = statusData.status === 'COMPLETED' || statusData.status === 'SIGNED';
+    // Verificar se todos assinaram (BRy usa FINISHED, COMPLETED ou SIGNED)
+    const envelopeCompleted = statusData.status === 'COMPLETED' || statusData.status === 'SIGNED' || statusData.status === 'FINISHED';
     const totalSigners = signersList.length || document.signers || 0;
     
     if (envelopeCompleted && document.status !== 'signed') {
