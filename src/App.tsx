@@ -15,14 +15,11 @@ import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
 import ProtectedRoute from "./components/ProtectedRoute";
-
 const queryClient = new QueryClient();
-
 const AppRoutes = () => {
-  return (
-    <Routes>
+  return <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/planos" element={<Pricing />} />
+      <Route path="/planos" element={<Pricing />} className="bg-primary-foreground" />
       <Route path="/install" element={<Install />} />
       <Route path="/assinar/:documentId" element={<SignDocument />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -34,13 +31,10 @@ const AppRoutes = () => {
       <Route path="/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
+    </Routes>;
 };
-
 const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
+  return <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -48,8 +42,6 @@ const App = () => {
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
-    </QueryClientProvider>
-  );
+    </QueryClientProvider>;
 };
-
 export default App;
