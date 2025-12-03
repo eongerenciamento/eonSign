@@ -10,15 +10,23 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
-
-const AUTHENTICATION_OPTIONS: { id: AuthenticationOption; label: string }[] = [
-  { id: 'SELFIE', label: 'Biometria Facial' },
-  { id: 'OTP_WHATSAPP', label: 'Código de Verificação WhatsApp' },
-  { id: 'OTP_EMAIL', label: 'Código de Verificação E-mail' },
-  { id: 'OTP_PHONE', label: 'Código de Verificação SMS' },
-];
+const AUTHENTICATION_OPTIONS: {
+  id: AuthenticationOption;
+  label: string;
+}[] = [{
+  id: 'SELFIE',
+  label: 'Biometria Facial'
+}, {
+  id: 'OTP_WHATSAPP',
+  label: 'Código de Verificação WhatsApp'
+}, {
+  id: 'OTP_EMAIL',
+  label: 'Código de Verificação E-mail'
+}, {
+  id: 'OTP_PHONE',
+  label: 'Código de Verificação SMS'
+}];
 interface Signer {
   name: string;
   phone: string;
@@ -32,7 +40,6 @@ const NewDocument = () => {
   const MAX_DOCUMENTS = 10;
   const MAX_SIGNERS_ENVELOPE = 20;
   const MAX_SIGNERS_DOCUMENT = 99;
-  
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [title, setTitle] = useState("");
@@ -55,7 +62,6 @@ const NewDocument = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
-  
   const isEnvelope = files.length >= 2;
   const maxSigners = isEnvelope ? MAX_SIGNERS_ENVELOPE : MAX_SIGNERS_DOCUMENT;
 
@@ -162,10 +168,8 @@ const NewDocument = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type === "application/pdf");
-      
       if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
@@ -174,7 +178,6 @@ const NewDocument = () => {
         });
         return;
       }
-      
       if (files.length + newFiles.length > MAX_DOCUMENTS) {
         toast({
           title: "Limite excedido",
@@ -183,14 +186,12 @@ const NewDocument = () => {
         });
         return;
       }
-      
       setFiles([...files, ...newFiles]);
     }
   };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).filter(f => f.type === "application/pdf");
-      
       if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
@@ -199,7 +200,6 @@ const NewDocument = () => {
         });
         return;
       }
-      
       if (files.length + newFiles.length > MAX_DOCUMENTS) {
         toast({
           title: "Limite excedido",
@@ -208,7 +208,6 @@ const NewDocument = () => {
         });
         return;
       }
-      
       setFiles([...files, ...newFiles]);
     }
   };
@@ -242,7 +241,6 @@ const NewDocument = () => {
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
-
   const toggleAuthOption = (option: AuthenticationOption) => {
     setAuthOptions(prev => {
       if (prev.includes(option)) {
@@ -253,7 +251,6 @@ const NewDocument = () => {
       return [...prev, option];
     });
   };
-  
   const handleSubmit = async () => {
     if (files.length === 0 || !title) {
       toast({
@@ -263,8 +260,7 @@ const NewDocument = () => {
       });
       return;
     }
-    
-    const hasInvalidSigner = signers.some(signer => !signer.name || (!signer.phone && !signer.email));
+    const hasInvalidSigner = signers.some(signer => !signer.name || !signer.phone && !signer.email);
     if (hasInvalidSigner) {
       toast({
         title: "Campos obrigatórios",
@@ -273,7 +269,7 @@ const NewDocument = () => {
       });
       return;
     }
-    
+
     // Validate signers limit based on mode
     if (signers.length > maxSigners) {
       toast({
@@ -283,7 +279,6 @@ const NewDocument = () => {
       });
       return;
     }
-    
     if (!companySigner) {
       toast({
         title: "Erro",
@@ -300,92 +295,86 @@ const NewDocument = () => {
         }
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
-
       let envelopeId: string | null = null;
-      
+
       // If envelope mode (2+ documents), create envelope first
       if (isEnvelope) {
-        const { data: envelopeData, error: envelopeError } = await supabase
-          .from('envelopes')
-          .insert({
-            title: title,
-            user_id: user.id,
-            status: 'pending'
-          })
-          .select()
-          .single();
-          
+        const {
+          data: envelopeData,
+          error: envelopeError
+        } = await supabase.from('envelopes').insert({
+          title: title,
+          user_id: user.id,
+          status: 'pending'
+        }).select().single();
         if (envelopeError) throw envelopeError;
         envelopeId = envelopeData.id;
       }
-
       const documentIds: string[] = [];
-      const fileContents: { docId: string; base64: string }[] = [];
-      
+      const fileContents: {
+        docId: string;
+        base64: string;
+      }[] = [];
+
       // Upload and create documents
       for (const file of files) {
         // Upload PDF to storage
         const timestamp = Date.now();
-        const sanitizedFileName = file.name.normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-zA-Z0-9.-]/g, '_')
-          .replace(/__+/g, '_');
+        const sanitizedFileName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.-]/g, '_').replace(/__+/g, '_');
         const filePath = `${user.id}/${timestamp}-${sanitizedFileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(filePath, file);
+        const {
+          error: uploadError
+        } = await supabase.storage.from('documents').upload(filePath, file);
         if (uploadError) throw uploadError;
 
         // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('documents')
-          .getPublicUrl(filePath);
+        const {
+          data: {
+            publicUrl
+          }
+        } = supabase.storage.from('documents').getPublicUrl(filePath);
 
         // Create document record
         const totalSigners = signers.length + 1;
-        const { data: documentData, error: docError } = await supabase
-          .from('documents')
-          .insert({
-            name: isEnvelope ? `${title} - ${file.name}` : title,
-            file_url: publicUrl,
-            user_id: user.id,
-            status: 'pending',
-            signers: totalSigners,
-            signed_by: 0,
-            envelope_id: envelopeId
-          })
-          .select()
-          .single();
+        const {
+          data: documentData,
+          error: docError
+        } = await supabase.from('documents').insert({
+          name: isEnvelope ? `${title} - ${file.name}` : title,
+          file_url: publicUrl,
+          user_id: user.id,
+          status: 'pending',
+          signers: totalSigners,
+          signed_by: 0,
+          envelope_id: envelopeId
+        }).select().single();
         if (docError) throw docError;
-        
         documentIds.push(documentData.id);
 
         // Convert file to base64 for BRy
         const arrayBuffer = await file.arrayBuffer();
-        const base64 = btoa(
-          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-        );
-        fileContents.push({ docId: documentData.id, base64 });
+        const base64 = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+        fileContents.push({
+          docId: documentData.id,
+          base64
+        });
       }
-      
       const firstDocumentId = documentIds[0];
 
       // Create signers for all documents
       for (const docId of documentIds) {
-        const { error: companySignerError } = await supabase
-          .from('document_signers')
-          .insert({
-            document_id: docId,
-            name: companySigner.name,
-            email: companySigner.email,
-            phone: companySigner.phone,
-            cpf: companySigner.cpf,
-            is_company_signer: true,
-            status: 'pending'
-          });
+        const {
+          error: companySignerError
+        } = await supabase.from('document_signers').insert({
+          document_id: docId,
+          name: companySigner.name,
+          email: companySigner.email,
+          phone: companySigner.phone,
+          cpf: companySigner.cpf,
+          is_company_signer: true,
+          status: 'pending'
+        });
         if (companySignerError) throw companySignerError;
-
         const externalSigners = signers.map(signer => ({
           document_id: docId,
           name: signer.name,
@@ -395,24 +384,26 @@ const NewDocument = () => {
           is_company_signer: false,
           status: 'pending'
         }));
-        
-        const { error: signersError } = await supabase
-          .from('document_signers')
-          .insert(externalSigners);
+        const {
+          error: signersError
+        } = await supabase.from('document_signers').insert(externalSigners);
         if (signersError) throw signersError;
       }
 
       // Create BRy envelope for each document
       const brySignerLinks: Map<string, string> = new Map(); // key: email or phone
-      
+
       for (const fileContent of fileContents) {
         try {
-          const allSigners = [
-            { name: companySigner.name, email: companySigner.email, phone: companySigner.phone },
-            ...signers
-          ];
-          
-          const { data: bryData, error: bryError } = await supabase.functions.invoke('bry-create-envelope', {
+          const allSigners = [{
+            name: companySigner.name,
+            email: companySigner.email,
+            phone: companySigner.phone
+          }, ...signers];
+          const {
+            data: bryData,
+            error: bryError
+          } = await supabase.functions.invoke('bry-create-envelope', {
             body: {
               documentId: fileContent.docId,
               title: title,
@@ -422,7 +413,6 @@ const NewDocument = () => {
               authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions]
             }
           });
-          
           if (bryError) {
             console.error('BRy envelope creation failed:', bryError);
           } else if (bryData?.signerLinks) {
@@ -441,16 +431,16 @@ const NewDocument = () => {
       }
 
       // Send notifications with BRy links - PARA TODOS incluindo empresa
-      const allSignersForNotification = [
-        { name: companySigner.name, email: companySigner.email, phone: companySigner.phone },
-        ...signers
-      ];
-
+      const allSignersForNotification = [{
+        name: companySigner.name,
+        email: companySigner.email,
+        phone: companySigner.phone
+      }, ...signers];
       for (const signer of allSignersForNotification) {
         try {
           // Get BRy link using email or phone as key
           const bryLink = brySignerLinks.get(signer.email) || brySignerLinks.get(signer.phone);
-          
+
           // Send email only if email is provided
           if (signer.email) {
             await supabase.functions.invoke('send-signature-email', {
@@ -484,13 +474,10 @@ const NewDocument = () => {
           console.error(`Failed to send notification to ${signer.email || signer.phone}:`, error);
         }
       }
-      
       setIsSubmitted(true);
       toast({
         title: isEnvelope ? "Envelope enviado!" : "Documento enviado!",
-        description: isEnvelope 
-          ? `Envelope com ${files.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.`
-          : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
+        description: isEnvelope ? `Envelope com ${files.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.` : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
@@ -634,9 +621,9 @@ const NewDocument = () => {
                 <p className="text-xs text-muted-foreground mt-4">
                   Apenas arquivos PDF são aceitos
                 </p>
-              </> : files.length === 1 ? (
-                // Single document - simple view
-                <div className="flex items-center justify-center gap-4">
+              </> : files.length === 1 ?
+          // Single document - simple view
+          <div className="flex items-center justify-center gap-4">
                   <FileText className="w-8 h-8 text-gray-500" />
                   <div className="flex-1 text-left">
                     <p className="font-medium text-sm text-gray-600">{files[0].name}</p>
@@ -651,10 +638,9 @@ const NewDocument = () => {
                     <Plus className="w-4 h-4 text-gray-500" />
                   </Button>
                   <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
-                </div>
-              ) : (
-                // Multiple documents - envelope view
-                <div className="space-y-2">
+                </div> :
+          // Multiple documents - envelope view
+          <div className="space-y-2">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <FolderOpen className="w-5 h-5 text-gray-500" />
@@ -666,8 +652,7 @@ const NewDocument = () => {
                       1 crédito
                     </p>
                   </div>
-                  {files.map((file, index) => (
-                    <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                  {files.map((file, index) => <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                       <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left">
                         <p className="font-medium text-sm md:text-base text-gray-600 truncate">{file.name}</p>
@@ -678,18 +663,14 @@ const NewDocument = () => {
                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0 hover:bg-transparent hover:text-gray-500" onClick={() => removeFile(index)}>
                         <X className="w-4 h-4 text-gray-500" />
                       </Button>
-                    </div>
-                  ))}
-                  {files.length < MAX_DOCUMENTS && (
-                    <div className="flex justify-end mt-3">
+                    </div>)}
+                  {files.length < MAX_DOCUMENTS && <div className="flex justify-end mt-3">
                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-gray-500" onClick={() => fileInputRef.current?.click()}>
                         <Plus className="w-4 h-4 text-gray-500" />
                       </Button>
-                    </div>
-                  )}
+                    </div>}
                   <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
-                </div>
-              )}
+                </div>}
           </div>
 
           {/* Form Fields */}
@@ -705,7 +686,7 @@ const NewDocument = () => {
               
               {/* Company Signer (Read-only) */}
               {companySigner && <div className="p-4 border rounded-lg space-y-3 bg-primary/5">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Signatário da Empresa</p>
+                  
                   <div className="grid gap-2">
                     <Label>Nome Completo</Label>
                     <Input value={companySigner.name} disabled />
@@ -762,23 +743,13 @@ const NewDocument = () => {
             <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
             <p className="text-xs text-gray-500">Pelo menos 1 nível de verificação deve estar ativo</p>
             <div className="space-y-2">
-              {AUTHENTICATION_OPTIONS.map((option) => {
-                const isSelected = authOptions.includes(option.id);
-                return (
-                  <div
-                    key={option.id}
-                    onClick={() => toggleAuthOption(option.id)}
-                    className="flex items-center gap-3 px-3 py-2 bg-gray-100 rounded cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      onClick={(e) => e.stopPropagation()}
-                      onCheckedChange={() => toggleAuthOption(option.id)}
-                    />
+              {AUTHENTICATION_OPTIONS.map(option => {
+              const isSelected = authOptions.includes(option.id);
+              return <div key={option.id} onClick={() => toggleAuthOption(option.id)} className="flex items-center gap-3 px-3 py-2 bg-gray-100 rounded cursor-pointer">
+                    <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onCheckedChange={() => toggleAuthOption(option.id)} />
                     <span className="text-sm text-gray-600">{option.label}</span>
-                  </div>
-                );
-              })}
+                  </div>;
+            })}
             </div>
           </div>
 
