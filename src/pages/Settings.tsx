@@ -15,6 +15,7 @@ import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { MembersTab } from "@/components/settings/MembersTab";
 import { useQuery } from "@tanstack/react-query";
+
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -32,9 +33,11 @@ const Settings = () => {
   const [phone, setPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [isAdmin, setIsAdmin] = useState(true);
 
-  // Get tab from URL params
-  const activeTab = searchParams.get('tab') || 'company';
+  // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
+  const urlTab = searchParams.get('tab') || 'company';
+  const activeTab = !isAdmin && (urlTab === 'subscription' || urlTab === 'members') ? 'company' : urlTab;
 
   // Fetch support tickets
   const {
@@ -96,9 +99,22 @@ const Settings = () => {
       } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
+        // Check if user is a member (not admin)
+        const { data: memberData } = await supabase
+          .from('organization_members')
+          .select('*')
+          .eq('member_user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        // User is admin if they are NOT a member of another organization
+        setIsAdmin(!memberData);
+
+        // Load company data from user's own settings or organization's settings
+        const organizationId = memberData?.organization_id || user.id;
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('*').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('*').eq('user_id', organizationId).single();
         if (companyData) {
           setCompanyName(companyData.company_name);
           setCnpj(companyData.cnpj);
@@ -261,19 +277,23 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
             </TabsTrigger>
-            <TabsTrigger value="members" className="gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden md:inline">Membros</span>
-            </TabsTrigger>
-            <TabsTrigger value="subscription" className="gap-2">
-              <CreditCard className="h-4 w-4" />
-              <span className="hidden md:inline">Assinatura</span>
-            </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="members" className="gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden md:inline">Membros</span>
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="subscription" className="gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden md:inline">Assinatura</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="support" className="gap-2">
               <HelpCircle className="h-4 w-4" />
               <span className="hidden md:inline">Suporte</span>
@@ -408,13 +428,17 @@ const Settings = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="members" className="space-y-6 mt-6">
-            <MembersTab />
-          </TabsContent>
+          {isAdmin && (
+            <TabsContent value="members" className="space-y-6 mt-6">
+              <MembersTab />
+            </TabsContent>
+          )}
 
-          <TabsContent value="subscription" className="space-y-6 mt-6">
-            <SubscriptionTab />
-          </TabsContent>
+          {isAdmin && (
+            <TabsContent value="subscription" className="space-y-6 mt-6">
+              <SubscriptionTab />
+            </TabsContent>
+          )}
 
           <TabsContent value="support" className="space-y-6 mt-6">
             <div className="flex justify-end mb-6">
