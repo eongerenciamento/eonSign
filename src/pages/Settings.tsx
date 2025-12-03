@@ -410,6 +410,16 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Footer Logo */}
+            <div className="flex flex-col items-center pt-0 pb-4">
+              <img 
+                src="/lovable-uploads/Eon_Tecnologia-4.png" 
+                alt="Eon" 
+                className="h-36"
+              />
+              <p className="text-xs text-gray-500">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
+            </div>
           </TabsContent>
 
           <TabsContent value="subscription" className="space-y-6 mt-6">
@@ -521,12 +531,13 @@ const Settings = () => {
             </Card>
 
             {/* Footer Logo */}
-            <div className="flex justify-center pt-0 pb-4">
+            <div className="flex flex-col items-center pt-0 pb-4">
               <img 
                 src="/lovable-uploads/Eon_Tecnologia-4.png" 
                 alt="Eon" 
                 className="h-36"
               />
+              <p className="text-xs text-gray-500">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
           </TabsContent>
         </Tabs>
