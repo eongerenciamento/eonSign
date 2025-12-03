@@ -209,7 +209,7 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#273d60] to-[#001f3f] px-4" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+  return <div className="min-h-screen flex items-center justify-center bg-[#273d60] px-4" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
@@ -217,7 +217,7 @@ export default function Auth() {
           <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/86300fa7-7f6a-4b88-b2b9-978491efec2c.png" />
         </div>
 
-        <div className="p-8 rounded-lg shadow-xl opacity-90 bg-[#273d60] border border-white/20 animate-fade-in" style={{
+        <div className="p-8 rounded-2xl shadow-xl bg-white/10 border border-white/20 animate-fade-in" style={{
         animationDelay: '0.3s'
       }}>
           <form onSubmit={handleSubmit} className="space-y-6">
