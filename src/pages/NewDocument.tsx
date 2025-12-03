@@ -14,9 +14,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 
 const AUTHENTICATION_OPTIONS: { id: AuthenticationOption; label: string }[] = [
-  { id: 'IP', label: 'IP' },
   { id: 'SELFIE', label: 'Biometria Facial' },
-  { id: 'GEOLOCATION', label: 'Geolocalização' },
   { id: 'OTP_WHATSAPP', label: 'Código de Verificação WhatsApp' },
   { id: 'OTP_EMAIL', label: 'Código de Verificação E-mail' },
   { id: 'OTP_PHONE', label: 'Código de Verificação SMS' },
@@ -51,7 +49,7 @@ const NewDocument = () => {
     limit: number;
     planName: string;
   } | null>(null);
-  const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['IP', 'SELFIE', 'GEOLOCATION', 'OTP_WHATSAPP']);
+  const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE', 'OTP_WHATSAPP']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -418,7 +416,7 @@ const NewDocument = () => {
               signers: allSigners,
               documentBase64: fileContent.base64,
               userId: user.id,
-              authenticationOptions: authOptions
+              authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions]
             }
           });
           
