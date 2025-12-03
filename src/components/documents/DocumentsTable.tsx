@@ -671,7 +671,7 @@ export const DocumentsTable = ({
                           onClick={() => handleDownloadReport(doc.id)}
                           title="Baixar relatório de evidências"
                         >
-                          <FileCheck className="w-4 h-4 text-green-600" />
+                          <FileCheck className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
                       {doc.bryEnvelopeUuid && (
@@ -682,7 +682,7 @@ export const DocumentsTable = ({
                           onClick={() => handleOpenValidation(doc.id)}
                           title="Validar assinaturas"
                         >
-                          <ShieldCheck className="w-4 h-4 text-blue-600" />
+                          <ShieldCheck className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
                       {doc.status !== 'signed' && (
@@ -693,7 +693,7 @@ export const DocumentsTable = ({
                           onClick={() => handleResendNotifications(doc.id)}
                           title="Reenviar notificações"
                         >
-                          <Mail className="w-4 h-4 text-blue-500" />
+                          <Mail className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
                       {doc.signedBy === 0 && (
@@ -740,7 +740,7 @@ export const DocumentsTable = ({
                       onClick={() => handleDownloadReport(doc.id)}
                       title="Baixar relatório de evidências"
                     >
-                      <FileCheck className="w-4 h-4 text-green-600" />
+                      <FileCheck className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
                   {doc.bryEnvelopeUuid && (
@@ -751,7 +751,7 @@ export const DocumentsTable = ({
                       onClick={() => handleOpenValidation(doc.id)}
                       title="Validar assinaturas"
                     >
-                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                      <ShieldCheck className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
                   {doc.status !== 'signed' && (
@@ -762,7 +762,7 @@ export const DocumentsTable = ({
                       onClick={() => handleResendNotifications(doc.id)}
                       title="Reenviar notificações"
                     >
-                      <Mail className="w-4 h-4 text-blue-500" />
+                      <Mail className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
                   {doc.signedBy === 0 && (
