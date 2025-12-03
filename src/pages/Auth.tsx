@@ -209,7 +209,7 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-[#273d60] px-4" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+  return <div className="min-h-screen flex items-center justify-center bg-[#273d60] px-4 md:pt-0 pt-0 -mt-16 md:mt-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
