@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
 import { Upload } from "lucide-react";
@@ -6,11 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useBryStatusSync } from "@/hooks/useBryStatusSync";
+
+interface DocumentWithBry extends Document {
+  bry_envelope_uuid?: string | null;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<DocumentWithBry[]>([]);
   const [pendingByOwner, setPendingByOwner] = useState(0);
   const [pendingByExternal, setPendingByExternal] = useState(0);
+
   const currentDate = new Date();
   const weekDay = currentDate.toLocaleDateString('pt-BR', {
     weekday: 'long'
@@ -21,10 +28,8 @@ const Dashboard = () => {
     year: 'numeric'
   });
   const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
-  useEffect(() => {
-    loadDocuments();
-  }, []);
-  const loadDocuments = async () => {
+
+  const loadDocuments = useCallback(async () => {
     const {
       data: userData
     } = await supabase.auth.getUser();
@@ -60,7 +65,8 @@ const Dashboard = () => {
         signedBy: doc.signed_by,
         folderId: doc.folder_id,
         signerStatuses,
-        signerNames
+        signerNames,
+        bry_envelope_uuid: doc.bry_envelope_uuid,
       };
     }));
     setDocuments(documentsWithSigners);
@@ -70,7 +76,18 @@ const Dashboard = () => {
     const pendingExt = documentsWithSigners.filter(doc => doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")).length;
     setPendingByOwner(pendingOwner);
     setPendingByExternal(pendingExt);
-  };
+  }, []);
+
+  // Automatic BRy status sync
+  useBryStatusSync(documents, {
+    onStatusChange: loadDocuments,
+    pollingInterval: 30000,
+  });
+
+  useEffect(() => {
+    loadDocuments();
+  }, [loadDocuments]);
+
   return <Layout>
       <div className="p-8 space-y-8">
         {/* Header */}
