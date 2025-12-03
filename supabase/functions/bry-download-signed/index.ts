@@ -39,6 +39,35 @@ async function getToken(): Promise<string> {
   return tokenData.access_token;
 }
 
+async function getDocumentUuidFromStatus(envelopeUuid: string, accessToken: string, apiBaseUrl: string): Promise<string | null> {
+  try {
+    const statusUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${envelopeUuid}/status`;
+    console.log('Fetching document UUID from status:', statusUrl);
+    
+    const statusResponse = await fetch(statusUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!statusResponse.ok) {
+      console.error('Failed to get status:', statusResponse.status);
+      return null;
+    }
+
+    const statusData = await statusResponse.json();
+    console.log('Status response documents:', JSON.stringify(statusData.documents));
+    
+    // BRy pode retornar documentUuid ou uuid
+    const docUuid = statusData.documents?.[0]?.documentUuid || statusData.documents?.[0]?.uuid;
+    return docUuid || null;
+  } catch (error) {
+    console.error('Error getting document UUID from status:', error);
+    return null;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -64,8 +93,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Document not found');
     }
 
-    if (!document.bry_envelope_uuid || !document.bry_document_uuid) {
-      throw new Error('Document does not have BRy information');
+    if (!document.bry_envelope_uuid) {
+      throw new Error('Document does not have BRy envelope UUID');
     }
 
     // Obter token da BRy
@@ -76,8 +105,28 @@ const handler = async (req: Request): Promise<Response> => {
       ? 'https://easysign.bry.com.br'
       : 'https://easysign.hom.bry.com.br';
 
+    // Se não temos o document UUID, tentar obter via status
+    let documentUuid = document.bry_document_uuid;
+    if (!documentUuid) {
+      console.log('Document UUID not found in database, fetching from BRy status...');
+      documentUuid = await getDocumentUuidFromStatus(document.bry_envelope_uuid, accessToken, apiBaseUrl);
+      
+      if (documentUuid) {
+        // Salvar o UUID para futuras requisições
+        await supabase
+          .from('documents')
+          .update({ bry_document_uuid: documentUuid })
+          .eq('id', documentId);
+        console.log('Document UUID saved:', documentUuid);
+      }
+    }
+
+    if (!documentUuid) {
+      throw new Error('Could not obtain document UUID from BRy');
+    }
+
     // Baixar documento assinado
-    const downloadUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}/documents/${document.bry_document_uuid}/signed`;
+    const downloadUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}/documents/${documentUuid}/signed`;
     console.log('Downloading from:', downloadUrl);
 
     const downloadResponse = await fetch(downloadUrl, {
@@ -124,9 +173,15 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Error updating document:', updateError);
     }
 
+    // Gerar URL assinada para download imediato
+    const { data: signedUrlData } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(fileName, 3600);
+
     return new Response(JSON.stringify({
       success: true,
       signedFileUrl: fileName,
+      downloadUrl: signedUrlData?.signedUrl || null,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
