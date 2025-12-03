@@ -209,15 +209,6 @@ export function MembersTab() {
         </CardContent>
       </Card>
 
-      {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-100">
-        <CardContent className="pt-6">
-          <p className="text-sm text-blue-800">
-            <strong>Sobre membros:</strong> Membros convidados terão acesso apenas à visualização da assinatura do plano. 
-            Eles não precisam de uma assinatura própria, pois utilizarão a assinatura da organização.
-          </p>
-        </CardContent>
-      </Card>
 
       {/* Invite Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
