@@ -10,9 +10,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Building2, CreditCard, HelpCircle, X, Check } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
+import { MembersTab } from "@/components/settings/MembersTab";
 import { useQuery } from "@tanstack/react-query";
 const Settings = () => {
   const navigate = useNavigate();
@@ -260,10 +261,14 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
+            </TabsTrigger>
+            <TabsTrigger value="members" className="gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden md:inline">Membros</span>
             </TabsTrigger>
             <TabsTrigger value="subscription" className="gap-2">
               <CreditCard className="h-4 w-4" />
@@ -401,6 +406,10 @@ const Settings = () => {
               <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
               <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
+          </TabsContent>
+
+          <TabsContent value="members" className="space-y-6 mt-6">
+            <MembersTab />
           </TabsContent>
 
           <TabsContent value="subscription" className="space-y-6 mt-6">

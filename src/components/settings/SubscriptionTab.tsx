@@ -279,6 +279,10 @@ export function SubscriptionTab() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <span>Usuários <strong>ilimitados</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <span>Assinatura digital ICP-Brasil</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -345,7 +349,13 @@ export function SubscriptionTab() {
                         </TableCell>)}
                     </TableRow>
                     <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Usuários <strong>ilimitados</strong></TableCell>
+                      {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
+                          <Check className="h-4 w-4 text-green-600 mx-auto" />
+                        </TableCell>)}
+                    </TableRow>
+                    <TableRow className="bg-white border-0">
+                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Assinatura digital<br className="md:hidden" />ICP-Brasil</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           <Check className="h-4 w-4 text-green-600 mx-auto" />
                         </TableCell>)}
