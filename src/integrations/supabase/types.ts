@@ -20,6 +20,7 @@ export type Database = {
           admin_email: string
           admin_name: string
           admin_phone: string
+          avatar_url: string | null
           cep: string | null
           city: string | null
           cnpj: string
@@ -38,6 +39,7 @@ export type Database = {
           admin_email: string
           admin_name: string
           admin_phone: string
+          avatar_url?: string | null
           cep?: string | null
           city?: string | null
           cnpj: string
@@ -56,6 +58,7 @@ export type Database = {
           admin_email?: string
           admin_name?: string
           admin_phone?: string
+          avatar_url?: string | null
           cep?: string | null
           city?: string | null
           cnpj?: string

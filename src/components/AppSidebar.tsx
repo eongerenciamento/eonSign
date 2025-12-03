@@ -63,14 +63,14 @@ export function AppSidebar() {
         // Buscar dados do company_settings
         const { data: companyData } = await supabase
           .from('company_settings')
-          .select('admin_name, company_name, logo_url, admin_phone')
+          .select('admin_name, company_name, avatar_url, admin_phone')
           .eq('user_id', user.id)
           .single();
 
         if (companyData) {
           setName(companyData.admin_name || user.user_metadata?.name || "");
           setOrganization(companyData.company_name || user.user_metadata?.organization || "");
-          setAvatarUrl(companyData.logo_url || user.user_metadata?.avatar_url || null);
+          setAvatarUrl(companyData.avatar_url || user.user_metadata?.avatar_url || null);
         } else {
           // Fallback para user_metadata se não houver company_settings
           setName(user.user_metadata?.name || "");
@@ -150,14 +150,14 @@ export function AppSidebar() {
     if (user) {
       const { data: companyData } = await supabase
         .from('company_settings')
-        .select('admin_name, company_name, logo_url')
+        .select('admin_name, company_name, avatar_url')
         .eq('user_id', user.id)
         .single();
 
       if (companyData) {
         setName(companyData.admin_name || user.user_metadata?.name || "");
         setOrganization(companyData.company_name || user.user_metadata?.organization || "");
-        setAvatarUrl(companyData.logo_url || user.user_metadata?.avatar_url || null);
+        setAvatarUrl(companyData.avatar_url || user.user_metadata?.avatar_url || null);
       }
     }
   };
