@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, PenTool, Trash2, Mail } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ export interface Document {
   signerNames?: string[];
   folderId?: string | null;
   fileUrl?: string | null;
+  bryEnvelopeUuid?: string | null;
 }
 
 export interface Folder {
@@ -512,6 +513,78 @@ export const DocumentsTable = ({
       });
     }
   };
+
+  const handleDownloadReport = async (documentId: string) => {
+    try {
+      toast({
+        title: "Baixando relatório...",
+        description: "Obtendo relatório de evidências do BRy.",
+      });
+
+      const response = await supabase.functions.invoke('bry-download-report', {
+        body: { documentId },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao baixar relatório');
+      }
+
+      // O response.data é um ArrayBuffer do PDF
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      const doc = documents.find(d => d.id === documentId);
+      link.download = `${doc?.name || 'documento'}_evidencias.pdf`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download concluído",
+        description: "Relatório de evidências baixado com sucesso.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading report:", error);
+      toast({
+        title: "Erro ao baixar relatório",
+        description: error.message || "Não foi possível baixar o relatório de evidências.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenValidation = async (documentId: string) => {
+    try {
+      toast({
+        title: "Obtendo link de validação...",
+      });
+
+      const { data, error } = await supabase.functions.invoke('bry-get-validation-url', {
+        body: { documentId },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Erro ao obter URL de validação');
+      }
+
+      if (data?.validationUrl) {
+        window.open(data.validationUrl, '_blank');
+      } else {
+        throw new Error('URL de validação não disponível');
+      }
+    } catch (error: any) {
+      console.error("Error getting validation URL:", error);
+      toast({
+        title: "Erro ao obter validação",
+        description: error.message || "Não foi possível obter o link de validação.",
+        variant: "destructive",
+      });
+    }
+  };
   return <>
       {/* Desktop Table View */}
       <div className="hidden md:block rounded-lg overflow-hidden">
@@ -585,6 +658,119 @@ export const DocumentsTable = ({
                         </Button>
                       )}
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)}>
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
+                        <Download className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleDownloadReport(doc.id)}
+                          title="Baixar relatório de evidências"
+                        >
+                          <FileCheck className="w-4 h-4 text-green-600" />
+                        </Button>
+                      )}
+                      {doc.bryEnvelopeUuid && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleOpenValidation(doc.id)}
+                          title="Validar assinaturas"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-blue-600" />
+                        </Button>
+                      )}
+                      {doc.status !== 'signed' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleResendNotifications(doc.id)}
+                          title="Reenviar notificações"
+                        >
+                          <Mail className="w-4 h-4 text-blue-500" />
+                        </Button>
+                      )}
+                      {doc.signedBy === 0 && (
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                          <Trash2 className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>;
+          })}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {documents.map(doc => {
+        const statusInfo = statusConfig[doc.status];
+        return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
+            <div className="space-y-3">
+                <div className="flex justify-end gap-1">
+                  {doc.signerStatuses?.[0] === "pending" && (
+                    <Button 
+                      variant="ghost"
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => handleSignDocument(doc.id)}
+                    >
+                      <PenTool className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)}>
+                    <Eye className="w-4 h-4 text-gray-500" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)}>
+                    <Download className="w-4 h-4 text-gray-500" />
+                  </Button>
+                  {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => handleDownloadReport(doc.id)}
+                      title="Baixar relatório de evidências"
+                    >
+                      <FileCheck className="w-4 h-4 text-green-600" />
+                    </Button>
+                  )}
+                  {doc.bryEnvelopeUuid && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => handleOpenValidation(doc.id)}
+                      title="Validar assinaturas"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    </Button>
+                  )}
+                  {doc.status !== 'signed' && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => handleResendNotifications(doc.id)}
+                      title="Reenviar notificações"
+                    >
+                      <Mail className="w-4 h-4 text-blue-500" />
+                    </Button>
+                  )}
+                  {doc.signedBy === 0 && (
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                      <Trash2 className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  )}
+                </div>
                         <Eye className="w-4 h-4 text-gray-500" />
                       </Button>
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>

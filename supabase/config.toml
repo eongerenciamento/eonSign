@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.bry-sync-status]
 verify_jwt = false
+
+[functions.bry-download-report]
+verify_jwt = false
+
+[functions.bry-get-validation-url]
+verify_jwt = false
