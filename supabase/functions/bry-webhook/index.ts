@@ -311,16 +311,17 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log('Final signed_by count:', allSigners?.length || 0);
 
-      // Enviar email de documento completado
+      // Enviar email e WhatsApp de documento completado
       try {
         const { data: signers } = await supabase
           .from('document_signers')
-          .select('email')
+          .select('email, name, phone')
           .eq('document_id', document.id);
 
         if (signers && signers.length > 0) {
           const signerEmails = signers.map(s => s.email);
           
+          // Enviar email de conclusão
           await supabase.functions.invoke('send-document-completed-email', {
             body: {
               documentId: document.id,
@@ -330,9 +331,29 @@ const handler = async (req: Request): Promise<Response> => {
             },
           });
           console.log('Document completed email sent');
+
+          // Enviar WhatsApp de conclusão para cada signatário
+          for (const signer of signers) {
+            if (signer.phone) {
+              try {
+                await supabase.functions.invoke('send-whatsapp-message', {
+                  body: {
+                    signerName: signer.name,
+                    signerPhone: signer.phone,
+                    documentName: document.name,
+                    documentId: document.id,
+                    messageType: 'completed',
+                  },
+                });
+                console.log(`Document completed WhatsApp sent to ${signer.phone}`);
+              } catch (waError) {
+                console.error(`Error sending WhatsApp to ${signer.phone}:`, waError);
+              }
+            }
+          }
         }
       } catch (emailError) {
-        console.error('Error sending completed email:', emailError);
+        console.error('Error sending completed notifications:', emailError);
       }
     }
 
