@@ -528,28 +528,35 @@ export const DocumentsTable = ({
 
       // Send to each pending signer
       for (const signer of pendingSigners) {
-        // Send email
-        await supabase.functions.invoke('send-signature-email', {
-          body: {
-            signerEmail: signer.email,
-            signerName: signer.name,
-            documentName: documentData.name,
-            documentId: documentData.id,
-            organizationName: companyData.company_name,
-          },
-        });
+        // Send email only if signer has email
+        if (signer.email) {
+          await supabase.functions.invoke('send-signature-email', {
+            body: {
+              signerEmail: signer.email,
+              signerName: signer.name,
+              documentName: documentData.name,
+              documentId: documentData.id,
+              organizationName: companyData.company_name,
+              userId: user.id,
+              brySignerLink: signer.bry_signer_link,
+            },
+          });
+        }
 
-        // Send WhatsApp
-        await supabase.functions.invoke('send-whatsapp-message', {
-          body: {
-            signerName: signer.name,
-            signerPhone: signer.phone,
-            documentName: documentData.name,
-            documentId: documentData.id,
-            organizationName: companyData.company_name,
-            isCompleted: false,
-          },
-        });
+        // Send WhatsApp only if signer has phone
+        if (signer.phone) {
+          await supabase.functions.invoke('send-whatsapp-message', {
+            body: {
+              signerName: signer.name,
+              signerPhone: signer.phone,
+              documentName: documentData.name,
+              documentId: documentData.id,
+              organizationName: companyData.company_name,
+              isCompleted: false,
+              brySignerLink: signer.bry_signer_link,
+            },
+          });
+        }
       }
 
       toast({
