@@ -653,14 +653,15 @@ export const DocumentsTable = ({
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
                           onClick={() => handleSignDocument(doc.id)}
+                          title="Assinar documento"
                         >
                           <PenTool className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)}>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
                         <Eye className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)}>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
                         <Download className="w-4 h-4 text-gray-500" />
                       </Button>
                       {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
@@ -669,7 +670,7 @@ export const DocumentsTable = ({
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
                           onClick={() => handleDownloadReport(doc.id)}
-                          title="Baixar relatório de evidências"
+                          title="Baixar PDF com evidências das assinaturas coletadas"
                         >
                           <FileCheck className="w-4 h-4 text-gray-500" />
                         </Button>
@@ -680,7 +681,7 @@ export const DocumentsTable = ({
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
                           onClick={() => handleOpenValidation(doc.id)}
-                          title="Validar assinaturas"
+                          title="Validar assinaturas no portal BRy"
                         >
                           <ShieldCheck className="w-4 h-4 text-gray-500" />
                         </Button>
@@ -691,13 +692,13 @@ export const DocumentsTable = ({
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
                           onClick={() => handleResendNotifications(doc.id)}
-                          title="Reenviar notificações"
+                          title="Reenviar e-mail e WhatsApp para signatários pendentes"
                         >
                           <Mail className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
                       {doc.signedBy === 0 && (
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
                           <Trash2 className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
@@ -722,14 +723,15 @@ export const DocumentsTable = ({
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
                       onClick={() => handleSignDocument(doc.id)}
+                      title="Assinar documento"
                     >
                       <PenTool className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)}>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
                     <Eye className="w-4 h-4 text-gray-500" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)}>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
                     <Download className="w-4 h-4 text-gray-500" />
                   </Button>
                   {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
@@ -738,7 +740,7 @@ export const DocumentsTable = ({
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
                       onClick={() => handleDownloadReport(doc.id)}
-                      title="Baixar relatório de evidências"
+                      title="Baixar PDF com evidências das assinaturas coletadas"
                     >
                       <FileCheck className="w-4 h-4 text-gray-500" />
                     </Button>
@@ -749,7 +751,7 @@ export const DocumentsTable = ({
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
                       onClick={() => handleOpenValidation(doc.id)}
-                      title="Validar assinaturas"
+                      title="Validar assinaturas no portal BRy"
                     >
                       <ShieldCheck className="w-4 h-4 text-gray-500" />
                     </Button>
@@ -760,13 +762,13 @@ export const DocumentsTable = ({
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
                       onClick={() => handleResendNotifications(doc.id)}
-                      title="Reenviar notificações"
+                      title="Reenviar e-mail e WhatsApp para signatários pendentes"
                     >
                       <Mail className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
                   {doc.signedBy === 0 && (
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
                       <Trash2 className="w-4 h-4 text-gray-500" />
                     </Button>
                   )}
