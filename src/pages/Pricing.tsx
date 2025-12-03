@@ -20,6 +20,10 @@ const PLANS = [{
     name: "Quantidade de documentos / envelopes",
     value: "5"
   }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
+  }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
   }, {
@@ -46,6 +50,10 @@ const PLANS = [{
   features: [{
     name: "Quantidade de documentos / envelopes",
     value: "20"
+  }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
@@ -74,6 +82,10 @@ const PLANS = [{
     name: "Quantidade de documentos / envelopes",
     value: "50"
   }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
+  }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
   }, {
@@ -99,6 +111,10 @@ const PLANS = [{
   features: [{
     name: "Quantidade de documentos / envelopes",
     value: "100"
+  }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
@@ -126,6 +142,10 @@ const PLANS = [{
     name: "Quantidade de documentos / envelopes",
     value: "150"
   }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
+  }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
   }, {
@@ -151,6 +171,10 @@ const PLANS = [{
   features: [{
     name: "Quantidade de documentos / envelopes",
     value: "200"
+  }, {
+    name: "Usuários ilimitados",
+    included: true,
+    bold: true
   }, {
     name: "Assinatura digital ICP-Brasil",
     included: true
@@ -188,7 +212,7 @@ const FAQS = [{
   answer: "Sim! O plano Grátis permite testar a plataforma com até 5 documentos por mês, sem necessidade de cartão de crédito."
 }, {
   question: "Posso ter múltiplos usuários na minha conta?",
-  answer: "Atualmente cada conta é individual. Para equipes maiores, recomendamos o plano Enterprise que oferece maior volume de documentos."
+  answer: "Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações > Membros."
 }, {
   question: "Os documentos ficam armazenados com segurança?",
   answer: "Sim, todos os documentos são armazenados com criptografia em servidores seguros, com acesso restrito apenas ao proprietário da conta."
@@ -295,7 +319,9 @@ export default function Pricing() {
                       {plan.features.slice(1).map((feature, idx) => <div key={idx} className="flex items-center gap-2 text-sm">
                           {feature.included ? <>
                               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                              <span className="text-gray-600">{feature.name}</span>
+                              <span className="text-gray-600">
+                                {feature.name === "Usuários ilimitados" ? <>Usuários <strong>ilimitados</strong></> : feature.name}
+                              </span>
                             </> : <>
                               <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
                               <span className="text-gray-400 line-through">{feature.name}</span>
@@ -363,6 +389,9 @@ export default function Pricing() {
                         {PLANS[0].features.map((_, featureIdx) => {
                         const featureName = PLANS[0].features[featureIdx].name;
                         const renderFeatureName = () => {
+                          if (featureName === "Usuários ilimitados") {
+                            return <>Usuários <strong>ilimitados</strong></>;
+                          }
                           if (featureName === "Assinatura digital ICP-Brasil") {
                             return <>Assinatura digital<br className="md:hidden" />ICP-Brasil</>;
                           }

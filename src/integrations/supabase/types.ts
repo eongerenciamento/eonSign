@@ -333,6 +333,45 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          id: string
+          invited_at: string | null
+          member_email: string
+          member_user_id: string | null
+          organization_id: string
+          role: Database["public"]["Enums"]["member_role"]
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          invited_at?: string | null
+          member_email: string
+          member_user_id?: string | null
+          organization_id: string
+          role?: Database["public"]["Enums"]["member_role"]
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          invited_at?: string | null
+          member_email?: string
+          member_user_id?: string | null
+          organization_id?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       stripe_webhook_events: {
         Row: {
           created_at: string
@@ -503,9 +542,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_organization_id: { Args: { _user_id: string }; Returns: string }
+      is_organization_admin: {
+        Args: { _organization_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      member_role: "admin" | "member"
       subscription_status:
         | "active"
         | "canceled"
@@ -641,6 +685,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      member_role: ["admin", "member"],
       subscription_status: [
         "active",
         "canceled",
