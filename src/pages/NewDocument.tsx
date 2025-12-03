@@ -772,6 +772,7 @@ const NewDocument = () => {
                   >
                     <Checkbox
                       checked={isSelected}
+                      onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleAuthOption(option.id)}
                     />
                     <span className="text-sm text-gray-600">{option.label}</span>
