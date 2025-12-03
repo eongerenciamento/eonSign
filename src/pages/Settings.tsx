@@ -163,7 +163,6 @@ const Settings = () => {
     if (numbers.length <= 5) return `${numbers.slice(0, 2)}.${numbers.slice(2)}`;
     return `${numbers.slice(0, 2)}.${numbers.slice(2, 5)}-${numbers.slice(5, 8)}`;
   };
-
   const handleCepChange = async (value: string) => {
     const numbers = value.replace(/\D/g, "");
     const formatted = formatCEP(value);
@@ -188,23 +187,19 @@ const Settings = () => {
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
       if (!user) return;
-
       try {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/logo_${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, file);
-
+        const {
+          error: uploadError
+        } = await supabase.storage.from('avatars').upload(fileName, file);
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(fileName);
-
+        const {
+          data: {
+            publicUrl
+          }
+        } = supabase.storage.from('avatars').getPublicUrl(fileName);
         setLogo(publicUrl);
         toast.success("Logo atualizada!");
       } catch (error) {
@@ -259,9 +254,7 @@ const Settings = () => {
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
-          <Button 
-            className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto"
-          >
+          <Button className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
             Certificado A1 R$109.90
           </Button>
         </div>
@@ -290,17 +283,9 @@ const Settings = () => {
                 {/* Logo Upload */}
                 <div className="relative">
                   <div className="relative w-14 h-14 rounded-full bg-muted border-2 border-muted-foreground/25 flex items-center justify-center overflow-hidden">
-                    {logo ? (
-                      <img src={logo} alt="Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full" />
-                    )}
+                    {logo ? <img src={logo} alt="Logo" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => logoInputRef.current?.click()}
-                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                  >
+                  <button type="button" onClick={() => logoInputRef.current?.click()} className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white flex items-center justify-center hover:opacity-90 transition-opacity">
                     <Upload className="w-3 h-3" />
                   </button>
                   <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
@@ -386,19 +371,19 @@ const Settings = () => {
 
                   <div className="flex gap-3 justify-end pt-6">
                     <Button variant="outline" className="bg-[#273d60] text-white border-none hover:bg-[#273d60]/90 gap-2 w-28" onClick={() => {
-                      setLogo(null);
-                      setCompanyName("");
-                      setCnpj("");
-                      setCep("");
-                      setStreet("");
-                      setNeighborhood("");
-                      setCity("");
-                      setState("");
-                      setAdminName("");
-                      setAdminCpf("");
-                      setPhone("");
-                      setCompanyEmail("");
-                    }}>
+                    setLogo(null);
+                    setCompanyName("");
+                    setCnpj("");
+                    setCep("");
+                    setStreet("");
+                    setNeighborhood("");
+                    setCity("");
+                    setState("");
+                    setAdminName("");
+                    setAdminCpf("");
+                    setPhone("");
+                    setCompanyEmail("");
+                  }}>
                       <X className="w-4 h-4" />
                       Cancelar
                     </Button>
@@ -413,11 +398,7 @@ const Settings = () => {
 
             {/* Footer Logo */}
             <div className="flex flex-col items-center pt-0 pb-4">
-              <img 
-                src="/lovable-uploads/Eon_Tecnologia-4.png" 
-                alt="Eon" 
-                className="h-36"
-              />
+              <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
               <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
           </TabsContent>
@@ -477,14 +458,12 @@ const Settings = () => {
                 {/* Mobile Card View */}
                 <div className="md:hidden space-y-4">
                   {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
-                    // Extract category and priority from description
-                    const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                    const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                    const category = categoryMatch ? categoryMatch[1] : '-';
-                    const priority = priorityMatch ? priorityMatch[1] : '-';
-                    
-                    return (
-                      <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                  // Extract category and priority from description
+                  const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                  const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                  const category = categoryMatch ? categoryMatch[1] : '-';
+                  const priority = priorityMatch ? priorityMatch[1] : '-';
+                  return <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
                         <div>
                           <p className="text-xs text-gray-500">Título</p>
                           <p className="text-sm font-medium">{ticket.title}</p>
@@ -509,13 +488,10 @@ const Settings = () => {
                           <p className="text-xs text-gray-500">Status</p>
                           <div className="mt-1">{getStatusBadge(ticket.status)}</div>
                         </div>
-                      </div>
-                    );
-                  }) : (
-                    <div className="p-8 text-center text-sm text-gray-500">
+                      </div>;
+                }) : <div className="p-8 text-center text-sm text-gray-500">
                       Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
             </Card>
@@ -525,18 +501,14 @@ const Settings = () => {
               <CardContent className="p-6 text-center">
                 <p className="text-sm text-gray-600 mb-2">Precisa de mais ajuda?</p>
                 <p className="text-sm text-gray-900">
-                  Entre em contato: <a href="mailto:contato@eongerenciamento.com.br" className="text-[#273d60] font-semibold hover:underline">contato@eongerenciamento.com.br</a>
+                  Entre em contato: <a href="mailto:contato@eongerenciamento.com.br" className="font-semibold hover:underline text-blue-700">contato@eongerenciamento.com.br</a>
                 </p>
               </CardContent>
             </Card>
 
             {/* Footer Logo */}
             <div className="flex flex-col items-center pt-0 pb-4">
-              <img 
-                src="/lovable-uploads/Eon_Tecnologia-4.png" 
-                alt="Eon" 
-                className="h-36"
-              />
+              <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
               <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
           </TabsContent>
