@@ -31,43 +31,93 @@ const Dashboard = () => {
     } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    // Load recent documents
+    // Load recent documents with envelope info
     const {
       data: docsData,
       error: docsError
-    } = await supabase.from("documents").select("*").eq("user_id", userData.user.id).order("created_at", {
+    } = await supabase.from("documents").select("*, envelopes(title)").eq("user_id", userData.user.id).order("created_at", {
       ascending: false
-    }).limit(5);
+    });
     if (docsError) {
       console.error("Error loading documents:", docsError);
       return;
     }
 
-    // Load signers for each document
-    const documentsWithSigners = await Promise.all((docsData || []).map(async doc => {
+    // Group documents by envelope_id
+    const envelopeGroups = new Map<string, typeof docsData>();
+    const standaloneDocuments: typeof docsData = [];
+
+    (docsData || []).forEach(doc => {
+      if (doc.envelope_id) {
+        const existing = envelopeGroups.get(doc.envelope_id) || [];
+        existing.push(doc);
+        envelopeGroups.set(doc.envelope_id, existing);
+      } else {
+        standaloneDocuments.push(doc);
+      }
+    });
+
+    // Convert to display format - envelopes show as single item
+    const displayItems: any[] = [];
+
+    // Add envelope groups (use first doc as representative)
+    envelopeGroups.forEach((docs, envelopeId) => {
+      const firstDoc = docs[0];
+      const envelopeTitle = (firstDoc as any).envelopes?.title || firstDoc.name;
+      displayItems.push({
+        ...firstDoc,
+        name: envelopeTitle,
+        isEnvelope: true,
+        documentCount: docs.length,
+        envelopeDocuments: docs,
+      });
+    });
+
+    // Add standalone documents
+    standaloneDocuments.forEach(doc => {
+      displayItems.push({
+        ...doc,
+        isEnvelope: false,
+        documentCount: 1,
+      });
+    });
+
+    // Sort by created_at and take first 5
+    displayItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const recentItems = displayItems.slice(0, 5);
+
+    // Load signers for each item
+    const documentsWithSigners = await Promise.all(recentItems.map(async item => {
+      // For envelopes, use the first document's signers (they share signers)
+      const docIdForSigners = item.id;
       const {
         data: signersData
-      } = await supabase.from("document_signers").select("*").eq("document_id", doc.id).order("is_company_signer", {
+      } = await supabase.from("document_signers").select("*").eq("document_id", docIdForSigners).order("is_company_signer", {
         ascending: false
       });
       const signerNames = (signersData || []).map(s => s.name);
+      const signerEmails = (signersData || []).map(s => s.email);
       const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
       return {
-        id: doc.id,
-        name: doc.name,
-        createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
-        status: doc.status as "pending" | "signed" | "expired" | "in_progress",
-        signers: doc.signers,
-        signedBy: doc.signed_by,
-        folderId: doc.folder_id,
+        id: item.id,
+        name: item.name,
+        createdAt: new Date(item.created_at).toLocaleDateString('pt-BR'),
+        status: item.status as "pending" | "signed" | "expired" | "in_progress",
+        signers: item.signers,
+        signedBy: item.signed_by,
+        folderId: item.folder_id,
         signerStatuses,
         signerNames,
-        bryEnvelopeUuid: doc.bry_envelope_uuid,
+        signerEmails,
+        bryEnvelopeUuid: item.bry_envelope_uuid,
+        isEnvelope: item.isEnvelope,
+        documentCount: item.documentCount,
+        envelopeId: item.envelope_id,
       };
     }));
     setDocuments(documentsWithSigners);
 
-    // Calculate pending counts
+    // Calculate pending counts (count envelopes as 1)
     const pendingOwner = documentsWithSigners.filter(doc => doc.signerStatuses && doc.signerStatuses[0] === "pending").length;
     const pendingExt = documentsWithSigners.filter(doc => doc.signerStatuses && doc.signerStatuses.slice(1).some(status => status === "pending")).length;
     setPendingByOwner(pendingOwner);
