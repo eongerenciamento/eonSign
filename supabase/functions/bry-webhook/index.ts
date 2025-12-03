@@ -146,6 +146,137 @@ async function downloadSignedDocument(envelopeUuid: string, documentUuid: string
   }
 }
 
+// Função para finalizar documento (baixar, carimbar, fazer upload e notificar)
+async function finalizeDocument(
+  supabase: any,
+  document: any,
+  envelopeUuid: string,
+  documentUuid: string
+): Promise<void> {
+  console.log('=== FINALIZING DOCUMENT ===');
+  console.log('Document ID:', document.id);
+  console.log('Envelope UUID:', envelopeUuid);
+  console.log('Document UUID:', documentUuid);
+
+  // Baixar documento assinado
+  let signedPdf = await downloadSignedDocument(envelopeUuid, documentUuid);
+
+  if (signedPdf) {
+    // Carimbar o PDF antes de fazer upload
+    console.log('Stamping signed PDF...');
+    const stampedPdf = await stampPdf(signedPdf);
+    
+    // Usar PDF carimbado se disponível, senão usar original
+    const finalPdf = stampedPdf || signedPdf;
+    if (stampedPdf) {
+      console.log('Using stamped PDF');
+    } else {
+      console.log('Stamp failed, using original signed PDF');
+    }
+
+    // Fazer upload do documento assinado para o Storage
+    const fileName = `${document.user_id}/${document.id}_signed.pdf`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(fileName, finalPdf, {
+        contentType: 'application/pdf',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('Error uploading signed document:', uploadError);
+    } else {
+      console.log('Signed document uploaded:', fileName);
+
+      // Atualizar documento com URL do arquivo assinado
+      await supabase
+        .from('documents')
+        .update({
+          status: 'signed',
+          bry_signed_file_url: fileName,
+          bry_document_uuid: documentUuid,
+        })
+        .eq('id', document.id);
+
+      console.log('Document status updated to signed');
+    }
+  } else {
+    console.error('Failed to download signed PDF');
+  }
+
+  // Marcar todos os signatários como assinados
+  await supabase
+    .from('document_signers')
+    .update({
+      status: 'signed',
+      signed_at: new Date().toISOString(),
+    })
+    .eq('document_id', document.id)
+    .eq('status', 'pending');
+
+  // Atualizar contagem final
+  const { data: allSigners } = await supabase
+    .from('document_signers')
+    .select('id')
+    .eq('document_id', document.id);
+
+  await supabase
+    .from('documents')
+    .update({ 
+      signed_by: allSigners?.length || 0,
+      status: 'signed',
+    })
+    .eq('id', document.id);
+
+  console.log('Final signed_by count:', allSigners?.length || 0);
+
+  // Enviar email e WhatsApp de documento completado
+  try {
+    const { data: signers } = await supabase
+      .from('document_signers')
+      .select('email, name, phone')
+      .eq('document_id', document.id);
+
+    if (signers && signers.length > 0) {
+      const signerEmails = signers.map((s: any) => s.email);
+      
+      // Enviar email de conclusão
+      await supabase.functions.invoke('send-document-completed-email', {
+        body: {
+          documentId: document.id,
+          documentName: document.name,
+          signerEmails,
+          senderName: 'Eon Sign',
+        },
+      });
+      console.log('Document completed email sent');
+
+      // Enviar WhatsApp de conclusão para cada signatário
+      for (const signer of signers) {
+        if (signer.phone) {
+          try {
+            await supabase.functions.invoke('send-whatsapp-message', {
+              body: {
+                signerName: signer.name,
+                signerPhone: signer.phone,
+                documentName: document.name,
+                documentId: document.id,
+                messageType: 'completed',
+              },
+            });
+            console.log(`Document completed WhatsApp sent to ${signer.phone}`);
+          } catch (waError) {
+            console.error(`Error sending WhatsApp to ${signer.phone}:`, waError);
+          }
+        }
+      }
+    }
+  } catch (emailError) {
+    console.error('Error sending completed notifications:', emailError);
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   console.log('=== BRY WEBHOOK CALLED ===');
   console.log('Method:', req.method);
@@ -272,13 +403,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       // Atualizar contagem de assinaturas no documento
-      const { data: signedCount } = await supabase
+      const { data: signedSigners } = await supabase
         .from('document_signers')
         .select('id')
         .eq('document_id', document.id)
         .eq('status', 'signed');
 
-      const newSignedBy = signedCount?.length || 0;
+      const newSignedBy = signedSigners?.length || 0;
 
       const { error: updateError } = await supabase
         .from('documents')
@@ -290,137 +421,47 @@ const handler = async (req: Request): Promise<Response> => {
       } else {
         console.log('Document signed_by updated to:', newSignedBy);
       }
+
+      // NOVO: Verificar se TODOS os signatários já assinaram após esta atualização
+      const { data: allSigners } = await supabase
+        .from('document_signers')
+        .select('id, status')
+        .eq('document_id', document.id);
+
+      const totalSigners = allSigners?.length || 0;
+      const signedCount = allSigners?.filter((s: any) => s.status === 'signed').length || 0;
+      
+      console.log(`Signature progress: ${signedCount}/${totalSigners}`);
+
+      // Se todos assinaram, finalizar o documento
+      if (totalSigners > 0 && signedCount === totalSigners && document.status !== 'signed') {
+        console.log('=== ALL SIGNERS COMPLETED - TRIGGERING FINALIZATION ===');
+        
+        // Buscar document UUID se não temos
+        let docUuidForDownload = document.bry_document_uuid || documentUuid;
+        
+        if (!docUuidForDownload) {
+          console.log('Document UUID not available, will try to finalize without stamping');
+        }
+        
+        await finalizeDocument(supabase, document, envelopeUuid, docUuidForDownload || '');
+      }
     }
 
-    // Verificar se envelope foi completado (todas as assinaturas)
-    // Formato novo: status === 'COMPLETED' ou 'SIGNED'
+    // Verificar se envelope foi completado via evento explícito (backup)
+    // Formato novo: status === 'COMPLETED', 'SIGNED' ou 'FINISHED'
     // Formato legado: event === 'ENVELOPE_COMPLETED' ou 'SIGNATURE_ALL_COMPLETED'
     const isEnvelopeCompleted = envelopeStatus === 'COMPLETED' || 
                                 envelopeStatus === 'SIGNED' ||
+                                envelopeStatus === 'FINISHED' ||
                                 legacyEvent === 'ENVELOPE_COMPLETED' || 
                                 legacyEvent === 'SIGNATURE_ALL_COMPLETED';
 
-    if (isEnvelopeCompleted) {
-      console.log('=== ENVELOPE COMPLETED ===');
-      console.log('All signatures completed, downloading signed document');
-
-      // Baixar documento assinado
-      const docUuidForDownload = document.bry_document_uuid || documentUuid || '';
-      console.log('Document UUID for download:', docUuidForDownload);
+    if (isEnvelopeCompleted && document.status !== 'signed') {
+      console.log('=== ENVELOPE COMPLETED EVENT RECEIVED ===');
       
-      let signedPdf = await downloadSignedDocument(envelopeUuid, docUuidForDownload);
-
-      if (signedPdf) {
-        // Carimbar o PDF antes de fazer upload
-        console.log('Stamping signed PDF...');
-        const stampedPdf = await stampPdf(signedPdf);
-        
-        // Usar PDF carimbado se disponível, senão usar original
-        const finalPdf = stampedPdf || signedPdf;
-        if (stampedPdf) {
-          console.log('Using stamped PDF');
-        } else {
-          console.log('Stamp failed, using original signed PDF');
-        }
-
-        // Fazer upload do documento assinado para o Storage
-        const fileName = `${document.user_id}/${document.id}_signed.pdf`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(fileName, finalPdf, {
-            contentType: 'application/pdf',
-            upsert: true,
-          });
-
-        if (uploadError) {
-          console.error('Error uploading signed document:', uploadError);
-        } else {
-          console.log('Signed document uploaded:', fileName);
-
-          // Atualizar documento com URL do arquivo assinado
-          await supabase
-            .from('documents')
-            .update({
-              status: 'signed',
-              bry_signed_file_url: fileName,
-            })
-            .eq('id', document.id);
-
-          console.log('Document status updated to signed');
-        }
-      }
-
-      // Marcar todos os signatários como assinados
-      await supabase
-        .from('document_signers')
-        .update({
-          status: 'signed',
-          signed_at: new Date().toISOString(),
-        })
-        .eq('document_id', document.id)
-        .eq('status', 'pending');
-
-      // Atualizar contagem final
-      const { data: allSigners } = await supabase
-        .from('document_signers')
-        .select('id')
-        .eq('document_id', document.id);
-
-      await supabase
-        .from('documents')
-        .update({ 
-          signed_by: allSigners?.length || 0,
-          status: 'signed',
-        })
-        .eq('id', document.id);
-
-      console.log('Final signed_by count:', allSigners?.length || 0);
-
-      // Enviar email e WhatsApp de documento completado
-      try {
-        const { data: signers } = await supabase
-          .from('document_signers')
-          .select('email, name, phone')
-          .eq('document_id', document.id);
-
-        if (signers && signers.length > 0) {
-          const signerEmails = signers.map(s => s.email);
-          
-          // Enviar email de conclusão
-          await supabase.functions.invoke('send-document-completed-email', {
-            body: {
-              documentId: document.id,
-              documentName: document.name,
-              signerEmails,
-              senderName: 'Eon Sign',
-            },
-          });
-          console.log('Document completed email sent');
-
-          // Enviar WhatsApp de conclusão para cada signatário
-          for (const signer of signers) {
-            if (signer.phone) {
-              try {
-                await supabase.functions.invoke('send-whatsapp-message', {
-                  body: {
-                    signerName: signer.name,
-                    signerPhone: signer.phone,
-                    documentName: document.name,
-                    documentId: document.id,
-                    messageType: 'completed',
-                  },
-                });
-                console.log(`Document completed WhatsApp sent to ${signer.phone}`);
-              } catch (waError) {
-                console.error(`Error sending WhatsApp to ${signer.phone}:`, waError);
-              }
-            }
-          }
-        }
-      } catch (emailError) {
-        console.error('Error sending completed notifications:', emailError);
-      }
+      const docUuidForDownload = document.bry_document_uuid || documentUuid || '';
+      await finalizeDocument(supabase, document, envelopeUuid, docUuidForDownload);
     }
 
     return new Response(JSON.stringify({ success: true }), {
