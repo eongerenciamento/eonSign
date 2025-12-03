@@ -17,7 +17,7 @@ const PLANS = [{
   priceId: "free",
   description: "Ideal para testes",
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "5"
   }, {
     name: "Usuários ilimitados",
@@ -48,7 +48,7 @@ const PLANS = [{
   description: "Para pequenas empresas",
   recommended: false,
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "20"
   }, {
     name: "Usuários ilimitados",
@@ -79,7 +79,7 @@ const PLANS = [{
   description: "Para empresas em crescimento",
   recommended: true,
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "50"
   }, {
     name: "Usuários ilimitados",
@@ -109,7 +109,7 @@ const PLANS = [{
   priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
   description: "Para empresas estabelecidas",
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "100"
   }, {
     name: "Usuários ilimitados",
@@ -139,7 +139,7 @@ const PLANS = [{
   priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
   description: "Para grandes volumes",
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "150"
   }, {
     name: "Usuários ilimitados",
@@ -169,7 +169,7 @@ const PLANS = [{
   priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
   description: "Para alto volume",
   features: [{
-    name: "Quantidade de documentos / envelopes",
+    name: "Documentos / Envelopes",
     value: "200"
   }, {
     name: "Usuários ilimitados",
@@ -265,7 +265,7 @@ export default function Pricing() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-6 text-center">
-        <h1 className="text-4xl font-bold mb-2 text-gray-600 md:text-xl">Planos</h1>
+        <h1 className="text-2xl font-bold mb-2 text-gray-600">Planos</h1>
         <p className="mb-1 max-w-2xl mx-auto text-gray-500 text-base">Escolha o plano ideal para sua empresa</p>
         <p className="mb-4 max-w-2xl mx-auto text-sm text-gray-400">
           Se seu volume de assinaturas é maior entre em contato:{" "}

@@ -343,7 +343,7 @@ export function SubscriptionTab() {
                   </TableHeader>
                   <TableBody>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Documentos / Envelopes</TableCell>
                       {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                           {tier.limit}
                         </TableCell>)}
@@ -615,7 +615,7 @@ export function SubscriptionTab() {
                 </TableHeader>
                 <TableBody>
                   <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Quantidade de documentos&nbsp;/&nbsp;envelopes</TableCell>
+                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">Documentos / Envelopes</TableCell>
                     {SUBSCRIPTION_TIERS.map(tier => <TableCell key={tier.name} className="text-center">
                         {tier.limit}
                       </TableCell>)}
