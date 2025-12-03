@@ -149,16 +149,29 @@ const handler = async (req: Request): Promise<Response> => {
       
       for (const brySign of envelopeData.signers) {
         const signerEmail = brySign.email;
-        const signerNonce = brySign.nonce;
-        // Usar link retornado pelo BRy (como no exemplo oficial)
-        const signerLink = brySign.link?.href || `${apiBaseUrl}/sign/${signerNonce}`;
+        const signerLink = brySign.link?.href || '';
+        
+        // Extrair nonce da URL do link (último segmento após /sign/)
+        // Formato: https://easysign.hom.bry.com.br/pt-br/{envelope_uuid}/sign/{signer_nonce}
+        let signerNonce = brySign.nonce || '';
+        if (!signerNonce && signerLink) {
+          const linkParts = signerLink.split('/');
+          const signIndex = linkParts.indexOf('sign');
+          if (signIndex !== -1 && linkParts[signIndex + 1]) {
+            signerNonce = linkParts[signIndex + 1];
+          } else {
+            // Fallback: último segmento da URL
+            signerNonce = linkParts[linkParts.length - 1] || '';
+          }
+        }
         
         console.log(`Signer ${signerEmail}: nonce=${signerNonce}, link=${signerLink}`);
+        console.log('Full BRy signer data:', JSON.stringify(brySign));
         
         signerLinks.push({
           email: signerEmail,
           nonce: signerNonce,
-          link: signerLink,
+          link: signerLink || `${apiBaseUrl}/sign/${signerNonce}`,
         });
       }
     }
