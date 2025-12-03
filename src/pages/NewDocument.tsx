@@ -49,7 +49,7 @@ const NewDocument = () => {
     limit: number;
     planName: string;
   } | null>(null);
-  const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE', 'OTP_WHATSAPP']);
+  const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE']);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -244,11 +244,14 @@ const NewDocument = () => {
   };
 
   const toggleAuthOption = (option: AuthenticationOption) => {
-    setAuthOptions(prev => 
-      prev.includes(option) 
-        ? prev.filter(o => o !== option)
-        : [...prev, option]
-    );
+    setAuthOptions(prev => {
+      if (prev.includes(option)) {
+        // Prevent removing the last option - at least 1 must be selected
+        if (prev.length <= 1) return prev;
+        return prev.filter(o => o !== option);
+      }
+      return [...prev, option];
+    });
   };
   
   const handleSubmit = async () => {
@@ -757,6 +760,7 @@ const NewDocument = () => {
           {/* Authentication Options Section */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
+            <p className="text-xs text-gray-500">Pelo menos 1 nível de verificação deve estar ativo</p>
             <div className="space-y-2">
               {AUTHENTICATION_OPTIONS.map((option) => {
                 const isSelected = authOptions.includes(option.id);
