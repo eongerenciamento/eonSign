@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 const AppRoutes = () => {
   return <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/planos" element={<Pricing />} className="bg-primary-foreground" />
+      <Route path="/planos" element={<Pricing />} />
       <Route path="/install" element={<Install />} />
       <Route path="/assinar/:documentId" element={<SignDocument />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
