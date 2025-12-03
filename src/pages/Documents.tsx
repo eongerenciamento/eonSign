@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document, Folder } from "@/components/documents/DocumentsTable";
 import { UploadDialog } from "@/components/documents/UploadDialog";
@@ -14,12 +14,17 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
+import { useBryStatusSync } from "@/hooks/useBryStatusSync";
+
+interface DocumentWithBry extends Document {
+  bry_envelope_uuid?: string | null;
+}
 
 const Documents = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<DocumentWithBry[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -31,22 +36,7 @@ const Documents = () => {
   const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (tabFromUrl) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [tabFromUrl]);
-
-  useEffect(() => {
-    loadSignedDocuments();
-    loadFolders();
-  }, []);
-
-  useEffect(() => {
-    filterDocuments();
-  }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo]);
-
-  const loadSignedDocuments = async () => {
+  const loadSignedDocuments = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
@@ -88,12 +78,19 @@ const Documents = () => {
           folderId: doc.folder_id,
           signerStatuses,
           signerNames,
+          bry_envelope_uuid: doc.bry_envelope_uuid,
         };
       })
     );
 
     setDocuments(documentsWithSigners);
-  };
+  }, [toast]);
+
+  // Automatic BRy status sync
+  useBryStatusSync(documents, {
+    onStatusChange: loadSignedDocuments,
+    pollingInterval: 30000, // 30 seconds
+  });
 
   const loadFolders = async () => {
     const { data, error } = await supabase
@@ -108,6 +105,21 @@ const Documents = () => {
       setAllFolders(data || []);
     }
   };
+
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
+
+  useEffect(() => {
+    loadSignedDocuments();
+    loadFolders();
+  }, [loadSignedDocuments]);
+
+  useEffect(() => {
+    filterDocuments();
+  }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo]);
 
   const filterDocuments = () => {
     let filtered = [...documents];

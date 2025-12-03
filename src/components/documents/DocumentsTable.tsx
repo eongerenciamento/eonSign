@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Download, PenTool, Trash2, Mail, MessageCircle, RefreshCw } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -124,47 +124,6 @@ export const DocumentsTable = ({
     } catch (error) {
       console.error('Error getting BRy link:', error);
       navigate(`/assinar/${documentId}`);
-    }
-  };
-
-  const handleSyncBryStatus = async (documentId: string) => {
-    try {
-      toast({
-        title: "Sincronizando...",
-        description: "Consultando status no BRy.",
-      });
-
-      const { data, error } = await supabase.functions.invoke('bry-sync-status', {
-        body: { documentId },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.completed) {
-        toast({
-          title: "Documento assinado!",
-          description: "Todas as assinaturas foram concluídas.",
-        });
-      } else {
-        toast({
-          title: "Status atualizado",
-          description: `${data.signedCount}/${data.totalSigners} assinaturas concluídas.`,
-        });
-      }
-
-      // Recarregar a página para mostrar novo status
-      if (onDocumentMoved) {
-        onDocumentMoved();
-      }
-    } catch (error) {
-      console.error('Error syncing BRy status:', error);
-      toast({
-        title: "Erro ao sincronizar",
-        description: "Não foi possível obter o status do BRy.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -561,17 +520,6 @@ export const DocumentsTable = ({
                           <Mail className="w-4 h-4 text-blue-500" />
                         </Button>
                       )}
-                      {doc.status !== 'signed' && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
-                          onClick={() => handleSyncBryStatus(doc.id)}
-                          title="Sincronizar status BRy"
-                        >
-                          <RefreshCw className="w-4 h-4 text-green-500" />
-                        </Button>
-                      )}
                       {doc.signedBy === 0 && (
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)}>
                           <Trash2 className="w-4 h-4 text-gray-500" />
@@ -617,17 +565,6 @@ export const DocumentsTable = ({
                       title="Reenviar notificações"
                     >
                       <Mail className="w-4 h-4 text-blue-500" />
-                    </Button>
-                  )}
-                  {doc.status !== 'signed' && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleSyncBryStatus(doc.id)}
-                      title="Sincronizar status BRy"
-                    >
-                      <RefreshCw className="w-4 h-4 text-green-500" />
                     </Button>
                   )}
                   {doc.signedBy === 0 && (

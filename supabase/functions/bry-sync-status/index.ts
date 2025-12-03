@@ -65,27 +65,22 @@ async function downloadSignedDocument(envelopeUuid: string, documentUuid: string
   }
 }
 
-const handler = async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+interface SyncResult {
+  documentId: string;
+  success: boolean;
+  changed: boolean;
+  signedCount?: number;
+  totalSigners?: number;
+  completed?: boolean;
+  error?: string;
+}
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
+async function syncSingleDocument(
+  supabase: any,
+  documentId: string,
+  accessToken: string
+): Promise<SyncResult> {
   try {
-    const { documentId } = await req.json();
-
-    if (!documentId) {
-      return new Response(JSON.stringify({ error: 'documentId is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log('Syncing BRy status for document:', documentId);
-
     // Buscar documento
     const { data: document, error: docError } = await supabase
       .from('documents')
@@ -94,22 +89,12 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (docError || !document) {
-      console.error('Document not found:', docError);
-      return new Response(JSON.stringify({ error: 'Document not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return { documentId, success: false, changed: false, error: 'Document not found' };
     }
 
     if (!document.bry_envelope_uuid) {
-      return new Response(JSON.stringify({ error: 'Document does not have BRy envelope' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return { documentId, success: false, changed: false, error: 'No BRy envelope' };
     }
-
-    const accessToken = await getToken();
-    console.log('BRy token obtained');
 
     const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
     const apiBaseUrl = environment === 'production'
@@ -118,7 +103,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Consultar status do envelope no BRy
     const statusUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}/status`;
-    console.log('Fetching status from:', statusUrl);
 
     const statusResponse = await fetch(statusUrl, {
       method: 'GET',
@@ -129,22 +113,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!statusResponse.ok) {
       const errorText = await statusResponse.text();
-      console.error('Failed to get BRy status:', statusResponse.status, errorText);
-      return new Response(JSON.stringify({ 
-        error: 'Failed to get BRy status',
-        details: errorText 
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.error(`Failed to get BRy status for ${documentId}:`, statusResponse.status, errorText);
+      return { documentId, success: false, changed: false, error: 'Failed to get BRy status' };
     }
 
     const statusData = await statusResponse.json();
-    console.log('BRy status response:', JSON.stringify(statusData));
+    console.log(`BRy status for ${documentId}:`, JSON.stringify(statusData));
 
     // Processar status dos signatários
     let signedCount = 0;
-    const signerUpdates: { email: string; status: string; signed_at: string | null }[] = [];
+    let hasChanges = false;
+    const previousSignedBy = document.signed_by || 0;
 
     if (statusData.signers) {
       for (const brySigner of statusData.signers) {
@@ -152,32 +131,38 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (isCompleted) {
           signedCount++;
-          signerUpdates.push({
-            email: brySigner.email,
-            status: 'signed',
-            signed_at: brySigner.signedAt || new Date().toISOString(),
-          });
 
           // Atualizar signatário no banco
-          await supabase
+          const { data: updated } = await supabase
             .from('document_signers')
             .update({
               status: 'signed',
               signed_at: brySigner.signedAt || new Date().toISOString(),
             })
             .eq('document_id', documentId)
-            .eq('email', brySigner.email);
+            .eq('email', brySigner.email)
+            .eq('status', 'pending')
+            .select();
 
-          console.log(`Signer ${brySigner.email} marked as signed`);
+          if (updated && updated.length > 0) {
+            hasChanges = true;
+            console.log(`Signer ${brySigner.email} marked as signed for ${documentId}`);
+          }
         }
       }
+    }
+
+    // Verificar se contagem mudou
+    if (signedCount !== previousSignedBy) {
+      hasChanges = true;
     }
 
     // Verificar se todos assinaram
     const envelopeCompleted = statusData.status === 'COMPLETED' || statusData.status === 'SIGNED';
     
-    if (envelopeCompleted) {
-      console.log('All signatures completed, downloading signed document');
+    if (envelopeCompleted && document.status !== 'signed') {
+      console.log(`All signatures completed for ${documentId}, downloading signed document`);
+      hasChanges = true;
 
       // Baixar documento assinado
       const signedPdf = await downloadSignedDocument(
@@ -221,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
               .eq('document_id', documentId);
 
             if (signers && signers.length > 0) {
-              const signerEmails = signers.map(s => s.email);
+              const signerEmails = signers.map((s: { email: string }) => s.email);
               
               await supabase.functions.invoke('send-document-completed-email', {
                 body: {
@@ -238,7 +223,16 @@ const handler = async (req: Request): Promise<Response> => {
           }
         }
       }
-    } else {
+
+      return {
+        documentId,
+        success: true,
+        changed: hasChanges,
+        signedCount,
+        totalSigners: statusData.signers?.length || 0,
+        completed: true,
+      };
+    } else if (hasChanges) {
       // Atualizar apenas contagem de assinaturas
       await supabase
         .from('documents')
@@ -246,13 +240,73 @@ const handler = async (req: Request): Promise<Response> => {
         .eq('id', documentId);
     }
 
-    return new Response(JSON.stringify({
+    return {
+      documentId,
       success: true,
-      bryStatus: statusData.status,
+      changed: hasChanges,
       signedCount,
       totalSigners: statusData.signers?.length || 0,
       completed: envelopeCompleted,
-      signerUpdates,
+    };
+
+  } catch (error: any) {
+    console.error(`Error syncing document ${documentId}:`, error);
+    return { documentId, success: false, changed: false, error: error.message };
+  }
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  try {
+    const body = await req.json();
+    
+    // Support both single documentId and array of documentIds
+    const documentIds: string[] = body.documentIds || (body.documentId ? [body.documentId] : []);
+
+    if (documentIds.length === 0) {
+      return new Response(JSON.stringify({ error: 'documentId or documentIds is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Syncing BRy status for ${documentIds.length} documents`);
+
+    // Get BRy token once for all documents
+    const accessToken = await getToken();
+    console.log('BRy token obtained');
+
+    // Process all documents
+    const results: SyncResult[] = await Promise.all(
+      documentIds.map((id) => syncSingleDocument(supabase, id, accessToken))
+    );
+
+    // For single document requests, return backward-compatible response
+    if (body.documentId && !body.documentIds) {
+      const result = results[0];
+      return new Response(JSON.stringify({
+        success: result.success,
+        signedCount: result.signedCount,
+        totalSigners: result.totalSigners,
+        completed: result.completed,
+        changed: result.changed,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // For multiple documents, return array of results
+    return new Response(JSON.stringify({
+      success: true,
+      results,
+      totalChanged: results.filter((r) => r.changed).length,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
