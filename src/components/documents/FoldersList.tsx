@@ -123,7 +123,7 @@ export const FoldersList = ({
 
   if (viewMode === "list") {
     return (
-      <div className="space-y-0">
+      <div className="rounded-lg overflow-hidden border border-gray-200">
         {folders.map((folder, index) => (
           <div
             key={folder.id}
