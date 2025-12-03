@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { EnvelopeDocumentsDialog } from "./EnvelopeDocumentsDialog";
+import { BrySigningDialog } from "./BrySigningDialog";
 
 export interface EnvelopeDocument {
   id: string;
@@ -54,6 +55,7 @@ interface DocumentsTableProps {
   allFolders?: Folder[];
   onDocumentMoved?: () => void;
   showFolderActions?: boolean;
+  onRefresh?: () => void;
 }
 const statusConfig = {
   pending: {
@@ -86,7 +88,8 @@ export const DocumentsTable = ({
   folders = [],
   allFolders = [],
   onDocumentMoved,
-  showFolderActions = true
+  showFolderActions = true,
+  onRefresh
 }: DocumentsTableProps) => {
   const {
     toast
@@ -96,6 +99,11 @@ export const DocumentsTable = ({
   // Envelope documents dialog state
   const [envelopeDialogOpen, setEnvelopeDialogOpen] = useState(false);
   const [selectedEnvelope, setSelectedEnvelope] = useState<{ title: string; documents: EnvelopeDocument[] } | null>(null);
+  
+  // BRy signing dialog state
+  const [signingDialogOpen, setSigningDialogOpen] = useState(false);
+  const [signingUrl, setSigningUrl] = useState<string | null>(null);
+  const [signingDocumentName, setSigningDocumentName] = useState("");
 
   const handleOpenEnvelopeDialog = (doc: Document) => {
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
@@ -125,7 +133,7 @@ export const DocumentsTable = ({
 
   const hierarchicalFolders = organizeHierarchicalFolders();
 
-  const handleSignDocument = async (documentId: string) => {
+  const handleSignDocument = async (documentId: string, documentName: string) => {
     try {
       // Buscar o link BRy do signatário da empresa
       const { data: { user } } = await supabase.auth.getUser();
@@ -149,8 +157,10 @@ export const DocumentsTable = ({
           .single();
 
         if (signerData?.bry_signer_link) {
-          // Redirecionar para BRy se link existir
-          window.open(signerData.bry_signer_link, '_blank');
+          // Abrir modal com iframe BRy
+          setSigningUrl(signerData.bry_signer_link);
+          setSigningDocumentName(documentName);
+          setSigningDialogOpen(true);
           return;
         }
       }
@@ -161,6 +171,11 @@ export const DocumentsTable = ({
       console.error('Error getting BRy link:', error);
       navigate(`/assinar/${documentId}`);
     }
+  };
+
+  const handleSigningComplete = () => {
+    // Refresh documents list after signing
+    onRefresh?.();
   };
 
   const handleViewDocument = async (documentId: string) => {
@@ -731,7 +746,7 @@ export const DocumentsTable = ({
                           variant="ghost"
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
-                          onClick={() => handleSignDocument(doc.id)}
+                          onClick={() => handleSignDocument(doc.id, doc.name)}
                           title="Assinar documento"
                         >
                           <PenTool className="w-4 h-4 text-gray-500" />
@@ -801,7 +816,7 @@ export const DocumentsTable = ({
                       variant="ghost"
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleSignDocument(doc.id)}
+                      onClick={() => handleSignDocument(doc.id, doc.name)}
                       title="Assinar documento"
                     >
                       <PenTool className="w-4 h-4 text-gray-500" />
@@ -941,6 +956,15 @@ export const DocumentsTable = ({
         onOpenChange={setEnvelopeDialogOpen}
         envelopeTitle={selectedEnvelope?.title || ''}
         documents={selectedEnvelope?.documents || []}
+      />
+
+      {/* BRy Signing Dialog */}
+      <BrySigningDialog
+        open={signingDialogOpen}
+        onOpenChange={setSigningDialogOpen}
+        signingUrl={signingUrl}
+        documentName={signingDocumentName}
+        onSigningComplete={handleSigningComplete}
       />
     </>;
 };
