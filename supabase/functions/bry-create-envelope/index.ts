@@ -80,29 +80,40 @@ const handler = async (req: Request): Promise<Response> => {
       : 'https://easysign.hom.bry.com.br';
 
     // Default authentication options if not provided
-    const selectedAuthOptions = authenticationOptions && authenticationOptions.length > 0 
+    const selectedAuthOptions: AuthenticationOption[] = authenticationOptions && authenticationOptions.length > 0 
       ? authenticationOptions 
       : ['IP', 'GEOLOCATION'];
 
     // Preparar dados dos signatários para a BRy com formato E.164
     const signersData = signers.map(signer => {
-      // Converter para formato E.164 (padrão internacional)
-      let phone = signer.phone.replace(/\D/g, ''); // Remover formatação
+      // Converter para formato E.164 (padrão internacional) - somente se telefone existir
+      let phone = signer.phone ? signer.phone.replace(/\D/g, '') : ''; // Remover formatação
       
-      // Adicionar código do país +55 se não existir
-      if (!phone.startsWith('55')) {
-        phone = '55' + phone;
-      }
-      phone = '+' + phone;
-      
-      console.log(`Signer ${signer.name}: phone formatted to ${phone}`);
-      
-      return {
+      // Montar objeto base do signatário
+      const signerData: {
+        name: string;
+        email: string;
+        phone?: string;
+        authenticationOptions: AuthenticationOption[];
+      } = {
         name: signer.name,
         email: signer.email,
-        phone: phone, // Formato E.164: +5591988981359
         authenticationOptions: selectedAuthOptions,
       };
+      
+      // Adicionar telefone somente se não estiver vazio
+      if (phone && phone.length >= 10) {
+        // Adicionar código do país +55 se não existir
+        if (!phone.startsWith('55')) {
+          phone = '55' + phone;
+        }
+        signerData.phone = '+' + phone; // Formato E.164: +5591988981359
+        console.log(`Signer ${signer.name}: phone formatted to ${signerData.phone}`);
+      } else {
+        console.log(`Signer ${signer.name}: no valid phone provided, omitting phone field`);
+      }
+      
+      return signerData;
     });
 
     // Criar envelope na BRy (seguindo exemplo oficial)
