@@ -352,6 +352,7 @@ const Documents = () => {
               allFolders={allFolders}
               onDocumentMoved={loadSignedDocuments}
               showFolderActions={true}
+              onRefresh={loadSignedDocuments}
             />
           </TabsContent>
 
@@ -430,7 +431,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} />
           </TabsContent>
 
           <TabsContent value="pending-external" className="mt-6 space-y-6">
@@ -508,7 +509,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} />
           </TabsContent>
         </Tabs>
       </div>

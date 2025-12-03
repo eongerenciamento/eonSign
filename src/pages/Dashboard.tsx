@@ -200,7 +200,7 @@ const Dashboard = () => {
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={documents} showFolderActions={false} />
+          <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
         </div>
       </div>
     </Layout>;
