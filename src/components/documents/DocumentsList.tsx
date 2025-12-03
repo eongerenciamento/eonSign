@@ -57,7 +57,7 @@ export const DocumentsList = ({
     // Layout mobile diferente
     if (isMobile) {
       return (
-        <div className="rounded-lg overflow-hidden border border-gray-200">
+        <div className="rounded-lg overflow-hidden">
           {documents.map((document, index) => (
             <div
               key={document.id}
@@ -144,7 +144,7 @@ export const DocumentsList = ({
 
     // Layout desktop
     return (
-      <div className="rounded-lg overflow-hidden border border-gray-200">
+      <div className="rounded-lg overflow-hidden">
         {documents.map((document, index) => (
           <div
             key={document.id}
