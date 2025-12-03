@@ -256,16 +256,17 @@ async function syncSingleDocument(
 
             console.log('Document status updated to signed');
 
-            // Enviar email de conclusão
+            // Enviar email e WhatsApp de conclusão
             try {
               const { data: signers } = await supabase
                 .from('document_signers')
-                .select('email')
+                .select('email, name, phone')
                 .eq('document_id', documentId);
 
               if (signers && signers.length > 0) {
                 const signerEmails = signers.map((s: { email: string }) => s.email);
                 
+                // Enviar email de conclusão
                 await supabase.functions.invoke('send-document-completed-email', {
                   body: {
                     documentId: document.id,
@@ -275,9 +276,29 @@ async function syncSingleDocument(
                   },
                 });
                 console.log('Document completed email sent');
+
+                // Enviar WhatsApp de conclusão para cada signatário com telefone
+                for (const signer of signers) {
+                  if (signer.phone) {
+                    try {
+                      await supabase.functions.invoke('send-whatsapp-message', {
+                        body: {
+                          signerName: signer.name,
+                          signerPhone: signer.phone,
+                          documentName: document.name,
+                          documentId: document.id,
+                          messageType: 'completed',
+                        },
+                      });
+                      console.log(`Document completed WhatsApp sent to ${signer.phone}`);
+                    } catch (waError) {
+                      console.error(`Error sending WhatsApp to ${signer.phone}:`, waError);
+                    }
+                  }
+                }
               }
             } catch (emailError) {
-              console.error('Error sending completed email:', emailError);
+              console.error('Error sending completed notifications:', emailError);
             }
           }
         }
