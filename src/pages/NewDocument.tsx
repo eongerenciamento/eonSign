@@ -529,24 +529,24 @@ const NewDocument = () => {
               <span>Faça upload de 1 ou mais documentos (máx. {MAX_DOCUMENTS})</span>
             </motion.div>
             
-            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && signer.phone && signer.email) ? 'text-green-600' : 'text-gray-500'}`} initial={{
+            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && (signer.phone || signer.email)) ? 'text-green-600' : 'text-gray-500'}`} initial={{
             opacity: 0,
             x: -10
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: files.length > 0 && !signers.some(signer => signer.name && signer.phone && signer.email) ? [1, 1.02, 1] : 1
+            scale: files.length > 0 && !signers.some(signer => signer.name && (signer.phone || signer.email)) ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             delay: 0.1,
             scale: {
-              repeat: files.length > 0 && !signers.some(signer => signer.name && signer.phone && signer.email) ? Infinity : 0,
+              repeat: files.length > 0 && !signers.some(signer => signer.name && (signer.phone || signer.email)) ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
           }}>
               <AnimatePresence mode="wait">
-                {signers.some(signer => signer.name && signer.phone && signer.email) && <motion.div initial={{
+                {signers.some(signer => signer.name && (signer.phone || signer.email)) && <motion.div initial={{
                 scale: 0,
                 rotate: -180
               }} animate={{
@@ -572,12 +572,12 @@ const NewDocument = () => {
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: files.length > 0 && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? [1, 1.02, 1] : 1
+            scale: files.length > 0 && signers.some(signer => signer.name && (signer.phone || signer.email)) && !isSubmitted ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             delay: 0.2,
             scale: {
-              repeat: files.length > 0 && signers.some(signer => signer.name && signer.phone && signer.email) && !isSubmitted ? Infinity : 0,
+              repeat: files.length > 0 && signers.some(signer => signer.name && (signer.phone || signer.email)) && !isSubmitted ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
