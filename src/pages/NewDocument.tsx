@@ -90,7 +90,7 @@ const NewDocument = () => {
 
   // Track step 2 completion (signers added)
   useEffect(() => {
-    const hasCompleteSigner = signers.some(signer => signer.name && signer.phone && signer.email);
+    const hasCompleteSigner = signers.some(signer => signer.name && (signer.phone || signer.email));
     if (hasCompleteSigner) {
       playCompletionSound(900); // Slightly higher frequency
     }
@@ -263,11 +263,11 @@ const NewDocument = () => {
       return;
     }
     
-    const hasEmptySigner = signers.some(signer => !signer.name || !signer.phone || !signer.email);
-    if (hasEmptySigner) {
+    const hasInvalidSigner = signers.some(signer => !signer.name || (!signer.phone && !signer.email));
+    if (hasInvalidSigner) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos dos signatários.",
+        description: "Por favor, preencha o nome e pelo menos telefone ou e-mail de cada signatário.",
         variant: "destructive"
       });
       return;
@@ -402,7 +402,7 @@ const NewDocument = () => {
       }
 
       // Create BRy envelope for each document
-      const brySignerLinks: Map<string, string> = new Map();
+      const brySignerLinks: Map<string, string> = new Map(); // key: email or phone
       
       for (const fileContent of fileContents) {
         try {
@@ -426,7 +426,11 @@ const NewDocument = () => {
             console.error('BRy envelope creation failed:', bryError);
           } else if (bryData?.signerLinks) {
             for (const link of bryData.signerLinks) {
-              brySignerLinks.set(link.email, link.link);
+              // Use email as key if available, otherwise use phone
+              const key = link.email || link.phone;
+              if (key) {
+                brySignerLinks.set(key, link.link);
+              }
             }
             console.log('BRy envelope created:', bryData.envelopeUuid);
           }
@@ -443,33 +447,40 @@ const NewDocument = () => {
 
       for (const signer of allSignersForNotification) {
         try {
-          const bryLink = brySignerLinks.get(signer.email);
+          // Get BRy link using email or phone as key
+          const bryLink = brySignerLinks.get(signer.email) || brySignerLinks.get(signer.phone);
           
-          await supabase.functions.invoke('send-signature-email', {
-            body: {
-              signerName: signer.name,
-              signerEmail: signer.email,
-              documentName: title,
-              documentId: firstDocumentId,
-              senderName: companySigner.name,
-              organizationName: companySigner.companyName,
-              userId: user.id,
-              brySignerLink: bryLink
-            }
-          });
+          // Send email only if email is provided
+          if (signer.email) {
+            await supabase.functions.invoke('send-signature-email', {
+              body: {
+                signerName: signer.name,
+                signerEmail: signer.email,
+                documentName: title,
+                documentId: firstDocumentId,
+                senderName: companySigner.name,
+                organizationName: companySigner.companyName,
+                userId: user.id,
+                brySignerLink: bryLink
+              }
+            });
+          }
 
-          await supabase.functions.invoke('send-whatsapp-message', {
-            body: {
-              signerName: signer.name,
-              signerPhone: signer.phone,
-              documentName: title,
-              documentId: firstDocumentId,
-              organizationName: companySigner.companyName,
-              brySignerLink: bryLink
-            }
-          });
+          // Send WhatsApp only if phone is provided
+          if (signer.phone) {
+            await supabase.functions.invoke('send-whatsapp-message', {
+              body: {
+                signerName: signer.name,
+                signerPhone: signer.phone,
+                documentName: title,
+                documentId: firstDocumentId,
+                organizationName: companySigner.companyName,
+                brySignerLink: bryLink
+              }
+            });
+          }
         } catch (error) {
-          console.error(`Failed to send notification to ${signer.email}:`, error);
+          console.error(`Failed to send notification to ${signer.email || signer.phone}:`, error);
         }
       }
       
