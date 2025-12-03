@@ -218,7 +218,7 @@ export function AppSidebar() {
             Certificado Digital A1 R$109.90    
           </button>}
         
-        {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors">
+        {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white">
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-white/20 text-white">
@@ -236,7 +236,7 @@ export function AppSidebar() {
                 Administrador
               </p>
             </div>
-          </button> : <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 transition-colors" title="Perfil">
+          </button> : <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center justify-center p-2 rounded-lg text-white" title="Perfil">
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-white/20 text-white">
