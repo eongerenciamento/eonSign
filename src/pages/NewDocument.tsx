@@ -413,8 +413,13 @@ const NewDocument = () => {
         }
       }
 
-      // Send notifications with BRy links
-      for (const signer of signers) {
+      // Send notifications with BRy links - PARA TODOS incluindo empresa
+      const allSignersForNotification = [
+        { name: companySigner.name, email: companySigner.email, phone: companySigner.phone },
+        ...signers
+      ];
+
+      for (const signer of allSignersForNotification) {
         try {
           const bryLink = brySignerLinks.get(signer.email);
           

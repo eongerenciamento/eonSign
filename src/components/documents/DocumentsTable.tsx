@@ -89,8 +89,42 @@ export const DocumentsTable = ({
 
   const hierarchicalFolders = organizeHierarchicalFolders();
 
-  const handleSignDocument = (documentId: string) => {
-    navigate(`/assinar/${documentId}`);
+  const handleSignDocument = async (documentId: string) => {
+    try {
+      // Buscar o link BRy do signatário da empresa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate(`/assinar/${documentId}`);
+        return;
+      }
+
+      const { data: companyData } = await supabase
+        .from('company_settings')
+        .select('admin_email')
+        .eq('user_id', user.id)
+        .single();
+
+      if (companyData?.admin_email) {
+        const { data: signerData } = await supabase
+          .from('document_signers')
+          .select('bry_signer_link')
+          .eq('document_id', documentId)
+          .eq('email', companyData.admin_email)
+          .single();
+
+        if (signerData?.bry_signer_link) {
+          // Redirecionar para BRy se link existir
+          window.open(signerData.bry_signer_link, '_blank');
+          return;
+        }
+      }
+
+      // Fallback para método antigo
+      navigate(`/assinar/${documentId}`);
+    } catch (error) {
+      console.error('Error getting BRy link:', error);
+      navigate(`/assinar/${documentId}`);
+    }
   };
 
   const handleViewDocument = async (documentId: string) => {
