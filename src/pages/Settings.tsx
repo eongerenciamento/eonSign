@@ -418,7 +418,7 @@ const Settings = () => {
                 alt="Eon" 
                 className="h-36"
               />
-              <p className="text-xs text-gray-500">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
+              <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
           </TabsContent>
 
@@ -537,7 +537,7 @@ const Settings = () => {
                 alt="Eon" 
                 className="h-36"
               />
-              <p className="text-xs text-gray-500">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
+              <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
             </div>
           </TabsContent>
         </Tabs>
