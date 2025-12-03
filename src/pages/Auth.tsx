@@ -146,10 +146,6 @@ export default function Auth() {
           variant: "destructive"
         });
       } else {
-        toast({
-          title: "Bem-vindo!",
-          description: "Login realizado com sucesso."
-        });
         navigate("/dashboard");
       }
     } catch (error) {
