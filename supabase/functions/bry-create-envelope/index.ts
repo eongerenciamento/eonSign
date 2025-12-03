@@ -136,7 +136,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Extrair informações do envelope
     const envelopeUuid = envelopeData.uuid;
-    const documentUuid = envelopeData.documents?.[0]?.uuid;
+    // BRy retorna documentUuid (não uuid)
+    const documentUuid = envelopeData.documents?.[0]?.documentUuid || envelopeData.documents?.[0]?.uuid;
     
     console.log('Envelope UUID:', envelopeUuid);
     console.log('Document UUID:', documentUuid);

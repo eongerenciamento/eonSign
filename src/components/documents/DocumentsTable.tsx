@@ -133,11 +133,11 @@ export const DocumentsTable = ({
 
     const { data, error } = await supabase
       .from("documents")
-      .select("file_url")
+      .select("file_url, status, bry_envelope_uuid, bry_signed_file_url")
       .eq("id", documentId)
       .single();
 
-    if (error || !data?.file_url) {
+    if (error || !data) {
       toast({
         title: "Erro ao visualizar documento",
         description: "Não foi possível carregar o documento.",
@@ -146,18 +146,31 @@ export const DocumentsTable = ({
       return;
     }
 
-    // Extract path from URL for signed URL generation
-    const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
-    if (urlParts.length < 2) {
+    let filePath: string;
+
+    // Se é documento BRy assinado com arquivo já salvo
+    if (data.bry_envelope_uuid && data.status === 'signed' && data.bry_signed_file_url) {
+      filePath = data.bry_signed_file_url;
+    } else if (data.file_url) {
+      // Extract path from URL for signed URL generation
+      const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+      if (urlParts.length < 2) {
+        toast({
+          title: "Erro ao visualizar documento",
+          description: "URL do documento inválida.",
+          variant: "destructive",
+        });
+        return;
+      }
+      filePath = urlParts[1];
+    } else {
       toast({
         title: "Erro ao visualizar documento",
-        description: "URL do documento inválida.",
+        description: "URL do documento não encontrada.",
         variant: "destructive",
       });
       return;
     }
-
-    const filePath = urlParts[1];
 
     // Generate signed URL for private bucket
     const { data: signedData, error: signedError } = await supabase
@@ -183,11 +196,11 @@ export const DocumentsTable = ({
 
     const { data, error } = await supabase
       .from("documents")
-      .select("file_url, name")
+      .select("file_url, name, status, bry_envelope_uuid, bry_signed_file_url")
       .eq("id", documentId)
       .single();
 
-    if (error || !data?.file_url) {
+    if (error || !data) {
       toast({
         title: "Erro ao baixar documento",
         description: "Não foi possível carregar o documento.",
@@ -196,18 +209,86 @@ export const DocumentsTable = ({
       return;
     }
 
-    // Extract path from URL for signed URL generation
-    const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
-    if (urlParts.length < 2) {
-      toast({
-        title: "Erro ao baixar documento",
-        description: "URL do documento inválida.",
-        variant: "destructive",
-      });
-      return;
-    }
+    let filePath: string;
+    let downloadFileName = data.name;
 
-    const filePath = urlParts[1];
+    // Se é documento BRy assinado
+    if (data.bry_envelope_uuid && data.status === 'signed') {
+      // Se já temos o arquivo assinado salvo
+      if (data.bry_signed_file_url) {
+        filePath = data.bry_signed_file_url;
+        downloadFileName = data.name.replace('.pdf', '_assinado.pdf');
+      } else {
+        // Baixar documento assinado do BRy
+        toast({
+          title: "Baixando documento assinado...",
+          description: "Obtendo documento do BRy.",
+        });
+
+        try {
+          const { data: bryData, error: bryError } = await supabase.functions.invoke('bry-download-signed', {
+            body: { documentId },
+          });
+
+          if (bryError) {
+            throw bryError;
+          }
+
+          if (bryData?.downloadUrl) {
+            // Usar URL direta do BRy
+            const response = await fetch(bryData.downloadUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = data.name.replace('.pdf', '_assinado.pdf');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            toast({
+              title: "Download concluído",
+              description: "Documento assinado baixado com sucesso.",
+            });
+            return;
+          }
+
+          filePath = bryData?.signedFileUrl;
+          downloadFileName = data.name.replace('.pdf', '_assinado.pdf');
+        } catch (err: any) {
+          console.error('Error downloading BRy signed document:', err);
+          toast({
+            title: "Erro ao baixar documento assinado",
+            description: err.message || "Não foi possível obter o documento assinado do BRy.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    } else {
+      // Documento normal
+      if (!data.file_url) {
+        toast({
+          title: "Erro ao baixar documento",
+          description: "URL do documento não encontrada.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Extract path from URL for signed URL generation
+      const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+      if (urlParts.length < 2) {
+        toast({
+          title: "Erro ao baixar documento",
+          description: "URL do documento inválida.",
+          variant: "destructive",
+        });
+        return;
+      }
+      filePath = urlParts[1];
+    }
 
     // Generate signed URL for private bucket
     const { data: signedData, error: signedError } = await supabase
@@ -230,7 +311,7 @@ export const DocumentsTable = ({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = data.name;
+      link.download = downloadFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
