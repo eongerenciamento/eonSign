@@ -217,7 +217,7 @@ export default function Auth() {
           <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/86300fa7-7f6a-4b88-b2b9-978491efec2c.png" />
         </div>
 
-        <div className="p-8 rounded-2xl shadow-xl bg-white/10 border border-white/20 animate-fade-in" style={{
+        <div className="p-8 rounded-2xl shadow-xl bg-white/5 border border-white/20 animate-fade-in" style={{
         animationDelay: '0.3s'
       }}>
           <form onSubmit={handleSubmit} className="space-y-6">
