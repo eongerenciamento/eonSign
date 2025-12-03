@@ -26,3 +26,15 @@ verify_jwt = false
 
 [functions.send-member-invitation]
 verify_jwt = true
+
+[functions.bry-get-token]
+verify_jwt = false
+
+[functions.bry-create-envelope]
+verify_jwt = false
+
+[functions.bry-webhook]
+verify_jwt = false
+
+[functions.bry-download-signed]
+verify_jwt = false

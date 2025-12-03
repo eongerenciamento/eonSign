@@ -77,6 +77,8 @@ export type Database = {
       document_signers: {
         Row: {
           birth_date: string | null
+          bry_signer_link: string | null
+          bry_signer_nonce: string | null
           cpf: string | null
           created_at: string
           document_id: string
@@ -97,6 +99,8 @@ export type Database = {
         }
         Insert: {
           birth_date?: string | null
+          bry_signer_link?: string | null
+          bry_signer_nonce?: string | null
           cpf?: string | null
           created_at?: string
           document_id: string
@@ -117,6 +121,8 @@ export type Database = {
         }
         Update: {
           birth_date?: string | null
+          bry_signer_link?: string | null
+          bry_signer_nonce?: string | null
           cpf?: string | null
           created_at?: string
           document_id?: string
@@ -147,6 +153,9 @@ export type Database = {
       }
       documents: {
         Row: {
+          bry_document_uuid: string | null
+          bry_envelope_uuid: string | null
+          bry_signed_file_url: string | null
           created_at: string
           envelope_id: string | null
           file_url: string | null
@@ -160,6 +169,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bry_document_uuid?: string | null
+          bry_envelope_uuid?: string | null
+          bry_signed_file_url?: string | null
           created_at?: string
           envelope_id?: string | null
           file_url?: string | null
@@ -173,6 +185,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bry_document_uuid?: string | null
+          bry_envelope_uuid?: string | null
+          bry_signed_file_url?: string | null
           created_at?: string
           envelope_id?: string | null
           file_url?: string | null
