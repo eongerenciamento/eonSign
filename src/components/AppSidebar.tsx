@@ -61,12 +61,9 @@ export function AppSidebar() {
       setUser(user);
       if (user) {
         // Buscar dados do company_settings
-        const { data: companyData } = await supabase
-          .from('company_settings')
-          .select('admin_name, company_name, avatar_url, admin_phone')
-          .eq('user_id', user.id)
-          .single();
-
+        const {
+          data: companyData
+        } = await supabase.from('company_settings').select('admin_name, company_name, avatar_url, admin_phone').eq('user_id', user.id).single();
         if (companyData) {
           setName(companyData.admin_name || user.user_metadata?.name || "");
           setOrganization(companyData.company_name || user.user_metadata?.organization || "");
@@ -140,7 +137,6 @@ export function AppSidebar() {
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
   };
-
   const handleProfileUpdate = async () => {
     const {
       data: {
@@ -148,12 +144,9 @@ export function AppSidebar() {
       }
     } = await supabase.auth.getUser();
     if (user) {
-      const { data: companyData } = await supabase
-        .from('company_settings')
-        .select('admin_name, company_name, avatar_url')
-        .eq('user_id', user.id)
-        .single();
-
+      const {
+        data: companyData
+      } = await supabase.from('company_settings').select('admin_name, company_name, avatar_url').eq('user_id', user.id).single();
       if (companyData) {
         setName(companyData.admin_name || user.user_metadata?.name || "");
         setOrganization(companyData.company_name || user.user_metadata?.organization || "");
@@ -214,7 +207,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto bg-[#273d60]">
-        {!collapsed && <button onClick={() => window.open('https://eongerenciamento.com.br', '_blank')} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs font-light bg-muted-foreground">
+        {!collapsed && <button onClick={() => window.open('https://eongerenciamento.com.br', '_blank')} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-normal">
             Certificado Digital A1 R$109.90    
           </button>}
         
