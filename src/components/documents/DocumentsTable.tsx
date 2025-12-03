@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ export interface Document {
   signedBy: number;
   signerStatuses?: ("signed" | "pending" | "rejected")[];
   signerNames?: string[];
+  signerEmails?: string[];
   folderId?: string | null;
   fileUrl?: string | null;
   bryEnvelopeUuid?: string | null;
@@ -609,7 +611,31 @@ export const DocumentsTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
+                    {doc.status === 'pending' || doc.status === 'in_progress' ? (
+                      <TooltipProvider>
+                        <div className="flex items-center gap-1">
+                          {doc.signerNames?.map((name, idx) => {
+                            const status = doc.signerStatuses?.[idx] || 'pending';
+                            const email = doc.signerEmails?.[idx] || '';
+                            const bgColor = status === 'signed' ? 'bg-green-700' : status === 'rejected' ? 'bg-red-700' : 'bg-yellow-700';
+                            return (
+                              <Tooltip key={idx}>
+                                <TooltipTrigger asChild>
+                                  <div className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default`}>
+                                    {getInitials(name)}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{email}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
+                        </div>
+                      </TooltipProvider>
+                    ) : (
+                      <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-4">

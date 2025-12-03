@@ -62,6 +62,7 @@ const Documents = () => {
           .order("is_company_signer", { ascending: false });
 
         const signerNames = (signersData || []).map(s => s.name);
+        const signerEmails = (signersData || []).map(s => s.email);
         const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
 
         return {
@@ -74,6 +75,7 @@ const Documents = () => {
           folderId: doc.folder_id,
           signerStatuses,
           signerNames,
+          signerEmails,
           bryEnvelopeUuid: doc.bry_envelope_uuid,
         };
       })
