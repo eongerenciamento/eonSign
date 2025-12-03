@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,9 @@ export interface Document {
   folderId?: string | null;
   fileUrl?: string | null;
   bryEnvelopeUuid?: string | null;
+  isEnvelope?: boolean;
+  documentCount?: number;
+  envelopeId?: string | null;
 }
 
 export interface Folder {
@@ -605,9 +608,23 @@ export const DocumentsTable = ({
             const progressPercentage = doc.signedBy / doc.signers * 100;
             return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:opacity-80`}>
                   <TableCell>
-                    <div className="space-y-0.5">
-                      <span className="font-medium text-gray-600">{doc.name}</span>
-                      <p className="text-xs text-gray-500">{doc.createdAt}</p>
+                    <div className="flex items-center gap-2">
+                      {doc.isEnvelope ? (
+                        <FolderOpen className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                      ) : (
+                        <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                      )}
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-600">{doc.name}</span>
+                          {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
+                            <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                              {doc.documentCount} docs
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500">{doc.createdAt}</p>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -801,7 +818,19 @@ export const DocumentsTable = ({
                 </div>
                 
                 <div className="space-y-1">
-                  <p className="font-medium">{doc.name}</p>
+                  <div className="flex items-center gap-2">
+                    {doc.isEnvelope ? (
+                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    ) : (
+                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    )}
+                    <p className="font-medium">{doc.name}</p>
+                    {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
+                      <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                        {doc.documentCount} docs
+                      </span>
+                    )}
+                  </div>
                   <p className="text-gray-500 text-sm">{doc.createdAt}</p>
                 </div>
               </div>

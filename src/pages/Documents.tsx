@@ -36,10 +36,10 @@ const Documents = () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    // Load all documents for the user
+    // Load all documents with envelope info
     const { data, error } = await supabase
       .from("documents")
-      .select("*")
+      .select("*, envelopes(title)")
       .eq("user_id", userData.user.id)
       .order("created_at", { ascending: false });
 
@@ -52,13 +52,55 @@ const Documents = () => {
       return;
     }
 
-    // Load signers for each document
+    // Group documents by envelope_id
+    const envelopeGroups = new Map<string, typeof data>();
+    const standaloneDocuments: typeof data = [];
+
+    (data || []).forEach(doc => {
+      if (doc.envelope_id) {
+        const existing = envelopeGroups.get(doc.envelope_id) || [];
+        existing.push(doc);
+        envelopeGroups.set(doc.envelope_id, existing);
+      } else {
+        standaloneDocuments.push(doc);
+      }
+    });
+
+    // Convert to display format
+    const displayItems: any[] = [];
+
+    // Add envelope groups
+    envelopeGroups.forEach((docs, envelopeId) => {
+      const firstDoc = docs[0];
+      const envelopeTitle = (firstDoc as any).envelopes?.title || firstDoc.name;
+      displayItems.push({
+        ...firstDoc,
+        name: envelopeTitle,
+        isEnvelope: true,
+        documentCount: docs.length,
+        envelopeDocuments: docs,
+      });
+    });
+
+    // Add standalone documents
+    standaloneDocuments.forEach(doc => {
+      displayItems.push({
+        ...doc,
+        isEnvelope: false,
+        documentCount: 1,
+      });
+    });
+
+    // Sort by created_at
+    displayItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    // Load signers for each item
     const documentsWithSigners = await Promise.all(
-      (data || []).map(async (doc) => {
+      displayItems.map(async (item) => {
         const { data: signersData } = await supabase
           .from("document_signers")
           .select("*")
-          .eq("document_id", doc.id)
+          .eq("document_id", item.id)
           .order("is_company_signer", { ascending: false });
 
         const signerNames = (signersData || []).map(s => s.name);
@@ -66,17 +108,20 @@ const Documents = () => {
         const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
 
         return {
-          id: doc.id,
-          name: doc.name,
-          createdAt: new Date(doc.created_at).toLocaleDateString('pt-BR'),
-          status: doc.status as "pending" | "signed" | "expired" | "in_progress",
-          signers: doc.signers,
-          signedBy: doc.signed_by,
-          folderId: doc.folder_id,
+          id: item.id,
+          name: item.name,
+          createdAt: new Date(item.created_at).toLocaleDateString('pt-BR'),
+          status: item.status as "pending" | "signed" | "expired" | "in_progress",
+          signers: item.signers,
+          signedBy: item.signed_by,
+          folderId: item.folder_id,
           signerStatuses,
           signerNames,
           signerEmails,
-          bryEnvelopeUuid: doc.bry_envelope_uuid,
+          bryEnvelopeUuid: item.bry_envelope_uuid,
+          isEnvelope: item.isEnvelope,
+          documentCount: item.documentCount,
+          envelopeId: item.envelope_id,
         };
       })
     );
