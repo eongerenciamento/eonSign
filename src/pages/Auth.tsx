@@ -86,13 +86,11 @@ export default function Auth() {
   useEffect(() => {
     document.documentElement.style.backgroundColor = '#273d60';
     document.body.style.backgroundColor = '#273d60';
-    
     return () => {
       document.documentElement.style.backgroundColor = '';
       document.body.style.backgroundColor = '';
     };
   }, []);
-
   useEffect(() => {
     const {
       data: {
@@ -205,12 +203,14 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-[#273d60] px-4 md:pt-0 pt-0 -mt-16 md:mt-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+  return <div className="min-h-screen flex items-center justify-center bg-[#273d60] px-4 md:pt-0 pt-0 -mt-16 md:mt-0" style={{
+    paddingTop: 'env(safe-area-inset-top)'
+  }}>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
       }}>
-          <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/86300fa7-7f6a-4b88-b2b9-978491efec2c.png" />
+          <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" />
         </div>
 
         <div className="p-8 rounded-2xl shadow-xl bg-white/5 border border-white/20 animate-fade-in" style={{
