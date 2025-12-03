@@ -7,13 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useBryStatusSync } from "@/hooks/useBryStatusSync";
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [pendingByOwner, setPendingByOwner] = useState(0);
   const [pendingByExternal, setPendingByExternal] = useState(0);
-
   const currentDate = new Date();
   const weekDay = currentDate.toLocaleDateString('pt-BR', {
     weekday: 'long'
@@ -24,7 +22,6 @@ const Dashboard = () => {
     year: 'numeric'
   });
   const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
-
   const loadDocuments = useCallback(async () => {
     const {
       data: userData
@@ -46,7 +43,6 @@ const Dashboard = () => {
     // Group documents by envelope_id
     const envelopeGroups = new Map<string, typeof docsData>();
     const standaloneDocuments: typeof docsData = [];
-
     (docsData || []).forEach(doc => {
       if (doc.envelope_id) {
         const existing = envelopeGroups.get(doc.envelope_id) || [];
@@ -69,7 +65,7 @@ const Dashboard = () => {
         name: envelopeTitle,
         isEnvelope: true,
         documentCount: docs.length,
-        envelopeDocuments: docs,
+        envelopeDocuments: docs
       });
     });
 
@@ -78,7 +74,7 @@ const Dashboard = () => {
       displayItems.push({
         ...doc,
         isEnvelope: false,
-        documentCount: 1,
+        documentCount: 1
       });
     });
 
@@ -99,7 +95,7 @@ const Dashboard = () => {
       const signerEmails = (signersData || []).map(s => s.email);
       const signerPhones = (signersData || []).map(s => s.phone);
       const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
-      
+
       // Format envelope documents for the dialog
       const envelopeDocuments = item.envelopeDocuments?.map((doc: any) => ({
         id: doc.id,
@@ -109,9 +105,8 @@ const Dashboard = () => {
         signed_by: doc.signed_by,
         signers: doc.signers,
         bry_signed_file_url: doc.bry_signed_file_url,
-        bry_envelope_uuid: doc.bry_envelope_uuid,
+        bry_envelope_uuid: doc.bry_envelope_uuid
       }));
-      
       return {
         id: item.id,
         name: item.name,
@@ -128,7 +123,7 @@ const Dashboard = () => {
         isEnvelope: item.isEnvelope,
         documentCount: item.documentCount,
         envelopeId: item.envelope_id,
-        envelopeDocuments,
+        envelopeDocuments
       };
     }));
     setDocuments(documentsWithSigners);
@@ -143,13 +138,11 @@ const Dashboard = () => {
   // Automatic BRy status sync
   useBryStatusSync(documents, {
     onStatusChange: loadDocuments,
-    pollingInterval: 30000,
+    pollingInterval: 30000
   });
-
   useEffect(() => {
     loadDocuments();
   }, [loadDocuments]);
-
   return <Layout>
       <div className="p-8 space-y-8">
         {/* Header */}
@@ -160,7 +153,7 @@ const Dashboard = () => {
               {subtitle}
             </p>
           </div>
-          <Button onClick={() => navigate("/novo-documento")} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#2d4670] hover:to-[#002855] shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:rounded-md md:px-4 md:py-2">
+          <Button onClick={() => navigate("/novo-documento")} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#2d4670] hover:to-[#002855] shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:rounded-md md:px-4 md:py-2 bg-[#273d60]">
             <Upload className="w-5 h-5 md:mr-2" />
             <span className="hidden md:inline">Documento</span>
           </Button>
