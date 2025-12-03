@@ -6,13 +6,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Interfaces baseadas no payload real da BRy
+interface BrySigner {
+  name: string;
+  signatureStatus: string; // 'SIGNED', 'PENDING', etc.
+  signerNonce: string;
+  signerUuid: string;
+  email?: string;
+}
+
+interface BryDocument {
+  documentUuid: string;
+  documentNonce: string;
+  currentDocumentLink?: { href: string };
+  originalDocumentLink?: { href: string };
+}
+
 interface BryWebhookPayload {
-  event: string;
-  uuid: string;
+  uuid: string;           // Envelope UUID
+  signer?: BrySigner;     // Informações do signatário (presente quando signatário assina)
+  documents?: BryDocument[];
+  status?: string;        // Status do envelope ('COMPLETED', 'SIGNED', etc.)
+  // Campos legados para compatibilidade
+  event?: string;
   signerNonce?: string;
   signerEmail?: string;
   documentUuid?: string;
-  timestamp?: string;
 }
 
 async function downloadSignedDocument(envelopeUuid: string, documentUuid: string): Promise<ArrayBuffer | null> {
@@ -94,18 +113,35 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: BryWebhookPayload = JSON.parse(rawBody);
     console.log('BRy webhook parsed payload:', JSON.stringify(payload));
 
-    const { event, uuid, signerNonce, signerEmail, documentUuid } = payload;
-    console.log('Event:', event);
-    console.log('UUID:', uuid);
+    // Extrair dados do payload - suporta tanto formato novo quanto legado
+    const envelopeUuid = payload.uuid;
+    const envelopeStatus = payload.status;
+    
+    // Dados do signatário - formato novo (signer object) ou legado
+    const signerNonce = payload.signer?.signerNonce || payload.signerNonce;
+    const signerStatus = payload.signer?.signatureStatus;
+    const signerEmail = payload.signer?.email || payload.signerEmail;
+    
+    // Documento UUID - do array documents ou campo legado
+    const documentUuid = payload.documents?.[0]?.documentUuid || payload.documentUuid;
+    
+    // Evento legado
+    const legacyEvent = payload.event;
+
+    console.log('=== PARSED DATA ===');
+    console.log('Envelope UUID:', envelopeUuid);
+    console.log('Envelope Status:', envelopeStatus);
     console.log('Signer Nonce:', signerNonce);
+    console.log('Signer Status:', signerStatus);
     console.log('Signer Email:', signerEmail);
     console.log('Document UUID:', documentUuid);
+    console.log('Legacy Event:', legacyEvent);
 
     // Buscar documento pelo envelope UUID
     const { data: document, error: docError } = await supabase
       .from('documents')
       .select('*')
-      .eq('bry_envelope_uuid', uuid)
+      .eq('bry_envelope_uuid', envelopeUuid)
       .maybeSingle();
 
     if (docError) {
@@ -113,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!document) {
-      console.error('Document not found for envelope UUID:', uuid);
+      console.error('Document not found for envelope UUID:', envelopeUuid);
       // Tentar buscar por nonce do signatário
       if (signerNonce) {
         console.log('Attempting to find document by signer nonce:', signerNonce);
@@ -138,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
       
-      return new Response(JSON.stringify({ error: 'Document not found', uuid, signerNonce }), {
+      return new Response(JSON.stringify({ error: 'Document not found', uuid: envelopeUuid, signerNonce }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -146,7 +182,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Found document:', document.id, '- Name:', document.name);
 
-    if (event === 'SIGNER_COMPLETED' || event === 'SIGNATURE_COMPLETED') {
+    // Verificar se signatário completou assinatura
+    // Formato novo: signer.signatureStatus === 'SIGNED'
+    // Formato legado: event === 'SIGNER_COMPLETED' ou 'SIGNATURE_COMPLETED'
+    const isSignerCompleted = signerStatus === 'SIGNED' || 
+                              legacyEvent === 'SIGNER_COMPLETED' || 
+                              legacyEvent === 'SIGNATURE_COMPLETED';
+
+    if (isSignerCompleted) {
+      console.log('=== SIGNER COMPLETED ===');
+      
       // Atualizar status do signatário específico
       let query = supabase
         .from('document_signers')
@@ -158,16 +203,18 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (signerNonce) {
         query = query.eq('bry_signer_nonce', signerNonce);
+        console.log('Updating signer by nonce:', signerNonce);
       } else if (signerEmail) {
         query = query.eq('email', signerEmail);
+        console.log('Updating signer by email:', signerEmail);
       }
 
-      const { error: signerError } = await query;
+      const { error: signerError, data: updatedSigner } = await query.select();
 
       if (signerError) {
         console.error('Error updating signer status:', signerError);
       } else {
-        console.log('Signer status updated to signed');
+        console.log('Signer status updated to signed:', updatedSigner);
       }
 
       // Atualizar contagem de assinaturas no documento
@@ -179,19 +226,35 @@ const handler = async (req: Request): Promise<Response> => {
 
       const newSignedBy = signedCount?.length || 0;
 
-      await supabase
+      const { error: updateError } = await supabase
         .from('documents')
         .update({ signed_by: newSignedBy })
         .eq('id', document.id);
 
-      console.log('Document signed_by updated to:', newSignedBy);
+      if (updateError) {
+        console.error('Error updating signed_by:', updateError);
+      } else {
+        console.log('Document signed_by updated to:', newSignedBy);
+      }
     }
 
-    if (event === 'ENVELOPE_COMPLETED' || event === 'SIGNATURE_ALL_COMPLETED') {
+    // Verificar se envelope foi completado (todas as assinaturas)
+    // Formato novo: status === 'COMPLETED' ou 'SIGNED'
+    // Formato legado: event === 'ENVELOPE_COMPLETED' ou 'SIGNATURE_ALL_COMPLETED'
+    const isEnvelopeCompleted = envelopeStatus === 'COMPLETED' || 
+                                envelopeStatus === 'SIGNED' ||
+                                legacyEvent === 'ENVELOPE_COMPLETED' || 
+                                legacyEvent === 'SIGNATURE_ALL_COMPLETED';
+
+    if (isEnvelopeCompleted) {
+      console.log('=== ENVELOPE COMPLETED ===');
       console.log('All signatures completed, downloading signed document');
 
       // Baixar documento assinado
-      const signedPdf = await downloadSignedDocument(uuid, document.bry_document_uuid || documentUuid || '');
+      const docUuidForDownload = document.bry_document_uuid || documentUuid || '';
+      console.log('Document UUID for download:', docUuidForDownload);
+      
+      const signedPdf = await downloadSignedDocument(envelopeUuid, docUuidForDownload);
 
       if (signedPdf) {
         // Fazer upload do documento assinado para o Storage
@@ -210,10 +273,6 @@ const handler = async (req: Request): Promise<Response> => {
           console.log('Signed document uploaded:', fileName);
 
           // Atualizar documento com URL do arquivo assinado
-          const { data: { publicUrl } } = supabase.storage
-            .from('documents')
-            .getPublicUrl(fileName);
-
           await supabase
             .from('documents')
             .update({
@@ -249,6 +308,8 @@ const handler = async (req: Request): Promise<Response> => {
           status: 'signed',
         })
         .eq('id', document.id);
+
+      console.log('Final signed_by count:', allSigners?.length || 0);
 
       // Enviar email de documento completado
       try {
