@@ -745,7 +745,7 @@ const NewDocument = () => {
             <div className="space-y-2">
               {AUTHENTICATION_OPTIONS.map(option => {
               const isSelected = authOptions.includes(option.id);
-              return <div key={option.id} onClick={() => toggleAuthOption(option.id)} className="flex items-center gap-3 px-3 py-2 bg-gray-100 rounded cursor-pointer">
+              return <div key={option.id} onClick={() => toggleAuthOption(option.id)} className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer bg-sidebar-foreground">
                     <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onCheckedChange={() => toggleAuthOption(option.id)} />
                     <span className="text-sm text-gray-600">{option.label}</span>
                   </div>;
