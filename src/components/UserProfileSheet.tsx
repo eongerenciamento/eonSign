@@ -167,14 +167,14 @@ export function UserProfileSheet({
       return;
     }
 
-    // Atualizar company_settings
+    // Atualizar company_settings (avatar_url para o avatar do usuário)
     const { error: companyError } = await supabase
       .from('company_settings')
       .update({
         admin_name: name,
         admin_phone: phone,
         admin_email: email,
-        logo_url: avatar,
+        avatar_url: avatar,
       })
       .eq('user_id', user.id);
 

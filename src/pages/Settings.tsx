@@ -185,14 +185,31 @@ const Settings = () => {
       }
     }
   };
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogo(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      
+      if (!user) return;
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/logo_${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+        setLogo(publicUrl);
+        toast.success("Logo atualizada!");
+      } catch (error) {
+        toast.error("Erro ao fazer upload da logo");
+      }
     }
   };
   const handleSaveCompany = async () => {
