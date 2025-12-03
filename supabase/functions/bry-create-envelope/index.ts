@@ -29,6 +29,8 @@ async function getToken(): Promise<string> {
     ? 'https://cloud.bry.com.br'
     : 'https://cloud-hom.bry.com.br';
 
+  console.log('Getting BRy token from:', baseUrl);
+
   const tokenResponse = await fetch(`${baseUrl}/token-service/jwt`, {
     method: 'POST',
     headers: {
@@ -61,40 +63,57 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Creating BRy envelope for document:', documentId);
     console.log('Title:', title);
     console.log('Number of signers:', signers.length);
+    console.log('Signers data:', JSON.stringify(signers.map(s => ({ name: s.name, email: s.email, phone: s.phone }))));
 
     // Obter token da BRy
     const accessToken = await getToken();
-    console.log('BRy token obtained');
+    console.log('BRy token obtained successfully');
 
     const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
     const apiBaseUrl = environment === 'production'
       ? 'https://easysign.bry.com.br'
       : 'https://easysign.hom.bry.com.br';
 
-    // Preparar dados dos signatários para a BRy
-    const signersData = signers.map(signer => ({
-      name: signer.name,
-      email: signer.email,
-      phone: signer.phone.replace(/\D/g, ''), // Remover formatação
-      authenticationOptions: ['GEOLOCATION', 'IP', 'OTP_EMAIL'],
-    }));
+    // Preparar dados dos signatários para a BRy com formato E.164
+    const signersData = signers.map(signer => {
+      // Converter para formato E.164 (padrão internacional)
+      let phone = signer.phone.replace(/\D/g, ''); // Remover formatação
+      
+      // Adicionar código do país +55 se não existir
+      if (!phone.startsWith('55')) {
+        phone = '55' + phone;
+      }
+      phone = '+' + phone;
+      
+      console.log(`Signer ${signer.name}: phone formatted to ${phone}`);
+      
+      return {
+        name: signer.name,
+        email: signer.email,
+        phone: phone, // Formato E.164: +5591988981359
+        authenticationOptions: ['GEOLOCATION', 'IP', 'OTP_EMAIL'],
+      };
+    });
 
-    // Criar envelope na BRy
+    // Criar envelope na BRy (seguindo exemplo oficial)
     const envelopePayload = {
       name: title,
       clientName: 'Eon Sign',
       signersData: signersData,
       signatureConfig: {
-        mode: 'SIMPLE', // Assinatura eletrônica avançada
+        mode: 'SIMPLE',
       },
       typeMessaging: ['LINK'], // Eon Sign envia próprias notificações
       documents: [{
         base64Document: documentBase64,
-        name: `${title}.pdf`,
       }],
     };
 
     console.log('Sending request to BRy API:', `${apiBaseUrl}/api/service/sign/v1/signatures`);
+    console.log('Envelope payload (without base64):', JSON.stringify({
+      ...envelopePayload,
+      documents: [{ base64Document: '[BASE64_CONTENT_HIDDEN]' }]
+    }));
 
     const envelopeResponse = await fetch(`${apiBaseUrl}/api/service/sign/v1/signatures`, {
       method: 'POST',
@@ -112,20 +131,29 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const envelopeData = await envelopeResponse.json();
-    console.log('BRy envelope created:', JSON.stringify(envelopeData));
+    console.log('BRy envelope created successfully');
+    console.log('BRy response:', JSON.stringify(envelopeData));
 
     // Extrair informações do envelope
     const envelopeUuid = envelopeData.uuid;
     const documentUuid = envelopeData.documents?.[0]?.uuid;
     
-    // Extrair links de assinatura por signatário
+    console.log('Envelope UUID:', envelopeUuid);
+    console.log('Document UUID:', documentUuid);
+    
+    // Extrair links de assinatura por signatário (usando link.href da resposta)
     const signerLinks: { email: string; nonce: string; link: string }[] = [];
     
     if (envelopeData.signers) {
+      console.log('Processing signers from BRy response:', envelopeData.signers.length);
+      
       for (const brySign of envelopeData.signers) {
         const signerEmail = brySign.email;
         const signerNonce = brySign.nonce;
-        const signerLink = `${apiBaseUrl}/sign/${signerNonce}`;
+        // Usar link retornado pelo BRy (como no exemplo oficial)
+        const signerLink = brySign.link?.href || `${apiBaseUrl}/sign/${signerNonce}`;
+        
+        console.log(`Signer ${signerEmail}: nonce=${signerNonce}, link=${signerLink}`);
         
         signerLinks.push({
           email: signerEmail,
@@ -153,6 +181,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (docError) {
       console.error('Error updating document with BRy UUIDs:', docError);
+    } else {
+      console.log('Document updated with BRy UUIDs');
     }
 
     // Atualizar signatários com links da BRy
@@ -167,7 +197,9 @@ const handler = async (req: Request): Promise<Response> => {
         .eq('email', signerLink.email);
 
       if (signerError) {
-        console.error('Error updating signer with BRy link:', signerError);
+        console.error(`Error updating signer ${signerLink.email} with BRy link:`, signerError);
+      } else {
+        console.log(`Signer ${signerLink.email} updated with BRy link: ${signerLink.link}`);
       }
     }
 
