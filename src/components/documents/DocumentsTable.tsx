@@ -32,6 +32,7 @@ export interface Document {
   signerStatuses?: ("signed" | "pending" | "rejected")[];
   signerNames?: string[];
   signerEmails?: string[];
+  signerPhones?: string[];
   folderId?: string | null;
   fileUrl?: string | null;
   bryEnvelopeUuid?: string | null;
@@ -663,9 +664,10 @@ export const DocumentsTable = ({
                     {doc.status === 'pending' || doc.status === 'in_progress' ? (
                       <TooltipProvider>
                         <div className="flex items-center gap-1">
-                          {doc.signerNames?.map((name, idx) => {
+                      {doc.signerNames?.map((name, idx) => {
                             const status = doc.signerStatuses?.[idx] || 'pending';
                             const email = doc.signerEmails?.[idx] || '';
+                            const phone = doc.signerPhones?.[idx] || '';
                             const bgColor = status === 'signed' ? 'bg-green-700' : status === 'rejected' ? 'bg-red-700' : 'bg-yellow-700';
                             return (
                               <Tooltip key={idx}>
@@ -674,8 +676,10 @@ export const DocumentsTable = ({
                                     {getInitials(name)}
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{email}</p>
+                                <TooltipContent className="flex flex-col gap-0.5">
+                                  <p className="font-medium">{name}</p>
+                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                  <p className="text-xs text-muted-foreground">{email}</p>
                                 </TooltipContent>
                               </Tooltip>
                             );
@@ -881,11 +885,29 @@ export const DocumentsTable = ({
                       <p className="text-xs text-muted-foreground">
                         {doc.signedBy}/{doc.signers}
                       </p>
-                      <div className="flex gap-1">
-                        {doc.signerStatuses?.map((status, idx) => <div key={idx} className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
-                            {doc.signerNames?.[idx] ? getInitials(doc.signerNames[idx]) : idx + 1}
-                          </div>)}
-                      </div>
+                      <TooltipProvider>
+                        <div className="flex gap-1">
+                          {doc.signerStatuses?.map((status, idx) => {
+                            const name = doc.signerNames?.[idx] || '';
+                            const email = doc.signerEmails?.[idx] || '';
+                            const phone = doc.signerPhones?.[idx] || '';
+                            return (
+                              <Tooltip key={idx}>
+                                <TooltipTrigger asChild>
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
+                                    {name ? getInitials(name) : idx + 1}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="flex flex-col gap-0.5">
+                                  <p className="font-medium">{name}</p>
+                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                  <p className="text-xs text-muted-foreground">{email}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
+                        </div>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </div>}
