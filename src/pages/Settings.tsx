@@ -10,12 +10,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users, BookUser, UsersRound } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle, X, Check, ClipboardList } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
-import { MembersTab } from "@/components/settings/MembersTab";
-import { ContactsTab } from "@/components/settings/ContactsTab";
-import { SignerGroupsTab } from "@/components/settings/SignerGroupsTab";
+import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { useQuery } from "@tanstack/react-query";
 
 const Settings = () => {
@@ -39,7 +37,9 @@ const Settings = () => {
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
-  const activeTab = !isAdmin && (urlTab === 'subscription' || urlTab === 'members') ? 'company' : urlTab;
+  // Redirect old tabs (members, contacts, groups) to cadastros
+  const normalizedTab = ['members', 'contacts', 'groups'].includes(urlTab) ? 'cadastros' : urlTab;
+  const activeTab = !isAdmin && (normalizedTab === 'subscription') ? 'company' : normalizedTab;
 
   // Fetch support tickets
   const {
@@ -279,24 +279,14 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
             </TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="members" className="gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden md:inline">Membros</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="contacts" className="gap-2">
-              <BookUser className="h-4 w-4" />
-              <span className="hidden md:inline">Contatos</span>
-            </TabsTrigger>
-            <TabsTrigger value="groups" className="gap-2">
-              <UsersRound className="h-4 w-4" />
-              <span className="hidden md:inline">Grupos</span>
+            <TabsTrigger value="cadastros" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden md:inline">Cadastros</span>
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="subscription" className="gap-2">
@@ -438,18 +428,8 @@ const Settings = () => {
             </div>
           </TabsContent>
 
-          {isAdmin && (
-            <TabsContent value="members" className="space-y-6 mt-6">
-              <MembersTab />
-            </TabsContent>
-          )}
-
-          <TabsContent value="contacts">
-            <ContactsTab />
-          </TabsContent>
-
-          <TabsContent value="groups">
-            <SignerGroupsTab />
+          <TabsContent value="cadastros">
+            <CadastrosTab isAdmin={isAdmin} />
           </TabsContent>
 
           {isAdmin && (
