@@ -911,6 +911,17 @@ export const DocumentsTable = ({
                           <ShieldCheck className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
+                          title="Visualizar certificado de validação"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
                       {doc.status !== 'signed' && (
                         <Button 
                           variant="ghost" 
@@ -992,6 +1003,17 @@ export const DocumentsTable = ({
                         className="rounded-full hover:bg-transparent h-8 w-8" 
                         onClick={() => handleOpenValidation(doc.id)}
                         title="Validar assinaturas no portal BRy"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
+                        title="Visualizar certificado de validação"
                       >
                         <ShieldCheck className="w-4 h-4 text-gray-500" />
                       </Button>
