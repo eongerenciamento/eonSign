@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignerAutocomplete, SignerSuggestion } from "@/components/documents/SignerAutocomplete";
+import { GroupSelector } from "@/components/documents/GroupSelector";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 const AUTHENTICATION_OPTIONS: {
@@ -794,8 +795,19 @@ const NewDocument = () => {
                 </div>}
 
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
-                
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
+                  <GroupSelector 
+                    onSelectGroup={(members) => {
+                      // Replace all signers with group members
+                      setSigners(members.map(m => ({
+                        name: m.name,
+                        phone: m.phone,
+                        email: m.email
+                      })));
+                    }}
+                  />
+                </div>
               </div>
               {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
                   <div className="absolute top-2 right-2 flex gap-1">
