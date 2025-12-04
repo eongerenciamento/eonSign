@@ -9,11 +9,19 @@ export interface SignerSuggestion {
   phone: string;
 }
 
+export interface SignerGroup {
+  id: string;
+  name: string;
+  members: SignerSuggestion[];
+}
+
 interface SignerAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   onSelectSigner: (signer: SignerSuggestion) => void;
+  onSelectGroup?: (members: SignerSuggestion[]) => void;
   suggestions: SignerSuggestion[];
+  groups?: SignerGroup[];
   placeholder?: string;
 }
 
@@ -21,7 +29,9 @@ export function SignerAutocomplete({
   value,
   onChange,
   onSelectSigner,
+  onSelectGroup,
   suggestions,
+  groups = [],
   placeholder = "Digite o nome ou razão social"
 }: SignerAutocompleteProps) {
   const [open, setOpen] = useState(false);
@@ -36,19 +46,38 @@ export function SignerAutocomplete({
       ).slice(0, 10)
     : [];
 
-  // Open popover when typing and there are suggestions
+  // Filter groups based on input value
+  const filteredGroups = value.length >= 2
+    ? groups.filter(g => 
+        g.name.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5)
+    : groups.slice(0, 5); // Show first 5 groups when no filter
+
+  // Open popover when typing and there are suggestions or groups
   useEffect(() => {
-    if (filteredSuggestions.length > 0 && value.length >= 2) {
+    if ((filteredSuggestions.length > 0 || filteredGroups.length > 0) && value.length >= 2) {
       setOpen(true);
+    } else if (filteredGroups.length > 0 && value.length === 0) {
+      // Keep closed when empty, groups show only when typing
+      setOpen(false);
     } else {
       setOpen(false);
     }
-  }, [filteredSuggestions.length, value]);
+  }, [filteredSuggestions.length, filteredGroups.length, value]);
 
-  const handleSelect = (signer: SignerSuggestion) => {
+  const handleSelectSigner = (signer: SignerSuggestion) => {
     onSelectSigner(signer);
     setOpen(false);
   };
+
+  const handleSelectGroup = (group: SignerGroup) => {
+    if (onSelectGroup) {
+      onSelectGroup(group.members);
+    }
+    setOpen(false);
+  };
+
+  const hasResults = filteredSuggestions.length > 0 || filteredGroups.length > 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,22 +98,40 @@ export function SignerAutocomplete({
       >
         <Command>
           <CommandList>
-            <CommandEmpty>Nenhum signatário encontrado</CommandEmpty>
-            <CommandGroup heading="Signatários recentes">
-              {filteredSuggestions.map((signer, index) => (
-                <CommandItem
-                  key={`${signer.email}-${signer.phone}-${index}`}
-                  onSelect={() => handleSelect(signer)}
-                  className="flex flex-col items-start gap-0.5 cursor-pointer bg-gray-50 hover:bg-gray-100 data-[selected=true]:bg-gray-100"
-                >
-                  <span className="font-medium text-gray-700">{signer.name}</span>
-                  <div className="flex flex-col text-xs">
-                    {signer.phone && <span className="text-gray-600">{signer.phone}</span>}
-                    {signer.email && <span className="text-gray-500">{signer.email}</span>}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {!hasResults && <CommandEmpty>Nenhum resultado encontrado</CommandEmpty>}
+            
+            {filteredSuggestions.length > 0 && (
+              <CommandGroup heading="Contatos recentes">
+                {filteredSuggestions.map((signer, index) => (
+                  <CommandItem
+                    key={`signer-${signer.email}-${signer.phone}-${index}`}
+                    onSelect={() => handleSelectSigner(signer)}
+                    className="flex flex-col items-start gap-0.5 cursor-pointer bg-gray-50 hover:bg-gray-100 data-[selected=true]:bg-gray-100"
+                  >
+                    <span className="font-medium text-gray-700">{signer.name}</span>
+                    <div className="flex flex-col text-xs">
+                      {signer.phone && <span className="text-gray-600">{signer.phone}</span>}
+                      {signer.email && <span className="text-gray-500">{signer.email}</span>}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {filteredGroups.length > 0 && onSelectGroup && (
+              <CommandGroup heading="Grupos">
+                {filteredGroups.map((group) => (
+                  <CommandItem
+                    key={`group-${group.id}`}
+                    onSelect={() => handleSelectGroup(group)}
+                    className="flex items-center justify-between cursor-pointer bg-gray-50 hover:bg-gray-100 data-[selected=true]:bg-gray-100"
+                  >
+                    <span className="font-medium text-gray-700">{group.name}</span>
+                    <span className="text-xs text-gray-500">({group.members.length} membros)</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

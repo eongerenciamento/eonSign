@@ -11,8 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SignerAutocomplete, SignerSuggestion } from "@/components/documents/SignerAutocomplete";
-import { GroupSelector } from "@/components/documents/GroupSelector";
+import { SignerAutocomplete, SignerSuggestion, SignerGroup } from "@/components/documents/SignerAutocomplete";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 const AUTHENTICATION_OPTIONS: {
@@ -92,6 +91,7 @@ const NewDocument = () => {
   const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE']);
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('SIMPLE');
   const [signerSuggestions, setSignerSuggestions] = useState<SignerSuggestion[]>([]);
+  const [signerGroups, setSignerGroups] = useState<SignerGroup[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -213,6 +213,43 @@ const NewDocument = () => {
       }
     };
     loadContacts();
+  }, []);
+
+  // Load groups for autocomplete
+  useEffect(() => {
+    const loadGroups = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: groupsData } = await supabase
+        .from('signer_groups')
+        .select(`
+          id,
+          name,
+          signer_group_members (
+            contact_id,
+            contacts (id, name, email, phone)
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('name');
+
+      if (groupsData) {
+        const formattedGroups: SignerGroup[] = groupsData.map(g => ({
+          id: g.id,
+          name: g.name,
+          members: g.signer_group_members
+            ?.map((m: any) => ({
+              name: m.contacts?.name || '',
+              email: m.contacts?.email || '',
+              phone: m.contacts?.phone || ''
+            }))
+            .filter((m: any) => m.name) || []
+        }));
+        setSignerGroups(formattedGroups);
+      }
+    };
+    loadGroups();
   }, []);
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -795,19 +832,7 @@ const NewDocument = () => {
                 </div>}
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
-                  <GroupSelector 
-                    onSelectGroup={(members) => {
-                      // Replace all signers with group members
-                      setSigners(members.map(m => ({
-                        name: m.name,
-                        phone: m.phone,
-                        email: m.email
-                      })));
-                    }}
-                  />
-                </div>
+                <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
               </div>
               {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
                   <div className="absolute top-2 right-2 flex gap-1">
@@ -871,7 +896,15 @@ const NewDocument = () => {
                         };
                         setSigners(newSigners);
                       }}
+                      onSelectGroup={(members) => {
+                        setSigners(members.map(m => ({
+                          name: m.name,
+                          phone: m.phone,
+                          email: m.email
+                        })));
+                      }}
                       suggestions={signerSuggestions}
+                      groups={signerGroups}
                     />
                   </div>
 
