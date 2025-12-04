@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download, Copy, Share2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 import logoEon from "@/assets/logo-eon.png";
 
 interface Signer {
@@ -194,16 +195,43 @@ const ValidateDocument = () => {
               </Badge>
             </div>
             
-            {/* Download Button */}
-            {isValid && document.downloadUrl && (
-              <div className="mt-4 pt-4 border-t border-green-200">
-                <Button
-                  onClick={() => window.open(document.downloadUrl!, '_blank')}
-                  className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] hover:opacity-90"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar Documento Assinado
-                </Button>
+            {/* Download and Share Buttons */}
+            {isValid && (
+              <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
+                {document.downloadUrl && (
+                  <Button
+                    onClick={() => window.open(document.downloadUrl!, '_blank')}
+                    className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] hover:opacity-90"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar Documento Assinado
+                  </Button>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link copiado para a area de transferencia!");
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar Link
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-green-600 border-green-300 hover:bg-green-50"
+                    onClick={() => {
+                      const text = `Verifique o documento "${document.name}" assinado digitalmente: ${window.location.href}`;
+                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                      window.open(whatsappUrl, '_blank');
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    WhatsApp
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
