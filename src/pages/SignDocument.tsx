@@ -363,8 +363,8 @@ const SignDocument = () => {
           longitude: location?.longitude || null,
           // Simple signature specific data
           typedSignature: isSimpleSignature ? typedSignature : null,
-          signatureX: signaturePosition?.x || 50,
-          signatureY: signaturePosition?.y || 80,
+          signatureX: signaturePosition?.x || 50, // centered horizontally
+          signatureY: signaturePosition?.y || 88, // near bottom of page
           signaturePage: signaturePosition?.page || 1,
         },
       });
@@ -583,7 +583,7 @@ const SignDocument = () => {
                 <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
                   <MousePointer className="h-4 w-4 text-blue-600" />
                   <p className="text-sm text-blue-700">
-                    Clique no documento abaixo para posicionar sua assinatura
+                    Clique no documento para posicionar sua assinatura, ou ela será adicionada automaticamente no rodapé
                   </p>
                 </div>
               )}
