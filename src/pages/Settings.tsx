@@ -10,10 +10,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users, BookUser } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { MembersTab } from "@/components/settings/MembersTab";
+import { ContactsTab } from "@/components/settings/ContactsTab";
 import { useQuery } from "@tanstack/react-query";
 
 const Settings = () => {
@@ -277,7 +278,7 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-3'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
@@ -288,6 +289,10 @@ const Settings = () => {
                 <span className="hidden md:inline">Membros</span>
               </TabsTrigger>
             )}
+            <TabsTrigger value="contacts" className="gap-2">
+              <BookUser className="h-4 w-4" />
+              <span className="hidden md:inline">Contatos</span>
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="subscription" className="gap-2">
                 <CreditCard className="h-4 w-4" />
@@ -433,6 +438,10 @@ const Settings = () => {
               <MembersTab />
             </TabsContent>
           )}
+
+          <TabsContent value="contacts">
+            <ContactsTab />
+          </TabsContent>
 
           {isAdmin && (
             <TabsContent value="subscription" className="space-y-6 mt-6">
