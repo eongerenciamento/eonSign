@@ -116,19 +116,38 @@ const handler = async (req: Request): Promise<Response> => {
       ? authenticationOptions 
       : ['IP', 'GEOLOCATION'];
 
+    // Configurar signatureConfig baseado no modo selecionado
+    const selectedSignatureMode = signatureMode || 'SIMPLE';
+    
     // Preparar dados dos signatários para a BRy com formato E.164
+    // signatureConfig deve estar DENTRO de cada signatário
     const signersData = signers.map(signer => {
       let phone = signer.phone ? signer.phone.replace(/\D/g, '') : '';
+      
+      // Configurar signatureConfig para este signatário
+      const signerSignatureConfig: {
+        mode: string;
+        profile?: string;
+      } = {
+        mode: selectedSignatureMode,
+      };
+      
+      // Para ADVANCED e QUALIFIED, adicionar perfil com timestamp
+      if (selectedSignatureMode === 'ADVANCED' || selectedSignatureMode === 'QUALIFIED') {
+        signerSignatureConfig.profile = 'TIMESTAMP';
+      }
       
       const signerData: {
         name: string;
         email: string;
         phone?: string;
         authenticationOptions: AuthenticationOption[];
+        signatureConfig: { mode: string; profile?: string };
       } = {
         name: signer.name,
         email: signer.email,
         authenticationOptions: selectedAuthOptions,
+        signatureConfig: signerSignatureConfig,
       };
       
       if (phone && phone.length >= 10) {
@@ -136,34 +155,19 @@ const handler = async (req: Request): Promise<Response> => {
           phone = '55' + phone;
         }
         signerData.phone = '+' + phone;
-        console.log(`Signer ${signer.name}: phone formatted to ${signerData.phone}`);
+        console.log(`Signer ${signer.name}: phone formatted to ${signerData.phone}, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`);
       } else {
-        console.log(`Signer ${signer.name}: no valid phone provided, omitting phone field`);
+        console.log(`Signer ${signer.name}: no valid phone provided, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`);
       }
       
       return signerData;
     });
-
-    // Configurar signatureConfig baseado no modo selecionado
-    const selectedSignatureMode = signatureMode || 'SIMPLE';
-    const signatureConfig: {
-      mode: string;
-      profile?: string;
-    } = {
-      mode: selectedSignatureMode,
-    };
-    
-    // Para ADVANCED e QUALIFIED, adicionar perfil com timestamp
-    if (selectedSignatureMode === 'ADVANCED' || selectedSignatureMode === 'QUALIFIED') {
-      signatureConfig.profile = 'TIMESTAMP';
-    }
 
     // Criar envelope na BRy com TODOS os documentos
     const envelopePayload = {
       name: title,
       clientName: 'Eon Sign',
       signersData: signersData,
-      signatureConfig,
       typeMessaging: ['LINK'],
       documents: documentsToProcess.map(doc => ({
         base64Document: doc.base64,
