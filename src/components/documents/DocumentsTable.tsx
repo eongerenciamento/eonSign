@@ -819,66 +819,9 @@ export const DocumentsTable = ({
         const statusInfo = statusConfig[doc.status];
         return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
-                <div className="flex justify-end gap-1">
-                  {doc.signerStatuses?.[0] === "pending" && (
-                    <Button 
-                      variant="ghost"
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleSignDocument(doc.id, doc.name)}
-                      title="Assinar documento"
-                    >
-                      <PenTool className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
-                    <Eye className="w-4 h-4 text-gray-500" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
-                    <Download className="w-4 h-4 text-gray-500" />
-                  </Button>
-                  {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleDownloadReport(doc.id)}
-                      title="Baixar PDF com evidências das assinaturas coletadas"
-                    >
-                      <FileCheck className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  )}
-                  {doc.bryEnvelopeUuid && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleOpenValidation(doc.id)}
-                      title="Validar assinaturas no portal BRy"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  )}
-                  {doc.status !== 'signed' && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => handleResendNotifications(doc.id)}
-                      title="Reenviar e-mail e WhatsApp para signatários pendentes"
-                    >
-                      <Mail className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  )}
-                  {doc.signedBy === 0 && (
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
-                      <Trash2 className="w-4 h-4 text-gray-500" />
-                    </Button>
-                  )}
-                </div>
-                
+                {/* Document Name */}
                 <div 
-                  className={`space-y-1 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
+                  className={`space-y-2 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
                   onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
                 >
                   <div className="flex items-center gap-2">
@@ -894,50 +837,102 @@ export const DocumentsTable = ({
                       </span>
                     )}
                   </div>
+                  
+                  {/* Signer Badges below document name */}
+                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
+                    <TooltipProvider>
+                      <div className="flex gap-1 pl-6">
+                        {doc.signerStatuses?.map((status, idx) => {
+                          const name = doc.signerNames?.[idx] || '';
+                          const email = doc.signerEmails?.[idx] || '';
+                          const phone = doc.signerPhones?.[idx] || '';
+                          return (
+                            <Tooltip key={idx}>
+                              <TooltipTrigger asChild>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
+                                  {name ? getInitials(name) : idx + 1}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="flex flex-col gap-0.5">
+                                <p className="font-medium">{name}</p>
+                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                <p className="text-xs text-muted-foreground">{email}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
+                  )}
+                </div>
+                
+                {/* Date and Action Buttons on same line */}
+                <div className="flex items-center justify-between">
                   <p className="text-gray-500 text-sm">{doc.createdAt}</p>
+                  <div className="flex gap-1">
+                    {doc.signerStatuses?.[0] === "pending" && (
+                      <Button 
+                        variant="ghost"
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleSignDocument(doc.id, doc.name)}
+                        title="Assinar documento"
+                      >
+                        <PenTool className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
+                      <Download className="w-4 h-4 text-gray-500" />
+                    </Button>
+                    {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleDownloadReport(doc.id)}
+                        title="Baixar PDF com evidências das assinaturas coletadas"
+                      >
+                        <FileCheck className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {doc.bryEnvelopeUuid && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleOpenValidation(doc.id)}
+                        title="Validar assinaturas no portal BRy"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {doc.status !== 'signed' && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleResendNotifications(doc.id)}
+                        title="Reenviar e-mail e WhatsApp para signatários pendentes"
+                      >
+                        <Mail className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {doc.signedBy === 0 && (
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
+                        <Trash2 className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               
-              {showProgress && <div className="space-y-1">
-                  <div className="space-y-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className={`h-2 rounded-full transition-all ${doc.status === "expired" ? "bg-red-500" : "bg-[#273d60]"}`} style={{
-                  width: `${doc.signedBy / doc.signers * 100}%`
-                }} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        {doc.signedBy}/{doc.signers}
-                      </p>
-                      <TooltipProvider>
-                        <div className="flex gap-1">
-                          {doc.signerStatuses?.map((status, idx) => {
-                            const name = doc.signerNames?.[idx] || '';
-                            const email = doc.signerEmails?.[idx] || '';
-                            const phone = doc.signerPhones?.[idx] || '';
-                            return (
-                              <Tooltip key={idx}>
-                                <TooltipTrigger asChild>
-                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
-                                    {name ? getInitials(name) : idx + 1}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col gap-0.5">
-                                  <p className="font-medium">{name}</p>
-                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                  <p className="text-xs text-muted-foreground">{email}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            );
-                          })}
-                        </div>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                </div>}
-              
-              <div className="flex flex-col gap-3 pt-2">
-                {showFolderActions && folders && folders.length > 0 && <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
+              {/* Folder selection */}
+              {showFolderActions && folders && folders.length > 0 && (
+                <div className="pt-2">
+                  <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
                     <SelectTrigger className="w-full hover:bg-gray-50">
                       <SelectValue placeholder="Selecionar pasta" />
                     </SelectTrigger>
@@ -953,8 +948,9 @@ export const DocumentsTable = ({
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>}
-              </div>
+                  </Select>
+                </div>
+              )}
             </div>;
       })}
       </div>
