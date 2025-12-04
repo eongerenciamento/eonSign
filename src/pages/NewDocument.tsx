@@ -201,11 +201,24 @@ const NewDocument = () => {
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type === "application/pdf");
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+      ];
+      const newFiles = Array.from(e.dataTransfer.files).filter(f => allowedTypes.includes(f.type));
       if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
-          description: "Por favor, envie apenas arquivos PDF.",
+          description: "Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP, GIF.",
           variant: "destructive"
         });
         return;
@@ -223,11 +236,24 @@ const NewDocument = () => {
   };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).filter(f => f.type === "application/pdf");
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+      ];
+      const newFiles = Array.from(e.target.files).filter(f => allowedTypes.includes(f.type));
       if (newFiles.length === 0) {
         toast({
           title: "Formato inválido",
-          description: "Por favor, envie apenas arquivos PDF.",
+          description: "Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP, GIF.",
           variant: "destructive"
         });
         return;
@@ -643,9 +669,9 @@ const NewDocument = () => {
 
         <div className="space-y-6 bg-card p-6 rounded-lg border">
           {/* Drag and Drop Area */}
-          <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+          <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${dragActive ? "border-primary bg-primary/10 scale-[1.02] shadow-lg" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
             {files.length === 0 ? <>
-                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <Upload className={`w-12 h-12 mx-auto mb-4 transition-all duration-300 ${dragActive ? "text-primary scale-110" : "text-muted-foreground"}`} />
                 <p className="font-medium mb-2 text-base text-gray-600">
                   Arraste e solte seu documento
                 </p>
@@ -653,9 +679,9 @@ const NewDocument = () => {
                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-[#273d60] text-primary-foreground hover:bg-[#273d60] hover:text-primary-foreground">
                   Selecionar Arquivo
                 </Button>
-                <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
+                <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif" multiple onChange={handleFileChange} className="hidden" />
                 <p className="text-xs text-muted-foreground mt-4">
-                  Apenas arquivos PDF são aceitos
+                  PDF, DOC, XLS, PPT e imagens
                 </p>
               </> : files.length === 1 ?
           // Single document - simple view
@@ -673,7 +699,7 @@ const NewDocument = () => {
                   <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="h-8 w-8 hover:bg-transparent hover:text-gray-500">
                     <Plus className="w-4 h-4 text-gray-500" />
                   </Button>
-                  <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
+                  <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif" multiple onChange={handleFileChange} className="hidden" />
                 </div> :
           // Multiple documents - envelope view
           <div className="space-y-2">
@@ -705,7 +731,7 @@ const NewDocument = () => {
                         <Plus className="w-4 h-4 text-gray-500" />
                       </Button>
                     </div>}
-                  <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileChange} className="hidden" />
+                  <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif" multiple onChange={handleFileChange} className="hidden" />
                 </div>}
           </div>
 
