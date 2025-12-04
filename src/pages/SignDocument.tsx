@@ -364,7 +364,7 @@ const SignDocument = () => {
           // Simple signature specific data
           typedSignature: isSimpleSignature ? typedSignature : null,
           signatureX: signaturePosition?.x || 50, // centered horizontally
-          signatureY: signaturePosition?.y || 88, // near bottom of page
+          signatureY: signaturePosition?.y || 92, // very close to bottom of page
           signaturePage: signaturePosition?.page || 1,
         },
       });
