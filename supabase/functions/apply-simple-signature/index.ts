@@ -217,9 +217,7 @@ serve(async (req) => {
       // Colors
       const gray300 = rgb(0.835, 0.843, 0.863); // #d4d7db - gray-300
       const gray600 = rgb(0.4, 0.424, 0.471); // #666b78 - gray-600
-      const grayColor = rgb(0.4, 0.4, 0.4);
-      const lightGrayColor = rgb(0.6, 0.6, 0.6);
-      const primaryColor = rgb(0.153, 0.239, 0.376); // #273d60
+      const greenColor = rgb(0.086, 0.639, 0.290); // green for signed status
       
       // Header background - gray300
       validationPage.drawRectangle({
@@ -292,7 +290,7 @@ serve(async (req) => {
         y: currentY,
         size: 11,
         font: helveticaBold,
-        color: primaryColor,
+        color: gray600,
       });
       currentY -= 20;
 
@@ -312,7 +310,7 @@ serve(async (req) => {
         y: currentY - 15,
         size: 10,
         font: helveticaFont,
-        color: rgb(0.2, 0.2, 0.2),
+        color: gray600,
       });
 
       validationPage.drawText(`ID: ${documentId}`, {
@@ -320,7 +318,7 @@ serve(async (req) => {
         y: currentY - 30,
         size: 9,
         font: helveticaFont,
-        color: grayColor,
+        color: gray600,
       });
 
       validationPage.drawText(`Data de conclusão: ${signDate}`, {
@@ -328,7 +326,7 @@ serve(async (req) => {
         y: currentY - 45,
         size: 9,
         font: helveticaFont,
-        color: grayColor,
+        color: gray600,
       });
       
       currentY -= 80;
@@ -339,7 +337,7 @@ serve(async (req) => {
         y: currentY,
         size: 11,
         font: helveticaBold,
-        color: primaryColor,
+        color: gray600,
       });
       currentY -= 25;
 
@@ -357,7 +355,7 @@ serve(async (req) => {
             y: currentY,
             size: 11,
             font: helveticaBold,
-            color: primaryColor,
+            color: gray600,
           });
           currentY -= 25;
         }
@@ -397,7 +395,7 @@ serve(async (req) => {
           y: currentY + 2,
           size: 11,
           font: helveticaBold,
-          color: rgb(0.15, 0.15, 0.15),
+          color: gray600,
         });
 
         // Signed checkmark
@@ -406,7 +404,7 @@ serve(async (req) => {
           y: currentY + 2,
           size: 8,
           font: helveticaBold,
-          color: rgb(0.086, 0.639, 0.290), // green
+          color: greenColor,
         });
 
         const lineHeight = 13;
@@ -419,7 +417,7 @@ serve(async (req) => {
           y: infoY,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         validationPage.drawText(`Nascimento: ${formatDate(signer.birth_date)}`, {
@@ -427,7 +425,7 @@ serve(async (req) => {
           y: infoY - lineHeight,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         validationPage.drawText(`E-mail: ${signer.email || "N/A"}`, {
@@ -435,7 +433,7 @@ serve(async (req) => {
           y: infoY - lineHeight * 2,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         validationPage.drawText(`Telefone: ${formatPhone(signer.phone)}`, {
@@ -443,7 +441,7 @@ serve(async (req) => {
           y: infoY - lineHeight * 3,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         // Right column
@@ -452,7 +450,7 @@ serve(async (req) => {
           y: infoY,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         let locationStr = "N/A";
@@ -468,7 +466,7 @@ serve(async (req) => {
           y: infoY - lineHeight,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         // Truncate signature ID for display
@@ -478,7 +476,7 @@ serve(async (req) => {
           y: infoY - lineHeight * 2,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         validationPage.drawText(`Data/Hora: ${formatDateTime(signer.signed_at)}`, {
@@ -486,7 +484,7 @@ serve(async (req) => {
           y: infoY - lineHeight * 3,
           size: 9,
           font: helveticaFont,
-          color: rgb(0.25, 0.25, 0.25),
+          color: gray600,
         });
 
         currentY -= cardHeight + 10;
@@ -518,7 +516,7 @@ serve(async (req) => {
             y: 78,
             size: 8,
             font: helveticaBold,
-            color: primaryColor,
+            color: gray600,
           });
           
           const scanText = "Escaneie o QR Code";
@@ -528,7 +526,7 @@ serve(async (req) => {
             y: 68,
             size: 7,
             font: helveticaFont,
-            color: grayColor,
+            color: gray600,
           });
           
           console.log("QR code embedded successfully");
@@ -550,7 +548,7 @@ serve(async (req) => {
         y: 36,
         size: 9,
         font: helveticaBold,
-        color: primaryColor,
+        color: gray600,
       });
 
       validationPage.drawText("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
@@ -558,7 +556,7 @@ serve(async (req) => {
         y: 24,
         size: 8,
         font: helveticaFont,
-        color: lightGrayColor,
+        color: gray600,
       });
     }
 
