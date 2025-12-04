@@ -42,14 +42,23 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Extrair o primeiro nome
-    const firstName = companyData.admin_name.split(' ')[0];
-    console.log("Setting new password to first name:", firstName);
+    // Gerar senha aleatória de 8 caracteres
+    const generateRandomPassword = () => {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      let password = '';
+      for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    };
+    
+    const newPassword = generateRandomPassword();
+    console.log("Setting new random password for user:", companyData.user_id);
 
     // Definir a nova senha usando o Supabase Admin API
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       companyData.user_id,
-      { password: firstName }
+      { password: newPassword }
     );
 
     if (updateError) {
@@ -83,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <strong>Login:</strong> ${email}
               </p>
               <p style="margin: 10px 0; color: #333; font-size: 16px;">
-                <strong>Nova Senha:</strong> ${firstName}
+                <strong>Nova Senha:</strong> ${newPassword}
               </p>
             </div>
             <p style="color: #666; font-size: 14px;">
