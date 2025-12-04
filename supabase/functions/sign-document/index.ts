@@ -213,50 +213,7 @@ serve(async (req) => {
     // Check if this is a SIMPLE signature (native flow)
     const isSimpleSignature = document.signature_mode === "SIMPLE" || !document.signature_mode;
 
-    let signedFileUrl = null;
-
-    if (isSimpleSignature) {
-      console.log("Processing SIMPLE signature - native flow");
-
-      // Call apply-simple-signature to process the PDF
-      try {
-        const { data: signatureResult, error: signatureError } = await supabase.functions.invoke(
-          "apply-simple-signature",
-          {
-            body: {
-              documentId,
-              signerId,
-              typedSignature: typedSignature || signerInfo.name,
-              signatureX: signatureX || 50,
-              signatureY: signatureY || 80,
-              signaturePage: signaturePage || 1,
-              signerData: {
-                name: signerInfo.name,
-                email: signerInfo.email,
-                phone: signerInfo.phone,
-                cpf: cpf,
-                ip: clientIp,
-                city,
-                state,
-                country,
-                signatureId
-              }
-            }
-          }
-        );
-
-        if (signatureError) {
-          console.error("Error applying simple signature:", signatureError);
-        } else if (signatureResult?.signedFileUrl) {
-          signedFileUrl = signatureResult.signedFileUrl;
-          console.log("Simple signature applied, signed URL:", signedFileUrl);
-        }
-      } catch (sigErr) {
-        console.error("Error invoking apply-simple-signature:", sigErr);
-      }
-    }
-
-    // Update signer record
+    // First, update signer record with signature data (before applying signature to PDF)
     const { error: signerError } = await supabase
       .from("document_signers")
       .update({
@@ -286,10 +243,10 @@ serve(async (req) => {
       );
     }
 
-    // Check if all signers have signed
+    // Check if all signers have signed BEFORE applying signature
     const { data: signers, error: signersError } = await supabase
       .from("document_signers")
-      .select("status")
+      .select("id, name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id")
       .eq("document_id", documentId);
 
     if (signersError) {
@@ -298,18 +255,68 @@ serve(async (req) => {
 
     const signedCount = signers?.filter(s => s.status === "signed").length || 0;
     const allSigned = signedCount === signers?.length;
+    const isLastSigner = allSigned;
 
-    console.log("Signature count:", { signedCount, totalSigners: signers?.length, allSigned });
+    console.log("Signature count:", { signedCount, totalSigners: signers?.length, allSigned, isLastSigner });
 
-    // Update document
+    let signedFilePath = null;
+
+    if (isSimpleSignature) {
+      console.log("Processing SIMPLE signature - native flow");
+
+      // Prepare all signers data for validation page (only used when last signer)
+      const allSignersData = isLastSigner ? signers : null;
+
+      // Call apply-simple-signature to process the PDF
+      try {
+        const { data: signatureResult, error: signatureError } = await supabase.functions.invoke(
+          "apply-simple-signature",
+          {
+            body: {
+              documentId,
+              signerId,
+              typedSignature: typedSignature || signerInfo.name,
+              signatureX: signatureX || 50,
+              signatureY: signatureY || 80,
+              signaturePage: signaturePage || 1,
+              signerData: {
+                name: signerInfo.name,
+                email: signerInfo.email,
+                phone: signerInfo.phone,
+                cpf: cpf,
+                ip: clientIp,
+                city,
+                state,
+                country,
+                signatureId
+              },
+              allSignersData,  // Pass all signers data for validation page
+              isLastSigner     // Flag to indicate last signer
+            }
+          }
+        );
+
+        if (signatureError) {
+          console.error("Error applying simple signature:", signatureError);
+        } else if (signatureResult?.signedFilePath) {
+          signedFilePath = signatureResult.signedFilePath;
+          console.log("Simple signature applied, signed path:", signedFilePath);
+        }
+      } catch (sigErr) {
+        console.error("Error invoking apply-simple-signature:", sigErr);
+      }
+    }
+
+    // Update document - ALWAYS update bry_signed_file_url after each signature
     const updateData: any = {
       signed_by: signedCount,
       status: allSigned ? "signed" : "pending",
     };
 
-    // Only update signed file URL for simple signatures when all have signed
-    if (isSimpleSignature && allSigned && signedFileUrl) {
-      updateData.bry_signed_file_url = signedFileUrl;
+    // Update signed file URL after EACH simple signature to accumulate signatures
+    if (isSimpleSignature && signedFilePath) {
+      updateData.bry_signed_file_url = signedFilePath;
+      console.log("Updating bry_signed_file_url to:", signedFilePath);
     }
 
     const { error: docError } = await supabase
@@ -331,13 +338,13 @@ serve(async (req) => {
         .eq("user_id", document.user_id)
         .single();
 
-      const { data: allSigners } = await supabase
+      const { data: allSignersForNotification } = await supabase
         .from("document_signers")
         .select("email, phone, name")
         .eq("document_id", documentId);
 
-      if (allSigners && allSigners.length > 0) {
-        const signerEmails = allSigners.map(s => s.email);
+      if (allSignersForNotification && allSignersForNotification.length > 0) {
+        const signerEmails = allSignersForNotification.map(s => s.email).filter(Boolean);
         const senderName = companySettings?.admin_name || "Eon Sign";
 
         try {
@@ -354,21 +361,23 @@ serve(async (req) => {
           console.error("Error sending confirmation emails:", emailError);
         }
 
-        for (const signer of allSigners) {
-          try {
-            await supabase.functions.invoke('send-whatsapp-message', {
-              body: {
-                signerName: signer.name,
-                signerPhone: signer.phone,
-                documentName: document.name,
-                documentId,
-                organizationName: companySettings?.admin_name || "Eon Sign",
-                isCompleted: true
-              }
-            });
-            console.log(`WhatsApp confirmation sent to ${signer.phone}`);
-          } catch (whatsappError) {
-            console.error(`Error sending WhatsApp to ${signer.phone}:`, whatsappError);
+        for (const signer of allSignersForNotification) {
+          if (signer.phone) {
+            try {
+              await supabase.functions.invoke('send-whatsapp-message', {
+                body: {
+                  signerName: signer.name,
+                  signerPhone: signer.phone,
+                  documentName: document.name,
+                  documentId,
+                  organizationName: companySettings?.admin_name || "Eon Sign",
+                  isCompleted: true
+                }
+              });
+              console.log(`WhatsApp confirmation sent to ${signer.phone}`);
+            } catch (whatsappError) {
+              console.error(`Error sending WhatsApp to ${signer.phone}:`, whatsappError);
+            }
           }
         }
       }
