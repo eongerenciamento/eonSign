@@ -154,9 +154,21 @@ serve(async (req) => {
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Calculate signature position
+    // Calculate signature position with offset for multiple signers at default position
+    let adjustedSignatureY = signatureY;
+    
+    // If using default position (92% or higher), offset based on signer index to avoid overlap
+    if (signatureY >= 90 && allSignersData && allSignersData.length > 1) {
+      const signerIndex = allSignersData.findIndex((s: any) => s.id === signerId);
+      if (signerIndex > 0) {
+        // Move each subsequent signer's signature 8% up from the previous
+        adjustedSignatureY = signatureY - (signerIndex * 8);
+        console.log(`Signer index ${signerIndex}: adjusted Y from ${signatureY} to ${adjustedSignatureY}`);
+      }
+    }
+    
     const sigX = signatureX ? (signatureX / 100) * width : 50;
-    const sigY = signatureY ? height - ((signatureY / 100) * height) : height - 200;
+    const sigY = adjustedSignatureY ? height - ((adjustedSignatureY / 100) * height) : height - 200;
 
     // Draw signature box - reduced size
     const signatureBoxWidth = 150;
@@ -230,10 +242,20 @@ serve(async (req) => {
 
       // Try to embed system logo (Eon Sign logo) - left justified
       try {
-        const systemLogoUrl = `${APP_URL}/logo-eon-gray.png`;
-        console.log("Downloading system logo:", systemLogoUrl);
-        const logoResponse = await fetch(systemLogoUrl);
-        console.log("Logo response status:", logoResponse.status);
+        // Use Lovable project URL as primary, custom domain as fallback
+        const primaryLogoUrl = "https://lbyoniuealghclfuahko.lovableproject.com/logo-eon-gray.png";
+        const fallbackLogoUrl = `${APP_URL}/logo-eon-gray.png`;
+        
+        console.log("Downloading system logo from primary URL:", primaryLogoUrl);
+        let logoResponse = await fetch(primaryLogoUrl);
+        console.log("Primary logo response status:", logoResponse.status);
+        
+        // If primary fails, try fallback
+        if (!logoResponse.ok) {
+          console.log("Primary URL failed, trying fallback:", fallbackLogoUrl);
+          logoResponse = await fetch(fallbackLogoUrl);
+          console.log("Fallback logo response status:", logoResponse.status);
+        }
         
         if (logoResponse.ok) {
           const logoBuffer = await logoResponse.arrayBuffer();
@@ -243,9 +265,9 @@ serve(async (req) => {
           let logoImage;
           
           // Determine format from content-type or URL extension
-          const isPng = contentType.includes("png") || systemLogoUrl.endsWith(".png");
+          const isPng = contentType.includes("png") || primaryLogoUrl.endsWith(".png");
           const isJpeg = contentType.includes("jpeg") || contentType.includes("jpg") || 
-                         systemLogoUrl.endsWith(".jpg") || systemLogoUrl.endsWith(".jpeg");
+                         primaryLogoUrl.endsWith(".jpg") || primaryLogoUrl.endsWith(".jpeg");
           
           if (isPng) {
             try {
