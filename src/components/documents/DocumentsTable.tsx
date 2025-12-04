@@ -1103,6 +1103,17 @@ export const DocumentsTable = ({
                       >
                         <Download className="w-4 h-4 text-gray-500" />
                       </Button>
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleDownloadCertificatePDF(doc.id)}
+                          title="Baixar certificado de validação (PDF)"
+                        >
+                          <FileDown className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
                       {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
                         <Button 
                           variant="ghost" 
@@ -1134,17 +1145,6 @@ export const DocumentsTable = ({
                           title="Visualizar certificado de validação"
                         >
                           <ShieldCheck className="w-4 h-4 text-gray-500" />
-                        </Button>
-                      )}
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
-                          onClick={() => handleDownloadCertificatePDF(doc.id)}
-                          title="Baixar certificado de validação (PDF)"
-                        >
-                          <FileDown className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
                       {doc.status !== 'signed' && (
@@ -1210,6 +1210,17 @@ export const DocumentsTable = ({
                     >
                       <Download className="w-4 h-4 text-gray-500" />
                     </Button>
+                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleDownloadCertificatePDF(doc.id)}
+                        title="Baixar certificado de validação (PDF)"
+                      >
+                        <FileDown className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
                     {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
                       <Button 
                         variant="ghost" 
@@ -1241,17 +1252,6 @@ export const DocumentsTable = ({
                         title="Visualizar certificado de validação"
                       >
                         <ShieldCheck className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    )}
-                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleDownloadCertificatePDF(doc.id)}
-                        title="Baixar certificado de validação (PDF)"
-                      >
-                        <FileDown className="w-4 h-4 text-gray-500" />
                       </Button>
                     )}
                     {doc.status !== 'signed' && (
