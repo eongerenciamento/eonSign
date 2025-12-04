@@ -40,7 +40,7 @@ const SIGNATURE_MODES: {
   {
     id: 'SIMPLE',
     label: 'Assinatura Eletrônica',
-    description: 'Coleta de evidências (IP, geolocalização, etc.)'
+    description: 'Coleta de evidências (IP, geolocalização)'
   },
   {
     id: 'ADVANCED',
@@ -789,15 +789,13 @@ const NewDocument = () => {
                 >
                   <RadioGroupItem value={mode.id} id={mode.id} className="mt-0.5" />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">{mode.label}</span>
-                      {mode.badge && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                          {mode.badge}
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-sm font-medium text-gray-700">{mode.label}</span>
                     <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
+                    {mode.badge && (
+                      <span className="inline-block text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium mt-1.5">
+                        {mode.badge}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
