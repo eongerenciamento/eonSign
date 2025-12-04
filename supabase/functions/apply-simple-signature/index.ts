@@ -230,9 +230,9 @@ serve(async (req) => {
         color: gray300,
       });
 
-      // Try to embed system logo (Eon Sign logo)
+      // Try to embed system logo (Eon Sign logo) - left justified
       try {
-        const systemLogoUrl = `${APP_URL}/logo-eon-white.png`;
+        const systemLogoUrl = `${APP_URL}/logo-eon-gray.png`;
         console.log("Downloading system logo:", systemLogoUrl);
         const logoResponse = await fetch(systemLogoUrl);
         if (logoResponse.ok) {
@@ -251,12 +251,14 @@ serve(async (req) => {
             const logoMaxWidth = 120;
             const logoDims = logoImage.scale(Math.min(logoMaxWidth / logoImage.width, logoMaxHeight / logoImage.height));
             
-            // Center logo horizontally
-            const logoX = (595.28 - logoDims.width) / 2;
+            // Logo left justified with padding
+            const logoX = 40;
+            // Vertically center logo in header (header: y=741.89 to y=841.89, center at 791.89)
+            const logoY = 791.89 - (logoDims.height / 2);
             
             validationPage.drawImage(logoImage, {
               x: logoX,
-              y: 782,
+              y: logoY,
               width: logoDims.width,
               height: logoDims.height,
             });
@@ -267,14 +269,16 @@ serve(async (req) => {
         console.error("Error embedding system logo:", logoError);
       }
 
-      // Title - centered, gray600, with accents
+      // Title - horizontally centered, vertically centered in header gray300
       const titleText = "PÁGINA DE VALIDAÇÃO";
       const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 16);
       const titleX = (595.28 - titleWidth) / 2;
+      // Header center at y=791.89, adjust for text height (approx half of font size)
+      const titleY = 791.89 - 6;
       
       validationPage.drawText(titleText, {
         x: titleX,
-        y: 760,
+        y: titleY,
         size: 16,
         font: helveticaBold,
         color: gray600,
