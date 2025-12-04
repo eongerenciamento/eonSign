@@ -903,7 +903,7 @@ export const DocumentsTable = ({
                   {/* Signer Badges below document name */}
                   {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
                     <TooltipProvider>
-                      <div className="flex gap-1 pl-6">
+                      <div className="flex gap-1 justify-end">
                         {doc.signerStatuses?.map((status, idx) => {
                           const name = doc.signerNames?.[idx] || '';
                           const email = doc.signerEmails?.[idx] || '';
