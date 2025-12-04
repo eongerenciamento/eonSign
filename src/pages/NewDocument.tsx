@@ -527,7 +527,8 @@ const NewDocument = () => {
           status: 'pending',
           signers: totalSigners,
           signed_by: 0,
-          envelope_id: envelopeId
+          envelope_id: envelopeId,
+          signature_mode: signatureMode
         }).select().single();
         if (docError) throw docError;
         documentIds.push(documentData.id);
@@ -571,64 +572,70 @@ const NewDocument = () => {
         if (signersError) throw signersError;
       }
 
-      // Create a SINGLE BRy envelope with ALL documents
-      const brySignerLinks: Map<string, string> = new Map(); // key: email or phone
+      // For SIMPLE signatures, use native flow without BRy
+      // For ADVANCED/QUALIFIED, use BRy integration
+      const brySignerLinks: Map<string, string> = new Map();
+      const isSimpleSignature = signatureMode === 'SIMPLE';
 
-      try {
-        const allSigners = [{
-          name: companySigner.name,
-          email: companySigner.email,
-          phone: companySigner.phone
-        }, ...signers];
+      if (!isSimpleSignature) {
+        // Create BRy envelope only for ADVANCED/QUALIFIED signatures
+        try {
+          const allSigners = [{
+            name: companySigner.name,
+            email: companySigner.email,
+            phone: companySigner.phone
+          }, ...signers];
 
-        // Preparar documentos para envio único ao BRy
-        const documentsForBry = fileContents.map(fc => ({
-          documentId: fc.docId,
-          base64: fc.base64,
-          fileName: files.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || title,
-        }));
+          const documentsForBry = fileContents.map(fc => ({
+            documentId: fc.docId,
+            base64: fc.base64,
+            fileName: files.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || title,
+          }));
 
-        const {
-          data: bryData,
-          error: bryError
-        } = await supabase.functions.invoke('bry-create-envelope', {
-          body: {
-            documents: documentsForBry,
-            title: title,
-            signers: allSigners,
-            userId: user.id,
-            authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions],
-            signatureMode: signatureMode
-          }
-        });
-
-        if (bryError) {
-          console.error('BRy envelope creation failed:', bryError);
-        } else if (bryData?.signerLinks) {
-          for (const link of bryData.signerLinks) {
-            const key = link.email || link.phone;
-            if (key) {
-              brySignerLinks.set(key, link.link);
+          const {
+            data: bryData,
+            error: bryError
+          } = await supabase.functions.invoke('bry-create-envelope', {
+            body: {
+              documents: documentsForBry,
+              title: title,
+              signers: allSigners,
+              userId: user.id,
+              authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions],
+              signatureMode: signatureMode
             }
+          });
+
+          if (bryError) {
+            console.error('BRy envelope creation failed:', bryError);
+          } else if (bryData?.signerLinks) {
+            for (const link of bryData.signerLinks) {
+              const key = link.email || link.phone;
+              if (key) {
+                brySignerLinks.set(key, link.link);
+              }
+            }
+            console.log('BRy envelope created:', bryData.envelopeUuid, 'with', documentsForBry.length, 'documents');
           }
-          console.log('BRy envelope created:', bryData.envelopeUuid, 'with', documentsForBry.length, 'documents');
+        } catch (bryErr) {
+          console.error('Error creating BRy envelope:', bryErr);
         }
-      } catch (bryErr) {
-        console.error('Error creating BRy envelope:', bryErr);
+      } else {
+        console.log('SIMPLE signature mode - using native flow without BRy');
       }
 
-      // Send notifications with BRy links - PARA TODOS incluindo empresa
+      // Send notifications - use BRy links for ADVANCED/QUALIFIED, internal links for SIMPLE
       const allSignersForNotification = [{
         name: companySigner.name,
         email: companySigner.email,
         phone: companySigner.phone
       }, ...signers];
+
       for (const signer of allSignersForNotification) {
         try {
-          // Get BRy link using email or phone as key
-          const bryLink = brySignerLinks.get(signer.email) || brySignerLinks.get(signer.phone);
+          // For SIMPLE mode, no BRy link - will use internal /assinar/:documentId
+          const bryLink = isSimpleSignature ? null : (brySignerLinks.get(signer.email) || brySignerLinks.get(signer.phone));
 
-          // Send email only if email is provided
           if (signer.email) {
             await supabase.functions.invoke('send-signature-email', {
               body: {
@@ -639,12 +646,11 @@ const NewDocument = () => {
                 senderName: companySigner.name,
                 organizationName: companySigner.companyName,
                 userId: user.id,
-                brySignerLink: bryLink
+                brySignerLink: bryLink // null for SIMPLE, BRy link for others
               }
             });
           }
 
-          // Send WhatsApp only if phone is provided
           if (signer.phone) {
             await supabase.functions.invoke('send-whatsapp-message', {
               body: {
@@ -653,7 +659,7 @@ const NewDocument = () => {
                 documentName: title,
                 documentId: firstDocumentId,
                 organizationName: companySigner.companyName,
-                brySignerLink: bryLink
+                brySignerLink: bryLink // null for SIMPLE, BRy link for others
               }
             });
           }

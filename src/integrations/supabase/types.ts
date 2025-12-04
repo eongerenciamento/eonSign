@@ -119,12 +119,17 @@ export type Database = {
           phone: string
           signature_city: string | null
           signature_country: string | null
+          signature_id: string | null
           signature_ip: string | null
           signature_latitude: number | null
           signature_longitude: number | null
+          signature_page: number | null
           signature_state: string | null
+          signature_x: number | null
+          signature_y: number | null
           signed_at: string | null
           status: string
+          typed_signature: string | null
           updated_at: string
         }
         Insert: {
@@ -141,12 +146,17 @@ export type Database = {
           phone: string
           signature_city?: string | null
           signature_country?: string | null
+          signature_id?: string | null
           signature_ip?: string | null
           signature_latitude?: number | null
           signature_longitude?: number | null
+          signature_page?: number | null
           signature_state?: string | null
+          signature_x?: number | null
+          signature_y?: number | null
           signed_at?: string | null
           status?: string
+          typed_signature?: string | null
           updated_at?: string
         }
         Update: {
@@ -163,12 +173,17 @@ export type Database = {
           phone?: string
           signature_city?: string | null
           signature_country?: string | null
+          signature_id?: string | null
           signature_ip?: string | null
           signature_latitude?: number | null
           signature_longitude?: number | null
+          signature_page?: number | null
           signature_state?: string | null
+          signature_x?: number | null
+          signature_y?: number | null
           signed_at?: string | null
           status?: string
+          typed_signature?: string | null
           updated_at?: string
         }
         Relationships: [
