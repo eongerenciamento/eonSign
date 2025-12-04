@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { EnvelopeDocumentsDialog } from "./EnvelopeDocumentsDialog";
 import { BrySigningDialog } from "./BrySigningDialog";
+import JSZip from "jszip";
 
 export interface EnvelopeDocument {
   id: string;
@@ -644,6 +645,96 @@ export const DocumentsTable = ({
       });
     }
   };
+
+  // Download all envelope documents as ZIP
+  const handleDownloadEnvelopeAll = async (doc: Document) => {
+    if (!doc.isEnvelope || !doc.envelopeDocuments || doc.envelopeDocuments.length === 0) {
+      // Fallback to single document download
+      handleDownloadDocument(doc.id);
+      return;
+    }
+
+    try {
+      toast({
+        title: "Preparando download...",
+        description: `Baixando ${doc.envelopeDocuments.length} documentos...`,
+      });
+
+      const zip = new JSZip();
+
+      for (const envDoc of doc.envelopeDocuments) {
+        // Determine file path (signed or original)
+        let filePath: string | null = null;
+        
+        if (envDoc.bry_signed_file_url) {
+          filePath = envDoc.bry_signed_file_url;
+        } else if (envDoc.file_url) {
+          const urlParts = envDoc.file_url.split('/storage/v1/object/public/documents/');
+          if (urlParts.length >= 2) {
+            filePath = urlParts[1];
+          }
+        }
+
+        if (!filePath) continue;
+
+        // Get signed URL
+        const { data: signedData, error: signedError } = await supabase
+          .storage
+          .from('documents')
+          .createSignedUrl(filePath, 3600);
+
+        if (signedError || !signedData?.signedUrl) continue;
+
+        // Fetch file
+        const response = await fetch(signedData.signedUrl);
+        const blob = await response.blob();
+
+        // Add to ZIP with cleaned name
+        const fileName = envDoc.bry_signed_file_url 
+          ? envDoc.name.replace('.pdf', '_assinado.pdf')
+          : envDoc.name;
+        zip.file(fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`, blob);
+      }
+
+      // Generate and download ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${doc.name.split(' - ')[0]}_documentos.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download concluído",
+        description: `ZIP com ${doc.envelopeDocuments.length} documentos baixado com sucesso.`,
+      });
+    } catch (error: any) {
+      console.error("Error downloading envelope:", error);
+      toast({
+        title: "Erro ao baixar envelope",
+        description: error.message || "Não foi possível baixar os documentos.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Download evidence report for envelope (uses first document's BRy envelope)
+  const handleDownloadEnvelopeReport = async (doc: Document) => {
+    // Report is per envelope, so just use the main doc ID
+    handleDownloadReport(doc.id);
+  };
+
+  // View envelope documents (opens dialog)
+  const handleViewEnvelopeDocuments = (doc: Document) => {
+    if (doc.isEnvelope) {
+      handleOpenEnvelopeDialog(doc);
+    } else {
+      handleViewDocument(doc.id);
+    }
+  };
   return <>
       {/* Desktop Table View */}
       <div className="hidden md:block rounded-lg overflow-hidden">
@@ -761,10 +852,22 @@ export const DocumentsTable = ({
                           <PenTool className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent" 
+                        onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
+                        title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
+                      >
                         <Eye className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent" 
+                        onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
+                        title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
+                      >
                         <Download className="w-4 h-4 text-gray-500" />
                       </Button>
                       {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
@@ -772,7 +875,7 @@ export const DocumentsTable = ({
                           variant="ghost" 
                           size="icon" 
                           className="rounded-full hover:bg-transparent" 
-                          onClick={() => handleDownloadReport(doc.id)}
+                          onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
                           title="Baixar PDF com evidências das assinaturas coletadas"
                         >
                           <FileCheck className="w-4 h-4 text-gray-500" />
@@ -834,10 +937,22 @@ export const DocumentsTable = ({
                         <PenTool className="w-4 h-4 text-gray-500" />
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleViewDocument(doc.id)} title="Visualizar documento">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
+                      title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
+                    >
                       <Eye className="w-4 h-4 text-gray-500" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDownloadDocument(doc.id)} title="Baixar documento original">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-transparent h-8 w-8" 
+                      onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
+                      title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
+                    >
                       <Download className="w-4 h-4 text-gray-500" />
                     </Button>
                     {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
@@ -845,7 +960,7 @@ export const DocumentsTable = ({
                         variant="ghost" 
                         size="icon" 
                         className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleDownloadReport(doc.id)}
+                        onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
                         title="Baixar PDF com evidências das assinaturas coletadas"
                       >
                         <FileCheck className="w-4 h-4 text-gray-500" />

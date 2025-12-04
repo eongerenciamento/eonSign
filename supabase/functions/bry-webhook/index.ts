@@ -6,10 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Interfaces baseadas no payload real da BRy
 interface BrySigner {
   name: string;
-  signatureStatus: string; // 'SIGNED', 'PENDING', etc.
+  signatureStatus: string;
   signerNonce: string;
   signerUuid: string;
   email?: string;
@@ -23,18 +22,16 @@ interface BryDocument {
 }
 
 interface BryWebhookPayload {
-  uuid: string;           // Envelope UUID
-  signer?: BrySigner;     // Informações do signatário (presente quando signatário assina)
+  uuid: string;
+  signer?: BrySigner;
   documents?: BryDocument[];
-  status?: string;        // Status do envelope ('COMPLETED', 'SIGNED', etc.)
-  // Campos legados para compatibilidade
+  status?: string;
   event?: string;
   signerNonce?: string;
   signerEmail?: string;
   documentUuid?: string;
 }
 
-// Função para converter ArrayBuffer para base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -44,7 +41,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-// Função para converter base64 para ArrayBuffer
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -54,7 +50,6 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// Função para carimbar o PDF
 async function stampPdf(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer | null> {
   try {
     const base64Pdf = arrayBufferToBase64(pdfBuffer);
@@ -88,42 +83,43 @@ async function stampPdf(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer | null> {
   }
 }
 
+async function getAccessToken(): Promise<string> {
+  const clientId = Deno.env.get('BRY_CLIENT_ID');
+  const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
+  const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
+  
+  const tokenBaseUrl = environment === 'production' 
+    ? 'https://cloud.bry.com.br'
+    : 'https://cloud-hom.bry.com.br';
+
+  const tokenResponse = await fetch(`${tokenBaseUrl}/token-service/jwt`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId!,
+      client_secret: clientSecret!,
+    }).toString(),
+  });
+
+  if (!tokenResponse.ok) {
+    throw new Error('Failed to get BRy token');
+  }
+
+  const tokenData = await tokenResponse.json();
+  return tokenData.access_token;
+}
+
 async function downloadSignedDocument(envelopeUuid: string, documentUuid: string): Promise<ArrayBuffer | null> {
   try {
-    const clientId = Deno.env.get('BRY_CLIENT_ID');
-    const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
+    const accessToken = await getAccessToken();
     const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
-    
-    const tokenBaseUrl = environment === 'production' 
-      ? 'https://cloud.bry.com.br'
-      : 'https://cloud-hom.bry.com.br';
-
-    // Obter token
-    const tokenResponse = await fetch(`${tokenBaseUrl}/token-service/jwt`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: clientId!,
-        client_secret: clientSecret!,
-      }).toString(),
-    });
-
-    if (!tokenResponse.ok) {
-      console.error('Failed to get token for download');
-      return null;
-    }
-
-    const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
-
     const apiBaseUrl = environment === 'production'
       ? 'https://easysign.bry.com.br'
       : 'https://easysign.hom.bry.com.br';
 
-    // Baixar documento assinado
     const downloadUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${envelopeUuid}/documents/${documentUuid}/signed`;
     console.log('Downloading signed document from:', downloadUrl);
 
@@ -146,35 +142,33 @@ async function downloadSignedDocument(envelopeUuid: string, documentUuid: string
   }
 }
 
-// Função para finalizar documento (baixar, carimbar, fazer upload e notificar)
-async function finalizeDocument(
+// Processa e finaliza UM documento específico
+async function processDocument(
   supabase: any,
   document: any,
-  envelopeUuid: string,
-  documentUuid: string
+  envelopeUuid: string
 ): Promise<void> {
-  console.log('=== FINALIZING DOCUMENT ===');
+  console.log('=== PROCESSING DOCUMENT ===');
   console.log('Document ID:', document.id);
-  console.log('Envelope UUID:', envelopeUuid);
-  console.log('Document UUID:', documentUuid);
+  console.log('Document UUID:', document.bry_document_uuid);
+
+  const documentUuid = document.bry_document_uuid;
+  
+  if (!documentUuid) {
+    console.error('Document UUID not found for document:', document.id);
+    return;
+  }
 
   // Baixar documento assinado
   let signedPdf = await downloadSignedDocument(envelopeUuid, documentUuid);
 
   if (signedPdf) {
-    // Carimbar o PDF antes de fazer upload
+    // Carimbar o PDF
     console.log('Stamping signed PDF...');
     const stampedPdf = await stampPdf(signedPdf);
-    
-    // Usar PDF carimbado se disponível, senão usar original
     const finalPdf = stampedPdf || signedPdf;
-    if (stampedPdf) {
-      console.log('Using stamped PDF');
-    } else {
-      console.log('Stamp failed, using original signed PDF');
-    }
 
-    // Fazer upload do documento assinado para o Storage
+    // Upload do documento assinado
     const fileName = `${document.user_id}/${document.id}_signed.pdf`;
     
     const { error: uploadError } = await supabase.storage
@@ -189,23 +183,21 @@ async function finalizeDocument(
     } else {
       console.log('Signed document uploaded:', fileName);
 
-      // Atualizar documento com URL do arquivo assinado
       await supabase
         .from('documents')
         .update({
           status: 'signed',
           bry_signed_file_url: fileName,
-          bry_document_uuid: documentUuid,
         })
         .eq('id', document.id);
 
       console.log('Document status updated to signed');
     }
   } else {
-    console.error('Failed to download signed PDF');
+    console.error('Failed to download signed PDF for document:', document.id);
   }
 
-  // Marcar todos os signatários como assinados
+  // Marcar todos os signatários deste documento como assinados
   await supabase
     .from('document_signers')
     .update({
@@ -215,7 +207,7 @@ async function finalizeDocument(
     .eq('document_id', document.id)
     .eq('status', 'pending');
 
-  // Atualizar contagem final
+  // Atualizar contagem
   const { data: allSigners } = await supabase
     .from('document_signers')
     .select('id')
@@ -229,30 +221,69 @@ async function finalizeDocument(
     })
     .eq('id', document.id);
 
-  console.log('Final signed_by count:', allSigners?.length || 0);
+  console.log('Document finalized:', document.id);
+}
 
-  // Enviar email e WhatsApp de documento completado
+// Finaliza TODOS os documentos do envelope e envia notificações UMA vez
+async function finalizeEnvelope(
+  supabase: any,
+  envelopeUuid: string
+): Promise<void> {
+  console.log('=== FINALIZING ENVELOPE ===');
+  console.log('Envelope UUID:', envelopeUuid);
+
+  // Buscar TODOS os documentos com este envelope UUID
+  const { data: documents, error: docsError } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('bry_envelope_uuid', envelopeUuid);
+
+  if (docsError || !documents || documents.length === 0) {
+    console.error('No documents found for envelope:', envelopeUuid);
+    return;
+  }
+
+  console.log(`Found ${documents.length} documents in envelope`);
+
+  // Processar cada documento
+  for (const document of documents) {
+    if (document.status !== 'signed') {
+      await processDocument(supabase, document, envelopeUuid);
+    } else {
+      console.log(`Document ${document.id} already signed, skipping`);
+    }
+  }
+
+  // Enviar notificações de conclusão UMA VEZ (usando o primeiro documento para info)
+  const firstDocument = documents[0];
+  
   try {
+    // Pegar signatários únicos (evitar duplicatas em envelope)
     const { data: signers } = await supabase
       .from('document_signers')
       .select('email, name, phone')
-      .eq('document_id', document.id);
+      .eq('document_id', firstDocument.id);
 
     if (signers && signers.length > 0) {
-      const signerEmails = signers.map((s: any) => s.email);
+      const signerEmails = signers.map((s: any) => s.email).filter(Boolean);
       
+      // Nome do envelope para notificação
+      const envelopeName = documents.length > 1 
+        ? `Envelope: ${firstDocument.name.split(' - ')[0]}` 
+        : firstDocument.name;
+
       // Enviar email de conclusão
       await supabase.functions.invoke('send-document-completed-email', {
         body: {
-          documentId: document.id,
-          documentName: document.name,
+          documentId: firstDocument.id,
+          documentName: envelopeName,
           signerEmails,
           senderName: 'Eon Sign',
         },
       });
       console.log('Document completed email sent');
 
-      // Enviar WhatsApp de conclusão para cada signatário
+      // Enviar WhatsApp de conclusão
       for (const signer of signers) {
         if (signer.phone) {
           try {
@@ -260,12 +291,12 @@ async function finalizeDocument(
               body: {
                 signerName: signer.name,
                 signerPhone: signer.phone,
-                documentName: document.name,
-                documentId: document.id,
+                documentName: envelopeName,
+                documentId: firstDocument.id,
                 messageType: 'completed',
               },
             });
-            console.log(`Document completed WhatsApp sent to ${signer.phone}`);
+            console.log(`WhatsApp sent to ${signer.phone}`);
           } catch (waError) {
             console.error(`Error sending WhatsApp to ${signer.phone}:`, waError);
           }
@@ -275,13 +306,13 @@ async function finalizeDocument(
   } catch (emailError) {
     console.error('Error sending completed notifications:', emailError);
   }
+
+  console.log('=== ENVELOPE FINALIZATION COMPLETE ===');
 }
 
 const handler = async (req: Request): Promise<Response> => {
   console.log('=== BRY WEBHOOK CALLED ===');
   console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -298,46 +329,27 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: BryWebhookPayload = JSON.parse(rawBody);
     console.log('BRy webhook parsed payload:', JSON.stringify(payload));
 
-    // Extrair dados do payload - suporta tanto formato novo quanto legado
     const envelopeUuid = payload.uuid;
     const envelopeStatus = payload.status;
-    
-    // Dados do signatário - formato novo (signer object) ou legado
     const signerNonce = payload.signer?.signerNonce || payload.signerNonce;
     const signerStatus = payload.signer?.signatureStatus;
     const signerEmail = payload.signer?.email || payload.signerEmail;
-    
-    // Documento UUID - do array documents ou campo legado
-    const documentUuid = payload.documents?.[0]?.documentUuid || payload.documentUuid;
-    
-    // Evento legado
     const legacyEvent = payload.event;
 
-    console.log('=== PARSED DATA ===');
     console.log('Envelope UUID:', envelopeUuid);
     console.log('Envelope Status:', envelopeStatus);
     console.log('Signer Nonce:', signerNonce);
     console.log('Signer Status:', signerStatus);
-    console.log('Signer Email:', signerEmail);
-    console.log('Document UUID:', documentUuid);
-    console.log('Legacy Event:', legacyEvent);
 
-    // Buscar documento pelo envelope UUID
-    const { data: document, error: docError } = await supabase
+    // Buscar TODOS os documentos do envelope
+    const { data: documents, error: docsError } = await supabase
       .from('documents')
       .select('*')
-      .eq('bry_envelope_uuid', envelopeUuid)
-      .maybeSingle();
+      .eq('bry_envelope_uuid', envelopeUuid);
 
-    if (docError) {
-      console.error('Database error finding document:', docError);
-    }
-
-    if (!document) {
-      console.error('Document not found for envelope UUID:', envelopeUuid);
+    if (docsError || !documents || documents.length === 0) {
       // Tentar buscar por nonce do signatário
       if (signerNonce) {
-        console.log('Attempting to find document by signer nonce:', signerNonce);
         const { data: signerData } = await supabase
           .from('document_signers')
           .select('document_id')
@@ -345,31 +357,28 @@ const handler = async (req: Request): Promise<Response> => {
           .maybeSingle();
         
         if (signerData) {
-          console.log('Found document via signer nonce:', signerData.document_id);
           const { data: docByNonce } = await supabase
             .from('documents')
-            .select('*')
+            .select('bry_envelope_uuid')
             .eq('id', signerData.document_id)
             .single();
           
-          if (docByNonce) {
-            console.log('Document found by nonce fallback');
-            // Continuar com este documento
+          if (docByNonce?.bry_envelope_uuid) {
+            console.log('Found envelope via signer nonce');
           }
         }
       }
       
-      return new Response(JSON.stringify({ error: 'Document not found', uuid: envelopeUuid, signerNonce }), {
+      console.error('Documents not found for envelope UUID:', envelopeUuid);
+      return new Response(JSON.stringify({ error: 'Documents not found' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Found document:', document.id, '- Name:', document.name);
+    console.log(`Found ${documents.length} documents in envelope`);
 
     // Verificar se signatário completou assinatura
-    // Formato novo: signer.signatureStatus === 'SIGNED'
-    // Formato legado: event === 'SIGNER_COMPLETED' ou 'SIGNATURE_COMPLETED'
     const isSignerCompleted = signerStatus === 'SIGNED' || 
                               legacyEvent === 'SIGNER_COMPLETED' || 
                               legacyEvent === 'SIGNATURE_COMPLETED';
@@ -377,91 +386,71 @@ const handler = async (req: Request): Promise<Response> => {
     if (isSignerCompleted) {
       console.log('=== SIGNER COMPLETED ===');
       
-      // Atualizar status do signatário específico
-      let query = supabase
-        .from('document_signers')
-        .update({
-          status: 'signed',
-          signed_at: new Date().toISOString(),
-        })
-        .eq('document_id', document.id);
+      // Atualizar status do signatário em TODOS os documentos do envelope
+      for (const document of documents) {
+        let query = supabase
+          .from('document_signers')
+          .update({
+            status: 'signed',
+            signed_at: new Date().toISOString(),
+          })
+          .eq('document_id', document.id);
 
-      if (signerNonce) {
-        query = query.eq('bry_signer_nonce', signerNonce);
-        console.log('Updating signer by nonce:', signerNonce);
-      } else if (signerEmail) {
-        query = query.eq('email', signerEmail);
-        console.log('Updating signer by email:', signerEmail);
+        if (signerNonce) {
+          query = query.eq('bry_signer_nonce', signerNonce);
+        } else if (signerEmail) {
+          query = query.eq('email', signerEmail);
+        }
+
+        await query;
+
+        // Atualizar contagem no documento
+        const { data: signedSigners } = await supabase
+          .from('document_signers')
+          .select('id')
+          .eq('document_id', document.id)
+          .eq('status', 'signed');
+
+        await supabase
+          .from('documents')
+          .update({ signed_by: signedSigners?.length || 0 })
+          .eq('id', document.id);
       }
 
-      const { error: signerError, data: updatedSigner } = await query.select();
-
-      if (signerError) {
-        console.error('Error updating signer status:', signerError);
-      } else {
-        console.log('Signer status updated to signed:', updatedSigner);
-      }
-
-      // Atualizar contagem de assinaturas no documento
-      const { data: signedSigners } = await supabase
-        .from('document_signers')
-        .select('id')
-        .eq('document_id', document.id)
-        .eq('status', 'signed');
-
-      const newSignedBy = signedSigners?.length || 0;
-
-      const { error: updateError } = await supabase
-        .from('documents')
-        .update({ signed_by: newSignedBy })
-        .eq('id', document.id);
-
-      if (updateError) {
-        console.error('Error updating signed_by:', updateError);
-      } else {
-        console.log('Document signed_by updated to:', newSignedBy);
-      }
-
-      // NOVO: Verificar se TODOS os signatários já assinaram após esta atualização
+      // Verificar se TODOS os signatários assinaram (usando primeiro documento)
       const { data: allSigners } = await supabase
         .from('document_signers')
         .select('id, status')
-        .eq('document_id', document.id);
+        .eq('document_id', documents[0].id);
 
       const totalSigners = allSigners?.length || 0;
       const signedCount = allSigners?.filter((s: any) => s.status === 'signed').length || 0;
       
       console.log(`Signature progress: ${signedCount}/${totalSigners}`);
 
-      // Se todos assinaram, finalizar o documento
-      if (totalSigners > 0 && signedCount === totalSigners && document.status !== 'signed') {
-        console.log('=== ALL SIGNERS COMPLETED - TRIGGERING FINALIZATION ===');
-        
-        // Buscar document UUID se não temos
-        let docUuidForDownload = document.bry_document_uuid || documentUuid;
-        
-        if (!docUuidForDownload) {
-          console.log('Document UUID not available, will try to finalize without stamping');
+      // Se todos assinaram, finalizar TODO o envelope
+      if (totalSigners > 0 && signedCount === totalSigners) {
+        const anyUnsigned = documents.some((d: any) => d.status !== 'signed');
+        if (anyUnsigned) {
+          console.log('=== ALL SIGNERS COMPLETED - FINALIZING ENVELOPE ===');
+          await finalizeEnvelope(supabase, envelopeUuid);
         }
-        
-        await finalizeDocument(supabase, document, envelopeUuid, docUuidForDownload || '');
       }
     }
 
-    // Verificar se envelope foi completado via evento explícito (backup)
-    // Formato novo: status === 'COMPLETED', 'SIGNED' ou 'FINISHED'
-    // Formato legado: event === 'ENVELOPE_COMPLETED' ou 'SIGNATURE_ALL_COMPLETED'
+    // Verificar se envelope foi completado via evento explícito
     const isEnvelopeCompleted = envelopeStatus === 'COMPLETED' || 
                                 envelopeStatus === 'SIGNED' ||
                                 envelopeStatus === 'FINISHED' ||
                                 legacyEvent === 'ENVELOPE_COMPLETED' || 
                                 legacyEvent === 'SIGNATURE_ALL_COMPLETED';
 
-    if (isEnvelopeCompleted && document.status !== 'signed') {
-      console.log('=== ENVELOPE COMPLETED EVENT RECEIVED ===');
-      
-      const docUuidForDownload = document.bry_document_uuid || documentUuid || '';
-      await finalizeDocument(supabase, document, envelopeUuid, docUuidForDownload);
+    if (isEnvelopeCompleted) {
+      const anyUnsigned = documents.some((d: any) => d.status !== 'signed');
+      if (anyUnsigned) {
+        console.log('=== ENVELOPE COMPLETED EVENT - FINALIZING ===');
+        await finalizeEnvelope(supabase, envelopeUuid);
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {
