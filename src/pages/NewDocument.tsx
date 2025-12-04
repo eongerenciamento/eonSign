@@ -647,7 +647,7 @@ const NewDocument = () => {
             {files.length === 0 ? <>
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="font-medium mb-2 text-base text-gray-600">
-                  Arraste e solte seu documento aqui
+                  Arraste e solte seu documento
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">ou</p>
                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-[#273d60] text-primary-foreground hover:bg-[#273d60] hover:text-primary-foreground">
