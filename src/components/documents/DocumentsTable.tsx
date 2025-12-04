@@ -819,54 +819,7 @@ export const DocumentsTable = ({
         const statusInfo = statusConfig[doc.status];
         return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
-                {/* Document Name */}
-                <div 
-                  className={`space-y-2 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
-                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
-                >
-                  <div className="flex items-center gap-2">
-                    {doc.isEnvelope ? (
-                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    ) : (
-                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    )}
-                    <p className="font-medium">{doc.name}</p>
-                    {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                      <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
-                        {doc.documentCount} docs
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Signer Badges below document name */}
-                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
-                    <TooltipProvider>
-                      <div className="flex gap-1 pl-6">
-                        {doc.signerStatuses?.map((status, idx) => {
-                          const name = doc.signerNames?.[idx] || '';
-                          const email = doc.signerEmails?.[idx] || '';
-                          const phone = doc.signerPhones?.[idx] || '';
-                          return (
-                            <Tooltip key={idx}>
-                              <TooltipTrigger asChild>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
-                                  {name ? getInitials(name) : idx + 1}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="flex flex-col gap-0.5">
-                                <p className="font-medium">{name}</p>
-                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                <p className="text-xs text-muted-foreground">{email}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </div>
-                    </TooltipProvider>
-                  )}
-                </div>
-                
-                {/* Date and Action Buttons on same line */}
+                {/* Date and Action Buttons on same line - ABOVE document name */}
                 <div className="flex items-center justify-between">
                   <p className="text-gray-500 text-sm">{doc.createdAt}</p>
                   <div className="flex gap-1">
@@ -926,6 +879,53 @@ export const DocumentsTable = ({
                       </Button>
                     )}
                   </div>
+                </div>
+                
+                {/* Document Name */}
+                <div 
+                  className={`space-y-2 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
+                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
+                >
+                  <div className="flex items-center gap-2">
+                    {doc.isEnvelope ? (
+                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    ) : (
+                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    )}
+                    <p className="font-medium">{doc.name}</p>
+                    {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
+                      <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                        {doc.documentCount} docs
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Signer Badges below document name */}
+                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
+                    <TooltipProvider>
+                      <div className="flex gap-1 pl-6">
+                        {doc.signerStatuses?.map((status, idx) => {
+                          const name = doc.signerNames?.[idx] || '';
+                          const email = doc.signerEmails?.[idx] || '';
+                          const phone = doc.signerPhones?.[idx] || '';
+                          return (
+                            <Tooltip key={idx}>
+                              <TooltipTrigger asChild>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
+                                  {name ? getInitials(name) : idx + 1}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="flex flex-col gap-0.5">
+                                <p className="font-medium">{name}</p>
+                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                <p className="text-xs text-muted-foreground">{email}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
+                  )}
                 </div>
               </div>
               
