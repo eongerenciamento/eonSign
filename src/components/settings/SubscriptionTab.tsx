@@ -184,8 +184,6 @@ export function SubscriptionTab() {
   // User has active tier
   if (subscription && subscription.status === "active") {
     const usagePercent = usage ? usage.current / subscription.document_limit * 100 : 0;
-    const currentTierIndex = SUBSCRIPTION_TIERS.findIndex(t => t.name === subscription.plan_name);
-    const nextTier = currentTierIndex >= 0 && currentTierIndex < SUBSCRIPTION_TIERS.length - 1 ? SUBSCRIPTION_TIERS[currentTierIndex + 1] : null;
     return <div className="space-y-10">
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
@@ -245,68 +243,79 @@ export function SubscriptionTab() {
           </Card>
         </div>
 
-        {/* Title */}
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600">Faça o Upgrade do seu Plano</h2>
-        </div>
-
-        {/* Botão de ação */}
-        {nextTier && <div>
-          <Button onClick={() => handleUpgrade(nextTier)} disabled={processingCheckout} className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white">
-            {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : `Fazer Upgrade para ${nextTier.name} - R$ ${nextTier.price.toFixed(2).replace('.', ',')} / mês`}
-          </Button>
-        </div>}
-
-        {/* Show upgrade options */}
+        {/* Show all plans */}
         <div className="pt-4">
-          <h3 className="text-lg font-semibold mb-6">Planos Disponíveis para Upgrade</h3>
-              <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
-            {SUBSCRIPTION_TIERS.filter(t => t.limit > subscription.document_limit && t.priceId !== "free").map(tier => <Card key={tier.name} className="relative flex-shrink-0 w-[320px] snap-start pt-8">
-                <CardHeader>
-                  <CardTitle className="text-lg">{tier.name}</CardTitle>
-                  <CardDescription>{tier.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-3xl font-bold">R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span></p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>
-                        {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
-                      </span>
+          <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
+          <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
+            {SUBSCRIPTION_TIERS.map((tier) => {
+              const isCurrentPlan = tier.limit === subscription.document_limit;
+              const isDowngrade = tier.limit < subscription.document_limit;
+              const isUpgrade = tier.limit > subscription.document_limit;
+              
+              return (
+                <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}>
+                  {isCurrentPlan && (
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Usuários <strong>ilimitados</strong></span>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-lg">{tier.name}</CardTitle>
+                    <CardDescription>{tier.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-3xl font-bold">
+                        {tier.price === 0 ? "Grátis" : <>R$ {tier.price.toFixed(2).replace('.', ',')} <span className="text-lg font-normal text-muted-foreground">/ mês</span></>}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Assinatura digital ICP-Brasil</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>
+                          {tier.limit >= 1000 ? "Documentos / envelopes ilimitados" : <>Até <strong>{tier.limit}</strong> documentos / envelopes</>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>Usuários <strong>ilimitados</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>Assinatura digital ICP-Brasil</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>Notificações por email/WhatsApp</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Geolocalização da assinatura</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Eon Drive</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" || tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                        <span className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}>Biometria facial</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Notificações por email/WhatsApp</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Geolocalização da assinatura</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>Eon Drive</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      {tier.name === "Básico" ? <X className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <Check className="h-4 w-4 text-green-600 flex-shrink-0" />}
-                      <span className={tier.name === "Básico" ? "text-gray-400 line-through" : ""}>Biometria facial</span>
-                    </div>
-                  </div>
-                  <Button onClick={() => handleUpgrade(tier)} disabled={processingCheckout} className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white">
-                    {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fazer Upgrade"}
-                  </Button>
-                </CardContent>
-              </Card>)}
+                    <Button 
+                      onClick={() => handleUpgrade(tier)} 
+                      disabled={processingCheckout || isCurrentPlan} 
+                      className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
+                      variant={isCurrentPlan ? "outline" : undefined}
+                    >
+                      {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : 
+                        isCurrentPlan ? "Plano Atual" : 
+                        isDowngrade ? "Downgrade" : 
+                        "Fazer Upgrade"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
@@ -518,12 +527,16 @@ export function SubscriptionTab() {
       </div>
 
       <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
-        {SUBSCRIPTION_TIERS.map((tier, index) => {
-        const isRecommended = index === 2; // Professional tier
-        return <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isRecommended ? "border-primary shadow-lg" : ""}`}>
-              {isRecommended && <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-                  <Badge className="bg-primary whitespace-nowrap">Recomendado</Badge>
-                </div>}
+        {SUBSCRIPTION_TIERS.map((tier) => {
+          const isCurrentPlan = tier.priceId === "free";
+          
+          return (
+            <Card key={tier.name} className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}>
+              {isCurrentPlan && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
+                  <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
+                </div>
+              )}
               <CardHeader>
                 <CardTitle className="text-lg text-gray-600">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
@@ -574,12 +587,18 @@ export function SubscriptionTab() {
                     </span>
                   </div>
                 </div>
-                <Button onClick={() => handleUpgrade(tier)} disabled={processingCheckout || tier.priceId === "free"} className={tier.priceId === "free" ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"} variant={tier.priceId === "free" ? "outline" : undefined}>
-                  {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : tier.priceId === "free" ? "Plano Atual" : "Fazer Upgrade"}
+                <Button 
+                  onClick={() => handleUpgrade(tier)} 
+                  disabled={processingCheckout || isCurrentPlan} 
+                  className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"} 
+                  variant={isCurrentPlan ? "outline" : undefined}
+                >
+                  {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : isCurrentPlan ? "Plano Atual" : "Fazer Upgrade"}
                 </Button>
               </CardContent>
-            </Card>;
-      })}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Comparison Table */}
