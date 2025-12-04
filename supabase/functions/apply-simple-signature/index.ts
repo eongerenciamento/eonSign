@@ -233,15 +233,60 @@ serve(async (req) => {
         const systemLogoUrl = `${APP_URL}/logo-eon-gray.png`;
         console.log("Downloading system logo:", systemLogoUrl);
         const logoResponse = await fetch(systemLogoUrl);
+        console.log("Logo response status:", logoResponse.status);
+        
         if (logoResponse.ok) {
           const logoBuffer = await logoResponse.arrayBuffer();
           const contentType = logoResponse.headers.get("content-type") || "";
+          console.log("Logo content-type:", contentType, "Buffer size:", logoBuffer.byteLength);
           
           let logoImage;
-          if (contentType.includes("png")) {
-            logoImage = await pdfDoc.embedPng(logoBuffer);
-          } else if (contentType.includes("jpeg") || contentType.includes("jpg")) {
-            logoImage = await pdfDoc.embedJpg(logoBuffer);
+          
+          // Determine format from content-type or URL extension
+          const isPng = contentType.includes("png") || systemLogoUrl.endsWith(".png");
+          const isJpeg = contentType.includes("jpeg") || contentType.includes("jpg") || 
+                         systemLogoUrl.endsWith(".jpg") || systemLogoUrl.endsWith(".jpeg");
+          
+          if (isPng) {
+            try {
+              logoImage = await pdfDoc.embedPng(logoBuffer);
+              console.log("Logo embedded as PNG");
+            } catch (pngError) {
+              console.log("Failed to embed as PNG, trying JPG:", String(pngError));
+              try {
+                logoImage = await pdfDoc.embedJpg(logoBuffer);
+                console.log("Logo embedded as JPG (fallback from PNG)");
+              } catch (jpgError) {
+                console.error("Failed to embed as JPG fallback:", String(jpgError));
+              }
+            }
+          } else if (isJpeg) {
+            try {
+              logoImage = await pdfDoc.embedJpg(logoBuffer);
+              console.log("Logo embedded as JPG");
+            } catch (jpgError) {
+              console.log("Failed to embed as JPG, trying PNG:", String(jpgError));
+              try {
+                logoImage = await pdfDoc.embedPng(logoBuffer);
+                console.log("Logo embedded as PNG (fallback from JPG)");
+              } catch (pngError) {
+                console.error("Failed to embed as PNG fallback:", String(pngError));
+              }
+            }
+          } else {
+            // Unknown format: try PNG first, then JPG
+            console.log("Unknown content-type, trying PNG first");
+            try {
+              logoImage = await pdfDoc.embedPng(logoBuffer);
+              console.log("Logo embedded as PNG (unknown type)");
+            } catch {
+              try {
+                logoImage = await pdfDoc.embedJpg(logoBuffer);
+                console.log("Logo embedded as JPG (unknown type)");
+              } catch (e) {
+                console.error("Failed to embed logo with any format:", String(e));
+              }
+            }
           }
           
           if (logoImage) {
@@ -261,7 +306,11 @@ serve(async (req) => {
               height: logoDims.height,
             });
             console.log("System logo embedded successfully");
+          } else {
+            console.error("Logo image could not be embedded - logoImage is null/undefined");
           }
+        } else {
+          console.error("Failed to fetch logo, status:", logoResponse.status);
         }
       } catch (logoError) {
         console.error("Error embedding system logo:", logoError);
