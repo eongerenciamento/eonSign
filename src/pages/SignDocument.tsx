@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, Plus, Minus, Download } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download, MousePointer, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign.png";
 
-// Schemas de validação
 const emailSchema = z.string()
   .trim()
   .min(1, "E-mail é obrigatório")
@@ -48,11 +47,14 @@ interface Document {
   status: string;
   signed_by: number;
   signers: number;
+  signature_mode?: string;
 }
 
 const SignDocument = () => {
   const { documentId } = useParams();
   const navigate = useNavigate();
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
+  
   const [document, setDocument] = useState<Document | null>(null);
   const [signers, setSigners] = useState<Signer[]>([]);
   const [currentSigner, setCurrentSigner] = useState<Signer | null>(null);
@@ -70,6 +72,13 @@ const SignDocument = () => {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState(false);
   const [linkExpired, setLinkExpired] = useState(false);
+  
+  // Simple signature specific states
+  const [typedSignature, setTypedSignature] = useState("");
+  const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number; page: number } | null>(null);
+  const [isSelectingPosition, setIsSelectingPosition] = useState(false);
+
+  const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
   useEffect(() => {
     if (documentId) {
@@ -77,7 +86,6 @@ const SignDocument = () => {
     }
   }, [documentId]);
 
-  // Solicitar geolocalização quando o usuário é identificado
   useEffect(() => {
     if (isIdentified && !location && !locationError) {
       if ("geolocation" in navigator) {
@@ -101,6 +109,13 @@ const SignDocument = () => {
     }
   }, [isIdentified, location, locationError]);
 
+  // Pre-fill typed signature with signer name
+  useEffect(() => {
+    if (currentSigner && !typedSignature) {
+      setTypedSignature(currentSigner.name);
+    }
+  }, [currentSigner]);
+
   const fetchDocumentData = async () => {
     try {
       setIsLoading(true);
@@ -109,7 +124,6 @@ const SignDocument = () => {
       });
 
       if (error) {
-        // Document was deleted or not found
         setLinkExpired(true);
         return;
       }
@@ -190,13 +204,11 @@ const SignDocument = () => {
     const numbers = value.replace(/\D/g, "");
     
     if (numbers.length <= 11) {
-      // CPF format: 000.000.000-00
       return numbers
         .replace(/(\d{3})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
     } else {
-      // CNPJ format: 00.000.000/0000-00
       return numbers
         .replace(/(\d{2})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d)/, "$1.$2")
@@ -207,7 +219,6 @@ const SignDocument = () => {
 
   const validateCPF = (cpf: string): boolean => {
     const cleanCpf = cpf.replace(/\D/g, "");
-    
     if (cleanCpf.length !== 11) return false;
     if (/^(\d)\1+$/.test(cleanCpf)) return false;
     
@@ -232,7 +243,6 @@ const SignDocument = () => {
 
   const validateCNPJ = (cnpj: string): boolean => {
     const cleanCnpj = cnpj.replace(/\D/g, "");
-    
     if (cleanCnpj.length !== 14) return false;
     if (/^(\d)\1+$/.test(cleanCnpj)) return false;
     
@@ -268,13 +278,11 @@ const SignDocument = () => {
 
   const validateCpfCnpj = (value: string): boolean => {
     const clean = value.replace(/\D/g, "");
-    
     if (clean.length === 11) {
       return validateCPF(clean);
     } else if (clean.length === 14) {
       return validateCNPJ(clean);
     }
-    
     return false;
   };
 
@@ -282,7 +290,6 @@ const SignDocument = () => {
     const formatted = formatCpfCnpj(e.target.value);
     setCpf(formatted);
     
-    // Validar CPF/CNPJ em tempo real
     const clean = formatted.replace(/\D/g, "");
     if (clean.length === 11 || clean.length === 14) {
       setCpfValid(validateCpfCnpj(formatted));
@@ -291,13 +298,24 @@ const SignDocument = () => {
     }
   };
 
+  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isSelectingPosition || !pdfContainerRef.current) return;
+
+    const rect = pdfContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setSignaturePosition({ x, y, page: 1 });
+    setIsSelectingPosition(false);
+    toast.success("Posição da assinatura selecionada!");
+  };
+
   const handleSign = async () => {
     if (!cpf) {
       toast.error("Por favor, informe seu CPF/CNPJ");
       return;
     }
 
-    // Validar CPF/CNPJ
     if (!validateCpfCnpj(cpf)) {
       const cleanCpf = cpf.replace(/\D/g, "");
       const type = cleanCpf.length === 11 ? "CPF" : cleanCpf.length === 14 ? "CNPJ" : "CPF/CNPJ";
@@ -310,7 +328,6 @@ const SignDocument = () => {
       return;
     }
 
-    // Validar idade mínima de 18 anos
     const birth = new Date(birthDate);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -330,6 +347,12 @@ const SignDocument = () => {
       return;
     }
 
+    // For simple signatures, require typed signature
+    if (isSimpleSignature && !typedSignature.trim()) {
+      toast.error("Por favor, digite sua assinatura");
+      return;
+    }
+
     try {
       setIsSigning(true);
       const { data, error } = await supabase.functions.invoke("sign-document", {
@@ -340,17 +363,20 @@ const SignDocument = () => {
           birthDate: birthDate,
           latitude: location?.latitude || null,
           longitude: location?.longitude || null,
+          // Simple signature specific data
+          typedSignature: isSimpleSignature ? typedSignature : null,
+          signatureX: signaturePosition?.x || 50,
+          signatureY: signaturePosition?.y || 80,
+          signaturePage: signaturePosition?.page || 1,
         },
       });
 
       if (error) {
         console.error("Error from edge function:", error);
-        const errorMessage = error.message || "Erro ao assinar documento";
-        toast.error(errorMessage);
+        toast.error(error.message || "Erro ao assinar documento");
         return;
       }
 
-      // Check if response contains error in data
       if (data && data.error) {
         toast.error(data.error);
         return;
@@ -358,13 +384,10 @@ const SignDocument = () => {
 
       toast.success("Documento assinado com sucesso!");
       setSignatureComplete(true);
-      
-      // Atualizar dados do documento
       await fetchDocumentData();
     } catch (error: any) {
       console.error("Error signing document:", error);
-      const errorMessage = error?.message || "Erro ao assinar documento";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Erro ao assinar documento");
     } finally {
       setIsSigning(false);
     }
@@ -438,7 +461,7 @@ const SignDocument = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
         <div className="max-w-2xl mx-auto pt-8">
           <div className="text-center mb-8">
-            <img src={logo} alt="Éon Sign" className="h-16 mx-auto mb-4" />
+            <img src={logo} alt="Eon Sign" className="h-16 mx-auto mb-4" />
           </div>
           
           <Card className="p-8 text-center">
@@ -472,7 +495,7 @@ const SignDocument = () => {
       <div className="max-w-4xl mx-auto pt-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <img src={logo} alt="Éon Sign" className="h-16 mx-auto mb-4" />
+          <img src={logo} alt="Eon Sign" className="h-16 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Assinatura de Documento</h1>
         </div>
 
@@ -525,6 +548,17 @@ const SignDocument = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Visualizar Documento</h3>
                 <div className="flex items-center gap-2">
+                  {isSimpleSignature && (
+                    <Button
+                      variant={isSelectingPosition ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setIsSelectingPosition(!isSelectingPosition)}
+                      className={isSelectingPosition ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      <MousePointer className="h-4 w-4 mr-2" />
+                      {isSelectingPosition ? "Clique no PDF" : "Posicionar Assinatura"}
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -558,12 +592,41 @@ const SignDocument = () => {
                 </div>
               </div>
               {document.file_url ? (
-                <div className="overflow-auto border rounded-md bg-gray-100" style={{ height: 'calc(100vh - 280px)', minHeight: '500px' }}>
+                <div 
+                  ref={pdfContainerRef}
+                  className={`relative overflow-auto border rounded-md bg-gray-100 ${isSelectingPosition ? 'cursor-crosshair' : ''}`}
+                  style={{ height: 'calc(100vh - 380px)', minHeight: '400px' }}
+                  onClick={handlePdfClick}
+                >
                   <iframe
                     src={`${document.file_url}#view=Fit&zoom=page-fit`}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 pointer-events-none"
                     title="Document Preview"
                   />
+                  {/* Signature position indicator */}
+                  {signaturePosition && (
+                    <div 
+                      className="absolute bg-blue-500/20 border-2 border-blue-500 border-dashed rounded-lg flex items-center justify-center"
+                      style={{
+                        left: `${signaturePosition.x}%`,
+                        top: `${signaturePosition.y}%`,
+                        width: '200px',
+                        height: '60px',
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                    >
+                      <span className="font-signature text-2xl text-blue-700">{typedSignature || currentSigner?.name}</span>
+                    </div>
+                  )}
+                  {isSelectingPosition && (
+                    <div className="absolute inset-0 bg-blue-500/10 flex items-center justify-center">
+                      <div className="bg-white/90 px-4 py-2 rounded-lg shadow-lg">
+                        <p className="text-sm font-medium text-blue-700">
+                          Clique para posicionar sua assinatura
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground">Documento não disponível para visualização</p>
@@ -579,6 +642,12 @@ const SignDocument = () => {
                     <span>Status: {getStatusBadge(document.status)}</span>
                     <span>•</span>
                     <span>Assinaturas: {document.signed_by}/{document.signers}</span>
+                    {isSimpleSignature && (
+                      <>
+                        <span>•</span>
+                        <Badge variant="secondary">Assinatura Eletrônica</Badge>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -609,6 +678,29 @@ const SignDocument = () => {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Assinar Documento</h3>
                 <div className="space-y-4">
+                  {/* Typed Signature for Simple Mode */}
+                  {isSimpleSignature && (
+                    <div>
+                      <Label htmlFor="typedSignature" className="flex items-center gap-2">
+                        <PenLine className="h-4 w-4" />
+                        Digite sua assinatura
+                      </Label>
+                      <Input
+                        id="typedSignature"
+                        value={typedSignature}
+                        onChange={(e) => setTypedSignature(e.target.value)}
+                        placeholder="Seu nome completo"
+                        className="mt-1"
+                      />
+                      {typedSignature && (
+                        <div className="mt-3 p-4 bg-muted rounded-lg border-2 border-dashed border-muted-foreground/30">
+                          <p className="text-xs text-muted-foreground mb-2">Preview da assinatura:</p>
+                          <p className="font-signature text-3xl text-foreground">{typedSignature}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="cpf">CPF/CNPJ</Label>
                     <div className="relative">
@@ -677,7 +769,7 @@ const SignDocument = () => {
                   </div>
                   <Button
                     onClick={handleSign}
-                    disabled={isSigning || !cpf || !birthDate || cpfValid === false || !!birthDateError}
+                    disabled={isSigning || !cpf || !birthDate || cpfValid === false || !!birthDateError || (isSimpleSignature && !typedSignature.trim())}
                     className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
                   >
                     {isSigning ? (
