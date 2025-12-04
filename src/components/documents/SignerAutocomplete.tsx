@@ -76,19 +76,26 @@ export function SignerAutocomplete({
           <CommandList>
             <CommandEmpty>Nenhum signatário encontrado</CommandEmpty>
             <CommandGroup heading="Signatários recentes">
-              {filteredSuggestions.map((signer, index) => (
-                <CommandItem
-                  key={`${signer.email}-${signer.phone}-${index}`}
-                  onSelect={() => handleSelect(signer)}
-                  className="flex flex-col items-start gap-0.5 cursor-pointer"
-                >
-                  <span className="font-medium">{signer.name}</span>
-                  <div className="flex flex-col text-xs text-muted-foreground">
-                    {signer.email && <span>{signer.email}</span>}
-                    {signer.phone && <span>{signer.phone}</span>}
-                  </div>
-                </CommandItem>
-              ))}
+              {filteredSuggestions.map((signer, index) => {
+                const isSelected = value === signer.name;
+                return (
+                  <CommandItem
+                    key={`${signer.email}-${signer.phone}-${index}`}
+                    onSelect={() => handleSelect(signer)}
+                    className={`flex flex-col items-start gap-0.5 cursor-pointer ${
+                      isSelected ? 'bg-gray-100 text-gray-700' : ''
+                    }`}
+                  >
+                    <span className={`font-medium ${isSelected ? 'text-gray-700' : ''}`}>
+                      {signer.name}
+                    </span>
+                    <div className="flex flex-col text-xs text-muted-foreground">
+                      {signer.email && <span>{signer.email}</span>}
+                      {signer.phone && <span>{signer.phone}</span>}
+                    </div>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
