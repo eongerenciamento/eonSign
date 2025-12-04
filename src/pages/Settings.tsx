@@ -10,11 +10,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users, BookUser } from "lucide-react";
+import { Upload, Building2, CreditCard, HelpCircle, X, Check, Users, BookUser, UsersRound } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { MembersTab } from "@/components/settings/MembersTab";
 import { ContactsTab } from "@/components/settings/ContactsTab";
+import { SignerGroupsTab } from "@/components/settings/SignerGroupsTab";
 import { useQuery } from "@tanstack/react-query";
 
 const Settings = () => {
@@ -278,7 +279,7 @@ const Settings = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-4'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
@@ -292,6 +293,10 @@ const Settings = () => {
             <TabsTrigger value="contacts" className="gap-2">
               <BookUser className="h-4 w-4" />
               <span className="hidden md:inline">Contatos</span>
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="gap-2">
+              <UsersRound className="h-4 w-4" />
+              <span className="hidden md:inline">Grupos</span>
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="subscription" className="gap-2">
@@ -441,6 +446,10 @@ const Settings = () => {
 
           <TabsContent value="contacts">
             <ContactsTab />
+          </TabsContent>
+
+          <TabsContent value="groups">
+            <SignerGroupsTab />
           </TabsContent>
 
           {isAdmin && (
