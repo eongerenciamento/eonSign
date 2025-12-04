@@ -276,8 +276,6 @@ const NewDocument = () => {
   const toggleAuthOption = (option: AuthenticationOption) => {
     setAuthOptions(prev => {
       if (prev.includes(option)) {
-        // Prevent removing the last option - at least 1 must be selected
-        if (prev.length <= 1) return prev;
         return prev.filter(o => o !== option);
       }
       return [...prev, option];
@@ -779,7 +777,6 @@ const NewDocument = () => {
           {/* Signature Mode Section */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-600">Tipo de Assinatura</Label>
-            <p className="text-xs text-gray-500">Selecione o nível de certificação digital</p>
             <RadioGroup value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)} className="space-y-2">
               {SIGNATURE_MODES.map(mode => (
                 <div
@@ -812,7 +809,6 @@ const NewDocument = () => {
           {/* Authentication Options Section */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
-            <p className="text-xs text-gray-500">Pelo menos 1 nível de verificação deve estar ativo</p>
             <div className="space-y-2">
               {AUTHENTICATION_OPTIONS.map(option => {
               const isSelected = authOptions.includes(option.id);
