@@ -713,7 +713,7 @@ const NewDocument = () => {
           <div className="grid gap-6">
             <div className="grid gap-2">
               <Label htmlFor="title">Título do Documento</Label>
-              <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Contrato de Prestação de Serviços" />
+              <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Contrato de Prestação de Serviços" className="placeholder:text-xs" />
             </div>
 
             {/* Signers Section */}
@@ -752,17 +752,17 @@ const NewDocument = () => {
                   
                   <div className="grid gap-2">
                     <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
-                    <Input id={`name-${index}`} value={signer.name} onChange={e => handleSignerChange(index, "name", e.target.value)} placeholder="Digite o nome ou razão social" />
+                    <Input id={`name-${index}`} value={signer.name} onChange={e => handleSignerChange(index, "name", e.target.value)} placeholder="Digite o nome ou razão social" className="placeholder:text-xs" />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor={`phone-${index}`}>Telefone</Label>
-                    <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" />
+                    <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="placeholder:text-xs" />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor={`email-${index}`}>E-mail</Label>
-                    <Input id={`email-${index}`} type="email" value={signer.email} onChange={e => handleSignerChange(index, "email", e.target.value)} placeholder="email@exemplo.com" />
+                    <Input id={`email-${index}`} type="email" value={signer.email} onChange={e => handleSignerChange(index, "email", e.target.value)} placeholder="email@exemplo.com" className="placeholder:text-xs" />
                   </div>
                 </div>)}
               
