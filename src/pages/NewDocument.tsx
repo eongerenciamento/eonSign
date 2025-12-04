@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 const AUTHENTICATION_OPTIONS: {
   id: AuthenticationOption;
@@ -27,6 +29,31 @@ const AUTHENTICATION_OPTIONS: {
   id: 'OTP_PHONE',
   label: 'Código de Verificação SMS'
 }];
+
+type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED';
+const SIGNATURE_MODES: {
+  id: SignatureMode;
+  label: string;
+  description: string;
+  badge?: string;
+}[] = [
+  {
+    id: 'SIMPLE',
+    label: 'Assinatura Eletrônica',
+    description: 'Coleta de evidências (IP, geolocalização, etc.)'
+  },
+  {
+    id: 'ADVANCED',
+    label: 'Certificado Digital',
+    description: 'Evidências + certificado digital em nuvem'
+  },
+  {
+    id: 'QUALIFIED',
+    label: 'Certificado ICP-Brasil',
+    description: 'Evidências + certificado digital ICP-Brasil',
+    badge: 'Maior validade jurídica'
+  }
+];
 interface Signer {
   name: string;
   phone: string;
@@ -57,6 +84,7 @@ const NewDocument = () => {
     planName: string;
   } | null>(null);
   const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE']);
+  const [signatureMode, setSignatureMode] = useState<SignatureMode>('SIMPLE');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -416,7 +444,8 @@ const NewDocument = () => {
             title: title,
             signers: allSigners,
             userId: user.id,
-            authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions]
+            authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions],
+            signatureMode: signatureMode
           }
         });
 
@@ -741,6 +770,38 @@ const NewDocument = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Signature Mode Section */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-gray-600">Tipo de Assinatura</Label>
+            <p className="text-xs text-gray-500">Selecione o nível de certificação digital</p>
+            <RadioGroup value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)} className="space-y-2">
+              {SIGNATURE_MODES.map(mode => (
+                <div
+                  key={mode.id}
+                  onClick={() => setSignatureMode(mode.id)}
+                  className={`flex items-start gap-3 px-3 py-3 rounded cursor-pointer transition-colors ${
+                    signatureMode === mode.id 
+                      ? 'bg-primary/10 border border-primary/30' 
+                      : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
+                  }`}
+                >
+                  <RadioGroupItem value={mode.id} id={mode.id} className="mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">{mode.label}</span>
+                      {mode.badge && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                          {mode.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
+                  </div>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
 
           {/* Authentication Options Section */}

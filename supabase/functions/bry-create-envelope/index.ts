@@ -21,6 +21,8 @@ interface DocumentInfo {
 // Available authentication options for BRy
 type AuthenticationOption = 'IP' | 'GEOLOCATION' | 'OTP_EMAIL' | 'OTP_PHONE' | 'OTP_WHATSAPP' | 'SELFIE';
 
+type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED';
+
 interface CreateEnvelopeRequest {
   // Novo formato: múltiplos documentos
   documents?: DocumentInfo[];
@@ -31,6 +33,7 @@ interface CreateEnvelopeRequest {
   signers: Signer[];
   userId: string;
   authenticationOptions?: AuthenticationOption[];
+  signatureMode?: SignatureMode;
 }
 
 async function getToken(): Promise<string> {
@@ -72,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const requestData: CreateEnvelopeRequest = await req.json();
-    const { title, signers, userId, authenticationOptions } = requestData;
+    const { title, signers, userId, authenticationOptions, signatureMode } = requestData;
 
     // Suportar formato novo (documents array) e legado (documentId + documentBase64)
     let documentsToProcess: DocumentInfo[] = [];
@@ -97,6 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Number of signers:', signers.length);
     console.log('Number of documents:', documentsToProcess.length);
     console.log('Authentication options:', authenticationOptions);
+    console.log('Signature mode:', signatureMode || 'SIMPLE');
 
     // Obter token da BRy
     const accessToken = await getToken();
@@ -140,14 +144,26 @@ const handler = async (req: Request): Promise<Response> => {
       return signerData;
     });
 
+    // Configurar signatureConfig baseado no modo selecionado
+    const selectedSignatureMode = signatureMode || 'SIMPLE';
+    const signatureConfig: {
+      mode: string;
+      profile?: string;
+    } = {
+      mode: selectedSignatureMode,
+    };
+    
+    // Para ADVANCED e QUALIFIED, adicionar perfil com timestamp
+    if (selectedSignatureMode === 'ADVANCED' || selectedSignatureMode === 'QUALIFIED') {
+      signatureConfig.profile = 'TIMESTAMP';
+    }
+
     // Criar envelope na BRy com TODOS os documentos
     const envelopePayload = {
       name: title,
       clientName: 'Eon Sign',
       signersData: signersData,
-      signatureConfig: {
-        mode: 'SIMPLE',
-      },
+      signatureConfig,
       typeMessaging: ['LINK'],
       documents: documentsToProcess.map(doc => ({
         base64Document: doc.base64,
