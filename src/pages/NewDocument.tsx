@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, FileText, X, Plus, Check, FolderOpen } from "lucide-react";
+import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -190,47 +190,28 @@ const NewDocument = () => {
     loadCompanySigner();
   }, []);
 
-  // Load previous signers for autocomplete
+  // Load contacts for autocomplete
   useEffect(() => {
-    const loadPreviousSigners = async () => {
+    const loadContacts = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's documents
-      const { data: userDocs } = await supabase
-        .from('documents')
-        .select('id')
-        .eq('user_id', user.id);
-
-      if (!userDocs || userDocs.length === 0) return;
-
-      const docIds = userDocs.map(d => d.id);
-
-      // Fetch external signers from user's documents
-      const { data: signersData } = await supabase
-        .from('document_signers')
+      // Fetch saved contacts
+      const { data: contactsData } = await supabase
+        .from('contacts')
         .select('name, email, phone')
-        .in('document_id', docIds)
-        .eq('is_company_signer', false);
+        .eq('user_id', user.id)
+        .order('name');
 
-      if (!signersData) return;
-
-      // Deduplicate by email or phone, keeping most recent
-      const seen = new Map<string, SignerSuggestion>();
-      for (const signer of signersData) {
-        const key = signer.email || signer.phone || signer.name;
-        if (key && !seen.has(key)) {
-          seen.set(key, {
-            name: signer.name,
-            email: signer.email || '',
-            phone: signer.phone || ''
-          });
-        }
+      if (contactsData) {
+        setSignerSuggestions(contactsData.map(c => ({
+          name: c.name,
+          email: c.email || '',
+          phone: c.phone || ''
+        })));
       }
-
-      setSignerSuggestions(Array.from(seen.values()));
     };
-    loadPreviousSigners();
+    loadContacts();
   }, []);
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -817,9 +798,52 @@ const NewDocument = () => {
                 
               </div>
               {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
-                  {signers.length > 1 && <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 hover:bg-transparent active:bg-transparent focus:bg-transparent" onClick={() => removeSigner(index)}>
-                      <X className="w-4 h-4" />
-                    </Button>}
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    {signer.name && (signer.phone || signer.email) && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                        onClick={async () => {
+                          const { data: { user } } = await supabase.auth.getUser();
+                          if (!user) return;
+                          
+                          // Check if contact already exists
+                          const existingContact = signerSuggestions.find(
+                            s => s.email === signer.email || s.phone === signer.phone
+                          );
+                          if (existingContact) {
+                            toast({ title: "Contato já existe", description: "Este signatário já está salvo nos seus contatos." });
+                            return;
+                          }
+                          
+                          const { error } = await supabase.from('contacts').insert({
+                            user_id: user.id,
+                            name: signer.name,
+                            email: signer.email || null,
+                            phone: signer.phone || null
+                          });
+                          
+                          if (error) {
+                            toast({ title: "Erro", description: "Não foi possível salvar o contato.", variant: "destructive" });
+                          } else {
+                            toast({ title: "Contato salvo!", description: "Signatário adicionado aos seus contatos." });
+                            // Refresh suggestions
+                            setSignerSuggestions(prev => [...prev, { name: signer.name, email: signer.email, phone: signer.phone }]);
+                          }
+                        }}
+                        title="Salvar como contato"
+                      >
+                        <BookUser className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {signers.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent" onClick={() => removeSigner(index)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                   
                   <div className="grid gap-2">
                     <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
