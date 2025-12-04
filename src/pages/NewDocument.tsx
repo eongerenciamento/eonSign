@@ -869,31 +869,8 @@ const NewDocument = () => {
 
             {/* Signers Section */}
             <div className="space-y-4">
-              <Label className="text-sm font-semibold text-gray-600">Signatário Interno</Label>
-              
-              {/* Company Signer (Read-only) */}
-              {companySigner && <div className="p-4 border rounded-lg space-y-3 bg-primary/5">
-                  
-                  <div className="grid gap-2">
-                    <Label>Nome Completo</Label>
-                    <Input value={companySigner.name} disabled />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>CPF</Label>
-                    <Input value={companySigner.cpf} disabled />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Telefone</Label>
-                    <Input value={companySigner.phone} disabled />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>E-mail</Label>
-                    <Input value={companySigner.email} disabled />
-                  </div>
-                </div>}
-
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-600">Signatários Externos</p>
+                <p className="text-sm font-semibold text-gray-600">Signatários</p>
               </div>
               {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
                   <div className="absolute top-2 right-2 flex gap-1">
