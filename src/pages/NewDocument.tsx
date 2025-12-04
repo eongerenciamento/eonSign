@@ -785,7 +785,7 @@ const NewDocument = () => {
                 <div
                   key={mode.id}
                   onClick={() => setSignatureMode(mode.id)}
-                  className={`flex items-start gap-3 px-3 py-3 rounded cursor-pointer transition-colors ${
+                  className={`px-3 py-3 rounded cursor-pointer transition-colors ${
                     signatureMode === mode.id 
                       ? 'bg-primary/10 border border-primary/30' 
                       : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
@@ -795,7 +795,7 @@ const NewDocument = () => {
                     <RadioGroupItem value={mode.id} id={mode.id} />
                     <span className="text-sm font-semibold text-gray-800">{mode.typeName}</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="ml-6 mt-1">
                     <span className="text-sm font-medium text-gray-700">{mode.label}</span>
                     <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
                     {mode.badge && (
