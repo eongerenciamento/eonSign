@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import logoEon from "@/assets/logo-eon.png";
 
@@ -31,6 +32,7 @@ interface DocumentValidation {
     completedAt: string | null;
     totalSigners: number;
     signedCount: number;
+    downloadUrl: string | null;
   };
   organization: {
     name: string;
@@ -191,6 +193,19 @@ const ValidateDocument = () => {
                 {isValid ? "Verificado" : "Pendente"}
               </Badge>
             </div>
+            
+            {/* Download Button */}
+            {isValid && document.downloadUrl && (
+              <div className="mt-4 pt-4 border-t border-green-200">
+                <Button
+                  onClick={() => window.open(document.downloadUrl!, '_blank')}
+                  className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] hover:opacity-90"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar Documento Assinado
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
