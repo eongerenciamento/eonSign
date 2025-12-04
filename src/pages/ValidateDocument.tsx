@@ -346,6 +346,17 @@ const ValidateDocument = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Quick Actions Bar */}
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            className="border-primary text-primary hover:bg-primary/5"
+            onClick={handleDownloadCertificate}
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            Baixar Certificado PDF
+          </Button>
+        </div>
         {/* Validation Status Card */}
         <Card className={`mb-6 border-2 ${isValid ? "border-green-200 bg-green-50/50" : "border-yellow-200 bg-yellow-50/50"}`}>
           <CardContent className="pt-6">
