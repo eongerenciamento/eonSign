@@ -76,7 +76,6 @@ const SignDocument = () => {
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
   const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number; page: number } | null>(null);
-  const [isSelectingPosition, setIsSelectingPosition] = useState(false);
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
@@ -299,14 +298,13 @@ const SignDocument = () => {
   };
 
   const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isSelectingPosition || !pdfContainerRef.current) return;
+    if (!isSimpleSignature || !pdfContainerRef.current) return;
 
     const rect = pdfContainerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     setSignaturePosition({ x, y, page: 1 });
-    setIsSelectingPosition(false);
     toast.success("Posição da assinatura selecionada!");
   };
 
@@ -548,17 +546,6 @@ const SignDocument = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Visualizar Documento</h3>
                 <div className="flex items-center gap-2">
-                  {isSimpleSignature && (
-                    <Button
-                      variant={isSelectingPosition ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setIsSelectingPosition(!isSelectingPosition)}
-                      className={isSelectingPosition ? "bg-primary text-primary-foreground" : ""}
-                    >
-                      <MousePointer className="h-4 w-4 mr-2" />
-                      {isSelectingPosition ? "Clique no PDF" : "Posicionar Assinatura"}
-                    </Button>
-                  )}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -591,10 +578,19 @@ const SignDocument = () => {
                   </Button>
                 </div>
               </div>
+              {/* Instruction for positioning */}
+              {isSimpleSignature && !signaturePosition && (
+                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                  <MousePointer className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm text-blue-700">
+                    Clique no documento abaixo para posicionar sua assinatura
+                  </p>
+                </div>
+              )}
               {document.file_url ? (
                 <div 
                   ref={pdfContainerRef}
-                  className={`relative overflow-auto border rounded-md bg-gray-100 ${isSelectingPosition ? 'cursor-crosshair' : ''}`}
+                  className={`relative overflow-auto border rounded-md bg-gray-100 ${isSimpleSignature ? 'cursor-crosshair' : ''}`}
                   style={{ height: 'calc(100vh - 380px)', minHeight: '400px' }}
                   onClick={handlePdfClick}
                 >
@@ -610,21 +606,12 @@ const SignDocument = () => {
                       style={{
                         left: `${signaturePosition.x}%`,
                         top: `${signaturePosition.y}%`,
-                        width: '200px',
-                        height: '60px',
+                        width: '150px',
+                        height: '40px',
                         transform: 'translate(-50%, -50%)'
                       }}
                     >
-                      <span className="font-signature text-2xl text-blue-700">{typedSignature || currentSigner?.name}</span>
-                    </div>
-                  )}
-                  {isSelectingPosition && (
-                    <div className="absolute inset-0 bg-blue-500/10 flex items-center justify-center">
-                      <div className="bg-white/90 px-4 py-2 rounded-lg shadow-lg">
-                        <p className="text-sm font-medium text-blue-700">
-                          Clique para posicionar sua assinatura
-                        </p>
-                      </div>
+                      <span className="font-signature text-base text-blue-700">{typedSignature || currentSigner?.name}</span>
                     </div>
                   )}
                 </div>
@@ -693,9 +680,9 @@ const SignDocument = () => {
                         className="mt-1"
                       />
                       {typedSignature && (
-                        <div className="mt-3 p-4 bg-muted rounded-lg border-2 border-dashed border-muted-foreground/30">
-                          <p className="text-xs text-muted-foreground mb-2">Preview da assinatura:</p>
-                          <p className="font-signature text-3xl text-foreground">{typedSignature}</p>
+                        <div className="mt-3 p-3 bg-muted rounded-lg border-2 border-dashed border-muted-foreground/30">
+                          <p className="text-xs text-muted-foreground mb-1">Preview da assinatura:</p>
+                          <p className="font-signature text-lg text-foreground">{typedSignature}</p>
                         </div>
                       )}
                     </div>

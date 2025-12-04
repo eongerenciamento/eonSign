@@ -158,9 +158,9 @@ serve(async (req) => {
     const sigX = signatureX ? (signatureX / 100) * width : 50;
     const sigY = signatureY ? height - ((signatureY / 100) * height) : height - 200;
 
-    // Draw signature box
-    const signatureBoxWidth = 250;
-    const signatureBoxHeight = 80;
+    // Draw signature box - reduced size
+    const signatureBoxWidth = 150;
+    const signatureBoxHeight = 45;
     
     page.drawRectangle({
       x: sigX,
@@ -169,22 +169,22 @@ serve(async (req) => {
       height: signatureBoxHeight,
       color: rgb(0.98, 0.98, 0.98),
       borderColor: rgb(0.7, 0.7, 0.7),
-      borderWidth: 1,
+      borderWidth: 0.5,
     });
 
-    // Draw typed signature
+    // Draw typed signature - reduced size
     page.drawText(typedSignature || signerData.name, {
-      x: sigX + 10,
-      y: sigY - 35,
-      size: 24,
+      x: sigX + 5,
+      y: sigY - 18,
+      size: 12,
       font: helveticaBold,
       color: rgb(0.1, 0.1, 0.3),
     });
 
     page.drawText("Assinatura Eletronica", {
-      x: sigX + 10,
-      y: sigY - 55,
-      size: 8,
+      x: sigX + 5,
+      y: sigY - 30,
+      size: 6,
       font: helveticaFont,
       color: rgb(0.4, 0.4, 0.4),
     });
@@ -197,9 +197,9 @@ serve(async (req) => {
       minute: "2-digit",
     });
     page.drawText(signDate, {
-      x: sigX + 10,
-      y: sigY - 70,
-      size: 8,
+      x: sigX + 5,
+      y: sigY - 40,
+      size: 6,
       font: helveticaFont,
       color: rgb(0.4, 0.4, 0.4),
     });
