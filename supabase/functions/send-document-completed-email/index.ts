@@ -150,21 +150,31 @@ const handler = async (req: Request): Promise<Response> => {
     // Determine file path - prefer signed file if available
     let filePath: string;
     if (document.bry_signed_file_url) {
-      filePath = document.bry_signed_file_url;
+      // bry_signed_file_url can be either a full URL or just a path
+      if (document.bry_signed_file_url.includes('/documents/')) {
+        // It's a full URL, extract the path
+        const urlParts = document.bry_signed_file_url.split('/documents/');
+        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+      } else {
+        // It's already a path
+        filePath = document.bry_signed_file_url;
+      }
     } else if (document.file_url) {
-      filePath = document.file_url.split('/documents/')[1];
+      const urlParts = document.file_url.split('/documents/');
+      filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
     } else {
       throw new Error("URL do documento não encontrada");
     }
     
     // Download signed document from Storage
-    console.log("Downloading signed document from:", filePath);
+    console.log("Downloading signed document from path:", filePath);
     const { data: fileData, error: fileError } = await supabase
       .storage
       .from('documents')
       .download(filePath);
 
     if (fileError || !fileData) {
+      console.error("Error downloading document:", fileError);
       throw new Error("Erro ao baixar o documento assinado");
     }
 
