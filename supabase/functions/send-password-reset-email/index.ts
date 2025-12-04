@@ -65,49 +65,47 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email com as credenciais
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eongerenciamento.com.br>",
+      from: "Éon Sign <noreply@eongerenciamento.com.br>",
       to: [email],
-      subject: "Nova Senha - Eon Sign",
+      subject: "Nova Senha - Éon Sign",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #e5e5e5; padding: 20px;">
-          <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <div style="padding: 0; text-align: center;">
-              <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; display: block;" />
-            </div>
-            <div style="padding: 30px; background: #f9f9f9;">
-              <h2 style="color: #273d60;">Nova Senha Gerada</h2>
-              <p style="color: #333; font-size: 16px;">
-                Sua senha foi redefinida com sucesso. Utilize as credenciais abaixo para acessar o sistema:
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
+            <img src="${BANNER_URL}" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block;" />
+          </div>
+          <div style="padding: 30px; background: #f9f9f9;">
+            <h2 style="color: #273d60;">Nova Senha Gerada</h2>
+            <p style="color: #333; font-size: 16px;">
+              Sua senha foi redefinida com sucesso. Utilize as credenciais abaixo para acessar o sistema:
+            </p>
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 10px 0; color: #333; font-size: 16px;">
+                <strong>Login:</strong> ${email}
               </p>
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 10px 0; color: #333; font-size: 16px;">
-                  <strong>Login:</strong> ${email}
-                </p>
-                <p style="margin: 10px 0; color: #333; font-size: 16px;">
-                  <strong>Nova Senha:</strong> ${firstName}
-                </p>
-              </div>
-              <p style="color: #666; font-size: 14px;">
-                Por motivos de segurança, recomendamos que você altere sua senha após fazer login.
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${APP_URL}/auth" 
-                   style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                          color: white; 
-                          padding: 15px 40px; 
-                          text-decoration: none; 
-                          border-radius: 8px;
-                          font-weight: bold;
-                          display: inline-block;">
-                  Acessar Sistema
-                </a>
-              </div>
-            </div>
-            <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
-              <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                © ${new Date().getFullYear()} Eon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+              <p style="margin: 10px 0; color: #333; font-size: 16px;">
+                <strong>Nova Senha:</strong> ${firstName}
               </p>
             </div>
+            <p style="color: #666; font-size: 14px;">
+              Por motivos de segurança, recomendamos que você altere sua senha após fazer login.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${APP_URL}/auth" 
+                 style="background: linear-gradient(135deg, #273d60, #001a4d); 
+                        color: white; 
+                        padding: 15px 40px; 
+                        text-decoration: none; 
+                        border-radius: 8px;
+                        font-weight: bold;
+                        display: inline-block;">
+                Acessar Sistema
+              </a>
+            </div>
+          </div>
+          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
+            <p style="color: #6b7280; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Éon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+            </p>
           </div>
         </div>
       `,

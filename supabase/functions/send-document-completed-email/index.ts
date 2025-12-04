@@ -219,47 +219,45 @@ const handler = async (req: Request): Promise<Response> => {
         to: [email],
         subject: `Documento Assinado - ${documentName}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #e5e5e5; padding: 20px;">
-            <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-              <div style="padding: 0; text-align: center;">
-                <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; display: block;" />
-              </div>
-              <div style="padding: 30px; background: #f9f9f9;">
-                <h2 style="color: #273d60;">Documento Assinado com Sucesso!</h2>
-                <p style="color: #333; font-size: 16px;">
-                  O documento <strong>${documentName}</strong> foi assinado por todos os signatários.
-                </p>
-                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <p style="margin: 0; color: #666;">
-                    <strong>Documento:</strong> ${documentName}<br>
-                    <strong>Enviado por:</strong> ${senderName}<br>
-                    <strong>Status:</strong> <span style="color: #16a34a; font-weight: bold;">✓ Assinado</span>
-                  </p>
-                </div>
-                <p style="color: #333; font-size: 14px;">
-                  O documento assinado está anexado a este e-mail junto com o relatório de evidências contendo todas as assinaturas e dados de validação. Você também pode visualizá-lo no sistema a qualquer momento.
-                </p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${APP_URL}/drive" 
-                     style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                            color: white; 
-                            padding: 15px 40px; 
-                            text-decoration: none; 
-                            border-radius: 8px;
-                            font-weight: bold;
-                            display: inline-block;">
-                    Acessar Eon Drive
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 12px; text-align: center;">
-                  Este documento possui validade legal e todas as assinaturas foram registradas com evidências de autenticação.
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="padding: 0; text-align: center;">
+              <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
+            </div>
+            <div style="padding: 30px; background: #f9f9f9;">
+              <h2 style="color: #273d60;">Documento Assinado com Sucesso!</h2>
+              <p style="color: #333; font-size: 16px;">
+                O documento <strong>${documentName}</strong> foi assinado por todos os signatários.
+              </p>
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #666;">
+                  <strong>Documento:</strong> ${documentName}<br>
+                  <strong>Enviado por:</strong> ${senderName}<br>
+                  <strong>Status:</strong> <span style="color: #16a34a; font-weight: bold;">✓ Assinado</span>
                 </p>
               </div>
-              <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
-                <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                  © ${new Date().getFullYear()} Eon Sign - Sistema de Gestão de Documentos e Assinatura Digital
-                </p>
+              <p style="color: #333; font-size: 14px;">
+                O documento assinado está anexado a este e-mail junto com o relatório de evidências contendo todas as assinaturas e dados de validação. Você também pode visualizá-lo no sistema a qualquer momento.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${APP_URL}/drive" 
+                   style="background: linear-gradient(135deg, #273d60, #001a4d); 
+                          color: white; 
+                          padding: 15px 40px; 
+                          text-decoration: none; 
+                          border-radius: 8px;
+                          font-weight: bold;
+                          display: inline-block;">
+                  Acessar Eon Drive
+                </a>
               </div>
+              <p style="color: #999; font-size: 12px; text-align: center;">
+                Este documento possui validade legal e todas as assinaturas foram registradas com evidências de autenticação.
+              </p>
+            </div>
+            <div style="background: #f9f9f9; padding: 20px; text-align: center;">
+              <p style="color: #6b7280; margin: 0; font-size: 12px;">
+                © ${new Date().getFullYear()} Eon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+              </p>
             </div>
           </div>
         `,
