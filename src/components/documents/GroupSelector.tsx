@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Users } from "lucide-react";
 
 interface Contact {
   id: string;
@@ -79,7 +78,6 @@ export function GroupSelector({ onSelectGroup }: GroupSelectorProps) {
   return (
     <Select onValueChange={handleSelectGroup}>
       <SelectTrigger className="w-full md:w-[200px]">
-        <Users className="w-4 h-4 mr-2 text-muted-foreground" />
         <SelectValue placeholder="Usar grupo" />
       </SelectTrigger>
       <SelectContent>

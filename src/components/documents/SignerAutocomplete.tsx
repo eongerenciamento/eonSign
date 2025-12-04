@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
-import { Users } from "lucide-react";
 
 export interface SignerSuggestion {
   name: string;
@@ -60,11 +59,7 @@ export function SignerAutocomplete({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="pr-8"
           />
-          {suggestions.length > 0 && (
-            <Users className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          )}
         </div>
       </PopoverTrigger>
       <PopoverContent 
