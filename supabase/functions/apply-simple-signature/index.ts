@@ -215,140 +215,75 @@ serve(async (req) => {
       const validationPage = pdfDoc.addPage([595.28, 841.89]);
       
       // Colors
-      const primaryColor = rgb(0.153, 0.239, 0.376); // #273d60
-      const darkColor = rgb(0.0, 0.102, 0.302); // #001a4d
+      const gray300 = rgb(0.835, 0.843, 0.863); // #d4d7db - gray-300
+      const gray600 = rgb(0.4, 0.424, 0.471); // #666b78 - gray-600
       const grayColor = rgb(0.4, 0.4, 0.4);
       const lightGrayColor = rgb(0.6, 0.6, 0.6);
+      const primaryColor = rgb(0.153, 0.239, 0.376); // #273d60
       
-      // Header background
+      // Header background - gray300
       validationPage.drawRectangle({
         x: 0,
         y: 741.89,
         width: 595.28,
         height: 100,
-        color: primaryColor,
+        color: gray300,
       });
 
-      // Try to embed company logo
-      let logoEmbedded = false;
-      if (companySettings?.logo_url) {
-        try {
-          console.log("Downloading company logo:", companySettings.logo_url);
-          const logoResponse = await fetch(companySettings.logo_url);
-          if (logoResponse.ok) {
-            const logoBuffer = await logoResponse.arrayBuffer();
-            const contentType = logoResponse.headers.get("content-type") || "";
-            
-            let logoImage;
-            if (contentType.includes("png")) {
-              logoImage = await pdfDoc.embedPng(logoBuffer);
-            } else if (contentType.includes("jpeg") || contentType.includes("jpg")) {
-              logoImage = await pdfDoc.embedJpg(logoBuffer);
-            }
-            
-            if (logoImage) {
-              const logoMaxHeight = 60;
-              const logoMaxWidth = 150;
-              const logoDims = logoImage.scale(Math.min(logoMaxWidth / logoImage.width, logoMaxHeight / logoImage.height));
-              
-              validationPage.drawImage(logoImage, {
-                x: 50,
-                y: 760,
-                width: logoDims.width,
-                height: logoDims.height,
-              });
-              logoEmbedded = true;
-              console.log("Logo embedded successfully");
-            }
-          }
-        } catch (logoError) {
-          console.error("Error embedding logo:", logoError);
-        }
-      }
-
-      // Header text (adjust position based on logo)
-      const headerTextX = logoEmbedded ? 220 : 50;
-      
-      validationPage.drawText("PAGINA DE VALIDACAO", {
-        x: headerTextX,
-        y: 800,
-        size: 20,
-        font: helveticaBold,
-        color: rgb(1, 1, 1),
-      });
-
-      validationPage.drawText("ASSINATURAS ELETRONICAS", {
-        x: headerTextX,
-        y: 778,
-        size: 12,
-        font: helveticaFont,
-        color: rgb(0.85, 0.85, 0.85),
-      });
-
-      if (companySettings?.company_name) {
-        validationPage.drawText(companySettings.company_name, {
-          x: headerTextX,
-          y: 756,
-          size: 10,
-          font: helveticaFont,
-          color: rgb(0.7, 0.7, 0.7),
-        });
-      }
-
-      // QR Code section
+      // Try to embed system logo (Eon Sign logo)
       try {
-        console.log("Generating QR code for:", validationUrl);
-        const qrCodeUrl = generateQrCodeUrl(validationUrl, 120);
-        const qrResponse = await fetch(qrCodeUrl);
-        
-        if (qrResponse.ok) {
-          const qrBuffer = await qrResponse.arrayBuffer();
-          const qrImage = await pdfDoc.embedPng(qrBuffer);
+        const systemLogoUrl = `${APP_URL}/logo-eon-white.png`;
+        console.log("Downloading system logo:", systemLogoUrl);
+        const logoResponse = await fetch(systemLogoUrl);
+        if (logoResponse.ok) {
+          const logoBuffer = await logoResponse.arrayBuffer();
+          const contentType = logoResponse.headers.get("content-type") || "";
           
-          // QR code box on right side
-          validationPage.drawRectangle({
-            x: 430,
-            y: 620,
-            width: 140,
-            height: 160,
-            color: rgb(0.97, 0.97, 0.97),
-            borderColor: rgb(0.85, 0.85, 0.85),
-            borderWidth: 1,
-          });
+          let logoImage;
+          if (contentType.includes("png")) {
+            logoImage = await pdfDoc.embedPng(logoBuffer);
+          } else if (contentType.includes("jpeg") || contentType.includes("jpg")) {
+            logoImage = await pdfDoc.embedJpg(logoBuffer);
+          }
           
-          validationPage.drawImage(qrImage, {
-            x: 445,
-            y: 660,
-            width: 110,
-            height: 110,
-          });
-          
-          validationPage.drawText("Verificar Online", {
-            x: 460,
-            y: 640,
-            size: 9,
-            font: helveticaBold,
-            color: primaryColor,
-          });
-          
-          validationPage.drawText("Escaneie o QR Code", {
-            x: 455,
-            y: 628,
-            size: 7,
-            font: helveticaFont,
-            color: grayColor,
-          });
-          
-          console.log("QR code embedded successfully");
+          if (logoImage) {
+            const logoMaxHeight = 50;
+            const logoMaxWidth = 120;
+            const logoDims = logoImage.scale(Math.min(logoMaxWidth / logoImage.width, logoMaxHeight / logoImage.height));
+            
+            // Center logo horizontally
+            const logoX = (595.28 - logoDims.width) / 2;
+            
+            validationPage.drawImage(logoImage, {
+              x: logoX,
+              y: 782,
+              width: logoDims.width,
+              height: logoDims.height,
+            });
+            console.log("System logo embedded successfully");
+          }
         }
-      } catch (qrError) {
-        console.error("Error embedding QR code:", qrError);
+      } catch (logoError) {
+        console.error("Error embedding system logo:", logoError);
       }
+
+      // Title - centered, gray600, with accents
+      const titleText = "PÁGINA DE VALIDAÇÃO";
+      const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 16);
+      const titleX = (595.28 - titleWidth) / 2;
+      
+      validationPage.drawText(titleText, {
+        x: titleX,
+        y: 760,
+        size: 16,
+        font: helveticaBold,
+        color: gray600,
+      });
 
       // Document info section
       let currentY = 710;
       
-      validationPage.drawText("INFORMACOES DO DOCUMENTO", {
+      validationPage.drawText("INFORMAÇÕES DO DOCUMENTO", {
         x: 50,
         y: currentY,
         size: 11,
@@ -361,7 +296,7 @@ serve(async (req) => {
       validationPage.drawRectangle({
         x: 40,
         y: currentY - 55,
-        width: 370,
+        width: 515,
         height: 70,
         color: rgb(0.98, 0.98, 0.98),
         borderColor: rgb(0.9, 0.9, 0.9),
@@ -384,7 +319,7 @@ serve(async (req) => {
         color: grayColor,
       });
 
-      validationPage.drawText(`Data de conclusao: ${signDate}`, {
+      validationPage.drawText(`Data de conclusão: ${signDate}`, {
         x: 50,
         y: currentY - 45,
         size: 9,
@@ -394,8 +329,8 @@ serve(async (req) => {
       
       currentY -= 80;
 
-      // Signers section title
-      validationPage.drawText("SIGNATARIOS", {
+      // Signers section title - with accent
+      validationPage.drawText("SIGNATÁRIOS", {
         x: 50,
         y: currentY,
         size: 11,
@@ -409,11 +344,11 @@ serve(async (req) => {
         const signer = allSignersData[i];
         
         // Check if we need a new page
-        if (currentY < 120) {
+        if (currentY < 180) {
           const newPage = pdfDoc.addPage([595.28, 841.89]);
           currentY = 800;
           
-          newPage.drawText("SIGNATARIOS (continuacao)", {
+          newPage.drawText("SIGNATÁRIOS (continuação)", {
             x: 50,
             y: currentY,
             size: 11,
@@ -435,21 +370,21 @@ serve(async (req) => {
           borderWidth: 1,
         });
 
-        // Signer number badge
+        // Signer number badge - gray300 background, gray600 text
         validationPage.drawRectangle({
           x: 40,
           y: currentY - 2,
           width: 80,
           height: 18,
-          color: primaryColor,
+          color: gray300,
         });
 
-        validationPage.drawText(`Signatario ${i + 1}`, {
+        validationPage.drawText(`Signatário ${i + 1}`, {
           x: 48,
           y: currentY + 2,
           size: 9,
           font: helveticaBold,
-          color: rgb(1, 1, 1),
+          color: gray600,
         });
 
         // Signer name
@@ -553,34 +488,71 @@ serve(async (req) => {
         currentY -= cardHeight + 10;
       }
 
+      // QR Code section - bottom right, no background
+      try {
+        console.log("Generating QR code for:", validationUrl);
+        const qrCodeUrl = generateQrCodeUrl(validationUrl, 100);
+        const qrResponse = await fetch(qrCodeUrl);
+        
+        if (qrResponse.ok) {
+          const qrBuffer = await qrResponse.arrayBuffer();
+          const qrImage = await pdfDoc.embedPng(qrBuffer);
+          
+          // QR code at bottom right without background
+          validationPage.drawImage(qrImage, {
+            x: 475,
+            y: 90,
+            width: 80,
+            height: 80,
+          });
+          
+          // Text centered below QR code
+          const validationText = "Validação";
+          const validationTextWidth = helveticaBold.widthOfTextAtSize(validationText, 8);
+          validationPage.drawText(validationText, {
+            x: 475 + (80 - validationTextWidth) / 2,
+            y: 78,
+            size: 8,
+            font: helveticaBold,
+            color: primaryColor,
+          });
+          
+          const scanText = "Escaneie o QR Code";
+          const scanTextWidth = helveticaFont.widthOfTextAtSize(scanText, 7);
+          validationPage.drawText(scanText, {
+            x: 475 + (80 - scanTextWidth) / 2,
+            y: 68,
+            size: 7,
+            font: helveticaFont,
+            color: grayColor,
+          });
+          
+          console.log("QR code embedded successfully");
+        }
+      } catch (qrError) {
+        console.error("Error embedding QR code:", qrError);
+      }
+
       // Footer
       validationPage.drawLine({
-        start: { x: 40, y: 70 },
-        end: { x: 555, y: 70 },
+        start: { x: 40, y: 50 },
+        end: { x: 440, y: 50 },
         thickness: 1,
         color: rgb(0.85, 0.85, 0.85),
       });
 
       validationPage.drawText("Documento validado pelo sistema Eon Sign", {
         x: 50,
-        y: 52,
+        y: 36,
         size: 9,
         font: helveticaBold,
         color: primaryColor,
       });
 
-      validationPage.drawText("Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
-        x: 50,
-        y: 38,
-        size: 8,
-        font: helveticaFont,
-        color: lightGrayColor,
-      });
-
-      validationPage.drawText(`Verificacao: ${validationUrl}`, {
+      validationPage.drawText("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
         x: 50,
         y: 24,
-        size: 7,
+        size: 8,
         font: helveticaFont,
         color: lightGrayColor,
       });
