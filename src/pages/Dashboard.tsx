@@ -153,15 +153,15 @@ const Dashboard = () => {
               {subtitle}
             </p>
           </div>
-          <Button onClick={() => navigate("/novo-documento")} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:from-[#2d4670] hover:to-[#002855] shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 bg-[#273d60] md:rounded-full">
-            <Upload className="w-5 h-5 md:mr-2" />
-            <span className="hidden md:inline">Documento</span>
+          <Button onClick={() => navigate("/novo-documento")} className="bg-gray-100 hover:bg-gray-200 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full">
+            <Upload className="w-5 h-5 md:mr-2 text-gray-600" />
+            <span className="hidden md:inline text-gray-600">Documento</span>
           </Button>
         </div>
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-[#273d60] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-white text-base">
                 Pendentes
@@ -173,7 +173,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-[#273d60] to-[#001f3f] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-[#273d60] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-white text-base">
                 Pendentes
