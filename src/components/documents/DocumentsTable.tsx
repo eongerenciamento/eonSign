@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -590,6 +591,219 @@ export const DocumentsTable = ({
     }
   };
 
+  const handleDownloadCertificatePDF = async (documentId: string) => {
+    try {
+      toast({
+        title: "Gerando certificado...",
+        description: "Obtendo dados do documento.",
+      });
+
+      const { data: result, error } = await supabase.functions.invoke(
+        "get-document-validation",
+        { body: { documentId } }
+      );
+
+      if (error || result.error) {
+        throw new Error(result?.error || error?.message || 'Erro ao obter dados');
+      }
+
+      const { document, organization, signers } = result;
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      let yPos = 20;
+
+      // Header background
+      pdf.setFillColor(39, 61, 96);
+      pdf.rect(0, 0, pageWidth, 45, 'F');
+
+      // Header text
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(20);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("CERTIFICADO DE VALIDAÇÃO", pageWidth / 2, 20, { align: "center" });
+      
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "normal");
+      pdf.text("Eon Sign - Assinatura Eletrônica", pageWidth / 2, 30, { align: "center" });
+      
+      pdf.setFontSize(10);
+      pdf.text(`Emitido por: ${organization.name}`, pageWidth / 2, 38, { align: "center" });
+
+      yPos = 55;
+
+      // Status section
+      pdf.setTextColor(0, 0, 0);
+      const statusColor = result.valid ? [34, 197, 94] : [234, 179, 8];
+      pdf.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+      pdf.roundedRect(margin, yPos, pageWidth - margin * 2, 25, 3, 3, 'F');
+      
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(result.valid ? "✓ DOCUMENTO VÁLIDO" : "⏳ DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, { align: "center" });
+      
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      const statusText = result.valid 
+        ? "Este documento foi assinado por todos os signatários e possui validade jurídica."
+        : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s).`;
+      pdf.text(statusText, pageWidth / 2, yPos + 18, { align: "center" });
+
+      yPos += 35;
+
+      // Document Info Section
+      pdf.setTextColor(39, 61, 96);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("INFORMAÇÕES DO DOCUMENTO", margin, yPos);
+      
+      yPos += 8;
+      pdf.setDrawColor(39, 61, 96);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      
+      yPos += 10;
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+
+      const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return "N/A";
+        return new Date(dateStr).toLocaleString("pt-BR", {
+          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
+        });
+      };
+
+      const getSignatureModeLabel = (mode: string) => {
+        switch (mode) {
+          case "SIMPLE": return "Assinatura Simples";
+          case "ADVANCED": return "Assinatura Avançada";
+          case "QUALIFIED": return "Assinatura Qualificada";
+          default: return "Assinatura Eletrônica";
+        }
+      };
+
+      const docInfo = [
+        ["Nome do Documento:", document.name],
+        ["Tipo de Assinatura:", getSignatureModeLabel(document.signatureMode)],
+        ["Data de Criação:", formatDate(document.createdAt)],
+        ["Data de Conclusão:", document.completedAt ? formatDate(document.completedAt) : "Pendente"],
+        ["ID do Documento:", document.id],
+      ];
+
+      docInfo.forEach(([label, value]) => {
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(60, 60, 60);
+        pdf.text(label, margin, yPos);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(value, margin + 45, yPos);
+        yPos += 7;
+      });
+
+      yPos += 10;
+
+      // Signers Section
+      pdf.setTextColor(39, 61, 96);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`SIGNATÁRIOS (${document.signedCount}/${document.totalSigners})`, margin, yPos);
+      
+      yPos += 8;
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      signers.forEach((signer: any) => {
+        if (yPos > 250) {
+          pdf.addPage();
+          yPos = 20;
+        }
+
+        const boxHeight = signer.status === "signed" ? 35 : 15;
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(margin, yPos - 5, pageWidth - margin * 2, boxHeight, 2, 2, 'F');
+
+        if (signer.status === "signed") {
+          pdf.setFillColor(34, 197, 94);
+        } else {
+          pdf.setFillColor(156, 163, 175);
+        }
+        pdf.circle(margin + 5, yPos + 3, 3, 'F');
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(11);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(signer.name, margin + 12, yPos + 5);
+        
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "normal");
+        const statusLabel = signer.status === "signed" ? "Assinado" : "Pendente";
+        pdf.setTextColor(signer.status === "signed" ? 34 : 156, signer.status === "signed" ? 197 : 163, signer.status === "signed" ? 94 : 175);
+        pdf.text(`[${statusLabel}]`, margin + 12 + pdf.getTextWidth(signer.name) + 3, yPos + 5);
+
+        if (signer.status === "signed") {
+          pdf.setTextColor(100, 100, 100);
+          pdf.setFontSize(9);
+          
+          let infoY = yPos + 12;
+          
+          if (signer.signed_at) {
+            pdf.text(`Data: ${formatDate(signer.signed_at)}`, margin + 12, infoY);
+            infoY += 6;
+          }
+          
+          const location = [signer.signature_city, signer.signature_state].filter(Boolean).join(", ");
+          if (location) {
+            pdf.text(`Local: ${location}${signer.signature_country ? ` - ${signer.signature_country}` : ""}`, margin + 12, infoY);
+            infoY += 6;
+          }
+          
+          if (signer.cpf) {
+            pdf.text(`CPF: ${signer.cpf}`, margin + 12, infoY);
+            infoY += 6;
+          }
+          
+          if (signer.signature_ip) {
+            pdf.text(`IP: ${signer.signature_ip}`, margin + 12, infoY);
+          }
+        }
+
+        yPos += boxHeight + 5;
+      });
+
+      // Footer
+      yPos = Math.max(yPos + 10, 260);
+      if (yPos > 270) {
+        pdf.addPage();
+        yPos = 20;
+      }
+
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      
+      yPos += 8;
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.text("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", pageWidth / 2, yPos, { align: "center" });
+      pdf.text(`Verificado pelo sistema Eon Sign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, { align: "center" });
+      pdf.text(`URL de Validação: ${window.location.origin}/validar/${documentId}`, pageWidth / 2, yPos + 10, { align: "center" });
+
+      pdf.save(`${document.name}_certificado_validacao.pdf`);
+      toast({
+        title: "Certificado baixado",
+        description: "Certificado de validação baixado com sucesso.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading certificate:", error);
+      toast({
+        title: "Erro ao baixar certificado",
+        description: error.message || "Não foi possível gerar o certificado.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDownloadReport = async (documentId: string) => {
     try {
       toast({
@@ -922,6 +1136,17 @@ export const DocumentsTable = ({
                           <ShieldCheck className="w-4 h-4 text-gray-500" />
                         </Button>
                       )}
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full hover:bg-transparent" 
+                          onClick={() => handleDownloadCertificatePDF(doc.id)}
+                          title="Baixar certificado de validação (PDF)"
+                        >
+                          <FileDown className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
                       {doc.status !== 'signed' && (
                         <Button 
                           variant="ghost" 
@@ -1016,6 +1241,17 @@ export const DocumentsTable = ({
                         title="Visualizar certificado de validação"
                       >
                         <ShieldCheck className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    )}
+                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-transparent h-8 w-8" 
+                        onClick={() => handleDownloadCertificatePDF(doc.id)}
+                        title="Baixar certificado de validação (PDF)"
+                      >
+                        <FileDown className="w-4 h-4 text-gray-500" />
                       </Button>
                     )}
                     {doc.status !== 'signed' && (
