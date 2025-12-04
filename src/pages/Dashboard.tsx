@@ -123,7 +123,8 @@ const Dashboard = () => {
         isEnvelope: item.isEnvelope,
         documentCount: item.documentCount,
         envelopeId: item.envelope_id,
-        envelopeDocuments
+        envelopeDocuments,
+        signatureMode: item.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | null,
       };
     }));
     setDocuments(documentsWithSigners);

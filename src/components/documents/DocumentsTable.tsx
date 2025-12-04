@@ -42,6 +42,7 @@ export interface Document {
   documentCount?: number;
   envelopeId?: string | null;
   envelopeDocuments?: EnvelopeDocument[];
+  signatureMode?: "SIMPLE" | "ADVANCED" | "QUALIFIED" | null;
 }
 
 export interface Folder {
@@ -74,6 +75,21 @@ const statusConfig = {
   expired: {
     label: "Expirado",
     className: "bg-red-700 text-white hover:bg-red-700"
+  }
+};
+
+const signatureModeConfig = {
+  SIMPLE: {
+    label: "Simples",
+    className: "bg-gray-500 text-white"
+  },
+  ADVANCED: {
+    label: "Avançada",
+    className: "bg-blue-600 text-white"
+  },
+  QUALIFIED: {
+    label: "ICP-Brasil",
+    className: "bg-purple-600 text-white"
   }
 };
 const getInitials = (name: string) => {
@@ -770,6 +786,11 @@ export const DocumentsTable = ({
                               {doc.documentCount} docs
                             </span>
                           )}
+                          {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
+                            <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
+                              {signatureModeConfig[doc.signatureMode].label}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-gray-500">{doc.createdAt}</p>
                       </div>
@@ -997,7 +1018,7 @@ export const DocumentsTable = ({
                   className={`space-y-2 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
                   onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {doc.isEnvelope ? (
                       <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
                     ) : (
@@ -1008,6 +1029,11 @@ export const DocumentsTable = ({
                       <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
                         {doc.documentCount} docs
                       </span>
+                    )}
+                    {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
+                      <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
+                        {signatureModeConfig[doc.signatureMode].label}
+                      </Badge>
                     )}
                   </div>
                   

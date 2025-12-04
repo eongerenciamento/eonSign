@@ -259,20 +259,21 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Atualizar TODOS os documentos com o MESMO envelope UUID
+    // Atualizar TODOS os documentos com o MESMO envelope UUID e modo de assinatura
     for (const docInfo of documentUuids) {
       const { error: docError } = await supabase
         .from('documents')
         .update({
           bry_envelope_uuid: envelopeUuid,
           bry_document_uuid: docInfo.bryDocumentUuid,
+          signature_mode: selectedSignatureMode,
         })
         .eq('id', docInfo.documentId);
 
       if (docError) {
         console.error(`Error updating document ${docInfo.documentId} with BRy UUIDs:`, docError);
       } else {
-        console.log(`Document ${docInfo.documentId} updated with envelope UUID: ${envelopeUuid}`);
+        console.log(`Document ${docInfo.documentId} updated with envelope UUID: ${envelopeUuid}, signature mode: ${selectedSignatureMode}`);
       }
 
       // Atualizar signatários de CADA documento com links da BRy

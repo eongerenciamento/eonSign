@@ -162,6 +162,7 @@ export type Database = {
           folder_id: string | null
           id: string
           name: string
+          signature_mode: string | null
           signed_by: number
           signers: number
           status: string
@@ -178,6 +179,7 @@ export type Database = {
           folder_id?: string | null
           id?: string
           name: string
+          signature_mode?: string | null
           signed_by?: number
           signers?: number
           status?: string
@@ -194,6 +196,7 @@ export type Database = {
           folder_id?: string | null
           id?: string
           name?: string
+          signature_mode?: string | null
           signed_by?: number
           signers?: number
           status?: string
