@@ -69,6 +69,7 @@ const SignDocument = () => {
   const [pdfScale, setPdfScale] = useState(1);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState(false);
+  const [linkExpired, setLinkExpired] = useState(false);
 
   useEffect(() => {
     if (documentId) {
@@ -107,7 +108,16 @@ const SignDocument = () => {
         body: { documentId, signerEmail: email || "" },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Document was deleted or not found
+        setLinkExpired(true);
+        return;
+      }
+
+      if (!data.document) {
+        setLinkExpired(true);
+        return;
+      }
 
       setDocument(data.document);
       setSigners(data.signers || []);
@@ -118,7 +128,7 @@ const SignDocument = () => {
       }
     } catch (error: any) {
       console.error("Error fetching document:", error);
-      toast.error("Erro ao carregar documento");
+      setLinkExpired(true);
     } finally {
       setIsLoading(false);
     }
@@ -406,11 +416,18 @@ const SignDocument = () => {
     );
   }
 
-  if (!document) {
+  if (linkExpired || !document) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#273d60] to-[#001a4d]">
-        <Card className="p-8 text-center">
-          <p className="text-lg">Documento não encontrado</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
+        <Card className="p-8 text-center max-w-md">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <FileText className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-2">Link Expirado</h2>
+          <p className="text-muted-foreground">
+            Este documento não está mais disponível para assinatura. 
+            O link pode ter expirado ou o documento foi removido pelo remetente.
+          </p>
         </Card>
       </div>
     );
