@@ -29,7 +29,7 @@ serve(async (req) => {
     // Fetch document info
     const { data: document, error: docError } = await supabase
       .from("documents")
-      .select("id, name, status, signature_mode, created_at, updated_at, signers, signed_by, user_id")
+      .select("id, name, status, signature_mode, created_at, updated_at, signers, signed_by, user_id, bry_signed_file_url")
       .eq("id", documentId)
       .single();
 
@@ -90,6 +90,25 @@ serve(async (req) => {
     const isCompleted = document.status === "signed";
     const isValid = isCompleted && document.signed_by === document.signers;
 
+    // Generate signed URL for download if document is completed
+    let downloadUrl = null;
+    if (isCompleted && document.bry_signed_file_url) {
+      let filePath = document.bry_signed_file_url;
+      // Handle both URL and path formats
+      if (filePath.includes('/documents/')) {
+        const urlParts = filePath.split('/documents/');
+        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+      }
+      
+      const { data: signedUrlData } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      
+      if (signedUrlData?.signedUrl) {
+        downloadUrl = signedUrlData.signedUrl;
+      }
+    }
+
     return new Response(
       JSON.stringify({
         valid: isValid,
@@ -101,7 +120,8 @@ serve(async (req) => {
           createdAt: document.created_at,
           completedAt: isCompleted ? document.updated_at : null,
           totalSigners: document.signers,
-          signedCount: document.signed_by
+          signedCount: document.signed_by,
+          downloadUrl
         },
         organization: {
           name: companySettings?.company_name || "Organização",
