@@ -34,22 +34,26 @@ type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED';
 const SIGNATURE_MODES: {
   id: SignatureMode;
   label: string;
+  typeName: string;
   description: string;
   badge?: string;
 }[] = [
   {
     id: 'SIMPLE',
     label: 'Assinatura Eletrônica',
+    typeName: 'Simples',
     description: 'Coleta de evidências (IP, geolocalização)'
   },
   {
     id: 'ADVANCED',
     label: 'Certificado Digital',
+    typeName: 'Avançada',
     description: 'Evidências + certificado digital em nuvem'
   },
   {
     id: 'QUALIFIED',
     label: 'Certificado ICP-Brasil',
+    typeName: 'Qualificada',
     description: 'Evidências + certificado digital ICP-Brasil',
     badge: 'Maior validade jurídica'
   }
@@ -787,7 +791,10 @@ const NewDocument = () => {
                       : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
                   }`}
                 >
-                  <RadioGroupItem value={mode.id} id={mode.id} className="mt-0.5" />
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value={mode.id} id={mode.id} />
+                    <span className="text-sm font-semibold text-gray-800">{mode.typeName}</span>
+                  </div>
                   <div className="flex-1">
                     <span className="text-sm font-medium text-gray-700">{mode.label}</span>
                     <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
