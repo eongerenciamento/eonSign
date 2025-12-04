@@ -12,14 +12,23 @@ interface Signer {
   phone: string;
 }
 
+interface DocumentInfo {
+  documentId: string;
+  base64: string;
+  fileName: string;
+}
+
 // Available authentication options for BRy
 type AuthenticationOption = 'IP' | 'GEOLOCATION' | 'OTP_EMAIL' | 'OTP_PHONE' | 'OTP_WHATSAPP' | 'SELFIE';
 
 interface CreateEnvelopeRequest {
-  documentId: string;
+  // Novo formato: múltiplos documentos
+  documents?: DocumentInfo[];
+  // Formato legado (retrocompatibilidade): documento único
+  documentId?: string;
+  documentBase64?: string;
   title: string;
   signers: Signer[];
-  documentBase64: string;
   userId: string;
   authenticationOptions?: AuthenticationOption[];
 }
@@ -62,12 +71,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { documentId, title, signers, documentBase64, userId, authenticationOptions }: CreateEnvelopeRequest = await req.json();
+    const requestData: CreateEnvelopeRequest = await req.json();
+    const { title, signers, userId, authenticationOptions } = requestData;
 
-    console.log('Creating BRy envelope for document:', documentId);
+    // Suportar formato novo (documents array) e legado (documentId + documentBase64)
+    let documentsToProcess: DocumentInfo[] = [];
+    
+    if (requestData.documents && requestData.documents.length > 0) {
+      // Novo formato: múltiplos documentos
+      documentsToProcess = requestData.documents;
+      console.log(`Creating BRy envelope with ${documentsToProcess.length} documents`);
+    } else if (requestData.documentId && requestData.documentBase64) {
+      // Formato legado: documento único
+      documentsToProcess = [{
+        documentId: requestData.documentId,
+        base64: requestData.documentBase64,
+        fileName: title,
+      }];
+      console.log('Creating BRy envelope with single document (legacy format)');
+    } else {
+      throw new Error('No documents provided');
+    }
+
     console.log('Title:', title);
     console.log('Number of signers:', signers.length);
-    console.log('Signers data:', JSON.stringify(signers.map(s => ({ name: s.name, email: s.email, phone: s.phone }))));
+    console.log('Number of documents:', documentsToProcess.length);
     console.log('Authentication options:', authenticationOptions);
 
     // Obter token da BRy
@@ -86,10 +114,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Preparar dados dos signatários para a BRy com formato E.164
     const signersData = signers.map(signer => {
-      // Converter para formato E.164 (padrão internacional) - somente se telefone existir
-      let phone = signer.phone ? signer.phone.replace(/\D/g, '') : ''; // Remover formatação
+      let phone = signer.phone ? signer.phone.replace(/\D/g, '') : '';
       
-      // Montar objeto base do signatário
       const signerData: {
         name: string;
         email: string;
@@ -101,13 +127,11 @@ const handler = async (req: Request): Promise<Response> => {
         authenticationOptions: selectedAuthOptions,
       };
       
-      // Adicionar telefone somente se não estiver vazio
       if (phone && phone.length >= 10) {
-        // Adicionar código do país +55 se não existir
         if (!phone.startsWith('55')) {
           phone = '55' + phone;
         }
-        signerData.phone = '+' + phone; // Formato E.164: +5591988981359
+        signerData.phone = '+' + phone;
         console.log(`Signer ${signer.name}: phone formatted to ${signerData.phone}`);
       } else {
         console.log(`Signer ${signer.name}: no valid phone provided, omitting phone field`);
@@ -116,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
       return signerData;
     });
 
-    // Criar envelope na BRy (seguindo exemplo oficial)
+    // Criar envelope na BRy com TODOS os documentos
     const envelopePayload = {
       name: title,
       clientName: 'Eon Sign',
@@ -124,16 +148,16 @@ const handler = async (req: Request): Promise<Response> => {
       signatureConfig: {
         mode: 'SIMPLE',
       },
-      typeMessaging: ['LINK'], // Eon Sign envia próprias notificações
-      documents: [{
-        base64Document: documentBase64,
-      }],
+      typeMessaging: ['LINK'],
+      documents: documentsToProcess.map(doc => ({
+        base64Document: doc.base64,
+      })),
     };
 
     console.log('Sending request to BRy API:', `${apiBaseUrl}/api/service/sign/v1/signatures`);
     console.log('Envelope payload (without base64):', JSON.stringify({
       ...envelopePayload,
-      documents: [{ base64Document: '[BASE64_CONTENT_HIDDEN]' }]
+      documents: envelopePayload.documents.map(() => ({ base64Document: '[BASE64_CONTENT_HIDDEN]' }))
     }));
 
     const envelopeResponse = await fetch(`${apiBaseUrl}/api/service/sign/v1/signatures`, {
@@ -157,13 +181,27 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Extrair informações do envelope
     const envelopeUuid = envelopeData.uuid;
-    // BRy retorna documentUuid (não uuid)
-    const documentUuid = envelopeData.documents?.[0]?.documentUuid || envelopeData.documents?.[0]?.uuid;
+    
+    // Extrair UUIDs de cada documento
+    const documentUuids: { documentId: string; bryDocumentUuid: string }[] = [];
+    if (envelopeData.documents && envelopeData.documents.length > 0) {
+      for (let i = 0; i < envelopeData.documents.length; i++) {
+        const bryDoc = envelopeData.documents[i];
+        const localDoc = documentsToProcess[i];
+        const docUuid = bryDoc.documentUuid || bryDoc.uuid;
+        
+        documentUuids.push({
+          documentId: localDoc.documentId,
+          bryDocumentUuid: docUuid,
+        });
+        console.log(`Document ${localDoc.documentId} -> BRy UUID: ${docUuid}`);
+      }
+    }
     
     console.log('Envelope UUID:', envelopeUuid);
-    console.log('Document UUID:', documentUuid);
+    console.log('Document UUIDs:', JSON.stringify(documentUuids));
     
-    // Extrair links de assinatura por signatário (usando link.href da resposta)
+    // Extrair links de assinatura por signatário
     const signerLinks: { email: string; nonce: string; link: string }[] = [];
     
     if (envelopeData.signers) {
@@ -173,8 +211,6 @@ const handler = async (req: Request): Promise<Response> => {
         const signerEmail = brySign.email;
         const signerLink = brySign.link?.href || '';
         
-        // Extrair nonce da URL do link (último segmento após /sign/)
-        // Formato: https://easysign.hom.bry.com.br/pt-br/{envelope_uuid}/sign/{signer_nonce}
         let signerNonce = brySign.nonce || '';
         if (!signerNonce && signerLink) {
           const linkParts = signerLink.split('/');
@@ -182,13 +218,11 @@ const handler = async (req: Request): Promise<Response> => {
           if (signIndex !== -1 && linkParts[signIndex + 1]) {
             signerNonce = linkParts[signIndex + 1];
           } else {
-            // Fallback: último segmento da URL
             signerNonce = linkParts[linkParts.length - 1] || '';
           }
         }
         
         console.log(`Signer ${signerEmail}: nonce=${signerNonce}, link=${signerLink}`);
-        console.log('Full BRy signer data:', JSON.stringify(brySign));
         
         signerLinks.push({
           email: signerEmail,
@@ -205,45 +239,45 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Atualizar documento com UUIDs da BRy
-    const { error: docError } = await supabase
-      .from('documents')
-      .update({
-        bry_envelope_uuid: envelopeUuid,
-        bry_document_uuid: documentUuid,
-      })
-      .eq('id', documentId);
-
-    if (docError) {
-      console.error('Error updating document with BRy UUIDs:', docError);
-    } else {
-      console.log('Document updated with BRy UUIDs');
-    }
-
-    // Atualizar signatários com links da BRy
-    for (const signerLink of signerLinks) {
-      const { error: signerError } = await supabase
-        .from('document_signers')
+    // Atualizar TODOS os documentos com o MESMO envelope UUID
+    for (const docInfo of documentUuids) {
+      const { error: docError } = await supabase
+        .from('documents')
         .update({
-          bry_signer_nonce: signerLink.nonce,
-          bry_signer_link: signerLink.link,
+          bry_envelope_uuid: envelopeUuid,
+          bry_document_uuid: docInfo.bryDocumentUuid,
         })
-        .eq('document_id', documentId)
-        .eq('email', signerLink.email);
+        .eq('id', docInfo.documentId);
 
-      if (signerError) {
-        console.error(`Error updating signer ${signerLink.email} with BRy link:`, signerError);
+      if (docError) {
+        console.error(`Error updating document ${docInfo.documentId} with BRy UUIDs:`, docError);
       } else {
-        console.log(`Signer ${signerLink.email} updated with BRy link: ${signerLink.link}`);
+        console.log(`Document ${docInfo.documentId} updated with envelope UUID: ${envelopeUuid}`);
+      }
+
+      // Atualizar signatários de CADA documento com links da BRy
+      for (const signerLink of signerLinks) {
+        const { error: signerError } = await supabase
+          .from('document_signers')
+          .update({
+            bry_signer_nonce: signerLink.nonce,
+            bry_signer_link: signerLink.link,
+          })
+          .eq('document_id', docInfo.documentId)
+          .eq('email', signerLink.email);
+
+        if (signerError) {
+          console.error(`Error updating signer ${signerLink.email} for doc ${docInfo.documentId}:`, signerError);
+        }
       }
     }
 
-    console.log('Database updated with BRy information');
+    console.log('Database updated with BRy information for all documents');
 
     return new Response(JSON.stringify({
       success: true,
       envelopeUuid,
-      documentUuid,
+      documentUuids,
       signerLinks,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

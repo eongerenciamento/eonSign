@@ -390,44 +390,49 @@ const NewDocument = () => {
         if (signersError) throw signersError;
       }
 
-      // Create BRy envelope for each document
+      // Create a SINGLE BRy envelope with ALL documents
       const brySignerLinks: Map<string, string> = new Map(); // key: email or phone
 
-      for (const fileContent of fileContents) {
-        try {
-          const allSigners = [{
-            name: companySigner.name,
-            email: companySigner.email,
-            phone: companySigner.phone
-          }, ...signers];
-          const {
-            data: bryData,
-            error: bryError
-          } = await supabase.functions.invoke('bry-create-envelope', {
-            body: {
-              documentId: fileContent.docId,
-              title: title,
-              signers: allSigners,
-              documentBase64: fileContent.base64,
-              userId: user.id,
-              authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions]
-            }
-          });
-          if (bryError) {
-            console.error('BRy envelope creation failed:', bryError);
-          } else if (bryData?.signerLinks) {
-            for (const link of bryData.signerLinks) {
-              // Use email as key if available, otherwise use phone
-              const key = link.email || link.phone;
-              if (key) {
-                brySignerLinks.set(key, link.link);
-              }
-            }
-            console.log('BRy envelope created:', bryData.envelopeUuid);
+      try {
+        const allSigners = [{
+          name: companySigner.name,
+          email: companySigner.email,
+          phone: companySigner.phone
+        }, ...signers];
+
+        // Preparar documentos para envio único ao BRy
+        const documentsForBry = fileContents.map(fc => ({
+          documentId: fc.docId,
+          base64: fc.base64,
+          fileName: files.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || title,
+        }));
+
+        const {
+          data: bryData,
+          error: bryError
+        } = await supabase.functions.invoke('bry-create-envelope', {
+          body: {
+            documents: documentsForBry,
+            title: title,
+            signers: allSigners,
+            userId: user.id,
+            authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions]
           }
-        } catch (bryErr) {
-          console.error('Error creating BRy envelope:', bryErr);
+        });
+
+        if (bryError) {
+          console.error('BRy envelope creation failed:', bryError);
+        } else if (bryData?.signerLinks) {
+          for (const link of bryData.signerLinks) {
+            const key = link.email || link.phone;
+            if (key) {
+              brySignerLinks.set(key, link.link);
+            }
+          }
+          console.log('BRy envelope created:', bryData.envelopeUuid, 'with', documentsForBry.length, 'documents');
         }
+      } catch (bryErr) {
+        console.error('Error creating BRy envelope:', bryErr);
       }
 
       // Send notifications with BRy links - PARA TODOS incluindo empresa
