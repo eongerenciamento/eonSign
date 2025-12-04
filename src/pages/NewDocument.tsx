@@ -43,7 +43,7 @@ const SIGNATURE_MODES: {
     id: 'SIMPLE',
     label: 'Assinatura Eletrônica',
     typeName: 'Simples',
-    description: 'Coleta de evidências (IP + Geolocalização)'
+    description: 'Cada signatário posiciona sua assinatura no documento (IP + Geolocalização)'
   },
   {
     id: 'ADVANCED',
@@ -1003,19 +1003,23 @@ const NewDocument = () => {
             </RadioGroup>
           </div>
 
-          {/* Authentication Options Section */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
-            <div className="space-y-2">
-              {AUTHENTICATION_OPTIONS.map(option => {
-              const isSelected = authOptions.includes(option.id);
-              return <div key={option.id} onClick={() => toggleAuthOption(option.id)} className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer bg-sidebar-foreground">
-                    <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onCheckedChange={() => toggleAuthOption(option.id)} />
-                    <span className="text-sm text-gray-600">{option.label}</span>
-                  </div>;
-            })}
+          {/* Authentication Options Section - Only for BRy modes */}
+          {signatureMode !== 'SIMPLE' && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
+              <div className="space-y-2">
+                {AUTHENTICATION_OPTIONS.map(option => {
+                  const isSelected = authOptions.includes(option.id);
+                  return (
+                    <div key={option.id} onClick={() => toggleAuthOption(option.id)} className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer bg-sidebar-foreground">
+                      <Checkbox checked={isSelected} onClick={e => e.stopPropagation()} onCheckedChange={() => toggleAuthOption(option.id)} />
+                      <span className="text-sm text-gray-600">{option.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
