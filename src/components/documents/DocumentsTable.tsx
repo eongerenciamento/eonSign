@@ -786,13 +786,15 @@ export const DocumentsTable = ({
                               {doc.documentCount} docs
                             </span>
                           )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-500">{doc.createdAt}</p>
                           {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
                             <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
                               {signatureModeConfig[doc.signatureMode].label}
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500">{doc.createdAt}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -1030,12 +1032,12 @@ export const DocumentsTable = ({
                         {doc.documentCount} docs
                       </span>
                     )}
-                    {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
-                      <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
-                        {signatureModeConfig[doc.signatureMode].label}
-                      </Badge>
-                    )}
                   </div>
+                  {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
+                    <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
+                      {signatureModeConfig[doc.signatureMode].label}
+                    </Badge>
+                  )}
                   
                   {/* Signer Badges below document name */}
                   {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
