@@ -88,6 +88,7 @@ export function SignerAutocomplete({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
+            className="placeholder:text-xs placeholder:font-normal"
           />
         </div>
       </PopoverTrigger>
