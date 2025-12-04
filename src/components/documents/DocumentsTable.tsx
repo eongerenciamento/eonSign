@@ -645,13 +645,13 @@ export const DocumentsTable = ({
         console.error("Error loading logo:", logoError);
       }
 
-      // Title - "PÁGINA DE VALIDAÇÃO" centered
+      // Title - "PÁGINA DE VALIDAÇÃO" right-aligned
       pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
       pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
-      pdf.text("PÁGINA DE VALIDAÇÃO", pageWidth / 2, 22, { align: "center" });
+      pdf.text("PÁGINA DE VALIDAÇÃO", pageWidth - margin, 22, { align: "right" });
 
-      let yPos = 50;
+      let yPos = 42;
 
       // Document Info Section
       pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
@@ -794,10 +794,10 @@ export const DocumentsTable = ({
         yPos += cardHeight + 8;
       });
 
-      // QR Code section - bottom right
+      // QR Code section - bottom right (smaller size)
       const validationUrl = `${window.location.origin}/validar/${documentId}`;
       try {
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(validationUrl)}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(validationUrl)}`;
         const qrImg = new Image();
         qrImg.crossOrigin = "anonymous";
         await new Promise<void>((resolve, reject) => {
@@ -806,18 +806,18 @@ export const DocumentsTable = ({
           qrImg.src = qrCodeUrl;
         });
         
-        const qrX = pageWidth - margin - 35;
-        const qrY = pageHeight - 55;
-        pdf.addImage(qrImg, "PNG", qrX, qrY, 35, 35);
+        const qrX = pageWidth - margin - 28;
+        const qrY = pageHeight - 48;
+        pdf.addImage(qrImg, "PNG", qrX, qrY, 28, 28);
         
         // Text below QR code
         pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
         pdf.setFontSize(8);
         pdf.setFont("helvetica", "bold");
-        pdf.text("Validação", qrX + 17.5, qrY + 40, { align: "center" });
+        pdf.text("Validação", qrX + 14, qrY + 33, { align: "center" });
         pdf.setFontSize(7);
         pdf.setFont("helvetica", "normal");
-        pdf.text("Escaneie o QR Code", qrX + 17.5, qrY + 45, { align: "center" });
+        pdf.text("Escaneie o QR Code", qrX + 14, qrY + 38, { align: "center" });
       } catch (qrError) {
         console.error("Error loading QR code:", qrError);
       }
