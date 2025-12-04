@@ -872,7 +872,7 @@ const NewDocument = () => {
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-gray-600">Signatários</p>
               </div>
-              {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-orange-50">
+              {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted">
                   <div className="absolute top-2 right-2 flex gap-1">
                     {signer.name && (signer.phone || signer.email) && (
                       <Button 
