@@ -42,19 +42,19 @@ const SIGNATURE_MODES: {
     id: 'SIMPLE',
     label: 'Assinatura Eletrônica',
     typeName: 'Simples',
-    description: 'Coleta de evidências (IP, geolocalização)'
+    description: 'Coleta de evidências (IP + Geolocalização)'
   },
   {
     id: 'ADVANCED',
     label: 'Certificado Digital',
     typeName: 'Avançada',
-    description: 'Evidências + certificado digital em nuvem'
+    description: 'Evidências + Certificado digital em nuvem'
   },
   {
     id: 'QUALIFIED',
     label: 'Certificado ICP-Brasil',
     typeName: 'Qualificada',
-    description: 'Evidências + certificado digital ICP-Brasil',
+    description: 'Evidências + Certificado digital ICP-Brasil',
     badge: 'Maior validade jurídica'
   }
 ];
