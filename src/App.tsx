@@ -14,6 +14,7 @@ import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
+import ValidateDocument from "./pages/ValidateDocument";
 import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 const AppRoutes = () => {
@@ -22,6 +23,7 @@ const AppRoutes = () => {
       <Route path="/planos" element={<Pricing />} />
       <Route path="/install" element={<Install />} />
       <Route path="/assinar/:documentId" element={<SignDocument />} />
+      <Route path="/validar/:documentId" element={<ValidateDocument />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/documentos" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
