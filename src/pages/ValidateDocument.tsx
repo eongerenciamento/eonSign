@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download, Copy, Share2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download, Copy, Share2, FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import logoEon from "@/assets/logo-eon.png";
+import { jsPDF } from "jspdf";
 
 interface Signer {
   id: string;
@@ -104,6 +105,184 @@ const ValidateDocument = () => {
       default:
         return "Assinatura Eletronica";
     }
+  };
+
+  const handleDownloadCertificate = () => {
+    if (!data) return;
+
+    const { document, organization, signers } = data;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPos = 20;
+
+    // Header background
+    doc.setFillColor(39, 61, 96);
+    doc.rect(0, 0, pageWidth, 45, 'F');
+
+    // Header text
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("CERTIFICADO DE VALIDAÇÃO", pageWidth / 2, 20, { align: "center" });
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Eon Sign - Assinatura Eletrônica", pageWidth / 2, 30, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.text(`Emitido por: ${organization.name}`, pageWidth / 2, 38, { align: "center" });
+
+    yPos = 55;
+
+    // Status section
+    doc.setTextColor(0, 0, 0);
+    const statusColor = data.valid ? [34, 197, 94] : [234, 179, 8];
+    doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+    doc.roundedRect(margin, yPos, pageWidth - margin * 2, 25, 3, 3, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(data.valid ? "✓ DOCUMENTO VÁLIDO" : "⏳ DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const statusText = data.valid 
+      ? "Este documento foi assinado por todos os signatários e possui validade jurídica."
+      : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s).`;
+    doc.text(statusText, pageWidth / 2, yPos + 18, { align: "center" });
+
+    yPos += 35;
+
+    // Document Info Section
+    doc.setTextColor(39, 61, 96);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORMAÇÕES DO DOCUMENTO", margin, yPos);
+    
+    yPos += 8;
+    doc.setDrawColor(39, 61, 96);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    
+    yPos += 10;
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+
+    const docInfo = [
+      ["Nome do Documento:", document.name],
+      ["Tipo de Assinatura:", getSignatureModeLabel(document.signatureMode)],
+      ["Data de Criação:", formatDate(document.createdAt)],
+      ["Data de Conclusão:", document.completedAt ? formatDate(document.completedAt) : "Pendente"],
+      ["ID do Documento:", document.id],
+    ];
+
+    docInfo.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(60, 60, 60);
+      doc.text(label, margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(value, margin + 45, yPos);
+      yPos += 7;
+    });
+
+    yPos += 10;
+
+    // Signers Section
+    doc.setTextColor(39, 61, 96);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(`SIGNATÁRIOS (${document.signedCount}/${document.totalSigners})`, margin, yPos);
+    
+    yPos += 8;
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 10;
+
+    signers.forEach((signer, index) => {
+      // Check if we need a new page
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Signer box
+      const boxHeight = signer.status === "signed" ? 35 : 15;
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(margin, yPos - 5, pageWidth - margin * 2, boxHeight, 2, 2, 'F');
+
+      // Signer status indicator
+      if (signer.status === "signed") {
+        doc.setFillColor(34, 197, 94);
+      } else {
+        doc.setFillColor(156, 163, 175);
+      }
+      doc.circle(margin + 5, yPos + 3, 3, 'F');
+
+      // Signer name and status
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(signer.name, margin + 12, yPos + 5);
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      const statusLabel = signer.status === "signed" ? "Assinado" : "Pendente";
+      doc.setTextColor(signer.status === "signed" ? 34 : 156, signer.status === "signed" ? 197 : 163, signer.status === "signed" ? 94 : 175);
+      doc.text(`[${statusLabel}]`, margin + 12 + doc.getTextWidth(signer.name) + 3, yPos + 5);
+
+      if (signer.status === "signed") {
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(9);
+        
+        let infoY = yPos + 12;
+        
+        if (signer.signed_at) {
+          doc.text(`Data: ${formatDate(signer.signed_at)}`, margin + 12, infoY);
+          infoY += 6;
+        }
+        
+        const location = [signer.signature_city, signer.signature_state].filter(Boolean).join(", ");
+        if (location) {
+          doc.text(`Local: ${location}${signer.signature_country ? ` - ${signer.signature_country}` : ""}`, margin + 12, infoY);
+          infoY += 6;
+        }
+        
+        if (signer.cpf) {
+          doc.text(`CPF: ${signer.cpf}`, margin + 12, infoY);
+          infoY += 6;
+        }
+        
+        if (signer.signature_ip) {
+          doc.text(`IP: ${signer.signature_ip}`, margin + 12, infoY);
+        }
+      }
+
+      yPos += boxHeight + 5;
+    });
+
+    // Footer
+    yPos = Math.max(yPos + 10, 260);
+    if (yPos > 270) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    
+    yPos += 8;
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", pageWidth / 2, yPos, { align: "center" });
+    doc.text(`Verificado pelo sistema Eon Sign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, { align: "center" });
+    doc.text(`URL de Validação: ${window.location.href}`, pageWidth / 2, yPos + 10, { align: "center" });
+
+    // Save the PDF
+    doc.save(`${document.name}_certificado_validacao.pdf`);
+    toast.success("Certificado baixado com sucesso!");
   };
 
   if (loading) {
@@ -207,6 +386,14 @@ const ValidateDocument = () => {
                     Baixar Documento Assinado
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary/5"
+                  onClick={handleDownloadCertificate}
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Baixar Certificado de Validação (PDF)
+                </Button>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -232,6 +419,19 @@ const ValidateDocument = () => {
                     WhatsApp
                   </Button>
                 </div>
+              </div>
+            )}
+            {/* Download certificate button for pending documents */}
+            {!isValid && (
+              <div className="mt-4 pt-4 border-t border-yellow-200">
+                <Button
+                  variant="outline"
+                  className="w-full border-yellow-500 text-yellow-700 hover:bg-yellow-50"
+                  onClick={handleDownloadCertificate}
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Baixar Certificado de Validação (PDF)
+                </Button>
               </div>
             )}
           </CardContent>
