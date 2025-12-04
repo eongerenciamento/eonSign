@@ -776,34 +776,30 @@ export const DocumentsTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {doc.status === 'pending' || doc.status === 'in_progress' ? (
-                      <TooltipProvider>
-                        <div className="flex items-center gap-1">
-                      {doc.signerNames?.map((name, idx) => {
-                            const status = doc.signerStatuses?.[idx] || 'pending';
-                            const email = doc.signerEmails?.[idx] || '';
-                            const phone = doc.signerPhones?.[idx] || '';
-                            const bgColor = status === 'signed' ? 'bg-green-700' : status === 'rejected' ? 'bg-red-700' : 'bg-yellow-700';
-                            return (
-                              <Tooltip key={idx}>
-                                <TooltipTrigger asChild>
-                                  <div className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default`}>
-                                    {getInitials(name)}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col gap-0.5">
-                                  <p className="font-medium">{name}</p>
-                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                  <p className="text-xs text-muted-foreground">{email}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            );
-                          })}
-                        </div>
-                      </TooltipProvider>
-                    ) : (
-                      <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
-                    )}
+                    <TooltipProvider>
+                      <div className="flex items-center gap-1">
+                        {doc.signerNames?.map((name, idx) => {
+                          const status = doc.signerStatuses?.[idx] || 'pending';
+                          const email = doc.signerEmails?.[idx] || '';
+                          const phone = doc.signerPhones?.[idx] || '';
+                          const bgColor = status === 'signed' ? 'bg-green-700' : status === 'rejected' ? 'bg-red-700' : 'bg-yellow-700';
+                          return (
+                            <Tooltip key={idx}>
+                              <TooltipTrigger asChild>
+                                <div className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default`}>
+                                  {getInitials(name)}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="flex flex-col gap-0.5">
+                                <p className="font-medium">{name}</p>
+                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                <p className="text-xs text-muted-foreground">{email}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-4">
