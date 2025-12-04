@@ -28,6 +28,7 @@ const Documents = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
+  const [signatureModeFilter, setSignatureModeFilter] = useState<string>("all");
   const [folders, setFolders] = useState<Folder[]>([]);
   const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const { toast } = useToast();
@@ -178,7 +179,7 @@ const Documents = () => {
 
   useEffect(() => {
     filterDocuments();
-  }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo]);
+  }, [searchQuery, sortBy, documents, activeTab, dateFrom, dateTo, signatureModeFilter]);
 
   const filterDocuments = () => {
     let filtered = [...documents];
@@ -220,6 +221,11 @@ const Documents = () => {
           return docDate <= dateTo;
         }
       );
+    }
+
+    // Filter by signature mode
+    if (signatureModeFilter !== "all") {
+      filtered = filtered.filter((doc) => doc.signatureMode === signatureModeFilter);
     }
 
     // Sort
@@ -333,16 +339,29 @@ const Documents = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Modo de Assinatura" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Modos</SelectItem>
+                      <SelectItem value="SIMPLE">Simples</SelectItem>
+                      <SelectItem value="ADVANCED">Avançada</SelectItem>
+                      <SelectItem value="QUALIFIED">ICP-Brasil</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -418,16 +437,29 @@ const Documents = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Modo de Assinatura" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Modos</SelectItem>
+                      <SelectItem value="SIMPLE">Simples</SelectItem>
+                      <SelectItem value="ADVANCED">Avançada</SelectItem>
+                      <SelectItem value="QUALIFIED">ICP-Brasil</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -496,16 +528,29 @@ const Documents = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Ordenar por" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Mais Recentes</SelectItem>
-                    <SelectItem value="oldest">Mais Antigos</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Modo de Assinatura" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Modos</SelectItem>
+                      <SelectItem value="SIMPLE">Simples</SelectItem>
+                      <SelectItem value="ADVANCED">Avançada</SelectItem>
+                      <SelectItem value="QUALIFIED">ICP-Brasil</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
