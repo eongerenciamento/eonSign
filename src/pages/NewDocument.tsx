@@ -415,6 +415,67 @@ const NewDocument = () => {
         }
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Salvar signatários automaticamente na tabela contacts
+      const savedContactIds: string[] = [];
+      for (const signer of signers) {
+        if (!signer.name || (!signer.email && !signer.phone)) continue;
+        
+        // Verificar se já existe por email ou telefone
+        let query = supabase
+          .from('contacts')
+          .select('id')
+          .eq('user_id', user.id);
+        
+        if (signer.email && signer.phone) {
+          query = query.or(`email.eq.${signer.email},phone.eq.${signer.phone}`);
+        } else if (signer.email) {
+          query = query.eq('email', signer.email);
+        } else if (signer.phone) {
+          query = query.eq('phone', signer.phone);
+        }
+        
+        const { data: existingContact } = await query.maybeSingle();
+
+        if (existingContact) {
+          savedContactIds.push(existingContact.id);
+        } else {
+          // Criar novo contato
+          const { data: newContact } = await supabase.from('contacts').insert({
+            user_id: user.id,
+            name: signer.name,
+            email: signer.email || null,
+            phone: signer.phone || null
+          }).select('id').single();
+          
+          if (newContact) {
+            savedContactIds.push(newContact.id);
+          }
+        }
+      }
+
+      // Criar grupo automaticamente se houver mais de 1 signatário
+      if (signers.length > 1 && savedContactIds.length > 1) {
+        const { data: newGroup } = await supabase
+          .from('signer_groups')
+          .insert({
+            user_id: user.id,
+            name: 'Novo grupo'
+          })
+          .select('id')
+          .single();
+
+        if (newGroup) {
+          // Adicionar membros ao grupo
+          const groupMembers = savedContactIds.map(contactId => ({
+            group_id: newGroup.id,
+            contact_id: contactId
+          }));
+          
+          await supabase.from('signer_group_members').insert(groupMembers);
+        }
+      }
+
       let envelopeId: string | null = null;
 
       // If envelope mode (2+ documents), create envelope first
