@@ -233,7 +233,7 @@ export function MembersTab() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="hover:bg-background hover:text-foreground">
               Cancelar
             </Button>
             <Button
@@ -258,7 +258,7 @@ export function MembersTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="hover:bg-background hover:text-foreground">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteMember}
               disabled={isDeleting}
