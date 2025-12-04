@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SignerAutocomplete, SignerSuggestion } from "@/components/documents/SignerAutocomplete";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 const AUTHENTICATION_OPTIONS: {
@@ -89,6 +90,7 @@ const NewDocument = () => {
   } | null>(null);
   const [authOptions, setAuthOptions] = useState<AuthenticationOption[]>(['SELFIE']);
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('SIMPLE');
+  const [signerSuggestions, setSignerSuggestions] = useState<SignerSuggestion[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -186,6 +188,49 @@ const NewDocument = () => {
       }
     };
     loadCompanySigner();
+  }, []);
+
+  // Load previous signers for autocomplete
+  useEffect(() => {
+    const loadPreviousSigners = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user's documents
+      const { data: userDocs } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (!userDocs || userDocs.length === 0) return;
+
+      const docIds = userDocs.map(d => d.id);
+
+      // Fetch external signers from user's documents
+      const { data: signersData } = await supabase
+        .from('document_signers')
+        .select('name, email, phone')
+        .in('document_id', docIds)
+        .eq('is_company_signer', false);
+
+      if (!signersData) return;
+
+      // Deduplicate by email or phone, keeping most recent
+      const seen = new Map<string, SignerSuggestion>();
+      for (const signer of signersData) {
+        const key = signer.email || signer.phone || signer.name;
+        if (key && !seen.has(key)) {
+          seen.set(key, {
+            name: signer.name,
+            email: signer.email || '',
+            phone: signer.phone || ''
+          });
+        }
+      }
+
+      setSignerSuggestions(Array.from(seen.values()));
+    };
+    loadPreviousSigners();
   }, []);
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -778,7 +823,20 @@ const NewDocument = () => {
                   
                   <div className="grid gap-2">
                     <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
-                    <Input id={`name-${index}`} value={signer.name} onChange={e => handleSignerChange(index, "name", e.target.value)} placeholder="Digite o nome ou razão social" className="placeholder:text-xs" />
+                    <SignerAutocomplete
+                      value={signer.name}
+                      onChange={(value) => handleSignerChange(index, "name", value)}
+                      onSelectSigner={(suggestion) => {
+                        const newSigners = [...signers];
+                        newSigners[index] = {
+                          name: suggestion.name,
+                          phone: suggestion.phone || "",
+                          email: suggestion.email || ""
+                        };
+                        setSigners(newSigners);
+                      }}
+                      suggestions={signerSuggestions}
+                    />
                   </div>
 
                   <div className="grid gap-2">
