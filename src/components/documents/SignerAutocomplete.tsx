@@ -37,21 +37,21 @@ export function SignerAutocomplete({
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter suggestions based on input value
+  // Filter suggestions based on input value - use startsWith for name
   const filteredSuggestions = value.length >= 2
     ? suggestions.filter(s => 
-        s.name.toLowerCase().includes(value.toLowerCase()) ||
-        s.email.toLowerCase().includes(value.toLowerCase()) ||
+        s.name.toLowerCase().startsWith(value.toLowerCase()) ||
+        s.email.toLowerCase().startsWith(value.toLowerCase()) ||
         s.phone.includes(value.replace(/\D/g, ''))
       ).slice(0, 10)
     : [];
 
-  // Filter groups based on input value
+  // Filter groups based on input value - use startsWith for name
   const filteredGroups = value.length >= 2
     ? groups.filter(g => 
-        g.name.toLowerCase().includes(value.toLowerCase())
+        g.name.toLowerCase().startsWith(value.toLowerCase())
       ).slice(0, 5)
-    : groups.slice(0, 5); // Show first 5 groups when no filter
+    : [];
 
   // Open popover when typing and there are suggestions or groups
   useEffect(() => {
