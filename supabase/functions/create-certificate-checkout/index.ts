@@ -62,13 +62,14 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
 
     // Create checkout session for certificate payment
-    // Price ID: price_1Sb3RFHRTD5WvpxjIhcmCVkN (R$ 109,90) - Eon Certifica PRODUÇÃO
+    // TEST Price ID: price_1Sb3VuHRTD5WvpxjspGtnBwd (R$ 109,90) - Eon Certifica TESTE
+    // PRODUCTION Price ID (guardar): price_1Sb3RFHRTD5WvpxjIhcmCVkN
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : email,
       line_items: [
         {
-          price: "price_1Sb3RFHRTD5WvpxjIhcmCVkN", // PRODUCTION - Eon Certifica
+          price: "price_1Sb3VuHRTD5WvpxjspGtnBwd", // TEST - Eon Certifica
           quantity: 1,
         },
       ],
