@@ -649,6 +649,9 @@ export default function CertificateRequests() {
                             <h3 className="font-semibold bg-transparent text-gray-600 mb-1 text-sm">
                               {request.common_name}
                             </h3>
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Certificado Digital A1
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               <span className="font-bold">{request.type === "PJ" ? "CNPJ" : "CPF"}:</span> {request.type === "PJ" && request.cnpj ? request.cnpj : formatCPF(request.cpf)}
                             </p>
@@ -657,7 +660,7 @@ export default function CertificateRequests() {
                               </p>}
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge className={`${statusConfig.color} border shrink-0`}>
+                            <Badge className={`${statusConfig.color} border-0 shrink-0`}>
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {statusConfig.label}
                             </Badge>
@@ -669,16 +672,16 @@ export default function CertificateRequests() {
                                   <MoreVertical className="h-4 w-4" />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleSyncStatus(request)} disabled={isSyncing}>
+                              <DropdownMenuContent align="end" className="bg-background">
+                                <DropdownMenuItem onClick={() => handleSyncStatus(request)} disabled={isSyncing} className="focus:bg-transparent focus:text-foreground">
                                   <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
                                   Sincronizar Status
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleListDocuments(request)}>
+                                <DropdownMenuItem onClick={() => handleListDocuments(request)} className="focus:bg-transparent focus:text-foreground">
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver Documentos
                                 </DropdownMenuItem>
-                                {request.status === "approved" && <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm}>
+                                {request.status === "approved" && <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="focus:bg-transparent focus:text-foreground">
                                     {isDownloadingTerm ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                                     Termo de Titularidade
                                   </DropdownMenuItem>}
@@ -687,7 +690,7 @@ export default function CertificateRequests() {
                                     <DropdownMenuItem onClick={() => {
                               setDeletingRequest(request);
                               setShowDeleteRequestDialog(true);
-                            }} className="text-destructive focus:text-destructive">
+                            }} className="text-destructive focus:bg-transparent focus:text-destructive">
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Excluir Solicitação
                                     </DropdownMenuItem>
