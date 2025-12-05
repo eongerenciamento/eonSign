@@ -174,163 +174,171 @@ export function CertificateCheckoutDialog({
       if (!isOpen) resetForm();
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-gray-600">
-            Certificado Digital A1
-          </DialogTitle>
-          <DialogDescription>
-            Adquira seu certificado digital A1 com validade de 1 ano
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Product Card */}
-        <div className="bg-gradient-to-br from-[#273d60] to-[#001a4d] rounded-lg p-4 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              <span className="font-medium">Eon Certifica A1</span>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">R$ 109,90</div>
-              <div className="text-xs text-white/70">pagamento único</div>
-            </div>
-          </div>
-          <ul className="text-sm space-y-1 text-white/90">
-            <li className="flex items-center gap-2">
-              <Check className="h-3 w-3" />
-              Certificado ICP-Brasil
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-3 w-3" />
-              Validade de 1 ano
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-3 w-3" />
-              Emissão 100% online
-            </li>
-          </ul>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
+        {/* Header */}
+        <div className="bg-[#273d60] p-4 rounded-t-lg">
+          <img 
+            alt="Eon Sign" 
+            className="h-10 w-auto" 
+            src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" 
+          />
         </div>
 
-        {/* Form */}
-        <div className="space-y-4 pt-2">
-          {/* Type Selection */}
-          <div className="space-y-2">
-            <Label>Tipo de Certificado</Label>
-            <RadioGroup
-              value={type}
-              onValueChange={(v) => setType(v as "PF" | "PJ")}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="PF" id="pf" />
-                <Label htmlFor="pf" className="cursor-pointer">Pessoa Física</Label>
+        <div className="p-6">
+          <DialogHeader className="text-left mb-4">
+            <DialogTitle className="text-gray-600 text-left">
+              Certificado Digital A1
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Product Card */}
+          <div className="bg-gray-100 rounded-lg p-4 text-gray-600">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                <span className="font-medium">Eon Certifica A1</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="PJ" id="pj" />
-                <Label htmlFor="pj" className="cursor-pointer">Pessoa Jurídica</Label>
+              <div className="text-right">
+                <div className="text-2xl font-bold">R$ 109,90</div>
+                <div className="text-xs text-gray-500">pagamento único</div>
               </div>
-            </RadioGroup>
+            </div>
+            <ul className="text-sm space-y-1">
+              <li className="flex items-center gap-2">
+                <Check className="h-3 w-3" />
+                Certificado ICP-Brasil
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-3 w-3" />
+                Validade de 1 ano
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-3 w-3" />
+                Emissão 100% online
+              </li>
+            </ul>
           </div>
 
-          {/* PJ Fields */}
-          {type === "PJ" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
-                  id="cnpj"
-                  placeholder="00.000.000/0000-00"
-                  value={cnpj}
-                  onChange={(e) => setCnpj(formatCnpj(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="responsibleName">Nome do Responsável</Label>
-                <Input
-                  id="responsibleName"
-                  placeholder="Nome completo do responsável"
-                  value={responsibleName}
-                  onChange={(e) => setResponsibleName(e.target.value)}
-                />
-              </div>
-            </>
-          )}
+          {/* Form */}
+          <div className="space-y-4 pt-2">
+            {/* Type Selection */}
+            <div className="space-y-2">
+              <Label>Tipo de Certificado</Label>
+              <RadioGroup
+                value={type}
+                onValueChange={(v) => setType(v as "PF" | "PJ")}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="PF" id="pf" />
+                  <Label htmlFor="pf" className="cursor-pointer">Pessoa Física</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="PJ" id="pj" />
+                  <Label htmlFor="pj" className="cursor-pointer">Pessoa Jurídica</Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-          {/* Common Fields */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome Completo</Label>
-            <Input
-              id="name"
-              placeholder="Seu nome completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              placeholder="000.000.000-00"
-              value={cpf}
-              onChange={(e) => setCpf(formatCpf(e.target.value))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="birthDate">Data de Nascimento</Label>
-            <Input
-              id="birthDate"
-              placeholder="DD/MM/AAAA"
-              value={birthDate}
-              onChange={(e) => setBirthDate(formatBirthDate(e.target.value))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              placeholder="(00)00000-0000"
-              value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))}
-            />
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            onClick={() => onOpenChange(false)}
-            className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
-          >
-            <X className="h-4 w-4" />
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !isFormValid()}
-            className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <CreditCard className="h-4 w-4" />
+            {/* PJ Fields */}
+            {type === "PJ" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input
+                    id="cnpj"
+                    placeholder="00.000.000/0000-00"
+                    value={cnpj}
+                    onChange={(e) => setCnpj(formatCnpj(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="responsibleName">Nome do Responsável</Label>
+                  <Input
+                    id="responsibleName"
+                    placeholder="Nome completo do responsável"
+                    value={responsibleName}
+                    onChange={(e) => setResponsibleName(e.target.value)}
+                  />
+                </div>
+              </>
             )}
-            Pagar
-          </Button>
+
+            {/* Common Fields */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome Completo</Label>
+              <Input
+                id="name"
+                placeholder="Seu nome completo"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF</Label>
+              <Input
+                id="cpf"
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChange={(e) => setCpf(formatCpf(e.target.value))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="birthDate">Data de Nascimento</Label>
+              <Input
+                id="birthDate"
+                placeholder="DD/MM/AAAA"
+                value={birthDate}
+                onChange={(e) => setBirthDate(formatBirthDate(e.target.value))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                placeholder="(00)00000-0000"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              onClick={() => onOpenChange(false)}
+              className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
+            >
+              <X className="h-4 w-4" />
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !isFormValid()}
+              className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CreditCard className="h-4 w-4" />
+              )}
+              Pagar
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
