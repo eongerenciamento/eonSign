@@ -1180,9 +1180,10 @@ const NewDocument = () => {
           {/* Form Fields */}
           <div className="grid gap-6">
             {/* 3. Title - THIRD */}
-            <div className="grid gap-2">
-              <Label htmlFor="title">Título do Documento <span className="text-xs text-muted-foreground">(opcional - usa nome do arquivo)</span></Label>
-              <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Contrato de Prestação de Serviços" className="placeholder:text-xs" />
+            <div className="grid gap-1">
+              <Label htmlFor="title">Título do Documento</Label>
+              <p className="text-xs text-muted-foreground">Opcional - Usa nome do arquivo</p>
+              <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Contrato de Prestação de Serviços" className="placeholder:text-xs mt-1" />
             </div>
 
             {/* 4. Signers Section - Only for non-prescription modes */}
