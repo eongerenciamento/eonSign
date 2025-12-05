@@ -644,7 +644,7 @@ export default function CertificateRequests() {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-foreground">
+                              <h3 className="font-semibold bg-transparent text-gray-600 text-xs">
                                 {request.common_name}
                               </h3>
                               <Badge variant="outline" className="text-xs">
@@ -765,7 +765,7 @@ export default function CertificateRequests() {
                           </div>
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]">
+                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d] border-gray-400">
                                 <ArrowRight className="h-4 w-4" />
                                 Continuar Processo
                               </Button>}
