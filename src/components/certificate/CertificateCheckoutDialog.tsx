@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Award, CreditCard, Loader2, Shield, Check } from "lucide-react";
+import { CreditCard, Loader2, Shield, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface CertificateCheckoutDialogProps {
@@ -176,9 +176,8 @@ export function CertificateCheckoutDialog({
     }}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-primary" />
-            Comprar Certificado Digital
+          <DialogTitle className="text-gray-600">
+            Certificado Digital A1
           </DialogTitle>
           <DialogDescription>
             Adquira seu certificado digital A1 com validade de 1 ano
@@ -314,23 +313,23 @@ export function CertificateCheckoutDialog({
         {/* Actions */}
         <div className="flex gap-3 pt-4">
           <Button
-            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1"
+            className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
           >
+            <X className="h-4 w-4" />
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={loading || !isFormValid()}
-            className="flex-1 gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+            className="flex-1 gap-2 bg-gray-600 hover:bg-gray-700 text-white"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <CreditCard className="h-4 w-4" />
             )}
-            Pagar R$ 109,90
+            Pagar
           </Button>
         </div>
       </DialogContent>
