@@ -7,57 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { 
-  Award, 
-  Clock, 
-  CheckCircle, 
-  FileUp, 
-  Video, 
-  AlertCircle,
-  RefreshCw,
-  Download,
-  Loader2,
-  FileText,
-  Trash2,
-  Eye,
-  MoreHorizontal,
-  XCircle,
-  AlertTriangle,
-  ShieldX,
-  CreditCard,
-  Plus,
-  ArrowRight
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Award, Clock, CheckCircle, FileUp, Video, AlertCircle, RefreshCw, Download, Loader2, FileText, Trash2, Eye, MoreHorizontal, XCircle, AlertTriangle, ShieldX, CreditCard, Plus, ArrowRight } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
 import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
-
 interface CertificateRequest {
   id: string;
   protocol: string | null;
@@ -81,97 +38,155 @@ interface CertificateRequest {
   created_at: string;
   updated_at: string;
 }
-
 interface RequestDocument {
   id: string;
   name?: string;
   type?: string;
   created_at?: string;
 }
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  paid: { label: "Pago - Aguardando Início", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CreditCard },
-  created: { label: "Criada", color: "bg-gray-100 text-gray-800 border-gray-300", icon: Clock },
-  pending: { label: "Aguardando Documentos", color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: FileUp },
-  documents_sent: { label: "Documentos Enviados", color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock },
-  videoconference_scheduled: { label: "Videoconferência Agendada", color: "bg-purple-100 text-purple-800 border-purple-300", icon: Video },
-  videoconference_completed: { label: "Videoconferência Concluída", color: "bg-indigo-100 text-indigo-800 border-indigo-300", icon: CheckCircle },
-  in_validation: { label: "Em Validação", color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock },
-  pending_authentication: { label: "Aguardando Autenticação", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Clock },
-  approved: { label: "Aprovado", color: "bg-green-100 text-green-800 border-green-300", icon: CheckCircle },
-  issued: { label: "Certificado Emitido", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: Award },
-  rejected: { label: "Rejeitado", color: "bg-red-100 text-red-800 border-red-300", icon: XCircle },
-  validation_rejected: { label: "Validação Rejeitada", color: "bg-orange-100 text-orange-800 border-orange-300", icon: AlertTriangle },
-  revoked: { label: "Revogado", color: "bg-red-100 text-red-800 border-red-300", icon: ShieldX },
+const STATUS_CONFIG: Record<string, {
+  label: string;
+  color: string;
+  icon: React.ElementType;
+}> = {
+  paid: {
+    label: "Pago - Aguardando Início",
+    color: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    icon: CreditCard
+  },
+  created: {
+    label: "Criada",
+    color: "bg-gray-100 text-gray-800 border-gray-300",
+    icon: Clock
+  },
+  pending: {
+    label: "Aguardando Documentos",
+    color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+    icon: FileUp
+  },
+  documents_sent: {
+    label: "Documentos Enviados",
+    color: "bg-blue-100 text-blue-800 border-blue-300",
+    icon: Clock
+  },
+  videoconference_scheduled: {
+    label: "Videoconferência Agendada",
+    color: "bg-purple-100 text-purple-800 border-purple-300",
+    icon: Video
+  },
+  videoconference_completed: {
+    label: "Videoconferência Concluída",
+    color: "bg-indigo-100 text-indigo-800 border-indigo-300",
+    icon: CheckCircle
+  },
+  in_validation: {
+    label: "Em Validação",
+    color: "bg-orange-100 text-orange-800 border-orange-300",
+    icon: Clock
+  },
+  pending_authentication: {
+    label: "Aguardando Autenticação",
+    color: "bg-amber-100 text-amber-800 border-amber-300",
+    icon: Clock
+  },
+  approved: {
+    label: "Aprovado",
+    color: "bg-green-100 text-green-800 border-green-300",
+    icon: CheckCircle
+  },
+  issued: {
+    label: "Certificado Emitido",
+    color: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    icon: Award
+  },
+  rejected: {
+    label: "Rejeitado",
+    color: "bg-red-100 text-red-800 border-red-300",
+    icon: XCircle
+  },
+  validation_rejected: {
+    label: "Validação Rejeitada",
+    color: "bg-orange-100 text-orange-800 border-orange-300",
+    icon: AlertTriangle
+  },
+  revoked: {
+    label: "Revogado",
+    color: "bg-red-100 text-red-800 border-red-300",
+    icon: ShieldX
+  }
 };
-
-const STEPS = [
-  { key: "request", label: "Solicitação", icon: Award },
-  { key: "documents", label: "Documentos", icon: FileUp },
-  { key: "videoconference", label: "Videoconferência", icon: Video },
-  { key: "emission", label: "Emissão", icon: CheckCircle },
-];
-
+const STEPS = [{
+  key: "request",
+  label: "Solicitação",
+  icon: Award
+}, {
+  key: "documents",
+  label: "Documentos",
+  icon: FileUp
+}, {
+  key: "videoconference",
+  label: "Videoconferência",
+  icon: Video
+}, {
+  key: "emission",
+  label: "Emissão",
+  icon: CheckCircle
+}];
 function getStepStatus(request: CertificateRequest) {
   const steps = {
     request: "completed",
     documents: "pending",
     videoconference: "pending",
-    emission: "pending",
+    emission: "pending"
   };
-
   if (request.status === "rejected" || request.status === "revoked") {
-    return { ...steps, request: "rejected" };
+    return {
+      ...steps,
+      request: "rejected"
+    };
   }
-
   if (request.status === "validation_rejected") {
     steps.request = "completed";
     steps.documents = "warning";
     return steps;
   }
-
   steps.request = "completed";
-
   if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "in_validation", "pending_authentication", "approved", "issued"].includes(request.status)) {
     steps.documents = "completed";
   } else if (request.status === "pending" || request.status === "created") {
     steps.documents = "current";
   }
-
   if (request.videoconference_completed || ["in_validation", "pending_authentication", "approved", "issued"].includes(request.status)) {
     steps.videoconference = "completed";
   } else if (["videoconference_scheduled", "documents_sent"].includes(request.status)) {
     steps.videoconference = "current";
   }
-
   if (request.certificate_issued || request.status === "issued") {
     steps.emission = "completed";
   } else if (request.status === "approved" || request.status === "pending_authentication") {
     steps.emission = "current";
   }
-
   return steps;
 }
-
 export default function CertificateRequests() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [requests, setRequests] = useState<CertificateRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Checkout dialog state
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
-  
+
   // Purchase continuation dialog state
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [continuingRequest, setContinuingRequest] = useState<CertificateRequest | null>(null);
-  
+
   // Emission iframe state
   const [showEmissionDialog, setShowEmissionDialog] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<CertificateRequest | null>(null);
   const [isEmissionLoading, setIsEmissionLoading] = useState(true);
-  
+
   // Download state
   const [downloadingProtocol, setDownloadingProtocol] = useState<string | null>(null);
 
@@ -180,7 +195,7 @@ export default function CertificateRequests() {
   const [documents, setDocuments] = useState<RequestDocument[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [selectedDocRequest, setSelectedDocRequest] = useState<CertificateRequest | null>(null);
-  
+
   // Delete states
   const [showDeleteRequestDialog, setShowDeleteRequestDialog] = useState(false);
   const [deletingRequest, setDeletingRequest] = useState<CertificateRequest | null>(null);
@@ -204,21 +219,23 @@ export default function CertificateRequests() {
       setSearchParams({});
     }
   }, [searchParams, setSearchParams]);
-
   const fetchRequests = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) {
         navigate("/auth");
         return;
       }
-
-      const { data, error } = await supabase
-        .from("certificate_requests")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from("certificate_requests").select("*").eq("user_id", user.id).order("created_at", {
+        ascending: false
+      });
       if (error) throw error;
       setRequests((data || []) as CertificateRequest[]);
     } catch (error: any) {
@@ -229,63 +246,45 @@ export default function CertificateRequests() {
       setRefreshing(false);
     }
   };
-
   useEffect(() => {
     fetchRequests();
-
-    const channel = supabase
-      .channel("certificate-requests-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "certificate_requests",
-        },
-        (payload) => {
-          console.log("Certificate request change:", payload);
-          if (payload.eventType === "INSERT") {
-            setRequests((prev) => [payload.new as CertificateRequest, ...prev]);
-            toast.success("Nova solicitação criada");
-          } else if (payload.eventType === "UPDATE") {
-            setRequests((prev) =>
-              prev.map((req) =>
-                req.id === payload.new.id ? (payload.new as CertificateRequest) : req
-              )
-            );
-            toast.info("Status atualizado");
-          } else if (payload.eventType === "DELETE") {
-            setRequests((prev) => prev.filter((req) => req.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel("certificate-requests-changes").on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "certificate_requests"
+    }, payload => {
+      console.log("Certificate request change:", payload);
+      if (payload.eventType === "INSERT") {
+        setRequests(prev => [payload.new as CertificateRequest, ...prev]);
+        toast.success("Nova solicitação criada");
+      } else if (payload.eventType === "UPDATE") {
+        setRequests(prev => prev.map(req => req.id === payload.new.id ? payload.new as CertificateRequest : req));
+        toast.info("Status atualizado");
+      } else if (payload.eventType === "DELETE") {
+        setRequests(prev => prev.filter(req => req.id !== payload.old.id));
+      }
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [navigate]);
-
   const handleRefresh = () => {
     setRefreshing(true);
     fetchRequests();
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
-
   const formatCPF = (cpf: string) => {
     const cleaned = cpf.replace(/\D/g, "");
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
-
   const getEmissionUrl = (request: CertificateRequest): string => {
     if (request.emission_url) {
       return request.emission_url;
@@ -293,52 +292,49 @@ export default function CertificateRequests() {
     const cleanCpf = request.cpf.replace(/\D/g, "");
     return `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cleanCpf}&protocolo=${request.protocol}`;
   };
-
   const handleOpenEmission = (request: CertificateRequest) => {
     setSelectedRequest(request);
     setIsEmissionLoading(true);
     setShowEmissionDialog(true);
   };
-
   const handleCloseEmission = () => {
     setShowEmissionDialog(false);
     setSelectedRequest(null);
     setIsEmissionLoading(true);
   };
-
   const handleDownloadCertificate = async (request: CertificateRequest) => {
     if (!request.protocol) {
       toast.error("Protocolo não encontrado");
       return;
     }
-
     setDownloadingProtocol(request.protocol);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-download-certificate", {
-        body: { protocol: request.protocol },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-download-certificate", {
+        body: {
+          protocol: request.protocol
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         toast.error(data.error || "Erro ao baixar certificado");
         return;
       }
-
       if (!data.pfx_data) {
         toast.error("Certificado ainda não está disponível para download");
         return;
       }
-
       const byteCharacters = atob(data.pfx_data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "application/x-pkcs12" });
-      
+      const blob = new Blob([byteArray], {
+        type: "application/x-pkcs12"
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -347,20 +343,16 @@ export default function CertificateRequests() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
       if (data.pfx_password) {
         toast.success(`Certificado baixado! Senha: ${data.pfx_password}`, {
-          duration: 10000,
+          duration: 10000
         });
       } else {
         toast.success("Certificado baixado com sucesso!");
       }
-
-      await supabase
-        .from("certificate_requests")
-        .update({ certificate_downloaded: true })
-        .eq("protocol", request.protocol);
-
+      await supabase.from("certificate_requests").update({
+        certificate_downloaded: true
+      }).eq("protocol", request.protocol);
     } catch (error: any) {
       console.error("Error downloading certificate:", error);
       toast.error(error.message || "Erro ao baixar certificado");
@@ -375,20 +367,20 @@ export default function CertificateRequests() {
       toast.error("Protocolo não encontrado");
       return;
     }
-
     setSyncingProtocol(request.protocol);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-get-request", {
-        body: { protocol: request.protocol },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-get-request", {
+        body: {
+          protocol: request.protocol
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao sincronizar status");
       }
-
       toast.success("Status sincronizado com sucesso");
       fetchRequests();
     } catch (error: any) {
@@ -405,28 +397,29 @@ export default function CertificateRequests() {
       toast.error("Protocolo não encontrado");
       return;
     }
-
     setDownloadingTermProtocol(request.protocol);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-download-ownership-term", {
-        body: { protocol: request.protocol },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-download-ownership-term", {
+        body: {
+          protocol: request.protocol
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao baixar termo de titularidade");
       }
-
       const byteCharacters = atob(data.pdf_data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "application/pdf" });
-      
+      const blob = new Blob([byteArray], {
+        type: "application/pdf"
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -435,7 +428,6 @@ export default function CertificateRequests() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
       toast.success("Termo de titularidade baixado com sucesso!");
     } catch (error: any) {
       console.error("Error downloading ownership term:", error);
@@ -451,23 +443,23 @@ export default function CertificateRequests() {
       toast.error("Protocolo não encontrado");
       return;
     }
-
     setSelectedDocRequest(request);
     setLoadingDocuments(true);
     setShowDocumentsDialog(true);
     setDocuments([]);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-list-documents", {
-        body: { protocol: request.protocol },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-list-documents", {
+        body: {
+          protocol: request.protocol
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao listar documentos");
       }
-
       setDocuments(data.documents || []);
     } catch (error: any) {
       console.error("Error listing documents:", error);
@@ -480,17 +472,17 @@ export default function CertificateRequests() {
   // View/download a specific document
   const handleViewDocument = async (doc: RequestDocument) => {
     if (!selectedDocRequest?.protocol) return;
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-get-document", {
-        body: { 
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-get-document", {
+        body: {
           protocol: selectedDocRequest.protocol,
-          documentId: doc.id 
-        },
+          documentId: doc.id
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao obter documento");
       }
@@ -504,7 +496,6 @@ export default function CertificateRequests() {
         }
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray]);
-        
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -513,7 +504,6 @@ export default function CertificateRequests() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-
         toast.success("Documento baixado!");
       } else {
         toast.info("Documento visualizado com sucesso");
@@ -527,24 +517,22 @@ export default function CertificateRequests() {
   // Delete a specific document
   const handleDeleteDocument = async (doc: RequestDocument) => {
     if (!selectedDocRequest?.protocol) return;
-
     setDeletingDocId(doc.id);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-delete-document", {
-        body: { 
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-delete-document", {
+        body: {
           protocol: selectedDocRequest.protocol,
-          documentId: doc.id 
-        },
+          documentId: doc.id
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao excluir documento");
       }
-
-      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      setDocuments(prev => prev.filter(d => d.id !== doc.id));
       toast.success("Documento excluído com sucesso");
     } catch (error: any) {
       console.error("Error deleting document:", error);
@@ -557,21 +545,21 @@ export default function CertificateRequests() {
   // Delete certificate request
   const handleDeleteRequest = async () => {
     if (!deletingRequest?.protocol) return;
-
     setIsDeleting(true);
-
     try {
-      const { data, error } = await supabase.functions.invoke("bry-ar-delete-request", {
-        body: { protocol: deletingRequest.protocol },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("bry-ar-delete-request", {
+        body: {
+          protocol: deletingRequest.protocol
+        }
       });
-
       if (error) throw error;
-
       if (!data.success) {
         throw new Error(data.error || "Erro ao excluir solicitação");
       }
-
-      setRequests((prev) => prev.filter((r) => r.id !== deletingRequest.id));
+      setRequests(prev => prev.filter(r => r.id !== deletingRequest.id));
       toast.success("Solicitação excluída com sucesso");
       setShowDeleteRequestDialog(false);
       setDeletingRequest(null);
@@ -582,18 +570,14 @@ export default function CertificateRequests() {
       setIsDeleting(false);
     }
   };
-
   const canDeleteRequest = (request: CertificateRequest) => {
     return ["pending", "documents_sent", "created", "paid"].includes(request.status);
   };
-
   const handleContinueProcess = (request: CertificateRequest) => {
     setContinuingRequest(request);
     setShowPurchaseDialog(true);
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -603,79 +587,57 @@ export default function CertificateRequests() {
               Acompanhe suas solicitações de certificado digital
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="gap-2"
-            >
+          <div className="flex gap-2 text-primary-foreground bg-gray-500">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowCheckoutDialog(true)}
-              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-            >
-              <Plus className="h-4 w-4" />
-              Comprar Certificado
-            </Button>
+            
           </div>
         </div>
 
         {/* Content */}
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="p-6">
+        {loading ? <div className="space-y-4">
+            {[1, 2, 3].map(i => <Card key={i} className="p-6">
                 <div className="space-y-4">
                   <Skeleton className="h-6 w-48" />
                   <Skeleton className="h-4 w-32" />
                   <div className="flex gap-2">
-                    {[1, 2, 3, 4].map((j) => (
-                      <Skeleton key={j} className="h-10 w-10 rounded-full" />
-                    ))}
+                    {[1, 2, 3, 4].map(j => <Skeleton key={j} className="h-10 w-10 rounded-full" />)}
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        ) : requests.length === 0 ? (
-          <Card className="p-12 text-center">
+              </Card>)}
+          </div> : requests.length === 0 ? <Card className="p-12 text-center">
             <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Nenhuma solicitação encontrada</h3>
             <p className="text-muted-foreground mb-4">
               Você ainda não possui solicitações de certificado digital.
             </p>
-            <Button 
-              onClick={() => setShowCheckoutDialog(true)}
-              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-            >
+            <Button onClick={() => setShowCheckoutDialog(true)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]">
               <Plus className="h-4 w-4" />
               Comprar Certificado
             </Button>
-          </Card>
-        ) : (
-          <AnimatePresence>
+          </Card> : <AnimatePresence>
             <div className="space-y-4">
               {requests.map((request, index) => {
-                const statusConfig = STATUS_CONFIG[request.status] || STATUS_CONFIG.pending;
-                const StatusIcon = statusConfig.icon;
-                const stepStatus = getStepStatus(request);
-                const isDownloading = downloadingProtocol === request.protocol;
-                const isSyncing = syncingProtocol === request.protocol;
-                const isDownloadingTerm = downloadingTermProtocol === request.protocol;
-
-                return (
-                  <motion.div
-                    key={request.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
+            const statusConfig = STATUS_CONFIG[request.status] || STATUS_CONFIG.pending;
+            const StatusIcon = statusConfig.icon;
+            const stepStatus = getStepStatus(request);
+            const isDownloading = downloadingProtocol === request.protocol;
+            const isSyncing = syncingProtocol === request.protocol;
+            const isDownloadingTerm = downloadingTermProtocol === request.protocol;
+            return <motion.div key={request.id} initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} exit={{
+              opacity: 0,
+              y: -20
+            }} transition={{
+              delay: index * 0.1
+            }}>
                     <Card className="p-6 hover:shadow-md transition-shadow">
                       <div className="space-y-4">
                         {/* Header */}
@@ -691,9 +653,7 @@ export default function CertificateRequests() {
                             </div>
                             <p className="text-sm text-muted-foreground">
                               CPF: {formatCPF(request.cpf)}
-                              {request.protocol && (
-                                <span className="ml-3">Protocolo: {request.protocol}</span>
-                              )}
+                              {request.protocol && <span className="ml-3">Protocolo: {request.protocol}</span>}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -710,10 +670,7 @@ export default function CertificateRequests() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                  onClick={() => handleSyncStatus(request)}
-                                  disabled={isSyncing}
-                                >
+                                <DropdownMenuItem onClick={() => handleSyncStatus(request)} disabled={isSyncing}>
                                   <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
                                   Sincronizar Status
                                 </DropdownMenuItem>
@@ -721,197 +678,123 @@ export default function CertificateRequests() {
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver Documentos
                                 </DropdownMenuItem>
-                                {request.status === "approved" && (
-                                  <DropdownMenuItem 
-                                    onClick={() => handleDownloadOwnershipTerm(request)}
-                                    disabled={isDownloadingTerm}
-                                  >
-                                    {isDownloadingTerm ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                      <Download className="h-4 w-4 mr-2" />
-                                    )}
+                                {request.status === "approved" && <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm}>
+                                    {isDownloadingTerm ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                                     Termo de Titularidade
-                                  </DropdownMenuItem>
-                                )}
-                                {canDeleteRequest(request) && (
-                                  <>
+                                  </DropdownMenuItem>}
+                                {canDeleteRequest(request) && <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      onClick={() => {
-                                        setDeletingRequest(request);
-                                        setShowDeleteRequestDialog(true);
-                                      }}
-                                      className="text-destructive focus:text-destructive"
-                                    >
+                                    <DropdownMenuItem onClick={() => {
+                              setDeletingRequest(request);
+                              setShowDeleteRequestDialog(true);
+                            }} className="text-destructive focus:text-destructive">
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Excluir Solicitação
                                     </DropdownMenuItem>
-                                  </>
-                                )}
+                                  </>}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
                         </div>
 
                         {/* Rejection/Validation Alert */}
-                        {(request.status === "rejected" || request.status === "validation_rejected") && (
-                          <Alert variant={request.status === "rejected" ? "destructive" : "default"} className="border-orange-300 bg-orange-50">
+                        {(request.status === "rejected" || request.status === "validation_rejected") && <Alert variant={request.status === "rejected" ? "destructive" : "default"} className="border-orange-300 bg-orange-50">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>
-                              {request.status === "rejected" ? (
-                                <>
+                              {request.status === "rejected" ? <>
                                   <strong>Solicitação rejeitada.</strong>
-                                  {request.rejection_reason && (
-                                    <span className="block mt-1">Motivo: {request.rejection_reason}</span>
-                                  )}
-                                </>
-                              ) : (
-                                <>
+                                  {request.rejection_reason && <span className="block mt-1">Motivo: {request.rejection_reason}</span>}
+                                </> : <>
                                   <strong>Validação devolvida pela central.</strong>
                                   <span className="block mt-1">Por favor, verifique os documentos enviados e faça as correções necessárias.</span>
-                                </>
-                              )}
+                                </>}
                             </AlertDescription>
-                          </Alert>
-                        )}
+                          </Alert>}
 
                         {/* Revoked Alert */}
-                        {request.status === "revoked" && (
-                          <Alert variant="destructive">
+                        {request.status === "revoked" && <Alert variant="destructive">
                             <ShieldX className="h-4 w-4" />
                             <AlertDescription>
                               <strong>Certificado revogado.</strong>
-                              {request.revoked_at && (
-                                <span className="block mt-1">Revogado em: {formatDate(request.revoked_at)}</span>
-                              )}
+                              {request.revoked_at && <span className="block mt-1">Revogado em: {formatDate(request.revoked_at)}</span>}
                             </AlertDescription>
-                          </Alert>
-                        )}
+                          </Alert>}
 
                         {/* Progress Steps */}
                         <div className="flex items-center justify-between py-4">
                           {STEPS.map((step, stepIndex) => {
-                            const status = stepStatus[step.key as keyof typeof stepStatus];
-                            const StepIcon = step.icon;
-                            const isCompleted = status === "completed";
-                            const isCurrent = status === "current";
-                            const isRejected = status === "rejected";
-                            const isWarning = status === "warning";
-
-                            return (
-                              <div key={step.key} className="flex items-center flex-1">
+                      const status = stepStatus[step.key as keyof typeof stepStatus];
+                      const StepIcon = step.icon;
+                      const isCompleted = status === "completed";
+                      const isCurrent = status === "current";
+                      const isRejected = status === "rejected";
+                      const isWarning = status === "warning";
+                      return <div key={step.key} className="flex items-center flex-1">
                                 <div className="flex flex-col items-center">
-                                  <motion.div
-                                    className={`
+                                  <motion.div className={`
                                       w-10 h-10 rounded-full flex items-center justify-center
                                       ${isCompleted ? "bg-green-500 text-white" : ""}
                                       ${isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : ""}
                                       ${isRejected ? "bg-red-500 text-white" : ""}
                                       ${isWarning ? "bg-orange-500 text-white" : ""}
                                       ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
-                                    `}
-                                    animate={isCurrent ? { scale: [1, 1.1, 1] } : {}}
-                                    transition={{ repeat: Infinity, duration: 2 }}
-                                  >
+                                    `} animate={isCurrent ? {
+                            scale: [1, 1.1, 1]
+                          } : {}} transition={{
+                            repeat: Infinity,
+                            duration: 2
+                          }}>
                                     <StepIcon className="h-5 w-5" />
                                   </motion.div>
                                   <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
                                     {step.label}
                                   </span>
                                 </div>
-                                {stepIndex < STEPS.length - 1 && (
-                                  <div
-                                    className={`flex-1 h-1 mx-2 rounded ${
-                                      isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"
-                                    }`}
-                                  />
-                                )}
-                              </div>
-                            );
-                          })}
+                                {stepIndex < STEPS.length - 1 && <div className={`flex-1 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
+                              </div>;
+                    })}
                         </div>
 
                         {/* Footer */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t">
                           <div className="text-xs text-muted-foreground">
                             <span>Criado em {formatDate(request.created_at)}</span>
-                            {request.updated_at !== request.created_at && (
-                              <span className="ml-3">
+                            {request.updated_at !== request.created_at && <span className="ml-3">
                                 Atualizado em {formatDate(request.updated_at)}
-                              </span>
-                            )}
+                              </span>}
                           </div>
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleContinueProcess(request)}
-                                className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-                              >
+                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]">
                                 <ArrowRight className="h-4 w-4" />
                                 Continuar Processo
-                              </Button>
-                            )}
+                              </Button>}
 
                             {/* Ownership term button - when approved */}
-                            {request.status === "approved" && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleDownloadOwnershipTerm(request)}
-                                disabled={isDownloadingTerm}
-                                className="gap-2"
-                              >
-                                {isDownloadingTerm ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <FileText className="h-4 w-4" />
-                                )}
+                            {request.status === "approved" && <Button size="sm" variant="outline" onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="gap-2">
+                                {isDownloadingTerm ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
                                 Termo de Titularidade
-                              </Button>
-                            )}
+                              </Button>}
                             
                             {/* Emission button - when approved */}
-                            {request.status === "approved" && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleOpenEmission(request)}
-                                className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-                              >
+                            {request.status === "approved" && <Button size="sm" onClick={() => handleOpenEmission(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]">
                                 <Award className="h-4 w-4" />
                                 Emitir Certificado
-                              </Button>
-                            )}
+                              </Button>}
                             
                             {/* Download button - when issued */}
-                            {request.certificate_issued && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleDownloadCertificate(request)}
-                                disabled={isDownloading}
-                                className="gap-2"
-                                variant={request.certificate_downloaded ? "outline" : "default"}
-                              >
-                                {isDownloading ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Download className="h-4 w-4" />
-                                )}
+                            {request.certificate_issued && <Button size="sm" onClick={() => handleDownloadCertificate(request)} disabled={isDownloading} className="gap-2" variant={request.certificate_downloaded ? "outline" : "default"}>
+                                {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                                 {request.certificate_downloaded ? "Baixar Novamente" : "Baixar Certificado"}
-                              </Button>
-                            )}
+                              </Button>}
                           </div>
                         </div>
                       </div>
                     </Card>
-                  </motion.div>
-                );
-              })}
+                  </motion.div>;
+          })}
             </div>
-          </AnimatePresence>
-        )}
+          </AnimatePresence>}
       </div>
 
       {/* Emission Iframe Dialog */}
@@ -928,37 +811,25 @@ export default function CertificateRequests() {
               <Button variant="outline" size="sm" onClick={handleCloseEmission}>
                 Fechar
               </Button>
-              <Button 
-                size="sm" 
-                onClick={() => {
-                  handleCloseEmission();
-                  fetchRequests();
-                }}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
+              <Button size="sm" onClick={() => {
+              handleCloseEmission();
+              fetchRequests();
+            }} className="bg-gradient-to-r from-[#273d60] to-[#001a4d]">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Concluir Emissão
               </Button>
             </div>
           </div>
           <div className="relative flex-1 w-full min-h-0">
-            {isEmissionLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+            {isEmissionLoading && <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                 <div className="flex flex-col items-center gap-3">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <p className="text-sm text-muted-foreground">Carregando ambiente de emissão...</p>
                 </div>
-              </div>
-            )}
-            {selectedRequest && (
-              <iframe
-                src={getEmissionUrl(selectedRequest)}
-                className="w-full h-full border-0"
-                style={{ minHeight: "calc(90vh - 80px)" }}
-                allow="camera; microphone"
-                onLoad={() => setIsEmissionLoading(false)}
-              />
-            )}
+              </div>}
+            {selectedRequest && <iframe src={getEmissionUrl(selectedRequest)} className="w-full h-full border-0" style={{
+            minHeight: "calc(90vh - 80px)"
+          }} allow="camera; microphone" onLoad={() => setIsEmissionLoading(false)} />}
           </div>
         </DialogContent>
       </Dialog>
@@ -974,58 +845,28 @@ export default function CertificateRequests() {
           </DialogHeader>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {loadingDocuments ? (
-              <div className="flex items-center justify-center py-8">
+            {loadingDocuments ? <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : documents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              </div> : documents.length === 0 ? <div className="text-center py-8 text-muted-foreground">
                 <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>Nenhum documento encontrado</p>
-              </div>
-            ) : (
-              documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
-                >
+              </div> : documents.map(doc => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">{doc.name || `Documento ${doc.id}`}</p>
-                      {doc.type && (
-                        <p className="text-xs text-muted-foreground">{doc.type}</p>
-                      )}
+                      {doc.type && <p className="text-xs text-muted-foreground">{doc.type}</p>}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleViewDocument(doc)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewDocument(doc)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {selectedDocRequest && canDeleteRequest(selectedDocRequest) && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteDocument(doc)}
-                        disabled={deletingDocId === doc.id}
-                      >
-                        {deletingDocId === doc.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
+                    {selectedDocRequest && canDeleteRequest(selectedDocRequest) && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDeleteDocument(doc)} disabled={deletingDocId === doc.id}>
+                        {deletingDocId === doc.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </Button>}
                   </div>
-                </div>
-              ))
-            )}
+                </div>)}
           </div>
           
           <DialogFooter>
@@ -1051,51 +892,33 @@ export default function CertificateRequests() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteRequest}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? (
-                <>
+            <AlertDialogAction onClick={handleDeleteRequest} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isDeleting ? <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Excluindo...
-                </>
-              ) : (
-                "Excluir"
-              )}
+                </> : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Certificate Checkout Dialog */}
-      <CertificateCheckoutDialog
-        open={showCheckoutDialog}
-        onOpenChange={setShowCheckoutDialog}
-      />
+      <CertificateCheckoutDialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog} />
 
       {/* Certificate Purchase Dialog - for continuing paid certificates */}
-      {continuingRequest && (
-        <CertificatePurchaseDialog
-          open={showPurchaseDialog}
-          onOpenChange={(open) => {
-            setShowPurchaseDialog(open);
-            if (!open) setContinuingRequest(null);
-          }}
-          prefillData={{
-            name: continuingRequest.common_name,
-            cpf: continuingRequest.cpf,
-            email: continuingRequest.email,
-            phone: continuingRequest.phone,
-            birthDate: continuingRequest.birth_date,
-            type: continuingRequest.type as "PF" | "PJ",
-            cnpj: continuingRequest.cnpj || undefined,
-            responsibleName: continuingRequest.responsible_name || undefined,
-            certificateRequestId: continuingRequest.id,
-          }}
-        />
-      )}
-    </Layout>
-  );
+      {continuingRequest && <CertificatePurchaseDialog open={showPurchaseDialog} onOpenChange={open => {
+      setShowPurchaseDialog(open);
+      if (!open) setContinuingRequest(null);
+    }} prefillData={{
+      name: continuingRequest.common_name,
+      cpf: continuingRequest.cpf,
+      email: continuingRequest.email,
+      phone: continuingRequest.phone,
+      birthDate: continuingRequest.birth_date,
+      type: continuingRequest.type as "PF" | "PJ",
+      cnpj: continuingRequest.cnpj || undefined,
+      responsibleName: continuingRequest.responsible_name || undefined,
+      certificateRequestId: continuingRequest.id
+    }} />}
+    </Layout>;
 }
