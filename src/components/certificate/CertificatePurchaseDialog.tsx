@@ -591,19 +591,6 @@ export function CertificatePurchaseDialog({
                 />
               </div>
 
-              {canIssue === false && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-start gap-2"
-                >
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                  <div className="text-sm text-yellow-700">
-                    <p className="font-medium">Atenção</p>
-                    <p>Cliente não cadastrado no PSBIO. Necessário CNH emitida/renovada a partir de 2018 para prosseguir.</p>
-                  </div>
-                </motion.div>
-              )}
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
