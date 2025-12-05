@@ -15,7 +15,7 @@ import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { useQuery } from "@tanstack/react-query";
-import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
+import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -548,7 +548,7 @@ const Settings = () => {
         </Tabs>
       </div>
       
-      <CertificatePurchaseDialog 
+      <CertificateCheckoutDialog 
         open={certificateDialogOpen} 
         onOpenChange={setCertificateDialogOpen}
       />
