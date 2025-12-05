@@ -642,7 +642,7 @@ export default function CertificateRequests() {
             }} transition={{
               delay: index * 0.1
             }}>
-                    <Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
+                    <Card className="p-4 sm:p-6 hover:shadow-md transition-shadow bg-gray-100 border-transparent">
                       <div className="space-y-4">
                         {/* Header - Info + Actions */}
                         <div className="flex items-start justify-between gap-2">
