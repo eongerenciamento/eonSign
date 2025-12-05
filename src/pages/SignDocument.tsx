@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, Plus, Minus, Download, MousePointer, PenLine } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download, MousePointer, PenLine, Award, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign.png";
+import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
 
 const emailSchema = z.string()
   .trim()
@@ -76,6 +77,9 @@ const SignDocument = () => {
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
   const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number; page: number } | null>(null);
+  
+  // Certificate purchase dialog
+  const [showCertificateDialog, setShowCertificateDialog] = useState(false);
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
@@ -665,6 +669,41 @@ const SignDocument = () => {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Assinar Documento</h3>
                 <div className="space-y-4">
+                  {/* Certificate info for ADVANCED/QUALIFIED modes */}
+                  {!isSimpleSignature && (
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <ShieldCheck className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-blue-900 mb-1">
+                            {document.signature_mode === "QUALIFIED" 
+                              ? "Assinatura Qualificada (ICP-Brasil)" 
+                              : "Assinatura Avançada"}
+                          </h4>
+                          <p className="text-sm text-blue-700 mb-3">
+                            {document.signature_mode === "QUALIFIED"
+                              ? "Este documento requer um certificado digital ICP-Brasil para assinatura com validade jurídica máxima."
+                              : "Este documento requer um certificado digital em nuvem para assinatura avançada."}
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowCertificateDialog(true)}
+                              className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                            >
+                              <Award className="h-4 w-4 mr-2" />
+                              Adquirir Certificado Digital
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Typed Signature for Simple Mode */}
                   {isSimpleSignature && (
                     <div>
@@ -771,6 +810,18 @@ const SignDocument = () => {
                 </div>
               </Card>
             )}
+
+            {/* Certificate Purchase Dialog */}
+            <CertificatePurchaseDialog
+              open={showCertificateDialog}
+              onOpenChange={setShowCertificateDialog}
+              signerId={currentSigner?.id}
+              documentId={document?.id}
+              prefillData={currentSigner ? {
+                name: currentSigner.name,
+                email: currentSigner.email,
+              } : undefined}
+            />
 
             {currentSigner && currentSigner.status === "signed" && (
               <Card className="p-6 text-center">
