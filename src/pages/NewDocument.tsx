@@ -98,6 +98,7 @@ const NewDocument = () => {
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('SIMPLE');
   const [signerSuggestions, setSignerSuggestions] = useState<SignerSuggestion[]>([]);
   const [signerGroups, setSignerGroups] = useState<SignerGroup[]>([]);
+  const [isHealthcareProfessional, setIsHealthcareProfessional] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -182,7 +183,7 @@ const NewDocument = () => {
       if (user) {
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare').eq('user_id', user.id).single();
         if (companyData) {
           setCompanySigner({
             name: companyData.admin_name,
@@ -191,6 +192,7 @@ const NewDocument = () => {
             email: companyData.admin_email,
             companyName: companyData.company_name
           });
+          setIsHealthcareProfessional((companyData as any).is_healthcare || false);
         }
       }
     };
@@ -981,7 +983,9 @@ const NewDocument = () => {
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-600">Tipo de Assinatura</Label>
             <RadioGroup value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)} className="space-y-2">
-              {SIGNATURE_MODES.map(mode => (
+              {SIGNATURE_MODES
+                .filter(mode => mode.id !== 'PRESCRIPTION' || isHealthcareProfessional)
+                .map(mode => (
                 <div
                   key={mode.id}
                   onClick={() => setSignatureMode(mode.id)}

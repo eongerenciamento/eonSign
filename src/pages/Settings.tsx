@@ -242,6 +242,12 @@ const Settings = () => {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
+    
+    // Validate healthcare fields if healthcare is enabled
+    if (isHealthcare && (!professionalRegistration || !registrationState)) {
+      toast.error("Por favor, preencha o conselho de classe e o estado do registro");
+      return;
+    }
     const {
       data: existingData
     } = await supabase.from('company_settings').select('id').eq('user_id', user.id).single();
@@ -423,23 +429,46 @@ const Settings = () => {
                     </div>
 
                     {isHealthcare && (
-                      <div className="grid md:grid-cols-2 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="grid md:grid-cols-3 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="grid gap-2">
-                          <Label htmlFor="professional-registration">Registro de Classe</Label>
+                          <Label htmlFor="council-type">Conselho de Classe</Label>
+                          <Select value={professionalRegistration.split(' ')[0] || ''} onValueChange={(council) => {
+                            const number = professionalRegistration.split(' ').slice(1).join(' ');
+                            setProfessionalRegistration(council + (number ? ' ' + number : ''));
+                          }}>
+                            <SelectTrigger className="text-gray-600">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                'CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 
+                                'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'
+                              ].map(council => (
+                                <SelectItem key={council} value={council}>{council}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label htmlFor="registration-number">Número do Registro</Label>
                           <Input
-                            id="professional-registration"
-                            value={professionalRegistration}
-                            onChange={e => setProfessionalRegistration(e.target.value)}
-                            placeholder="Ex: CRM 12345"
+                            id="registration-number"
+                            value={professionalRegistration.split(' ').slice(1).join(' ')}
+                            onChange={e => {
+                              const council = professionalRegistration.split(' ')[0] || '';
+                              setProfessionalRegistration(council + (e.target.value ? ' ' + e.target.value : ''));
+                            }}
+                            placeholder="Ex: 12345"
                             className="text-gray-600"
                           />
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor="registration-state">Estado do Registro</Label>
+                          <Label htmlFor="registration-state">Estado</Label>
                           <Select value={registrationState} onValueChange={setRegistrationState}>
                             <SelectTrigger className="text-gray-600">
-                              <SelectValue placeholder="Selecione o estado" />
+                              <SelectValue placeholder="UF" />
                             </SelectTrigger>
                             <SelectContent>
                               {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
