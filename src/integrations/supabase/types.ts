@@ -20,14 +20,20 @@ export type Database = {
           birth_date: string
           certificate_downloaded: boolean | null
           certificate_issued: boolean | null
+          certificate_serial: string | null
+          certificate_valid_from: string | null
+          certificate_valid_until: string | null
           cnpj: string | null
           common_name: string
           cpf: string
           created_at: string
           document_id: string | null
           email: string
+          emission_url: string | null
           id: string
           issued_at: string | null
+          pfx_data: string | null
+          pfx_password: string | null
           phone: string
           product_id: number
           protocol: string | null
@@ -46,14 +52,20 @@ export type Database = {
           birth_date: string
           certificate_downloaded?: boolean | null
           certificate_issued?: boolean | null
+          certificate_serial?: string | null
+          certificate_valid_from?: string | null
+          certificate_valid_until?: string | null
           cnpj?: string | null
           common_name: string
           cpf: string
           created_at?: string
           document_id?: string | null
           email: string
+          emission_url?: string | null
           id?: string
           issued_at?: string | null
+          pfx_data?: string | null
+          pfx_password?: string | null
           phone: string
           product_id?: number
           protocol?: string | null
@@ -72,14 +84,20 @@ export type Database = {
           birth_date?: string
           certificate_downloaded?: boolean | null
           certificate_issued?: boolean | null
+          certificate_serial?: string | null
+          certificate_valid_from?: string | null
+          certificate_valid_until?: string | null
           cnpj?: string | null
           common_name?: string
           cpf?: string
           created_at?: string
           document_id?: string | null
           email?: string
+          emission_url?: string | null
           id?: string
           issued_at?: string | null
+          pfx_data?: string | null
+          pfx_password?: string | null
           phone?: string
           product_id?: number
           protocol?: string | null

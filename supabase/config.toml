@@ -75,6 +75,9 @@ verify_jwt = false
 [functions.bry-ar-webhook]
 verify_jwt = false
 
+[functions.bry-ar-download-certificate]
+verify_jwt = false
+
 [functions.generate-signature-report]
 verify_jwt = false
 

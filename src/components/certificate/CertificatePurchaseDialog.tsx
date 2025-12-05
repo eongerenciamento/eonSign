@@ -94,6 +94,10 @@ export function CertificatePurchaseDialog({
   const [showVideoconferenceIframe, setShowVideoconferenceIframe] = useState(false);
   const [isVideoconferenceLoading, setIsVideoconferenceLoading] = useState(true);
 
+  // Emission iframe
+  const [showEmissionIframe, setShowEmissionIframe] = useState(false);
+  const [isEmissionLoading, setIsEmissionLoading] = useState(true);
+
   const currentStepIndex = STEPS_CONFIG.findIndex((s) => s.key === step);
 
   // Initialize form data when dialog opens
@@ -325,12 +329,24 @@ export function CertificatePurchaseDialog({
     ? `https://certificaminas.syngularid.com.br/lyve?protocolo=${protocol}&cpf=${cpf.replace(/\D/g, "")}`
     : null;
 
+  const emissionUrl = protocol && cpf 
+    ? `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cpf.replace(/\D/g, "")}&protocolo=${protocol}`
+    : null;
+
   const handleOpenEmission = () => {
     if (!protocol || !cpf) return;
-    
-    const cleanCpf = cpf.replace(/\D/g, "");
-    const url = `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cleanCpf}&protocolo=${protocol}`;
-    window.open(url, "_blank");
+    setShowEmissionIframe(true);
+    setIsEmissionLoading(true);
+  };
+
+  const handleCloseEmission = () => {
+    setShowEmissionIframe(false);
+    setIsEmissionLoading(true);
+  };
+
+  const handleCompleteEmission = () => {
+    setShowEmissionIframe(false);
+    setIsEmissionLoading(true);
     setStep("complete");
   };
 
@@ -349,6 +365,8 @@ export function CertificatePurchaseDialog({
     setInitError(null);
     setShowVideoconferenceIframe(false);
     setIsVideoconferenceLoading(true);
+    setShowEmissionIframe(false);
+    setIsEmissionLoading(true);
   };
 
   const handleDialogOpenChange = (newOpen: boolean) => {
@@ -389,7 +407,7 @@ export function CertificatePurchaseDialog({
         <DialogContent 
           className={cn(
             "overflow-hidden",
-            showVideoconferenceIframe 
+            (showVideoconferenceIframe || showEmissionIframe)
               ? "max-w-[95vw] w-[1200px] h-[90vh] p-0 flex flex-col" 
               : "sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
           )}
@@ -433,6 +451,45 @@ export function CertificatePurchaseDialog({
                   style={{ minHeight: "calc(90vh - 80px)" }}
                   allow="camera; microphone; display-capture"
                   onLoad={() => setIsVideoconferenceLoading(false)}
+                />
+              </div>
+            </>
+          ) : showEmissionIframe ? (
+            <>
+              <div className="flex items-center justify-between p-4 border-b">
+                <div>
+                  <h2 className="text-lg font-semibold">Emissão do Certificado</h2>
+                  <p className="text-xs text-muted-foreground">Complete o processo de emissão</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCloseEmission}>
+                    Voltar
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleCompleteEmission}
+                    className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Concluir Emissão
+                  </Button>
+                </div>
+              </div>
+              <div className="relative flex-1 w-full min-h-0">
+                {isEmissionLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground">Carregando ambiente de emissão...</p>
+                    </div>
+                  </div>
+                )}
+                <iframe
+                  src={emissionUrl || ""}
+                  className="w-full h-full border-0"
+                  style={{ minHeight: "calc(90vh - 80px)" }}
+                  allow="camera; microphone"
+                  onLoad={() => setIsEmissionLoading(false)}
                 />
               </div>
             </>
