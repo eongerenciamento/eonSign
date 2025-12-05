@@ -31,7 +31,7 @@ const AUTHENTICATION_OPTIONS: {
   label: 'Código de Verificação SMS'
 }];
 
-type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED';
+type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED' | 'PRESCRIPTION';
 const SIGNATURE_MODES: {
   id: SignatureMode;
   label: string;
@@ -57,6 +57,12 @@ const SIGNATURE_MODES: {
     typeName: 'Qualificada',
     description: 'Evidências + Certificado digital ICP-Brasil',
     badge: 'Maior validade jurídica'
+  },
+  {
+    id: 'PRESCRIPTION',
+    label: 'Prescrição',
+    typeName: 'Prescrição',
+    description: 'Profissionais da Saúde'
   }
 ];
 interface Signer {
@@ -981,7 +987,9 @@ const NewDocument = () => {
                   onClick={() => setSignatureMode(mode.id)}
                   className={`px-3 py-3 rounded cursor-pointer transition-colors ${
                     signatureMode === mode.id 
-                      ? 'bg-primary/10 border border-primary/30' 
+                      ? mode.id === 'PRESCRIPTION'
+                        ? 'bg-purple-100 border border-purple-300'
+                        : 'bg-primary/10 border border-primary/30' 
                       : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
                   }`}
                 >
