@@ -41,6 +41,7 @@ const Settings = () => {
   const [isHealthcare, setIsHealthcare] = useState(false);
   const [professionalRegistration, setProfessionalRegistration] = useState("");
   const [registrationState, setRegistrationState] = useState("");
+  const [medicalSpecialty, setMedicalSpecialty] = useState("");
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -140,6 +141,7 @@ const Settings = () => {
           setIsHealthcare((companyData as any).is_healthcare || false);
           setProfessionalRegistration((companyData as any).professional_registration || "");
           setRegistrationState((companyData as any).registration_state || "");
+          setMedicalSpecialty((companyData as any).medical_specialty || "");
         }
       }
     };
@@ -267,7 +269,8 @@ const Settings = () => {
       admin_email: companyEmail,
       is_healthcare: isHealthcare,
       professional_registration: isHealthcare ? professionalRegistration : null,
-      registration_state: isHealthcare ? registrationState : null
+      registration_state: isHealthcare ? registrationState : null,
+      medical_specialty: isHealthcare && ['CRM', 'CRO'].includes(professionalRegistration.split(' ')[0]) ? medicalSpecialty : null
     };
     if (existingData) {
       const {
@@ -429,55 +432,71 @@ const Settings = () => {
                     </div>
 
                     {isHealthcare && (
-                      <div className="grid md:grid-cols-3 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="grid gap-2">
-                          <Label htmlFor="council-type">Conselho de Classe</Label>
-                          <Select value={professionalRegistration.split(' ')[0] || ''} onValueChange={(council) => {
-                            const number = professionalRegistration.split(' ').slice(1).join(' ');
-                            setProfessionalRegistration(council + (number ? ' ' + number : ''));
-                          }}>
-                            <SelectTrigger className="text-gray-600">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                'CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 
-                                'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'
-                              ].map(council => (
-                                <SelectItem key={council} value={council}>{council}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      <>
+                        <div className="grid md:grid-cols-3 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="grid gap-2">
+                            <Label htmlFor="council-type">Conselho de Classe</Label>
+                            <Select value={professionalRegistration.split(' ')[0] || ''} onValueChange={(council) => {
+                              const number = professionalRegistration.split(' ').slice(1).join(' ');
+                              setProfessionalRegistration(council + (number ? ' ' + number : ''));
+                            }}>
+                              <SelectTrigger className="text-gray-600">
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[
+                                  'CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 
+                                  'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'
+                                ].map(council => (
+                                  <SelectItem key={council} value={council}>{council}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label htmlFor="registration-number">Número do Registro</Label>
+                            <Input
+                              id="registration-number"
+                              value={professionalRegistration.split(' ').slice(1).join(' ')}
+                              onChange={e => {
+                                const council = professionalRegistration.split(' ')[0] || '';
+                                setProfessionalRegistration(council + (e.target.value ? ' ' + e.target.value : ''));
+                              }}
+                              placeholder="Ex: 12345"
+                              className="text-gray-600"
+                            />
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label htmlFor="registration-state">Estado</Label>
+                            <Select value={registrationState} onValueChange={setRegistrationState}>
+                              <SelectTrigger className="text-gray-600">
+                                <SelectValue placeholder="UF" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
+                                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="registration-number">Número do Registro</Label>
-                          <Input
-                            id="registration-number"
-                            value={professionalRegistration.split(' ').slice(1).join(' ')}
-                            onChange={e => {
-                              const council = professionalRegistration.split(' ')[0] || '';
-                              setProfessionalRegistration(council + (e.target.value ? ' ' + e.target.value : ''));
-                            }}
-                            placeholder="Ex: 12345"
-                            className="text-gray-600"
-                          />
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="registration-state">Estado</Label>
-                          <Select value={registrationState} onValueChange={setRegistrationState}>
-                            <SelectTrigger className="text-gray-600">
-                              <SelectValue placeholder="UF" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
-                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                        {/* Medical Specialty - Only for CRM and CRO */}
+                        {['CRM', 'CRO'].includes(professionalRegistration.split(' ')[0]) && (
+                          <div className="grid gap-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <Label htmlFor="medical-specialty">Especialidade</Label>
+                            <Input
+                              id="medical-specialty"
+                              value={medicalSpecialty}
+                              onChange={e => setMedicalSpecialty(e.target.value)}
+                              placeholder={professionalRegistration.startsWith('CRM') ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'}
+                              className="text-gray-600"
+                            />
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
 

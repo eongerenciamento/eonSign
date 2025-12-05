@@ -161,6 +161,7 @@ export type Database = {
           id: string
           is_healthcare: boolean | null
           logo_url: string | null
+          medical_specialty: string | null
           neighborhood: string | null
           professional_registration: string | null
           registration_state: string | null
@@ -183,6 +184,7 @@ export type Database = {
           id?: string
           is_healthcare?: boolean | null
           logo_url?: string | null
+          medical_specialty?: string | null
           neighborhood?: string | null
           professional_registration?: string | null
           registration_state?: string | null
@@ -205,6 +207,7 @@ export type Database = {
           id?: string
           is_healthcare?: boolean | null
           logo_url?: string | null
+          medical_specialty?: string | null
           neighborhood?: string | null
           professional_registration?: string | null
           registration_state?: string | null
