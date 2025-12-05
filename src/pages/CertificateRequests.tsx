@@ -588,7 +588,7 @@ export default function CertificateRequests() {
             </p>
           </div>
           <div className="flex gap-2 text-primary-foreground bg-transparent">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2 bg-gray-400 hover:bg-gray-300">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2 bg-gray-400 hover:bg-gray-300 rounded-full">
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
