@@ -639,13 +639,13 @@ export default function CertificateRequests() {
             }} transition={{
               delay: index * 0.1
             }}>
-                    <Card className="p-6 hover:shadow-md transition-shadow">
+                    <Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
                       <div className="space-y-4">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-4">
+                        {/* Header - Info + Actions */}
+                        <div className="flex items-start justify-between gap-2">
                           {/* Left side - Info */}
-                          <div className="flex-shrink-0">
-                            <h3 className="font-semibold bg-transparent text-gray-600 mb-1 text-sm">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold bg-transparent text-gray-600 mb-1 text-sm truncate">
                               {request.common_name}
                             </h3>
                             <p className="text-xs text-muted-foreground mb-1">
@@ -666,40 +666,43 @@ export default function CertificateRequests() {
                             </Badge>
                           </div>
                           
-                          {/* Center - Progress Steps */}
-                          <div className="flex-1 flex items-center justify-end">
+                          {/* Desktop Progress Steps - Hidden on mobile */}
+                          <div className="hidden sm:flex flex-1 items-center justify-end">
                             <div className="flex items-center">
                               {STEPS.map((step, stepIndex) => {
-                          const status = stepStatus[step.key as keyof typeof stepStatus];
-                          const StepIcon = step.icon;
-                          const isCompleted = status === "completed";
-                          const isCurrent = status === "current";
-                          const isRejected = status === "rejected";
-                          const isWarning = status === "warning";
-                          return <div key={step.key} className="flex items-center">
-                                  <div className="flex flex-col items-center">
-                                    <motion.div className={`
-                                        w-10 h-10 rounded-full flex items-center justify-center
-                                        ${isCompleted ? "bg-green-500 text-white" : ""}
-                                        ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
-                                        ${isRejected ? "bg-red-500 text-white" : ""}
-                                        ${isWarning ? "bg-orange-500 text-white" : ""}
-                                        ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
-                                      `} animate={isCurrent ? {
-                                scale: [1, 1.1, 1]
-                              } : {}} transition={{
-                                repeat: Infinity,
-                                duration: 2
-                              }}>
-                                      <StepIcon className="h-5 w-5" />
-                                    </motion.div>
-                                    <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                                      {step.label}
-                                    </span>
+                                const status = stepStatus[step.key as keyof typeof stepStatus];
+                                const StepIcon = step.icon;
+                                const isCompleted = status === "completed";
+                                const isCurrent = status === "current";
+                                const isRejected = status === "rejected";
+                                const isWarning = status === "warning";
+                                return (
+                                  <div key={step.key} className="flex items-center">
+                                    <div className="flex flex-col items-center">
+                                      <motion.div 
+                                        className={`
+                                          w-10 h-10 rounded-full flex items-center justify-center
+                                          ${isCompleted ? "bg-green-500 text-white" : ""}
+                                          ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
+                                          ${isRejected ? "bg-red-500 text-white" : ""}
+                                          ${isWarning ? "bg-orange-500 text-white" : ""}
+                                          ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
+                                        `} 
+                                        animate={isCurrent ? { scale: [1, 1.1, 1] } : {}} 
+                                        transition={{ repeat: Infinity, duration: 2 }}
+                                      >
+                                        <StepIcon className="h-5 w-5" />
+                                      </motion.div>
+                                      <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                                        {step.label}
+                                      </span>
+                                    </div>
+                                    {stepIndex < STEPS.length - 1 && (
+                                      <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
+                                    )}
                                   </div>
-                                  {stepIndex < STEPS.length - 1 && <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
-                                </div>;
-                        })}
+                                );
+                              })}
                             </div>
                           </div>
                           
@@ -720,22 +723,69 @@ export default function CertificateRequests() {
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver Documentos
                                 </DropdownMenuItem>
-                                {request.status === "approved" && <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="focus:bg-transparent focus:text-foreground">
+                                {request.status === "approved" && (
+                                  <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="focus:bg-transparent focus:text-foreground">
                                     {isDownloadingTerm ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                                     Termo de Titularidade
-                                  </DropdownMenuItem>}
-                                {canDeleteRequest(request) && <>
+                                  </DropdownMenuItem>
+                                )}
+                                {canDeleteRequest(request) && (
+                                  <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => {
-                              setDeletingRequest(request);
-                              setShowDeleteRequestDialog(true);
-                            }} className="text-destructive focus:bg-transparent focus:text-destructive">
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        setDeletingRequest(request);
+                                        setShowDeleteRequestDialog(true);
+                                      }} 
+                                      className="text-destructive focus:bg-transparent focus:text-destructive"
+                                    >
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Excluir Solicitação
                                     </DropdownMenuItem>
-                                  </>}
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
+                          </div>
+                        </div>
+
+                        {/* Mobile Progress Steps - Vertical layout */}
+                        <div className="sm:hidden">
+                          <div className="flex flex-col items-center py-2">
+                            {STEPS.map((step, stepIndex) => {
+                              const status = stepStatus[step.key as keyof typeof stepStatus];
+                              const StepIcon = step.icon;
+                              const isCompleted = status === "completed";
+                              const isCurrent = status === "current";
+                              const isRejected = status === "rejected";
+                              const isWarning = status === "warning";
+                              return (
+                                <div key={step.key} className="flex flex-col items-center">
+                                  <div className="flex items-center gap-3">
+                                    <motion.div 
+                                      className={`
+                                        w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                        ${isCompleted ? "bg-green-500 text-white" : ""}
+                                        ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
+                                        ${isRejected ? "bg-red-500 text-white" : ""}
+                                        ${isWarning ? "bg-orange-500 text-white" : ""}
+                                        ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
+                                      `} 
+                                      animate={isCurrent ? { scale: [1, 1.1, 1] } : {}} 
+                                      transition={{ repeat: Infinity, duration: 2 }}
+                                    >
+                                      <StepIcon className="h-4 w-4" />
+                                    </motion.div>
+                                    <span className={`text-xs ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                                      {step.label}
+                                    </span>
+                                  </div>
+                                  {stepIndex < STEPS.length - 1 && (
+                                    <div className={`w-0.5 h-4 my-1 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 
