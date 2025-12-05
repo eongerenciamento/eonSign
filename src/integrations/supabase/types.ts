@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      certificate_requests: {
+        Row: {
+          approved_at: string | null
+          birth_date: string
+          certificate_downloaded: boolean | null
+          certificate_issued: boolean | null
+          cnpj: string | null
+          common_name: string
+          cpf: string
+          created_at: string
+          document_id: string | null
+          email: string
+          id: string
+          issued_at: string | null
+          phone: string
+          product_id: number
+          protocol: string | null
+          registration_authority_id: number
+          registry_office_id: number
+          responsible_name: string | null
+          signer_id: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+          videoconference_completed: boolean | null
+        }
+        Insert: {
+          approved_at?: string | null
+          birth_date: string
+          certificate_downloaded?: boolean | null
+          certificate_issued?: boolean | null
+          cnpj?: string | null
+          common_name: string
+          cpf: string
+          created_at?: string
+          document_id?: string | null
+          email: string
+          id?: string
+          issued_at?: string | null
+          phone: string
+          product_id?: number
+          protocol?: string | null
+          registration_authority_id?: number
+          registry_office_id?: number
+          responsible_name?: string | null
+          signer_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id: string
+          videoconference_completed?: boolean | null
+        }
+        Update: {
+          approved_at?: string | null
+          birth_date?: string
+          certificate_downloaded?: boolean | null
+          certificate_issued?: boolean | null
+          cnpj?: string | null
+          common_name?: string
+          cpf?: string
+          created_at?: string
+          document_id?: string | null
+          email?: string
+          id?: string
+          issued_at?: string | null
+          phone?: string
+          product_id?: number
+          protocol?: string | null
+          registration_authority_id?: number
+          registry_office_id?: number
+          responsible_name?: string | null
+          signer_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          videoconference_completed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_requests_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_requests_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: false
+            referencedRelation: "document_signers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_settings: {
         Row: {
           admin_cpf: string

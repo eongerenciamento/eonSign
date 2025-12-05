@@ -56,3 +56,21 @@ verify_jwt = false
 
 [functions.get-document-validation]
 verify_jwt = false
+
+[functions.bry-ar-auth]
+verify_jwt = false
+
+[functions.bry-ar-request-certificate]
+verify_jwt = false
+
+[functions.bry-ar-attach-document]
+verify_jwt = false
+
+[functions.bry-ar-check-psbio]
+verify_jwt = false
+
+[functions.bry-ar-list-requests]
+verify_jwt = false
+
+[functions.bry-ar-webhook]
+verify_jwt = false
