@@ -677,7 +677,7 @@ export const DocumentsTable = ({
       pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
       pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
-      pdf.text("PÁGINA DE VALIDAÇÃO", pageWidth - margin, 22, { align: "right" });
+      pdf.text("RELATÓRIO DE ASSINATURAS", pageWidth - margin, 22, { align: "right" });
 
       let yPos = 42;
 
