@@ -60,9 +60,9 @@ const SIGNATURE_MODES: {
   },
   {
     id: 'PRESCRIPTION',
-    label: 'Prescrição',
+    label: 'Prescrição Médica',
     typeName: 'Área da saúde',
-    description: 'Lei n. 14.063/2020 - Res. n. 2.299/2021 (CFM)'
+    description: 'Lei n. 14.063/20 - Res. n. 2.299/21 (CFM)'
   }
 ];
 interface Signer {
