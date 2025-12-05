@@ -9,7 +9,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Award, 
   Clock, 
@@ -19,8 +33,19 @@ import {
   AlertCircle,
   RefreshCw,
   Download,
-  Loader2
+  Loader2,
+  FileText,
+  Trash2,
+  Eye,
+  MoreHorizontal
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -42,6 +67,13 @@ interface CertificateRequest {
   emission_url: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface RequestDocument {
+  id: string;
+  name?: string;
+  type?: string;
+  created_at?: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -75,24 +107,20 @@ function getStepStatus(request: CertificateRequest) {
     return { ...steps, request: "rejected" };
   }
 
-  // Request is always completed if it exists
   steps.request = "completed";
 
-  // Documents step
   if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "in_validation", "approved", "issued"].includes(request.status)) {
     steps.documents = "completed";
   } else if (request.status === "pending") {
     steps.documents = "current";
   }
 
-  // Videoconference step
   if (request.videoconference_completed || ["in_validation", "approved", "issued"].includes(request.status)) {
     steps.videoconference = "completed";
   } else if (["videoconference_scheduled", "documents_sent"].includes(request.status)) {
     steps.videoconference = "current";
   }
 
-  // Emission step
   if (request.certificate_issued || request.status === "issued") {
     steps.emission = "completed";
   } else if (request.status === "approved") {
@@ -115,6 +143,18 @@ export default function CertificateRequests() {
   
   // Download state
   const [downloadingProtocol, setDownloadingProtocol] = useState<string | null>(null);
+
+  // Documents state
+  const [showDocumentsDialog, setShowDocumentsDialog] = useState(false);
+  const [documents, setDocuments] = useState<RequestDocument[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [selectedDocRequest, setSelectedDocRequest] = useState<CertificateRequest | null>(null);
+  
+  // Delete states
+  const [showDeleteRequestDialog, setShowDeleteRequestDialog] = useState(false);
+  const [deletingRequest, setDeletingRequest] = useState<CertificateRequest | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -144,7 +184,6 @@ export default function CertificateRequests() {
   useEffect(() => {
     fetchRequests();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel("certificate-requests-changes")
       .on(
@@ -202,7 +241,6 @@ export default function CertificateRequests() {
     if (request.emission_url) {
       return request.emission_url;
     }
-    // Fallback: construct URL if not stored
     const cleanCpf = request.cpf.replace(/\D/g, "");
     return `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cleanCpf}&protocolo=${request.protocol}`;
   };
@@ -244,7 +282,6 @@ export default function CertificateRequests() {
         return;
       }
 
-      // Convert base64 to blob and download
       const byteCharacters = atob(data.pfx_data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -262,7 +299,6 @@ export default function CertificateRequests() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      // Show password if available
       if (data.pfx_password) {
         toast.success(`Certificado baixado! Senha: ${data.pfx_password}`, {
           duration: 10000,
@@ -271,7 +307,6 @@ export default function CertificateRequests() {
         toast.success("Certificado baixado com sucesso!");
       }
 
-      // Mark as downloaded
       await supabase
         .from("certificate_requests")
         .update({ certificate_downloaded: true })
@@ -283,6 +318,148 @@ export default function CertificateRequests() {
     } finally {
       setDownloadingProtocol(null);
     }
+  };
+
+  // List documents for a request
+  const handleListDocuments = async (request: CertificateRequest) => {
+    if (!request.protocol) {
+      toast.error("Protocolo não encontrado");
+      return;
+    }
+
+    setSelectedDocRequest(request);
+    setLoadingDocuments(true);
+    setShowDocumentsDialog(true);
+    setDocuments([]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-list-documents", {
+        body: { protocol: request.protocol },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao listar documentos");
+      }
+
+      setDocuments(data.documents || []);
+    } catch (error: any) {
+      console.error("Error listing documents:", error);
+      toast.error(error.message || "Erro ao listar documentos");
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  // View/download a specific document
+  const handleViewDocument = async (doc: RequestDocument) => {
+    if (!selectedDocRequest?.protocol) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-get-document", {
+        body: { 
+          protocol: selectedDocRequest.protocol,
+          documentId: doc.id 
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao obter documento");
+      }
+
+      // If document has content (base64), download it
+      if (data.document?.content) {
+        const byteCharacters = atob(data.document.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray]);
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = doc.name || `documento_${doc.id}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast.success("Documento baixado!");
+      } else {
+        toast.info("Documento visualizado com sucesso");
+      }
+    } catch (error: any) {
+      console.error("Error viewing document:", error);
+      toast.error(error.message || "Erro ao visualizar documento");
+    }
+  };
+
+  // Delete a specific document
+  const handleDeleteDocument = async (doc: RequestDocument) => {
+    if (!selectedDocRequest?.protocol) return;
+
+    setDeletingDocId(doc.id);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-delete-document", {
+        body: { 
+          protocol: selectedDocRequest.protocol,
+          documentId: doc.id 
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao excluir documento");
+      }
+
+      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      toast.success("Documento excluído com sucesso");
+    } catch (error: any) {
+      console.error("Error deleting document:", error);
+      toast.error(error.message || "Erro ao excluir documento");
+    } finally {
+      setDeletingDocId(null);
+    }
+  };
+
+  // Delete certificate request
+  const handleDeleteRequest = async () => {
+    if (!deletingRequest?.protocol) return;
+
+    setIsDeleting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-delete-request", {
+        body: { protocol: deletingRequest.protocol },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao excluir solicitação");
+      }
+
+      setRequests((prev) => prev.filter((r) => r.id !== deletingRequest.id));
+      toast.success("Solicitação excluída com sucesso");
+      setShowDeleteRequestDialog(false);
+      setDeletingRequest(null);
+    } catch (error: any) {
+      console.error("Error deleting request:", error);
+      toast.error(error.message || "Erro ao excluir solicitação");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const canDeleteRequest = (request: CertificateRequest) => {
+    return ["pending", "documents_sent"].includes(request.status);
   };
 
   return (
@@ -373,10 +550,42 @@ export default function CertificateRequests() {
                               )}
                             </p>
                           </div>
-                          <Badge className={`${statusConfig.color} border shrink-0`}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
-                            {statusConfig.label}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className={`${statusConfig.color} border shrink-0`}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {statusConfig.label}
+                            </Badge>
+                            
+                            {/* Actions dropdown */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleListDocuments(request)}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Ver Documentos
+                                </DropdownMenuItem>
+                                {canDeleteRequest(request) && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        setDeletingRequest(request);
+                                        setShowDeleteRequestDialog(true);
+                                      }}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Excluir Solicitação
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
 
                         {/* Progress Steps */}
@@ -520,6 +729,112 @@ export default function CertificateRequests() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Documents Dialog */}
+      <Dialog open={showDocumentsDialog} onOpenChange={setShowDocumentsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Documentos da Solicitação</DialogTitle>
+            <DialogDescription>
+              {selectedDocRequest?.common_name} - Protocolo: {selectedDocRequest?.protocol}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {loadingDocuments ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhum documento encontrado</p>
+              </div>
+            ) : (
+              documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">{doc.name || `Documento ${doc.id}`}</p>
+                      {doc.type && (
+                        <p className="text-xs text-muted-foreground">{doc.type}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleViewDocument(doc)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {canDeleteRequest(selectedDocRequest!) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteDocument(doc)}
+                        disabled={deletingDocId === doc.id}
+                      >
+                        {deletingDocId === doc.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDocumentsDialog(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Request Confirmation Dialog */}
+      <AlertDialog open={showDeleteRequestDialog} onOpenChange={setShowDeleteRequestDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Solicitação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a solicitação de certificado de{" "}
+              <strong>{deletingRequest?.common_name}</strong>?
+              <br />
+              <br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteRequest}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }

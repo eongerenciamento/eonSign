@@ -78,6 +78,18 @@ verify_jwt = false
 [functions.bry-ar-download-certificate]
 verify_jwt = false
 
+[functions.bry-ar-list-documents]
+verify_jwt = false
+
+[functions.bry-ar-get-document]
+verify_jwt = false
+
+[functions.bry-ar-delete-request]
+verify_jwt = false
+
+[functions.bry-ar-delete-document]
+verify_jwt = false
+
 [functions.generate-signature-report]
 verify_jwt = false
 
