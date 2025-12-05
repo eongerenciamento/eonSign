@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Award, Clock, CheckCircle, FileUp, Video, AlertCircle, RefreshCw, Download, Loader2, FileText, Trash2, Eye, MoreVertical, XCircle, AlertTriangle, ShieldX, CreditCard, Plus, ArrowRight } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -891,7 +892,7 @@ export default function CertificateRequests() {
           <div className="relative flex-1 w-full min-h-0">
             {isEmissionLoading && <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                 <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <LoadingSpinner size="md" inline />
                   <p className="text-sm text-muted-foreground">Carregando ambiente de emissão...</p>
                 </div>
               </div>}

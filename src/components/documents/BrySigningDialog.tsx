@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -127,7 +128,7 @@ export const BrySigningDialog = ({
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <LoadingSpinner size="md" inline />
                 <p className="text-sm text-muted-foreground">Carregando interface de assinatura...</p>
               </div>
             </div>
@@ -137,7 +138,7 @@ export const BrySigningDialog = ({
           {signingStatus === "syncing" && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-20">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <LoadingSpinner size="lg" inline />
                 <p className="text-lg font-medium">Sincronizando assinatura...</p>
                 <p className="text-sm text-muted-foreground">Aguarde um momento</p>
               </div>
