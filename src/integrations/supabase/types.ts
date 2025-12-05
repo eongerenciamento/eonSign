@@ -159,8 +159,11 @@ export type Database = {
           company_name: string
           created_at: string
           id: string
+          is_healthcare: boolean | null
           logo_url: string | null
           neighborhood: string | null
+          professional_registration: string | null
+          registration_state: string | null
           state: string | null
           street: string | null
           updated_at: string
@@ -178,8 +181,11 @@ export type Database = {
           company_name: string
           created_at?: string
           id?: string
+          is_healthcare?: boolean | null
           logo_url?: string | null
           neighborhood?: string | null
+          professional_registration?: string | null
+          registration_state?: string | null
           state?: string | null
           street?: string | null
           updated_at?: string
@@ -197,8 +203,11 @@ export type Database = {
           company_name?: string
           created_at?: string
           id?: string
+          is_healthcare?: boolean | null
           logo_url?: string | null
           neighborhood?: string | null
+          professional_registration?: string | null
+          registration_state?: string | null
           state?: string | null
           street?: string | null
           updated_at?: string

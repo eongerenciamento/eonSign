@@ -16,6 +16,8 @@ import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { useQuery } from "@tanstack/react-query";
 import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -36,6 +38,9 @@ const Settings = () => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [isAdmin, setIsAdmin] = useState(true);
   const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
+  const [isHealthcare, setIsHealthcare] = useState(false);
+  const [professionalRegistration, setProfessionalRegistration] = useState("");
+  const [registrationState, setRegistrationState] = useState("");
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -132,6 +137,9 @@ const Settings = () => {
           setAdminCpf(companyData.admin_cpf);
           setPhone(companyData.admin_phone);
           setCompanyEmail(companyData.admin_email);
+          setIsHealthcare((companyData as any).is_healthcare || false);
+          setProfessionalRegistration((companyData as any).professional_registration || "");
+          setRegistrationState((companyData as any).registration_state || "");
         }
       }
     };
@@ -250,7 +258,10 @@ const Settings = () => {
       admin_name: adminName,
       admin_cpf: adminCpf,
       admin_phone: phone,
-      admin_email: companyEmail
+      admin_email: companyEmail,
+      is_healthcare: isHealthcare,
+      professional_registration: isHealthcare ? professionalRegistration : null,
+      registration_state: isHealthcare ? registrationState : null
     };
     if (existingData) {
       const {
@@ -394,6 +405,51 @@ const Settings = () => {
                       <Label htmlFor="company-email">E-mail</Label>
                       <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" className="text-gray-600" />
                     </div>
+                  </div>
+
+                  <Separator className="my-4" />
+
+                  {/* Healthcare Professional Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="is-healthcare" className="text-sm font-medium">
+                        Profissional da Área da Saúde
+                      </Label>
+                      <Switch
+                        id="is-healthcare"
+                        checked={isHealthcare}
+                        onCheckedChange={setIsHealthcare}
+                      />
+                    </div>
+
+                    {isHealthcare && (
+                      <div className="grid md:grid-cols-2 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="grid gap-2">
+                          <Label htmlFor="professional-registration">Registro de Classe</Label>
+                          <Input
+                            id="professional-registration"
+                            value={professionalRegistration}
+                            onChange={e => setProfessionalRegistration(e.target.value)}
+                            placeholder="Ex: CRM 12345"
+                            className="text-gray-600"
+                          />
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label htmlFor="registration-state">Estado do Registro</Label>
+                          <Select value={registrationState} onValueChange={setRegistrationState}>
+                            <SelectTrigger className="text-gray-600">
+                              <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
+                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-3 justify-end pt-6">
