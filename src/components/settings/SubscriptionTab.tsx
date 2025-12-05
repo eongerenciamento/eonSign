@@ -9,6 +9,7 @@ import { Check, Crown, Loader2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 const SUBSCRIPTION_TIERS = [{
   name: "Grátis",
   limit: 5,
@@ -176,9 +177,7 @@ export function SubscriptionTab() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
   if (loading) {
-    return <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>;
+    return <LoadingSpinner />;
   }
 
   // User has active tier
