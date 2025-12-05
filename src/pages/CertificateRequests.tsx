@@ -763,11 +763,11 @@ export default function CertificateRequests() {
                           </Alert>}
 
                         {/* Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-2 border-t">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d] border-gray-400 bg-slate-400 hover:bg-slate-300 rounded-full">
-                                <ArrowRight className="h-4 w-4" />
+                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-gradient-to-r from-[#273d60] to-[#001a4d] rounded-full">
+                                <ArrowRight className="h-3 w-3" />
                                 Continuar Processo
                               </Button>}
 
