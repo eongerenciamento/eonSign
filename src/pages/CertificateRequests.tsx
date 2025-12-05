@@ -697,7 +697,7 @@ export default function CertificateRequests() {
                                       {step.label}
                                     </span>
                                   </div>
-                                  {stepIndex < STEPS.length - 1 && <div className={`w-12 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
+                                  {stepIndex < STEPS.length - 1 && <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
                                 </div>;
                               })}
                             </div>
@@ -763,7 +763,7 @@ export default function CertificateRequests() {
                           </Alert>}
 
                         {/* Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-2">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
                             {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-gradient-to-r from-[#273d60] to-[#001a4d] rounded-full">
