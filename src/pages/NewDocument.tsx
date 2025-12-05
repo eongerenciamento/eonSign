@@ -1364,7 +1364,7 @@ const NewDocument = () => {
             )}
 
             {/* Patient Info Section */}
-            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm font-semibold text-gray-600">Dados do Paciente</p>
               
               <div className="grid gap-2">
