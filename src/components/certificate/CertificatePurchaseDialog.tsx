@@ -90,6 +90,10 @@ export function CertificatePurchaseDialog({
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Videoconference iframe
+  const [showVideoconferenceIframe, setShowVideoconferenceIframe] = useState(false);
+  const [isVideoconferenceLoading, setIsVideoconferenceLoading] = useState(true);
+
   const currentStepIndex = STEPS_CONFIG.findIndex((s) => s.key === step);
 
   // Initialize form data when dialog opens
@@ -302,12 +306,24 @@ export function CertificatePurchaseDialog({
 
   const handleOpenVideoconference = () => {
     if (!protocol || !cpf) return;
-    
-    const cleanCpf = cpf.replace(/\D/g, "");
-    const url = `https://certificaminas.syngularid.com.br/lyve?protocolo=${protocol}&cpf=${cleanCpf}`;
-    window.open(url, "_blank");
+    setShowVideoconferenceIframe(true);
+    setIsVideoconferenceLoading(true);
+  };
+
+  const handleCloseVideoconference = () => {
+    setShowVideoconferenceIframe(false);
+    setIsVideoconferenceLoading(true);
+  };
+
+  const handleCompleteVideoconference = () => {
+    setShowVideoconferenceIframe(false);
+    setIsVideoconferenceLoading(true);
     setStep("emission");
   };
+
+  const videoconferenceUrl = protocol && cpf 
+    ? `https://certificaminas.syngularid.com.br/lyve?protocolo=${protocol}&cpf=${cpf.replace(/\D/g, "")}`
+    : null;
 
   const handleOpenEmission = () => {
     if (!protocol || !cpf) return;
@@ -331,6 +347,8 @@ export function CertificatePurchaseDialog({
     setCnpj("");
     setResponsibleName("");
     setInitError(null);
+    setShowVideoconferenceIframe(false);
+    setIsVideoconferenceLoading(true);
   };
 
   const handleDialogOpenChange = (newOpen: boolean) => {
@@ -368,18 +386,64 @@ export function CertificatePurchaseDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange} modal={true}>
-      <DialogContent 
-        className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
-        onInteractOutside={handleInteractOutside}
-        onEscapeKeyDown={handleEscapeKeyDown}
-        onPointerDownOutside={handleInteractOutside}
-      >
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-lg">Certificado Digital A1</DialogTitle>
-          <DialogDescription className="text-xs">
-            Solicite seu certificado digital ICP-Brasil
-          </DialogDescription>
-        </DialogHeader>
+        <DialogContent 
+          className={cn(
+            "overflow-hidden",
+            showVideoconferenceIframe 
+              ? "max-w-[95vw] w-[1200px] h-[90vh] p-0 flex flex-col" 
+              : "sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
+          )}
+          onInteractOutside={handleInteractOutside}
+          onEscapeKeyDown={handleEscapeKeyDown}
+          onPointerDownOutside={handleInteractOutside}
+        >
+          {showVideoconferenceIframe ? (
+            <>
+              <div className="flex items-center justify-between p-4 border-b">
+                <div>
+                  <h2 className="text-lg font-semibold">Videoconferência</h2>
+                  <p className="text-xs text-muted-foreground">Realize a validação de identidade</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCloseVideoconference}>
+                    Voltar
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleCompleteVideoconference}
+                    className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Concluir Videoconferência
+                  </Button>
+                </div>
+              </div>
+              <div className="relative flex-1 w-full min-h-0">
+                {isVideoconferenceLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground">Carregando videoconferência...</p>
+                    </div>
+                  </div>
+                )}
+                <iframe
+                  src={videoconferenceUrl || ""}
+                  className="w-full h-full border-0"
+                  style={{ minHeight: "calc(90vh - 80px)" }}
+                  allow="camera; microphone; display-capture"
+                  onLoad={() => setIsVideoconferenceLoading(false)}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-lg">Certificado Digital A1</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Solicite seu certificado digital ICP-Brasil
+                </DialogDescription>
+              </DialogHeader>
 
         {/* Step Indicator */}
         {!isInitializing && !initError && (
@@ -826,6 +890,8 @@ export function CertificatePurchaseDialog({
             </motion.div>
           )}
         </AnimatePresence>
+            </>
+          )}
       </DialogContent>
     </Dialog>
   );
