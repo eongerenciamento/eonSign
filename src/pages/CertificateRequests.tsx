@@ -763,7 +763,7 @@ export default function CertificateRequests() {
                           </Alert>}
 
                         {/* Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-8">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
                             {request.status === "paid" && <motion.div animate={{
