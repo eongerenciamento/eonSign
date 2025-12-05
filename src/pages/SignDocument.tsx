@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, Plus, Minus, Download, MousePointer, PenLine, Award, ShieldCheck } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign.png";
@@ -76,7 +76,6 @@ const SignDocument = () => {
   
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
-  const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number; page: number } | null>(null);
   
   // Certificate purchase dialog
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
@@ -301,17 +300,6 @@ const SignDocument = () => {
     }
   };
 
-  const handlePdfClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isSimpleSignature || !pdfContainerRef.current) return;
-
-    const rect = pdfContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    setSignaturePosition({ x, y, page: 1 });
-    toast.success("Posição da assinatura selecionada!");
-  };
-
   const handleSign = async () => {
     if (!cpf) {
       toast.error("Por favor, informe seu CPF/CNPJ");
@@ -367,9 +355,6 @@ const SignDocument = () => {
           longitude: location?.longitude || null,
           // Simple signature specific data
           typedSignature: isSimpleSignature ? typedSignature : null,
-          signatureX: signaturePosition?.x || 50, // centered horizontally
-          signatureY: signaturePosition?.y || 92, // very close to bottom of page
-          signaturePage: signaturePosition?.page || 1,
         },
       });
 
@@ -582,42 +567,17 @@ const SignDocument = () => {
                   </Button>
                 </div>
               </div>
-              {/* Instruction for positioning */}
-              {isSimpleSignature && !signaturePosition && (
-                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
-                  <MousePointer className="h-4 w-4 text-blue-600" />
-                  <p className="text-sm text-blue-700">
-                    Clique no documento para posicionar sua assinatura, ou ela será adicionada automaticamente no rodapé
-                  </p>
-                </div>
-              )}
               {document.file_url ? (
                 <div 
                   ref={pdfContainerRef}
-                  className={`relative overflow-auto border rounded-md bg-gray-100 ${isSimpleSignature ? 'cursor-crosshair' : ''}`}
+                  className="relative overflow-auto border rounded-md bg-gray-100"
                   style={{ height: 'calc(100vh - 380px)', minHeight: '400px' }}
-                  onClick={handlePdfClick}
                 >
                   <iframe
                     src={`${document.file_url}#view=Fit&zoom=page-fit`}
-                    className="w-full h-full border-0 pointer-events-none"
+                    className="w-full h-full border-0"
                     title="Document Preview"
                   />
-                  {/* Signature position indicator */}
-                  {signaturePosition && (
-                    <div 
-                      className="absolute bg-blue-500/20 border-2 border-blue-500 border-dashed rounded-lg flex items-center justify-center"
-                      style={{
-                        left: `${signaturePosition.x}%`,
-                        top: `${signaturePosition.y}%`,
-                        width: '150px',
-                        height: '40px',
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                    >
-                      <span className="font-signature text-base text-blue-700">{typedSignature || currentSigner?.name}</span>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground">Documento não disponível para visualização</p>

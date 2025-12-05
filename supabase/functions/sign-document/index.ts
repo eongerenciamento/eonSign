@@ -97,11 +97,7 @@ serve(async (req) => {
       birthDate, 
       latitude, 
       longitude,
-      // New fields for simple signature
-      typedSignature,
-      signatureX,
-      signatureY,
-      signaturePage
+      typedSignature
     } = await req.json();
 
     if (!documentId || !signerId || !cpf || !birthDate) {
@@ -229,9 +225,6 @@ serve(async (req) => {
         signature_ip: clientIp,
         signature_id: signatureId,
         typed_signature: typedSignature || signerInfo.name,
-        signature_x: signatureX,
-        signature_y: signatureY,
-        signature_page: signaturePage,
       })
       .eq("id", signerId);
 
@@ -264,8 +257,9 @@ serve(async (req) => {
     if (isSimpleSignature) {
       console.log("Processing SIMPLE signature - native flow");
 
-      // Prepare all signers data for validation page (only used when last signer)
-      const allSignersData = isLastSigner ? signers : null;
+      // Get current signer index for automatic positioning
+      const signerIndex = signers?.findIndex(s => s.id === signerId) || 0;
+      const totalSigners = signers?.length || 1;
 
       // Call apply-simple-signature to process the PDF
       try {
@@ -276,9 +270,8 @@ serve(async (req) => {
               documentId,
               signerId,
               typedSignature: typedSignature || signerInfo.name,
-              signatureX: signatureX || 50,
-              signatureY: signatureY || 80,
-              signaturePage: signaturePage || 1,
+              signerIndex,
+              totalSigners,
               signerData: {
                 name: signerInfo.name,
                 email: signerInfo.email,
@@ -290,8 +283,7 @@ serve(async (req) => {
                 country,
                 signatureId
               },
-              allSignersData,  // Pass all signers data for validation page
-              isLastSigner     // Flag to indicate last signer
+              isLastSigner
             }
           }
         );
