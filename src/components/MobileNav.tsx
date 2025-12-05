@@ -1,4 +1,4 @@
-import { File, Folder, BarChart, LogOut, Settings, Camera, X, Shield } from "lucide-react";
+import { File, Folder, BarChart, LogOut, Settings, Camera, X, Award } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ const items = [
   { title: "Documentos", url: "/documentos", icon: File },
   { title: "Drive", url: "/drive", icon: Folder },
   { title: "Relatórios", url: "/relatorios", icon: BarChart },
-  { title: "Certificados", url: "/certificados", icon: Shield },
+  { title: "Certificados", url: "/certificados", icon: Award },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 
