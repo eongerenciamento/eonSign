@@ -643,17 +643,15 @@ export default function CertificateRequests() {
                         {/* Header */}
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div>
-                            <h3 className="font-semibold bg-transparent text-gray-600 text-xs mb-1">
+                            <h3 className="font-semibold bg-transparent text-gray-600 mb-1 text-sm">
                               {request.common_name}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               <span className="font-bold">{request.type === "PJ" ? "CNPJ" : "CPF"}:</span> {request.type === "PJ" && request.cnpj ? request.cnpj : formatCPF(request.cpf)}
                             </p>
-                            {request.protocol && (
-                              <p className="text-sm text-muted-foreground">
+                            {request.protocol && <p className="text-sm text-muted-foreground">
                                 <span className="font-bold">Protocolo:</span> {request.protocol}
-                              </p>
-                            )}
+                              </p>}
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge className={`${statusConfig.color} border shrink-0`}>
