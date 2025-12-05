@@ -176,13 +176,13 @@ export function CertificateCheckoutDialog({
     }}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 [&>button]:text-white [&>button]:hover:text-white/80">
         {/* Header */}
-        <div className="bg-[#273d60] p-4 rounded-t-lg">
+        <div className="bg-[#273d60] p-4 rounded-t-lg flex items-center justify-between">
           <img 
             alt="Eon Sign" 
             className="h-10 w-auto" 
             src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" 
           />
-          <h2 className="text-white text-lg font-semibold mt-2">Certificado Digital A1</h2>
+          <h2 className="text-white text-lg font-semibold">Certificado Digital A1</h2>
         </div>
 
         <div className="p-6">
