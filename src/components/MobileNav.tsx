@@ -17,7 +17,7 @@ const items = [
   { title: "Documentos", url: "/documentos", icon: File },
   { title: "Drive", url: "/drive", icon: Folder },
   { title: "Relatórios", url: "/relatorios", icon: BarChart },
-  { title: "Certificados", url: "/certificados", icon: Award },
+  { title: "Certificado Digital", url: "/certificados", icon: Award },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 

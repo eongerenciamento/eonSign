@@ -30,7 +30,7 @@ const items = [{
   url: "/relatorios",
   icon: BarChart
 }, {
-  title: "Certificados",
+  title: "Certificado Digital",
   url: "/certificados",
   icon: Award
 }, {
