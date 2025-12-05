@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -40,15 +40,17 @@ export function CertificatePurchaseDialog({
   const [step, setStep] = useState<Step>("form");
   const [type, setType] = useState<"PF" | "PJ">("PF");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   const [protocol, setProtocol] = useState<string | null>(null);
   const [canIssue, setCanIssue] = useState<boolean | null>(null);
 
   // Form fields
-  const [commonName, setCommonName] = useState(prefillData?.name || "");
-  const [cpf, setCpf] = useState(prefillData?.cpf || "");
-  const [email, setEmail] = useState(prefillData?.email || "");
-  const [phone, setPhone] = useState(prefillData?.phone || "");
-  const [birthDate, setBirthDate] = useState(prefillData?.birthDate || "");
+  const [commonName, setCommonName] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   
   // PJ fields
   const [cnpj, setCnpj] = useState("");
@@ -57,6 +59,55 @@ export function CertificatePurchaseDialog({
   // Document upload
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Initialize form data when dialog opens
+  useEffect(() => {
+    if (open) {
+      console.log("[CertificateDialog] Dialog opened, initializing...");
+      setInitError(null);
+      setIsInitializing(true);
+      
+      const initializeDialog = async () => {
+        try {
+          // Check authentication
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          
+          if (authError) {
+            console.error("[CertificateDialog] Auth error:", authError);
+            setInitError("Erro de autenticação. Por favor, faça login novamente.");
+            return;
+          }
+          
+          if (!user) {
+            console.error("[CertificateDialog] No user found");
+            setInitError("Usuário não autenticado. Por favor, faça login.");
+            return;
+          }
+          
+          console.log("[CertificateDialog] User authenticated:", user.id);
+          
+          // Set prefill data if available
+          if (prefillData) {
+            console.log("[CertificateDialog] Setting prefill data:", prefillData);
+            setCommonName(prefillData.name || "");
+            setCpf(prefillData.cpf || "");
+            setEmail(prefillData.email || "");
+            setPhone(prefillData.phone || "");
+            setBirthDate(prefillData.birthDate || "");
+          }
+          
+          console.log("[CertificateDialog] Initialization complete");
+        } catch (error: any) {
+          console.error("[CertificateDialog] Initialization error:", error);
+          setInitError(error.message || "Erro ao inicializar. Tente novamente.");
+        } finally {
+          setIsInitializing(false);
+        }
+      };
+      
+      initializeDialog();
+    }
+  }, [open, prefillData]);
 
   const formatCpf = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -103,7 +154,7 @@ export function CertificatePurchaseDialog({
       setCanIssue(data.can_issue);
       return data.can_issue;
     } catch (error: any) {
-      console.error("PSBIO check error:", error);
+      console.error("[CertificateDialog] PSBIO check error:", error);
       return null;
     }
   };
@@ -126,7 +177,11 @@ export function CertificatePurchaseDialog({
       const psbioResult = await checkPsbio();
       
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error("Sessão expirada. Por favor, faça login novamente.");
+      }
 
       // Prepare request body
       const requestBody: any = {
@@ -136,7 +191,7 @@ export function CertificatePurchaseDialog({
         email,
         phone: phone.replace(/\D/g, ""),
         holder_birthdate: birthDate.replace(/\D/g, ""),
-        user_id: user?.id,
+        user_id: user.id,
         signer_id: signerId,
         document_id: documentId,
       };
@@ -146,11 +201,18 @@ export function CertificatePurchaseDialog({
         requestBody.responsible_name = responsibleName;
       }
 
+      console.log("[CertificateDialog] Sending request:", requestBody);
+
       const { data, error } = await supabase.functions.invoke("bry-ar-request-certificate", {
         body: requestBody,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[CertificateDialog] Function error:", error);
+        throw error;
+      }
+
+      console.log("[CertificateDialog] Response:", data);
 
       if (!data.success) {
         throw new Error(data.error || "Erro ao solicitar certificado");
@@ -160,7 +222,7 @@ export function CertificatePurchaseDialog({
       toast.success("Solicitação enviada com sucesso!");
       setStep("document");
     } catch (error: any) {
-      console.error("Certificate request error:", error);
+      console.error("[CertificateDialog] Certificate request error:", error);
       toast.error(error.message || "Erro ao solicitar certificado");
     } finally {
       setIsLoading(false);
@@ -206,7 +268,7 @@ export function CertificatePurchaseDialog({
       toast.success("Documento anexado com sucesso!");
       setStep("videoconference");
     } catch (error: any) {
-      console.error("Document upload error:", error);
+      console.error("[CertificateDialog] Document upload error:", error);
       toast.error(error.message || "Erro ao enviar documento");
     } finally {
       setIsUploading(false);
@@ -237,15 +299,27 @@ export function CertificatePurchaseDialog({
     setProtocol(null);
     setCanIssue(null);
     setDocumentFile(null);
+    setCommonName("");
+    setCpf("");
+    setEmail("");
+    setPhone("");
+    setBirthDate("");
+    setCnpj("");
+    setResponsibleName("");
+    setInitError(null);
   };
 
-  const handleClose = () => {
-    resetDialog();
-    onOpenChange(false);
+  const handleDialogOpenChange = (newOpen: boolean) => {
+    console.log("[CertificateDialog] onOpenChange called:", newOpen);
+    if (!newOpen) {
+      // Only close if user explicitly requests it
+      resetDialog();
+    }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Comprar Certificado Digital A1</DialogTitle>
@@ -258,7 +332,34 @@ export function CertificatePurchaseDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {step === "form" && (
+        {/* Loading state */}
+        {isInitializing && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {initError && !isInitializing && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-red-700">Erro</p>
+                <p className="text-sm text-red-600">{initError}</p>
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Fechar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Form step */}
+        {step === "form" && !isInitializing && !initError && (
           <div className="space-y-4">
             <div>
               <Label className="text-xs text-gray-500">Tipo de Certificado</Label>
@@ -365,7 +466,7 @@ export function CertificatePurchaseDialog({
             )}
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button 
@@ -469,7 +570,7 @@ export function CertificatePurchaseDialog({
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Fechar
               </Button>
               <Button 
@@ -502,7 +603,7 @@ export function CertificatePurchaseDialog({
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Fechar
               </Button>
             </div>
@@ -511,20 +612,30 @@ export function CertificatePurchaseDialog({
 
         {step === "complete" && (
           <div className="space-y-4">
-            <div className="p-6 text-center">
-              <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-800">Processo iniciado!</h3>
-              <p className="text-sm text-gray-600 mt-2">
-                Acompanhe o status da sua solicitação. Você receberá notificações 
-                sobre cada etapa do processo.
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-green-700">Processo concluído!</p>
+                <p className="text-sm text-green-600">
+                  Siga as instruções na página de emissão para baixar e instalar seu certificado digital.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                <strong>Protocolo:</strong> {protocol}
               </p>
-              <p className="text-xs text-gray-500 mt-4">
-                Protocolo: <strong>{protocol}</strong>
+              <p className="text-xs text-gray-500 mt-1">
+                Guarde este protocolo para referência futura.
               </p>
             </div>
 
-            <div className="flex justify-center pt-4">
-              <Button onClick={handleClose} className="bg-gradient-to-r from-[#273d60] to-[#001a4d]">
+            <div className="flex justify-end pt-4">
+              <Button 
+                onClick={() => onOpenChange(false)}
+                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+              >
                 Concluir
               </Button>
             </div>
