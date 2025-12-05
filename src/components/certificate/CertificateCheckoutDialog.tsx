@@ -145,7 +145,7 @@ export function CertificateCheckoutDialog({
         {/* Header */}
         <div className="bg-[#273d60] p-4 rounded-t-lg flex items-center justify-between border-none">
           <img alt="Eon Sign" className="h-10 w-auto" src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" />
-          <h2 className="text-white text-lg font-semibold">Certificado Digital A1</h2>
+          <h2 className="text-white text-lg font-normal">Certificado Digital A1</h2>
         </div>
 
         <div className="p-6 border-none">
@@ -155,7 +155,7 @@ export function CertificateCheckoutDialog({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                <span className="font-medium">Eon Certifica A1</span>
+                <span className="font-semibold">Eon Certifica A1</span>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold">R$ 109,90</div>
