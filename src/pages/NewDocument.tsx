@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignerAutocomplete, SignerSuggestion, SignerGroup } from "@/components/documents/SignerAutocomplete";
+import { PatientAutocomplete, PatientSuggestion } from "@/components/documents/PatientAutocomplete";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import jsPDF from "jspdf";
 
@@ -122,6 +123,7 @@ const NewDocument = () => {
   const [showPrescriptionSheet, setShowPrescriptionSheet] = useState(false);
   const [prescriptionContent, setPrescriptionContent] = useState("");
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '' });
+  const [patientSuggestions, setPatientSuggestions] = useState<PatientSuggestion[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -295,6 +297,32 @@ const NewDocument = () => {
     };
     loadGroups();
   }, []);
+
+  // Load patients for autocomplete (healthcare professionals only)
+  useEffect(() => {
+    const loadPatients = async () => {
+      if (!isHealthcareProfessional) return;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: patientsData } = await supabase
+        .from('patients')
+        .select('id, name, cpf, birth_date')
+        .eq('user_id', user.id)
+        .order('name');
+
+      if (patientsData) {
+        setPatientSuggestions(patientsData.map(p => ({
+          id: p.id,
+          name: p.name,
+          cpf: p.cpf || '',
+          birthDate: p.birth_date || ''
+        })));
+      }
+    };
+    loadPatients();
+  }, [isHealthcareProfessional]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -585,6 +613,38 @@ const NewDocument = () => {
       if (hasPrescriptionContent && files.length === 0) {
         const prescriptionPdf = await generatePrescriptionPdf();
         filesToUpload = [prescriptionPdf];
+
+        // Save patient to database for autocomplete on future prescriptions
+        if (patientInfo.name) {
+          // Check if patient already exists
+          const existingPatient = patientSuggestions.find(
+            p => p.name.toLowerCase() === patientInfo.name.toLowerCase() || 
+                 (patientInfo.cpf && p.cpf === patientInfo.cpf)
+          );
+
+          if (!existingPatient) {
+            const { data: newPatient, error: patientError } = await supabase
+              .from('patients')
+              .insert({
+                user_id: user.id,
+                name: patientInfo.name,
+                cpf: patientInfo.cpf || null,
+                birth_date: patientInfo.birthDate || null
+              })
+              .select('id')
+              .single();
+
+            if (!patientError && newPatient) {
+              // Add to local suggestions for immediate use
+              setPatientSuggestions(prev => [...prev, {
+                id: newPatient.id,
+                name: patientInfo.name,
+                cpf: patientInfo.cpf,
+                birthDate: patientInfo.birthDate
+              }]);
+            }
+          }
+        }
       }
 
       // For non-prescription modes, save signers to contacts
@@ -1309,12 +1369,18 @@ const NewDocument = () => {
               
               <div className="grid gap-2">
                 <Label htmlFor="patient-name">Nome do Paciente</Label>
-                <Input 
-                  id="patient-name"
+                <PatientAutocomplete
                   value={patientInfo.name}
-                  onChange={(e) => setPatientInfo(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(value) => setPatientInfo(prev => ({ ...prev, name: value }))}
+                  onSelectPatient={(patient) => {
+                    setPatientInfo({
+                      name: patient.name,
+                      cpf: patient.cpf,
+                      birthDate: patient.birthDate
+                    });
+                  }}
+                  suggestions={patientSuggestions}
                   placeholder="Nome completo do paciente"
-                  className="placeholder:text-xs"
                 />
               </div>
 
