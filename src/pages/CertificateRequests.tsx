@@ -722,7 +722,8 @@ export default function CertificateRequests() {
                           </Alert>}
 
                         {/* Progress Steps */}
-                        <div className="flex items-center justify-between py-4">
+                        <div className="flex items-center justify-center py-4">
+                          <div className="flex items-center">
                           {STEPS.map((step, stepIndex) => {
                       const status = stepStatus[step.key as keyof typeof stepStatus];
                       const StepIcon = step.icon;
@@ -754,6 +755,7 @@ export default function CertificateRequests() {
                                 {stepIndex < STEPS.length - 1 && <div className={`flex-1 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
                               </div>;
                     })}
+                          </div>
                         </div>
 
                         {/* Footer */}
