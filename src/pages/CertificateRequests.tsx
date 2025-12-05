@@ -731,7 +731,7 @@ export default function CertificateRequests() {
                       const isCurrent = status === "current";
                       const isRejected = status === "rejected";
                       const isWarning = status === "warning";
-                      return <div key={step.key} className="flex items-center flex-1">
+                      return <div key={step.key} className="flex items-center">
                                 <div className="flex flex-col items-center">
                                   <motion.div className={`
                                       w-10 h-10 rounded-full flex items-center justify-center
@@ -752,7 +752,7 @@ export default function CertificateRequests() {
                                     {step.label}
                                   </span>
                                 </div>
-                                {stepIndex < STEPS.length - 1 && <div className={`flex-1 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
+                                {stepIndex < STEPS.length - 1 && <div className={`w-12 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
                               </div>;
                     })}
                           </div>
