@@ -65,6 +65,7 @@ const SIGNATURE_MODES: {
   },
   {
     id: 'PRESCRIPTION',
+    badge: 'ICP-Brasil obrigatório',
     label: 'Prescrição Médica',
     typeName: 'Área da saúde',
     description: 'Lei n. 14.063/20 - Res. n. 2.299/21 (CFM)'
@@ -839,7 +840,9 @@ const NewDocument = () => {
 
         // Create document record
         // For prescription mode, only company signer (1 signer total)
+        // Prescription uses QUALIFIED mode for ICP-Brasil compliance
         const totalSigners = isPrescriptionMode ? 1 : signers.length + 1;
+        const dbSignatureMode = isPrescriptionMode ? 'QUALIFIED' : signatureMode;
         const {
           data: documentData,
           error: docError
@@ -851,7 +854,7 @@ const NewDocument = () => {
           signers: totalSigners,
           signed_by: 0,
           envelope_id: envelopeId,
-          signature_mode: signatureMode
+          signature_mode: dbSignatureMode
         }).select().single();
         if (docError) throw docError;
         documentIds.push(documentData.id);
@@ -902,18 +905,28 @@ const NewDocument = () => {
       }
 
       // For SIMPLE signatures, use native flow without BRy
-      // For ADVANCED/QUALIFIED, use BRy integration
+      // For ADVANCED/QUALIFIED/PRESCRIPTION, use BRy integration with ICP-Brasil certificate
       const brySignerLinks: Map<string, string> = new Map();
-      const isSimpleSignature = signatureMode === 'SIMPLE' || signatureMode === 'PRESCRIPTION';
+      const isSimpleSignature = signatureMode === 'SIMPLE';
+      
+      // Prescription mode uses QUALIFIED (ICP-Brasil) for legal compliance with Lei 14.063/2020
+      const effectiveSignatureMode = isPrescriptionMode ? 'QUALIFIED' : signatureMode;
 
       if (!isSimpleSignature) {
-        // Create BRy envelope only for ADVANCED/QUALIFIED signatures
+        // Create BRy envelope for ADVANCED/QUALIFIED/PRESCRIPTION signatures
         try {
-          const allSigners = [{
-            name: companySigner.name,
-            email: companySigner.email,
-            phone: companySigner.phone
-          }, ...signers];
+          // For prescription mode, only company signer
+          const allSigners = isPrescriptionMode 
+            ? [{
+                name: companySigner.name,
+                email: companySigner.email,
+                phone: companySigner.phone
+              }]
+            : [{
+                name: companySigner.name,
+                email: companySigner.email,
+                phone: companySigner.phone
+              }, ...signers];
 
           const documentsForBry = fileContents.map(fc => ({
             documentId: fc.docId,
@@ -930,8 +943,8 @@ const NewDocument = () => {
               title: effectiveTitle,
               signers: allSigners,
               userId: user.id,
-              authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions],
-              signatureMode: signatureMode
+              authenticationOptions: isPrescriptionMode ? ['IP', 'GEOLOCATION'] : ['IP', 'GEOLOCATION', ...authOptions],
+              signatureMode: effectiveSignatureMode
             }
           });
 
@@ -950,7 +963,7 @@ const NewDocument = () => {
           console.error('Error creating BRy envelope:', bryErr);
         }
       } else {
-        console.log('SIMPLE/PRESCRIPTION signature mode - using native flow without BRy');
+        console.log('SIMPLE signature mode - using native flow without BRy');
       }
 
       // Send notifications
