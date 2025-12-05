@@ -41,6 +41,10 @@ interface CertificatePurchaseDialogProps {
     email?: string;
     phone?: string;
     birthDate?: string;
+    type?: "PF" | "PJ";
+    cnpj?: string;
+    responsibleName?: string;
+    certificateRequestId?: string;
   };
 }
 
@@ -132,6 +136,14 @@ export function CertificatePurchaseDialog({
             setEmail(prefillData.email || "");
             setPhone(prefillData.phone || "");
             setBirthDate(prefillData.birthDate || "");
+            if (prefillData.type) setType(prefillData.type);
+            if (prefillData.cnpj) setCnpj(prefillData.cnpj);
+            if (prefillData.responsibleName) setResponsibleName(prefillData.responsibleName);
+            
+            // If continuing from paid certificate, skip to document step
+            if (prefillData.certificateRequestId) {
+              setStep("document");
+            }
           }
           
           console.log("[CertificateDialog] Initialization complete");

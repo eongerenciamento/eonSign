@@ -32,6 +32,8 @@ export type Database = {
           emission_url: string | null
           id: string
           issued_at: string | null
+          paid_at: string | null
+          payment_status: string | null
           pfx_data: string | null
           pfx_password: string | null
           phone: string
@@ -44,6 +46,8 @@ export type Database = {
           revoked_at: string | null
           signer_id: string | null
           status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
           type: string
           updated_at: string
           user_id: string
@@ -66,6 +70,8 @@ export type Database = {
           emission_url?: string | null
           id?: string
           issued_at?: string | null
+          paid_at?: string | null
+          payment_status?: string | null
           pfx_data?: string | null
           pfx_password?: string | null
           phone: string
@@ -78,6 +84,8 @@ export type Database = {
           revoked_at?: string | null
           signer_id?: string | null
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           type?: string
           updated_at?: string
           user_id: string
@@ -100,6 +108,8 @@ export type Database = {
           emission_url?: string | null
           id?: string
           issued_at?: string | null
+          paid_at?: string | null
+          payment_status?: string | null
           pfx_data?: string | null
           pfx_password?: string | null
           phone?: string
@@ -112,6 +122,8 @@ export type Database = {
           revoked_at?: string | null
           signer_id?: string | null
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           type?: string
           updated_at?: string
           user_id?: string

@@ -1,5 +1,11 @@
 project_id = "lbyoniuealghclfuahko"
 
+[functions.create-certificate-checkout]
+verify_jwt = false
+
+[functions.send-certificate-purchase-email]
+verify_jwt = false
+
 [functions.send-signature-email]
 verify_jwt = false
 
