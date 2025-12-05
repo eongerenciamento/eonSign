@@ -87,6 +87,12 @@ interface HealthcareInfo {
   medicalSpecialty: string | null;
 }
 
+interface PatientInfo {
+  name: string;
+  cpf: string;
+  birthDate: string;
+}
+
 const NewDocument = () => {
   const MAX_DOCUMENTS = 10;
   const MAX_SIGNERS_ENVELOPE = 20;
@@ -115,6 +121,7 @@ const NewDocument = () => {
   const [healthcareInfo, setHealthcareInfo] = useState<HealthcareInfo | null>(null);
   const [showPrescriptionSheet, setShowPrescriptionSheet] = useState(false);
   const [prescriptionContent, setPrescriptionContent] = useState("");
+  const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -381,6 +388,21 @@ const NewDocument = () => {
     return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
+  const formatCpf = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
+  };
+
+  const formatBirthDate = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+  };
+
   const handleSignerChange = (index: number, field: keyof Signer, value: string) => {
     const newSigners = [...signers];
     if (field === "phone") {
@@ -451,6 +473,43 @@ const NewDocument = () => {
     doc.setDrawColor(200, 200, 200);
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 15;
+
+    // Patient info section
+    if (patientInfo.name) {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PACIENTE:', margin, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.text(patientInfo.name, margin + 25, yPos);
+      yPos += 6;
+      
+      if (patientInfo.cpf) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('CPF:', margin, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(patientInfo.cpf, margin + 12, yPos);
+        
+        if (patientInfo.birthDate) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Data Nasc.:', margin + 55, yPos);
+          doc.setFont('helvetica', 'normal');
+          doc.text(patientInfo.birthDate, margin + 82, yPos);
+        }
+        yPos += 6;
+      } else if (patientInfo.birthDate) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('Data Nasc.:', margin, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(patientInfo.birthDate, margin + 27, yPos);
+        yPos += 6;
+      }
+      
+      // Another separator after patient info
+      yPos += 5;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+    }
     
     // Prescription content
     doc.setFontSize(11);
@@ -1230,7 +1289,7 @@ const NewDocument = () => {
             <SheetTitle>Preencher Prescrição</SheetTitle>
           </SheetHeader>
           
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
             {/* Professional Info Display */}
             {healthcareInfo && companySigner && (
               <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -1244,6 +1303,47 @@ const NewDocument = () => {
               </div>
             )}
 
+            {/* Patient Info Section */}
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-sm font-semibold text-gray-600">Dados do Paciente</p>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="patient-name">Nome do Paciente</Label>
+                <Input 
+                  id="patient-name"
+                  value={patientInfo.name}
+                  onChange={(e) => setPatientInfo(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Nome completo do paciente"
+                  className="placeholder:text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="patient-cpf">CPF</Label>
+                  <Input 
+                    id="patient-cpf"
+                    value={patientInfo.cpf}
+                    onChange={(e) => setPatientInfo(prev => ({ ...prev, cpf: formatCpf(e.target.value) }))}
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    className="placeholder:text-xs"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="patient-birth">Data de Nascimento</Label>
+                  <Input 
+                    id="patient-birth"
+                    value={patientInfo.birthDate}
+                    onChange={(e) => setPatientInfo(prev => ({ ...prev, birthDate: formatBirthDate(e.target.value) }))}
+                    placeholder="DD/MM/AAAA"
+                    maxLength={10}
+                    className="placeholder:text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Prescription Content */}
             <div className="space-y-2">
               <Label htmlFor="prescription-content">Conteúdo da Prescrição</Label>
@@ -1252,7 +1352,7 @@ const NewDocument = () => {
                 value={prescriptionContent}
                 onChange={(e) => setPrescriptionContent(e.target.value)}
                 placeholder="Digite aqui o conteúdo da prescrição médica..."
-                className="min-h-[300px] resize-none"
+                className="min-h-[200px] resize-none"
               />
             </div>
           </div>
