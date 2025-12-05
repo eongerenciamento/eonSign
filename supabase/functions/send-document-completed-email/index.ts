@@ -89,6 +89,44 @@ async function downloadBryReport(
   }
 }
 
+// Generate local signature report for SIMPLE mode
+async function generateLocalReport(documentId: string): Promise<ArrayBuffer | null> {
+  try {
+    console.log("Generating local signature report for SIMPLE mode...");
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/generate-signature-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ documentId }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to generate local report:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      console.error("Error in local report generation:", data.error);
+      return null;
+    }
+
+    // Convert pdfBytes array back to ArrayBuffer
+    if (data.pdfBytes) {
+      const uint8Array = new Uint8Array(data.pdfBytes);
+      return uint8Array.buffer;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error generating local report:", error);
+    return null;
+  }
+}
+
 // Merge two PDFs into one
 async function mergePdfs(signedPdfBuffer: ArrayBuffer, reportPdfBuffer: ArrayBuffer): Promise<ArrayBuffer> {
   const mergedPdf = await PDFDocument.create();
@@ -136,10 +174,10 @@ const handler = async (req: Request): Promise<Response> => {
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch document from database
+    // Fetch document from database including signature_mode
     const { data: document, error: docError } = await supabase
       .from('documents')
-      .select('file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url')
+      .select('file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url, signature_mode')
       .eq('id', documentId)
       .single();
 
@@ -181,12 +219,31 @@ const handler = async (req: Request): Promise<Response> => {
     const signedPdfBuffer = await fileData.arrayBuffer();
     console.log(`Signed document size: ${signedPdfBuffer.byteLength} bytes`);
 
-    // Try to get BRy evidence report and merge
+    // Determine which report to use based on signature_mode
     let finalPdfBuffer: ArrayBuffer = signedPdfBuffer;
     let attachmentFilename = `${documentName}.pdf`;
+    const isSimpleMode = document.signature_mode === "SIMPLE" || !document.bry_envelope_uuid;
 
-    if (document.bry_envelope_uuid && document.bry_document_uuid) {
-      console.log("Attempting to download and merge BRy evidence report...");
+    if (isSimpleMode) {
+      // SIMPLE mode: Generate local report
+      console.log("Using local report generation for SIMPLE signature mode");
+      const localReportBuffer = await generateLocalReport(documentId);
+      
+      if (localReportBuffer) {
+        console.log(`Local report size: ${localReportBuffer.byteLength} bytes`);
+        try {
+          finalPdfBuffer = await mergePdfs(signedPdfBuffer, localReportBuffer);
+          attachmentFilename = `${documentName}_completo.pdf`;
+          console.log(`Merged PDF size: ${finalPdfBuffer.byteLength} bytes`);
+        } catch (mergeError) {
+          console.error("Error merging PDFs, using signed document only:", mergeError);
+        }
+      } else {
+        console.log("Could not generate local report, sending signed document only");
+      }
+    } else if (document.bry_envelope_uuid && document.bry_document_uuid) {
+      // ADVANCED/QUALIFIED mode: Use BRy report
+      console.log("Using BRy report for ADVANCED/QUALIFIED signature mode");
       
       const bryToken = await getBryToken();
       if (bryToken) {
@@ -212,7 +269,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.log("Could not get BRy token, sending signed document only");
       }
     } else {
-      console.log("No BRy envelope/document UUID, sending signed document only");
+      console.log("No BRy envelope/document UUID and not SIMPLE mode, sending signed document only");
     }
 
     const base64Content = arrayBufferToBase64(finalPdfBuffer);
@@ -311,7 +368,8 @@ const handler = async (req: Request): Promise<Response> => {
       success: true,
       sent: results.filter(r => r.status === 'fulfilled').length,
       total: results.length,
-      merged: attachmentFilename.includes('_completo')
+      merged: attachmentFilename.includes('_completo'),
+      reportType: isSimpleMode ? 'local' : 'bry'
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
