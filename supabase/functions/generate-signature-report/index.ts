@@ -44,6 +44,13 @@ const formatPhone = (phone: string | null): string => {
   return phone;
 };
 
+// Truncate text to fit within a certain width
+const truncateText = (text: string | null, maxLength: number): string => {
+  if (!text) return "N/A";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + "...";
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -163,7 +170,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const completedAt = document.status === "signed" ? document.updated_at : null;
 
-    page.drawText(`Documento: ${document.name}`, {
+    // Truncate document name if too long
+    const maxDocNameLength = 60;
+    const displayDocName = truncateText(document.name, maxDocNameLength);
+
+    page.drawText(`Documento: ${displayDocName}`, {
       x: margin + 10,
       y: yPos - 20,
       size: 10,
@@ -249,8 +260,11 @@ const handler = async (req: Request): Promise<Response> => {
         color: gray600,
       });
 
-      // Signer name
-      page.drawText(signer.name || "N/A", {
+      // Truncate signer name to fit within card
+      const maxNameLength = 35;
+      const displayName = truncateText(signer.name, maxNameLength);
+
+      page.drawText(displayName, {
         x: margin + 80,
         y: yPos - 17,
         size: 10,
@@ -291,7 +305,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
       leftY -= lineHeight;
 
-      page.drawText(`E-mail: ${signer.email || "N/A"}`, {
+      // Truncate email if too long
+      const maxEmailLength = 30;
+      const displayEmail = truncateText(signer.email, maxEmailLength);
+
+      page.drawText(`E-mail: ${displayEmail}`, {
         x: margin + 10,
         y: leftY,
         size: 9,
@@ -328,7 +346,10 @@ const handler = async (req: Request): Promise<Response> => {
           locationStr += ` - ${signer.signature_country}`;
         }
       }
-      page.drawText(`Local: ${locationStr}`, {
+      // Truncate location if too long
+      const displayLocation = truncateText(locationStr, 30);
+      
+      page.drawText(`Local: ${displayLocation}`, {
         x: rightX,
         y: rightY,
         size: 9,

@@ -7,6 +7,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Truncate name to fit within signature box
+const truncateName = (name: string, maxLength: number = 18): string => {
+  if (!name) return "";
+  if (name.length <= maxLength) return name;
+  return name.substring(0, maxLength - 3) + "...";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -17,15 +24,14 @@ serve(async (req) => {
       documentId,
       signerId,
       typedSignature,
-      signatureX,
-      signatureY,
-      signaturePage,
+      signerIndex,
+      totalSigners,
       signerData,
-      allSignersData,
       isLastSigner
     } = await req.json();
 
     console.log("Processing simple signature for document:", documentId);
+    console.log("Signer index:", signerIndex, "of", totalSigners);
     console.log("Is last signer:", isLastSigner);
 
     const supabase = createClient(
@@ -47,13 +53,6 @@ serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Get company settings for logo
-    const { data: companySettings } = await supabase
-      .from("company_settings")
-      .select("logo_url, company_name")
-      .eq("user_id", document.user_id)
-      .single();
 
     // Determine which PDF to use: already signed version or original
     const sourceUrl = document.bry_signed_file_url || document.file_url;
@@ -91,38 +90,58 @@ serve(async (req) => {
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
     
-    // Get the page for signature
-    const pageIndex = Math.min(Math.max(0, (signaturePage || totalPages) - 1), totalPages - 1);
-    const page = pages[pageIndex];
-    const { width, height } = page.getSize();
+    // Get the last page for footer signatures
+    const lastPage = pages[totalPages - 1];
+    const { width, height } = lastPage.getSize();
 
     // Embed fonts
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Calculate signature position with offset for multiple signers at default position
-    let adjustedSignatureY = signatureY;
-    
-    // If using default position (92% or higher), offset based on signer index to avoid overlap
-    if (signatureY >= 90 && allSignersData && allSignersData.length > 1) {
-      const signerIndex = allSignersData.findIndex((s: any) => s.id === signerId);
-      if (signerIndex > 0) {
-        // Move each subsequent signer's signature 8% up from the previous
-        adjustedSignatureY = signatureY - (signerIndex * 8);
-        console.log(`Signer index ${signerIndex}: adjusted Y from ${signatureY} to ${adjustedSignatureY}`);
-      }
-    }
-    
-    const sigX = signatureX ? (signatureX / 100) * width : 50;
-    const sigY = adjustedSignatureY ? height - ((adjustedSignatureY / 100) * height) : height - 200;
+    // Signature box dimensions
+    const signatureBoxWidth = 140;
+    const signatureBoxHeight = 42;
+    const margin = 40;
+    const bottomMargin = 30;
+    const spacing = 10;
 
-    // Draw signature box - reduced size
-    const signatureBoxWidth = 150;
-    const signatureBoxHeight = 45;
-    
-    page.drawRectangle({
+    // Calculate automatic position based on signer index and total signers
+    // Layout: Y-shaped for 2 signers (side by side), grid for 3+ signers
+    let sigX: number;
+    let sigY: number;
+
+    const availableWidth = width - (margin * 2);
+
+    if (totalSigners === 1) {
+      // Single signer: center at bottom
+      sigX = (width - signatureBoxWidth) / 2;
+      sigY = bottomMargin;
+    } else if (totalSigners === 2) {
+      // 2 signers: Y-layout (side by side)
+      const gap = 20;
+      const totalWidth = (signatureBoxWidth * 2) + gap;
+      const startX = (width - totalWidth) / 2;
+      sigX = signerIndex === 0 ? startX : startX + signatureBoxWidth + gap;
+      sigY = bottomMargin;
+    } else {
+      // 3+ signers: grid layout (3 per row)
+      const signersPerRow = 3;
+      const row = Math.floor(signerIndex / signersPerRow);
+      const col = signerIndex % signersPerRow;
+      
+      const totalRowWidth = (signatureBoxWidth * signersPerRow) + (spacing * (signersPerRow - 1));
+      const startX = (width - totalRowWidth) / 2;
+      
+      sigX = startX + (col * (signatureBoxWidth + spacing));
+      sigY = bottomMargin + (row * (signatureBoxHeight + spacing));
+    }
+
+    console.log(`Signature position calculated: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}`);
+
+    // Draw signature box
+    lastPage.drawRectangle({
       x: sigX,
-      y: sigY - signatureBoxHeight,
+      y: sigY,
       width: signatureBoxWidth,
       height: signatureBoxHeight,
       color: rgb(0.98, 0.98, 0.98),
@@ -130,23 +149,28 @@ serve(async (req) => {
       borderWidth: 0.5,
     });
 
-    // Draw typed signature - reduced size
-    page.drawText(typedSignature || signerData.name, {
+    // Truncate name to fit within box
+    const displayName = truncateName(typedSignature || signerData.name, 18);
+
+    // Draw typed signature name
+    lastPage.drawText(displayName, {
       x: sigX + 5,
-      y: sigY - 18,
-      size: 12,
+      y: sigY + signatureBoxHeight - 16,
+      size: 11,
       font: helveticaBold,
       color: rgb(0.1, 0.1, 0.3),
     });
 
-    page.drawText("Assinatura Eletronica", {
+    // Draw "Assinatura Eletrônica" label
+    lastPage.drawText("Assinatura Eletrônica", {
       x: sigX + 5,
-      y: sigY - 30,
+      y: sigY + signatureBoxHeight - 28,
       size: 6,
       font: helveticaFont,
       color: rgb(0.4, 0.4, 0.4),
     });
 
+    // Draw signature date
     const signDate = new Date().toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -154,16 +178,13 @@ serve(async (req) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    page.drawText(signDate, {
+    lastPage.drawText(signDate, {
       x: sigX + 5,
-      y: sigY - 40,
+      y: sigY + 5,
       size: 6,
       font: helveticaFont,
       color: rgb(0.4, 0.4, 0.4),
     });
-
-    // Note: Validation page is now generated separately by generate-signature-report edge function
-    // and merged with the signed document when sending completion emails
 
     // Save the modified PDF
     const modifiedPdfBytes = await pdfDoc.save();
