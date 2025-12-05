@@ -7,6 +7,25 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+// Helper function to safely convert Stripe timestamps to ISO strings
+const safeTimestampToISO = (timestamp: number | undefined | null): string | null => {
+  if (timestamp === undefined || timestamp === null || typeof timestamp !== 'number') {
+    logStep("Invalid timestamp received", { timestamp, type: typeof timestamp });
+    return null;
+  }
+  try {
+    const date = new Date(timestamp * 1000);
+    if (isNaN(date.getTime())) {
+      logStep("Invalid date from timestamp", { timestamp });
+      return null;
+    }
+    return date.toISOString();
+  } catch (error) {
+    logStep("Error converting timestamp", { timestamp, error: String(error) });
+    return null;
+  }
+};
+
 serve(async (req) => {
   try {
     logStep("Webhook received");
@@ -59,6 +78,23 @@ serve(async (req) => {
             const subscriptionId = session.subscription as string;
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
             
+            logStep("Subscription retrieved", { 
+              id: subscription.id, 
+              status: subscription.status,
+              current_period_start: subscription.current_period_start,
+              current_period_end: subscription.current_period_end
+            });
+
+            // Convert timestamps safely with fallback to current time + 1 month
+            const now = new Date();
+            const oneMonthFromNow = new Date(now);
+            oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+            
+            const periodStart = safeTimestampToISO(subscription.current_period_start) || now.toISOString();
+            const periodEnd = safeTimestampToISO(subscription.current_period_end) || oneMonthFromNow.toISOString();
+
+            logStep("Period dates calculated", { periodStart, periodEnd });
+
             // If this is a new account (has email in metadata), create the user
             if (email && organizationName && !userId) {
               logStep("Creating new user account", { email, organizationName });
@@ -94,18 +130,23 @@ serve(async (req) => {
               logStep("Company settings created");
 
               // Create subscription
-              await supabaseClient.from("user_subscriptions").insert({
+              const { error: subError } = await supabaseClient.from("user_subscriptions").insert({
                 user_id: newUser.user.id,
                 stripe_customer_id: session.customer as string,
                 stripe_subscription_id: subscriptionId,
-                stripe_price_id: subscription.items.data[0].price.id,
-                plan_name: tierName,
+                stripe_price_id: subscription.items.data[0]?.price?.id || null,
+                plan_name: tierName || 'Básico',
                 status: subscription.status as any,
-                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-                cancel_at_period_end: subscription.cancel_at_period_end,
+                current_period_start: periodStart,
+                current_period_end: periodEnd,
+                cancel_at_period_end: subscription.cancel_at_period_end || false,
                 document_limit: documentLimit,
               });
+
+              if (subError) {
+                logStep("Error creating subscription", { error: subError.message });
+                throw subError;
+              }
 
               logStep("Subscription created");
 
@@ -127,19 +168,59 @@ serve(async (req) => {
               logStep("Welcome email sent");
             } else if (userId) {
               // Existing user upgrading - update subscription
-              await supabaseClient.from("user_subscriptions").upsert({
-                user_id: userId,
-                stripe_customer_id: session.customer as string,
-                stripe_subscription_id: subscriptionId,
-                stripe_price_id: subscription.items.data[0].price.id,
-                plan_name: tierName,
-                status: subscription.status as any,
-                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-                cancel_at_period_end: subscription.cancel_at_period_end,
-                document_limit: documentLimit,
-                updated_at: new Date().toISOString()
-              }, { onConflict: 'user_id' });
+              logStep("Updating subscription for existing user", { userId });
+
+              // First check if user has a subscription
+              const { data: existingSub } = await supabaseClient
+                .from("user_subscriptions")
+                .select("id")
+                .eq("user_id", userId)
+                .single();
+
+              if (existingSub) {
+                // Update existing subscription
+                const { error: updateError } = await supabaseClient
+                  .from("user_subscriptions")
+                  .update({
+                    stripe_customer_id: session.customer as string,
+                    stripe_subscription_id: subscriptionId,
+                    stripe_price_id: subscription.items.data[0]?.price?.id || null,
+                    plan_name: tierName || 'Básico',
+                    status: subscription.status as any,
+                    current_period_start: periodStart,
+                    current_period_end: periodEnd,
+                    cancel_at_period_end: subscription.cancel_at_period_end || false,
+                    document_limit: documentLimit,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq("user_id", userId);
+
+                if (updateError) {
+                  logStep("Error updating subscription", { error: updateError.message });
+                  throw updateError;
+                }
+              } else {
+                // Insert new subscription for existing user
+                const { error: insertError } = await supabaseClient
+                  .from("user_subscriptions")
+                  .insert({
+                    user_id: userId,
+                    stripe_customer_id: session.customer as string,
+                    stripe_subscription_id: subscriptionId,
+                    stripe_price_id: subscription.items.data[0]?.price?.id || null,
+                    plan_name: tierName || 'Básico',
+                    status: subscription.status as any,
+                    current_period_start: periodStart,
+                    current_period_end: periodEnd,
+                    cancel_at_period_end: subscription.cancel_at_period_end || false,
+                    document_limit: documentLimit,
+                  });
+
+                if (insertError) {
+                  logStep("Error inserting subscription", { error: insertError.message });
+                  throw insertError;
+                }
+              }
 
               logStep("Subscription updated for existing user");
             }
@@ -153,6 +234,10 @@ serve(async (req) => {
 
           logStep("Processing customer.subscription.updated", { subscriptionId: subscription.id });
 
+          // Convert timestamps safely
+          const periodStart = safeTimestampToISO(subscription.current_period_start);
+          const periodEnd = safeTimestampToISO(subscription.current_period_end);
+
           // Find user by customer_id
           const { data: existingSub } = await supabaseClient
             .from("user_subscriptions")
@@ -161,15 +246,19 @@ serve(async (req) => {
             .single();
 
           if (existingSub) {
+            const updateData: any = {
+              status: subscription.status,
+              cancel_at_period_end: subscription.cancel_at_period_end || false,
+              updated_at: new Date().toISOString()
+            };
+
+            // Only update period dates if they're valid
+            if (periodStart) updateData.current_period_start = periodStart;
+            if (periodEnd) updateData.current_period_end = periodEnd;
+
             await supabaseClient
               .from("user_subscriptions")
-              .update({
-                status: subscription.status,
-                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-                cancel_at_period_end: subscription.cancel_at_period_end,
-                updated_at: new Date().toISOString()
-              })
+              .update(updateData)
               .eq("stripe_subscription_id", subscription.id);
 
             logStep("Subscription updated");
