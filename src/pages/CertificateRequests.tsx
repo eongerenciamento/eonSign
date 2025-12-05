@@ -593,9 +593,9 @@ export default function CertificateRequests() {
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
-            <Button size="sm" onClick={() => setShowCheckoutDialog(true)} className="gap-2 rounded-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90 border-0">
+            <Button size="sm" onClick={() => setShowCheckoutDialog(true)} className="gap-2 rounded-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90 border-0 bg-[#273d60]">
               <Plus className="h-4 w-4" />
-              Comprar Certificado
+              Comprar
             </Button>
           </div>
         </div>
@@ -652,7 +652,7 @@ export default function CertificateRequests() {
                               {request.common_name}
                             </h3>
                             <p className="text-xs text-muted-foreground mb-1">
-                              <span className="font-bold">Certificado</span> Digital A1
+                              <span className="font-bold">Certificado:</span> Digital A1
                             </p>
                             <p className="text-sm text-muted-foreground">
                               <span className="font-bold">{request.type === "PJ" ? "CNPJ" : "CPF"}:</span> {request.type === "PJ" && request.cnpj ? request.cnpj : formatCPF(request.cpf)}
@@ -669,57 +669,53 @@ export default function CertificateRequests() {
                             </Badge>
                             
                             {/* Mobile Continue Button - Below badge */}
-                            {request.status === "paid" && (
-                              <motion.div 
-                                className="sm:hidden mt-1.5"
-                                animate={{ scale: [1, 1.05, 1] }} 
-                                transition={{ repeat: Infinity, duration: 2 }}
-                              >
+                            {request.status === "paid" && <motion.div className="sm:hidden mt-1.5" animate={{
+                        scale: [1, 1.05, 1]
+                      }} transition={{
+                        repeat: Infinity,
+                        duration: 2
+                      }}>
                                 <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-border">
                                   <ArrowRight className="h-3 w-3" />
                                   Continuar Processo
                                 </Button>
-                              </motion.div>
-                            )}
+                              </motion.div>}
                           </div>
                           
                           {/* Desktop Progress Steps - Hidden on mobile */}
                           <div className="hidden sm:flex flex-1 items-center justify-end">
                             <div className="flex items-center">
                               {STEPS.map((step, stepIndex) => {
-                                const status = stepStatus[step.key as keyof typeof stepStatus];
-                                const StepIcon = step.icon;
-                                const isCompleted = status === "completed";
-                                const isCurrent = status === "current";
-                                const isRejected = status === "rejected";
-                                const isWarning = status === "warning";
-                                return (
-                                  <div key={step.key} className="flex items-center">
+                          const status = stepStatus[step.key as keyof typeof stepStatus];
+                          const StepIcon = step.icon;
+                          const isCompleted = status === "completed";
+                          const isCurrent = status === "current";
+                          const isRejected = status === "rejected";
+                          const isWarning = status === "warning";
+                          return <div key={step.key} className="flex items-center">
                                     <div className="flex flex-col items-center">
-                                      <motion.div 
-                                        className={`
+                                      <motion.div className={`
                                           w-10 h-10 rounded-full flex items-center justify-center
                                           ${isCompleted ? "bg-green-500 text-white" : ""}
                                           ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
                                           ${isRejected ? "bg-red-500 text-white" : ""}
                                           ${isWarning ? "bg-orange-500 text-white" : ""}
                                           ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
-                                        `} 
-                                        animate={isCurrent ? { scale: [1, 1.1, 1] } : {}} 
-                                        transition={{ repeat: Infinity, duration: 2 }}
-                                      >
+                                        `} animate={isCurrent ? {
+                                scale: [1, 1.1, 1]
+                              } : {}} transition={{
+                                repeat: Infinity,
+                                duration: 2
+                              }}>
                                         <StepIcon className="h-5 w-5" />
                                       </motion.div>
                                       <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
                                         {step.label}
                                       </span>
                                     </div>
-                                    {stepIndex < STEPS.length - 1 && (
-                                      <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
-                                    )}
-                                  </div>
-                                );
-                              })}
+                                    {stepIndex < STEPS.length - 1 && <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
+                                  </div>;
+                        })}
                             </div>
                           </div>
                           
@@ -740,27 +736,20 @@ export default function CertificateRequests() {
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver Documentos
                                 </DropdownMenuItem>
-                                {request.status === "approved" && (
-                                  <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="focus:bg-transparent focus:text-foreground">
+                                {request.status === "approved" && <DropdownMenuItem onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="focus:bg-transparent focus:text-foreground">
                                     {isDownloadingTerm ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                                     Termo de Titularidade
-                                  </DropdownMenuItem>
-                                )}
-                                {canDeleteRequest(request) && (
-                                  <>
+                                  </DropdownMenuItem>}
+                                {canDeleteRequest(request) && <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      onClick={() => {
-                                        setDeletingRequest(request);
-                                        setShowDeleteRequestDialog(true);
-                                      }} 
-                                      className="text-destructive focus:bg-transparent focus:text-destructive"
-                                    >
+                                    <DropdownMenuItem onClick={() => {
+                              setDeletingRequest(request);
+                              setShowDeleteRequestDialog(true);
+                            }} className="text-destructive focus:bg-transparent focus:text-destructive">
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Excluir Solicitação
                                     </DropdownMenuItem>
-                                  </>
-                                )}
+                                  </>}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -770,41 +759,38 @@ export default function CertificateRequests() {
                         <div className="sm:hidden">
                           <div className="flex flex-col py-2 pl-4">
                             {STEPS.map((step, stepIndex) => {
-                              const status = stepStatus[step.key as keyof typeof stepStatus];
-                              const StepIcon = step.icon;
-                              const isCompleted = status === "completed";
-                              const isCurrent = status === "current";
-                              const isRejected = status === "rejected";
-                              const isWarning = status === "warning";
-                              return (
-                                <div key={step.key} className="flex">
+                        const status = stepStatus[step.key as keyof typeof stepStatus];
+                        const StepIcon = step.icon;
+                        const isCompleted = status === "completed";
+                        const isCurrent = status === "current";
+                        const isRejected = status === "rejected";
+                        const isWarning = status === "warning";
+                        return <div key={step.key} className="flex">
                                   {/* Icon column with centered line */}
                                   <div className="flex flex-col items-center">
-                                    <motion.div 
-                                      className={`
+                                    <motion.div className={`
                                         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
                                         ${isCompleted ? "bg-green-500 text-white" : ""}
                                         ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
                                         ${isRejected ? "bg-red-500 text-white" : ""}
                                         ${isWarning ? "bg-orange-500 text-white" : ""}
                                         ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
-                                      `} 
-                                      animate={isCurrent ? { scale: [1, 1.1, 1] } : {}} 
-                                      transition={{ repeat: Infinity, duration: 2 }}
-                                    >
+                                      `} animate={isCurrent ? {
+                              scale: [1, 1.1, 1]
+                            } : {}} transition={{
+                              repeat: Infinity,
+                              duration: 2
+                            }}>
                                       <StepIcon className="h-4 w-4" />
                                     </motion.div>
-                                    {stepIndex < STEPS.length - 1 && (
-                                      <div className={`w-0.5 h-4 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
-                                    )}
+                                    {stepIndex < STEPS.length - 1 && <div className={`w-0.5 h-4 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
                                   </div>
                                   {/* Label column */}
                                   <span className={`text-xs ml-3 mt-2 ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
                                     {step.label}
                                   </span>
-                                </div>
-                              );
-                            })}
+                                </div>;
+                      })}
                           </div>
                         </div>
 
@@ -868,10 +854,8 @@ export default function CertificateRequests() {
                         </div>
                         
                         {/* Mobile Footer - Other action buttons */}
-                        {(request.status === "approved" || request.certificate_issued) && (
-                          <div className="sm:hidden flex flex-wrap gap-2 mt-2">
-                            {request.status === "approved" && (
-                              <>
+                        {(request.status === "approved" || request.certificate_issued) && <div className="sm:hidden flex flex-wrap gap-2 mt-2">
+                            {request.status === "approved" && <>
                                 <Button size="sm" variant="outline" onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="gap-2 text-xs">
                                   {isDownloadingTerm ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />}
                                   Termo
@@ -880,16 +864,12 @@ export default function CertificateRequests() {
                                   <Award className="h-3 w-3" />
                                   Emitir
                                 </Button>
-                              </>
-                            )}
-                            {request.certificate_issued && (
-                              <Button size="sm" onClick={() => handleDownloadCertificate(request)} disabled={isDownloading} className="gap-2 text-xs" variant={request.certificate_downloaded ? "outline" : "default"}>
+                              </>}
+                            {request.certificate_issued && <Button size="sm" onClick={() => handleDownloadCertificate(request)} disabled={isDownloading} className="gap-2 text-xs" variant={request.certificate_downloaded ? "outline" : "default"}>
                                 {isDownloading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
                                 {request.certificate_downloaded ? "Baixar" : "Baixar Certificado"}
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                              </Button>}
+                          </div>}
                       </div>
                     </Card>
                   </motion.div>;
