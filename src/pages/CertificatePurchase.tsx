@@ -72,53 +72,40 @@ export default function CertificatePurchase() {
 
   const currentStepIndex = STEPS_CONFIG.findIndex((s) => s.key === step);
 
-  // Initialize and check auth using onAuthStateChange pattern
+  // Initialize and check auth
   useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!mounted) return;
+    const initializePage = async () => {
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
         
-        if (session?.user) {
-          setUserId(session.user.id);
-          setIsInitializing(false);
+        if (authError || !user) {
+          setInitError("Usuário não autenticado. Por favor, faça login.");
+          return;
         }
-      }
-    );
+        
+        setUserId(user.id);
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      if (session?.user) {
-        setUserId(session.user.id);
-      } else {
-        setInitError("Usuário não autenticado. Por favor, faça login.");
-      }
-      setIsInitializing(false);
-    });
+        // Check for prefill data from URL params
+        const prefillName = searchParams.get("name");
+        const prefillCpf = searchParams.get("cpf");
+        const prefillEmail = searchParams.get("email");
+        const prefillPhone = searchParams.get("phone");
+        const prefillBirthDate = searchParams.get("birthDate");
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
+        if (prefillName) setCommonName(prefillName);
+        if (prefillCpf) setCpf(prefillCpf);
+        if (prefillEmail) setEmail(prefillEmail);
+        if (prefillPhone) setPhone(prefillPhone);
+        if (prefillBirthDate) setBirthDate(prefillBirthDate);
+        
+      } catch (error: any) {
+        setInitError(error.message || "Erro ao inicializar. Tente novamente.");
+      } finally {
+        setIsInitializing(false);
+      }
     };
-  }, []);
-
-  // Handle prefill data from URL params
-  useEffect(() => {
-    const prefillName = searchParams.get("name");
-    const prefillCpf = searchParams.get("cpf");
-    const prefillEmail = searchParams.get("email");
-    const prefillPhone = searchParams.get("phone");
-    const prefillBirthDate = searchParams.get("birthDate");
-
-    if (prefillName) setCommonName(prefillName);
-    if (prefillCpf) setCpf(prefillCpf);
-    if (prefillEmail) setEmail(prefillEmail);
-    if (prefillPhone) setPhone(prefillPhone);
-    if (prefillBirthDate) setBirthDate(prefillBirthDate);
+    
+    initializePage();
   }, [searchParams]);
 
   const formatCpf = (value: string) => {
