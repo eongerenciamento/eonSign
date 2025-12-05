@@ -90,6 +90,12 @@ verify_jwt = false
 [functions.bry-ar-delete-document]
 verify_jwt = false
 
+[functions.bry-ar-get-request]
+verify_jwt = false
+
+[functions.bry-ar-download-ownership-term]
+verify_jwt = false
+
 [functions.generate-signature-report]
 verify_jwt = false
 

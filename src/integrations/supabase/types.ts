@@ -39,7 +39,9 @@ export type Database = {
           protocol: string | null
           registration_authority_id: number
           registry_office_id: number
+          rejection_reason: string | null
           responsible_name: string | null
+          revoked_at: string | null
           signer_id: string | null
           status: string
           type: string
@@ -71,7 +73,9 @@ export type Database = {
           protocol?: string | null
           registration_authority_id?: number
           registry_office_id?: number
+          rejection_reason?: string | null
           responsible_name?: string | null
+          revoked_at?: string | null
           signer_id?: string | null
           status?: string
           type?: string
@@ -103,7 +107,9 @@ export type Database = {
           protocol?: string | null
           registration_authority_id?: number
           registry_office_id?: number
+          rejection_reason?: string | null
           responsible_name?: string | null
+          revoked_at?: string | null
           signer_id?: string | null
           status?: string
           type?: string

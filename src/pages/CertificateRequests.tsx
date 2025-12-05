@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,10 @@ import {
   FileText,
   Trash2,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  XCircle,
+  AlertTriangle,
+  ShieldX
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -65,6 +69,8 @@ interface CertificateRequest {
   certificate_issued: boolean | null;
   certificate_downloaded: boolean | null;
   emission_url: string | null;
+  rejection_reason: string | null;
+  revoked_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,15 +83,18 @@ interface RequestDocument {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  created: { label: "Criada", color: "bg-gray-100 text-gray-800 border-gray-300", icon: Clock },
   pending: { label: "Aguardando Documentos", color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: FileUp },
   documents_sent: { label: "Documentos Enviados", color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock },
   videoconference_scheduled: { label: "Videoconferência Agendada", color: "bg-purple-100 text-purple-800 border-purple-300", icon: Video },
   videoconference_completed: { label: "Videoconferência Concluída", color: "bg-indigo-100 text-indigo-800 border-indigo-300", icon: CheckCircle },
   in_validation: { label: "Em Validação", color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock },
+  pending_authentication: { label: "Aguardando Autenticação", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Clock },
   approved: { label: "Aprovado", color: "bg-green-100 text-green-800 border-green-300", icon: CheckCircle },
   issued: { label: "Certificado Emitido", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: Award },
-  rejected: { label: "Rejeitado", color: "bg-red-100 text-red-800 border-red-300", icon: AlertCircle },
-  validation_rejected: { label: "Validação Rejeitada", color: "bg-red-100 text-red-800 border-red-300", icon: AlertCircle },
+  rejected: { label: "Rejeitado", color: "bg-red-100 text-red-800 border-red-300", icon: XCircle },
+  validation_rejected: { label: "Validação Rejeitada", color: "bg-orange-100 text-orange-800 border-orange-300", icon: AlertTriangle },
+  revoked: { label: "Revogado", color: "bg-red-100 text-red-800 border-red-300", icon: ShieldX },
 };
 
 const STEPS = [
@@ -103,19 +112,25 @@ function getStepStatus(request: CertificateRequest) {
     emission: "pending",
   };
 
-  if (request.status === "rejected" || request.status === "validation_rejected") {
+  if (request.status === "rejected" || request.status === "revoked") {
     return { ...steps, request: "rejected" };
+  }
+
+  if (request.status === "validation_rejected") {
+    steps.request = "completed";
+    steps.documents = "warning";
+    return steps;
   }
 
   steps.request = "completed";
 
-  if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "in_validation", "approved", "issued"].includes(request.status)) {
+  if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "in_validation", "pending_authentication", "approved", "issued"].includes(request.status)) {
     steps.documents = "completed";
-  } else if (request.status === "pending") {
+  } else if (request.status === "pending" || request.status === "created") {
     steps.documents = "current";
   }
 
-  if (request.videoconference_completed || ["in_validation", "approved", "issued"].includes(request.status)) {
+  if (request.videoconference_completed || ["in_validation", "pending_authentication", "approved", "issued"].includes(request.status)) {
     steps.videoconference = "completed";
   } else if (["videoconference_scheduled", "documents_sent"].includes(request.status)) {
     steps.videoconference = "current";
@@ -123,7 +138,7 @@ function getStepStatus(request: CertificateRequest) {
 
   if (request.certificate_issued || request.status === "issued") {
     steps.emission = "completed";
-  } else if (request.status === "approved") {
+  } else if (request.status === "approved" || request.status === "pending_authentication") {
     steps.emission = "current";
   }
 
@@ -155,6 +170,12 @@ export default function CertificateRequests() {
   const [deletingRequest, setDeletingRequest] = useState<CertificateRequest | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
+
+  // Sync status state
+  const [syncingProtocol, setSyncingProtocol] = useState<string | null>(null);
+
+  // Ownership term download state
+  const [downloadingTermProtocol, setDownloadingTermProtocol] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -320,6 +341,82 @@ export default function CertificateRequests() {
     }
   };
 
+  // Sync status manually
+  const handleSyncStatus = async (request: CertificateRequest) => {
+    if (!request.protocol) {
+      toast.error("Protocolo não encontrado");
+      return;
+    }
+
+    setSyncingProtocol(request.protocol);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-get-request", {
+        body: { protocol: request.protocol },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao sincronizar status");
+      }
+
+      toast.success("Status sincronizado com sucesso");
+      fetchRequests();
+    } catch (error: any) {
+      console.error("Error syncing status:", error);
+      toast.error(error.message || "Erro ao sincronizar status");
+    } finally {
+      setSyncingProtocol(null);
+    }
+  };
+
+  // Download ownership term
+  const handleDownloadOwnershipTerm = async (request: CertificateRequest) => {
+    if (!request.protocol) {
+      toast.error("Protocolo não encontrado");
+      return;
+    }
+
+    setDownloadingTermProtocol(request.protocol);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-download-ownership-term", {
+        body: { protocol: request.protocol },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao baixar termo de titularidade");
+      }
+
+      const byteCharacters = atob(data.pdf_data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = data.filename || `termo_titularidade_${request.protocol}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Termo de titularidade baixado com sucesso!");
+    } catch (error: any) {
+      console.error("Error downloading ownership term:", error);
+      toast.error(error.message || "Erro ao baixar termo de titularidade");
+    } finally {
+      setDownloadingTermProtocol(null);
+    }
+  };
+
   // List documents for a request
   const handleListDocuments = async (request: CertificateRequest) => {
     if (!request.protocol) {
@@ -459,7 +556,7 @@ export default function CertificateRequests() {
   };
 
   const canDeleteRequest = (request: CertificateRequest) => {
-    return ["pending", "documents_sent"].includes(request.status);
+    return ["pending", "documents_sent", "created"].includes(request.status);
   };
 
   return (
@@ -521,6 +618,8 @@ export default function CertificateRequests() {
                 const StatusIcon = statusConfig.icon;
                 const stepStatus = getStepStatus(request);
                 const isDownloading = downloadingProtocol === request.protocol;
+                const isSyncing = syncingProtocol === request.protocol;
+                const isDownloadingTerm = downloadingTermProtocol === request.protocol;
 
                 return (
                   <motion.div
@@ -564,10 +663,30 @@ export default function CertificateRequests() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  onClick={() => handleSyncStatus(request)}
+                                  disabled={isSyncing}
+                                >
+                                  <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
+                                  Sincronizar Status
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleListDocuments(request)}>
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver Documentos
                                 </DropdownMenuItem>
+                                {request.status === "approved" && (
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDownloadOwnershipTerm(request)}
+                                    disabled={isDownloadingTerm}
+                                  >
+                                    {isDownloadingTerm ? (
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <Download className="h-4 w-4 mr-2" />
+                                    )}
+                                    Termo de Titularidade
+                                  </DropdownMenuItem>
+                                )}
                                 {canDeleteRequest(request) && (
                                   <>
                                     <DropdownMenuSeparator />
@@ -588,6 +707,41 @@ export default function CertificateRequests() {
                           </div>
                         </div>
 
+                        {/* Rejection/Validation Alert */}
+                        {(request.status === "rejected" || request.status === "validation_rejected") && (
+                          <Alert variant={request.status === "rejected" ? "destructive" : "default"} className="border-orange-300 bg-orange-50">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              {request.status === "rejected" ? (
+                                <>
+                                  <strong>Solicitação rejeitada.</strong>
+                                  {request.rejection_reason && (
+                                    <span className="block mt-1">Motivo: {request.rejection_reason}</span>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  <strong>Validação devolvida pela central.</strong>
+                                  <span className="block mt-1">Por favor, verifique os documentos enviados e faça as correções necessárias.</span>
+                                </>
+                              )}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        {/* Revoked Alert */}
+                        {request.status === "revoked" && (
+                          <Alert variant="destructive">
+                            <ShieldX className="h-4 w-4" />
+                            <AlertDescription>
+                              <strong>Certificado revogado.</strong>
+                              {request.revoked_at && (
+                                <span className="block mt-1">Revogado em: {formatDate(request.revoked_at)}</span>
+                              )}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
                         {/* Progress Steps */}
                         <div className="flex items-center justify-between py-4">
                           {STEPS.map((step, stepIndex) => {
@@ -596,6 +750,7 @@ export default function CertificateRequests() {
                             const isCompleted = status === "completed";
                             const isCurrent = status === "current";
                             const isRejected = status === "rejected";
+                            const isWarning = status === "warning";
 
                             return (
                               <div key={step.key} className="flex items-center flex-1">
@@ -606,7 +761,8 @@ export default function CertificateRequests() {
                                       ${isCompleted ? "bg-green-500 text-white" : ""}
                                       ${isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : ""}
                                       ${isRejected ? "bg-red-500 text-white" : ""}
-                                      ${!isCompleted && !isCurrent && !isRejected ? "bg-muted text-muted-foreground" : ""}
+                                      ${isWarning ? "bg-orange-500 text-white" : ""}
+                                      ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
                                     `}
                                     animate={isCurrent ? { scale: [1, 1.1, 1] } : {}}
                                     transition={{ repeat: Infinity, duration: 2 }}
@@ -620,7 +776,7 @@ export default function CertificateRequests() {
                                 {stepIndex < STEPS.length - 1 && (
                                   <div
                                     className={`flex-1 h-1 mx-2 rounded ${
-                                      isCompleted ? "bg-green-500" : "bg-muted"
+                                      isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"
                                     }`}
                                   />
                                 )}
@@ -640,6 +796,24 @@ export default function CertificateRequests() {
                             )}
                           </div>
                           <div className="flex gap-2">
+                            {/* Ownership term button - when approved */}
+                            {request.status === "approved" && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDownloadOwnershipTerm(request)}
+                                disabled={isDownloadingTerm}
+                                className="gap-2"
+                              >
+                                {isDownloadingTerm ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <FileText className="h-4 w-4" />
+                                )}
+                                Termo de Titularidade
+                              </Button>
+                            )}
+                            
                             {/* Emission button - when approved */}
                             {request.status === "approved" && (
                               <Button 
@@ -774,7 +948,7 @@ export default function CertificateRequests() {
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {canDeleteRequest(selectedDocRequest!) && (
+                    {selectedDocRequest && canDeleteRequest(selectedDocRequest) && (
                       <Button
                         variant="ghost"
                         size="icon"
