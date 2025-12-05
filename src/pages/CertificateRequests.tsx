@@ -817,22 +817,9 @@ export default function CertificateRequests() {
                             </AlertDescription>
                           </Alert>}
 
-                        {/* Footer - Desktop only for continue button, always for other buttons */}
+                        {/* Footer - Desktop only for other action buttons */}
                         <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-end gap-3 -mt-8">
                           <div className="flex gap-2">
-                            {/* Continue process button - when paid (desktop only) */}
-                            {request.status === "paid" && <motion.div animate={{
-                        scale: [1, 1.05, 1]
-                      }} transition={{
-                        repeat: Infinity,
-                        duration: 2
-                      }}>
-                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-border">
-                                <ArrowRight className="h-3 w-3" />
-                                Continuar Processo
-                              </Button>
-                            </motion.div>}
-
                             {/* Ownership term button - when approved */}
                             {request.status === "approved" && <Button size="sm" variant="outline" onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="gap-2">
                                 {isDownloadingTerm ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
