@@ -668,8 +668,8 @@ export default function CertificateRequests() {
                               {statusConfig.label}
                             </Badge>
                             
-                            {/* Mobile Continue Button - Below badge */}
-                            {request.status === "paid" && <motion.div className="sm:hidden mt-1.5" animate={{
+                            {/* Continue Button - Below badge for both mobile and desktop */}
+                            {request.status === "paid" && <motion.div className="mt-2" animate={{
                         scale: [1, 1.05, 1]
                       }} transition={{
                         repeat: Infinity,
@@ -683,7 +683,7 @@ export default function CertificateRequests() {
                           </div>
                           
                           {/* Desktop Progress Steps - Hidden on mobile */}
-                          <div className="hidden sm:flex flex-1 items-center justify-end">
+                          <div className="hidden sm:flex flex-1 items-center justify-start pl-4">
                             <div className="flex items-center">
                               {STEPS.map((step, stepIndex) => {
                           const status = stepStatus[step.key as keyof typeof stepStatus];
