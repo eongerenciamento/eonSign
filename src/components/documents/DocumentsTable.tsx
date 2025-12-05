@@ -598,12 +598,12 @@ export const DocumentsTable = ({
     try {
       // Use edge function for consistency with email attachment
       const { data: result, error } = await supabase.functions.invoke(
-        "generate-signature-report",
+        "download-complete-document",
         { body: { documentId } }
       );
 
       if (error || result?.error) {
-        throw new Error(result?.error || error?.message || 'Erro ao gerar relatório');
+        throw new Error(result?.error || error?.message || 'Erro ao gerar documento completo');
       }
 
       if (!result?.pdfBytes) {
@@ -615,9 +615,8 @@ export const DocumentsTable = ({
       const blob = new Blob([uint8Array], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       
-      // Get document name for filename
-      const doc = documents.find(d => d.id === documentId);
-      const fileName = doc?.name ? `${doc.name}_validacao.pdf` : 'relatorio_assinaturas.pdf';
+      // Use filename from response or fallback
+      const fileName = result.fileName || 'documento_completo.pdf';
       
       const link = document.createElement("a");
       link.href = url;
