@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,12 +80,37 @@ serve(async (req) => {
       throw new Error(`Invalid document_type. Valid types: ${validTypes.join(", ")}`);
     }
 
-    const requestBody = {
-      type: document_type,
-      name: document_name || `document.${file_extension || "pdf"}`,
-      file: document_base64,
-      extension: file_extension || "pdf",
+    // Remove data URL prefix if present (e.g., "data:image/jpeg;base64,")
+    let cleanBase64 = document_base64;
+    if (document_base64.includes(",")) {
+      cleanBase64 = document_base64.split(",")[1];
+    }
+
+    // Decode base64 to binary
+    const fileData = base64Decode(cleanBase64);
+    
+    // Determine MIME type
+    const ext = (file_extension || "pdf").toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      pdf: "application/pdf",
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
     };
+    const mimeType = mimeTypes[ext] || "application/octet-stream";
+    
+    const fileName = document_name || `document.${ext}`;
+
+    // Create FormData for multipart upload
+    const formData = new FormData();
+    // Create a new ArrayBuffer and copy data for Blob compatibility
+    const arrayBuffer = new ArrayBuffer(fileData.length);
+    new Uint8Array(arrayBuffer).set(fileData);
+    const blob = new Blob([arrayBuffer], { type: mimeType });
+    formData.append("file", blob, fileName);
+    formData.append("type", document_type);
+
+    console.log(`Uploading file: ${fileName}, type: ${document_type}, size: ${fileData.length} bytes, mime: ${mimeType}`);
 
     const response = await fetch(
       `${baseUrl}/api/certificate-requests/protocol/${protocol}/documents`,
@@ -93,9 +118,9 @@ serve(async (req) => {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+          // Don't set Content-Type for FormData - browser/fetch will set it with boundary
         },
-        body: JSON.stringify(requestBody),
+        body: formData,
       }
     );
 
@@ -107,11 +132,19 @@ serve(async (req) => {
       try {
         const errorData = JSON.parse(responseText);
         errorMessage = errorData.message || errorData.error || errorMessage;
+        if (errorData.error_fields) {
+          console.error("BRy validation errors:", JSON.stringify(errorData.error_fields));
+        }
       } catch {}
       throw new Error(errorMessage);
     }
 
-    const bryResponse = JSON.parse(responseText);
+    let bryResponse = {};
+    try {
+      bryResponse = JSON.parse(responseText);
+    } catch {
+      bryResponse = { raw: responseText };
+    }
 
     return new Response(
       JSON.stringify({
