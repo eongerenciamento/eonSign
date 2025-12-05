@@ -490,8 +490,10 @@ const NewDocument = () => {
   const generatePrescriptionPdf = async (): Promise<File> => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pageWidth - margin * 2;
+    const footerHeight = 45;
     
     // Header with professional info
     doc.setFontSize(14);
@@ -561,6 +563,86 @@ const NewDocument = () => {
     doc.setFontSize(11);
     const lines = doc.splitTextToSize(prescriptionContent, contentWidth);
     doc.text(lines, margin, yPos);
+    
+    // Footer with gray background and metadata
+    const footerY = pageHeight - footerHeight;
+    
+    // Gray background for footer
+    doc.setFillColor(240, 240, 240);
+    doc.rect(0, footerY, pageWidth, footerHeight, 'F');
+    
+    // Footer content - metadata on the left
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    
+    let footerTextY = footerY + 8;
+    const footerMargin = 10;
+    
+    // Professional data
+    doc.setFont('helvetica', 'bold');
+    doc.text('DADOS DO PROFISSIONAL', footerMargin, footerTextY);
+    doc.setFont('helvetica', 'normal');
+    footerTextY += 4;
+    
+    doc.text(`Nome: ${companySigner?.name || '-'}`, footerMargin, footerTextY);
+    footerTextY += 3.5;
+    
+    if (healthcareInfo) {
+      doc.text(`Conselho: ${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`, footerMargin, footerTextY);
+      footerTextY += 3.5;
+      if (healthcareInfo.medicalSpecialty) {
+        doc.text(`Especialidade: ${healthcareInfo.medicalSpecialty}`, footerMargin, footerTextY);
+        footerTextY += 3.5;
+      }
+    }
+    
+    // Prescription type
+    const prescriptionTypeLabel = PRESCRIPTION_DOC_TYPES.find(t => t.id === prescriptionDocType)?.label || prescriptionDocType;
+    doc.text(`Tipo: ${prescriptionTypeLabel}`, footerMargin, footerTextY);
+    footerTextY += 3.5;
+    
+    // Date/time
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('pt-BR');
+    const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    doc.text(`Emitido em: ${dateStr} às ${timeStr}`, footerMargin, footerTextY);
+    footerTextY += 5;
+    
+    // Certificate info
+    doc.setFont('helvetica', 'bold');
+    doc.text('METADADOS DO CERTIFICADO', footerMargin, footerTextY);
+    doc.setFont('helvetica', 'normal');
+    footerTextY += 4;
+    doc.text('Assinatura: Certificado Digital ICP-Brasil (QUALIFIED)', footerMargin, footerTextY);
+    footerTextY += 3.5;
+    doc.text('Lei n. 14.063/2020 - Res. n. 2.299/2021 (CFM)', footerMargin, footerTextY);
+    
+    // Load and add logo to the right side of footer
+    try {
+      const logoUrl = 'https://lbyoniuealghclfuahko.supabase.co/storage/v1/object/public/email-assets/header-banner.png';
+      const response = await fetch(logoUrl);
+      if (response.ok) {
+        const logoBlob = await response.blob();
+        const logoBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(logoBlob);
+        });
+        
+        // Add logo to the right side of footer
+        const logoWidth = 35;
+        const logoHeight = 12;
+        const logoX = pageWidth - logoWidth - 10;
+        const logoY = footerY + (footerHeight - logoHeight) / 2;
+        doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+      }
+    } catch (logoError) {
+      console.log('Could not load logo for PDF footer:', logoError);
+    }
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
     
     // Convert to File
     const pdfBlob = doc.output('blob');
