@@ -174,7 +174,7 @@ export function CertificateCheckoutDialog({
       if (!isOpen) resetForm();
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 [&>button]:text-white [&>button]:hover:text-white/80">
         {/* Header */}
         <div className="bg-[#273d60] p-4 rounded-t-lg">
           <img 
@@ -182,14 +182,10 @@ export function CertificateCheckoutDialog({
             className="h-10 w-auto" 
             src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" 
           />
+          <h2 className="text-white text-lg font-semibold mt-2">Certificado Digital A1</h2>
         </div>
 
         <div className="p-6">
-          <DialogHeader className="text-left mb-4">
-            <DialogTitle className="text-gray-600 text-left">
-              Certificado Digital A1
-            </DialogTitle>
-          </DialogHeader>
 
           {/* Product Card */}
           <div className="bg-gray-100 rounded-lg p-4 text-gray-600">
