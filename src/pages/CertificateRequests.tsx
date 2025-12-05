@@ -772,7 +772,7 @@ export default function CertificateRequests() {
                         repeat: Infinity,
                         duration: 2
                       }}>
-                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-input">
+                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-border">
                                 <ArrowRight className="h-3 w-3" />
                                 Continuar Processo
                               </Button>
