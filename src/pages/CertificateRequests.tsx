@@ -588,12 +588,15 @@ export default function CertificateRequests() {
               Acompanhe suas solicitações de certificado digital
             </p>
           </div>
-          <div className="flex gap-2 text-primary-foreground bg-transparent">
+          <div className="flex gap-2 justify-end">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-100 border-0 border-none">
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
-            
+            <Button size="sm" onClick={() => setShowCheckoutDialog(true)} className="gap-2 rounded-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90 border-0">
+              <Plus className="h-4 w-4" />
+              Comprar Certificado
+            </Button>
           </div>
         </div>
 
