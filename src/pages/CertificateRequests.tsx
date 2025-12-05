@@ -565,9 +565,7 @@ export default function CertificateRequests() {
       setDeletingRequest(null);
     } catch (error: any) {
       console.error("Error deleting request:", error);
-      const errorMessage = error.message?.includes("não permite exclusão")
-        ? "Esta solicitação não pode ser excluída pois já está em processamento na certificadora."
-        : error.message || "Erro ao excluir solicitação";
+      const errorMessage = error.message?.includes("não permite exclusão") ? "Esta solicitação não pode ser excluída pois já está em processamento na certificadora." : error.message || "Erro ao excluir solicitação";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
@@ -591,7 +589,7 @@ export default function CertificateRequests() {
             </p>
           </div>
           <div className="flex gap-2 text-primary-foreground bg-transparent">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2 rounded-full bg-gray-500 hover:bg-gray-400">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-100 border-0 border-none">
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
