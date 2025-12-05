@@ -5,6 +5,7 @@ interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   fullPage?: boolean;
+  inline?: boolean;
 }
 
 const sizeClasses = {
@@ -16,7 +17,8 @@ const sizeClasses = {
 export function LoadingSpinner({ 
   size = "md", 
   className,
-  fullPage = false 
+  fullPage = false,
+  inline = false
 }: LoadingSpinnerProps) {
   const spinner = (
     <Loader2 
@@ -27,6 +29,10 @@ export function LoadingSpinner({
       )} 
     />
   );
+
+  if (inline) {
+    return spinner;
+  }
 
   if (fullPage) {
     return (

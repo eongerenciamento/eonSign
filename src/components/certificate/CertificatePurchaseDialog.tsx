@@ -28,6 +28,7 @@ import {
   PartyPopper,
   Check
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { cn } from "@/lib/utils";
 
 interface CertificatePurchaseDialogProps {
@@ -452,7 +453,7 @@ export function CertificatePurchaseDialog({
                 {isVideoconferenceLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                     <div className="flex flex-col items-center gap-3">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <LoadingSpinner size="md" inline />
                       <p className="text-sm text-muted-foreground">Carregando videoconferência...</p>
                     </div>
                   </div>
@@ -491,7 +492,7 @@ export function CertificatePurchaseDialog({
                 {isEmissionLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                     <div className="flex flex-col items-center gap-3">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <LoadingSpinner size="md" inline />
                       <p className="text-sm text-muted-foreground">Carregando ambiente de emissão...</p>
                     </div>
                   </div>
@@ -585,7 +586,7 @@ export function CertificatePurchaseDialog({
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center py-8"
           >
-            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <LoadingSpinner size="md" inline className="mb-4" />
             <p className="text-sm text-muted-foreground">Carregando...</p>
           </motion.div>
         )}

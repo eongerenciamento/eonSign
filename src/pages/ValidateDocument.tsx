@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Loader2, Download, Copy, Share2, FileDown } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Download, Copy, Share2, FileDown } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -289,7 +290,7 @@ const ValidateDocument = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <LoadingSpinner size="lg" inline className="mx-auto mb-4" />
           <p className="text-gray-600">Verificando documento...</p>
         </div>
       </div>
