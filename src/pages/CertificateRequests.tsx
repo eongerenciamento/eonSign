@@ -664,6 +664,20 @@ export default function CertificateRequests() {
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {statusConfig.label}
                             </Badge>
+                            
+                            {/* Mobile Continue Button - Below badge */}
+                            {request.status === "paid" && (
+                              <motion.div 
+                                className="sm:hidden mt-3"
+                                animate={{ scale: [1, 1.05, 1] }} 
+                                transition={{ repeat: Infinity, duration: 2 }}
+                              >
+                                <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-border">
+                                  <ArrowRight className="h-3 w-3" />
+                                  Continuar Processo
+                                </Button>
+                              </motion.div>
+                            )}
                           </div>
                           
                           {/* Desktop Progress Steps - Hidden on mobile */}
@@ -814,10 +828,10 @@ export default function CertificateRequests() {
                             </AlertDescription>
                           </Alert>}
 
-                        {/* Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-8">
+                        {/* Footer - Desktop only for continue button, always for other buttons */}
+                        <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-end gap-3 -mt-8">
                           <div className="flex gap-2">
-                            {/* Continue process button - when paid */}
+                            {/* Continue process button - when paid (desktop only) */}
                             {request.status === "paid" && <motion.div animate={{
                         scale: [1, 1.05, 1]
                       }} transition={{
@@ -849,6 +863,30 @@ export default function CertificateRequests() {
                               </Button>}
                           </div>
                         </div>
+                        
+                        {/* Mobile Footer - Other action buttons */}
+                        {(request.status === "approved" || request.certificate_issued) && (
+                          <div className="sm:hidden flex flex-wrap gap-2 mt-2">
+                            {request.status === "approved" && (
+                              <>
+                                <Button size="sm" variant="outline" onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="gap-2 text-xs">
+                                  {isDownloadingTerm ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />}
+                                  Termo
+                                </Button>
+                                <Button size="sm" onClick={() => handleOpenEmission(request)} className="gap-2 text-xs bg-gradient-to-r from-[#273d60] to-[#001a4d]">
+                                  <Award className="h-3 w-3" />
+                                  Emitir
+                                </Button>
+                              </>
+                            )}
+                            {request.certificate_issued && (
+                              <Button size="sm" onClick={() => handleDownloadCertificate(request)} disabled={isDownloading} className="gap-2 text-xs" variant={request.certificate_downloaded ? "outline" : "default"}>
+                                {isDownloading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                                {request.certificate_downloaded ? "Baixar" : "Baixar Certificado"}
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </motion.div>;
