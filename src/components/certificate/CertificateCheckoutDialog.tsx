@@ -179,7 +179,7 @@ export function CertificateCheckoutDialog({
           </div>
 
           {/* Form */}
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4 pt-6">
             {/* Type Selection */}
             <div className="space-y-2">
               <Label>Tipo de Certificado</Label>
