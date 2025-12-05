@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -41,7 +41,10 @@ import {
   MoreHorizontal,
   XCircle,
   AlertTriangle,
-  ShieldX
+  ShieldX,
+  CreditCard,
+  Plus,
+  ArrowRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,12 +55,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
+import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
 
 interface CertificateRequest {
   id: string;
   protocol: string | null;
   type: string;
   status: string;
+  payment_status: string | null;
   common_name: string;
   cpf: string;
   email: string;
@@ -71,6 +77,7 @@ interface CertificateRequest {
   emission_url: string | null;
   rejection_reason: string | null;
   revoked_at: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -83,6 +90,7 @@ interface RequestDocument {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  paid: { label: "Pago - Aguardando Início", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CreditCard },
   created: { label: "Criada", color: "bg-gray-100 text-gray-800 border-gray-300", icon: Clock },
   pending: { label: "Aguardando Documentos", color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: FileUp },
   documents_sent: { label: "Documentos Enviados", color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock },
@@ -147,9 +155,17 @@ function getStepStatus(request: CertificateRequest) {
 
 export default function CertificateRequests() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [requests, setRequests] = useState<CertificateRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Checkout dialog state
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+  
+  // Purchase continuation dialog state
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [continuingRequest, setContinuingRequest] = useState<CertificateRequest | null>(null);
   
   // Emission iframe state
   const [showEmissionDialog, setShowEmissionDialog] = useState(false);
@@ -176,6 +192,18 @@ export default function CertificateRequests() {
 
   // Ownership term download state
   const [downloadingTermProtocol, setDownloadingTermProtocol] = useState<string | null>(null);
+
+  // Handle payment URL parameters
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      toast.success("Pagamento confirmado! Seu certificado será processado.");
+      setSearchParams({});
+    } else if (payment === "canceled") {
+      toast.info("Pagamento cancelado. Você pode tentar novamente.");
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const fetchRequests = async () => {
     try {
@@ -556,7 +584,12 @@ export default function CertificateRequests() {
   };
 
   const canDeleteRequest = (request: CertificateRequest) => {
-    return ["pending", "documents_sent", "created"].includes(request.status);
+    return ["pending", "documents_sent", "created", "paid"].includes(request.status);
+  };
+
+  const handleContinueProcess = (request: CertificateRequest) => {
+    setContinuingRequest(request);
+    setShowPurchaseDialog(true);
   };
 
   return (
@@ -570,16 +603,26 @@ export default function CertificateRequests() {
               Acompanhe suas solicitações de certificado digital
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            Atualizar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Atualizar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShowCheckoutDialog(true)}
+              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+            >
+              <Plus className="h-4 w-4" />
+              Comprar Certificado
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
@@ -606,8 +649,12 @@ export default function CertificateRequests() {
             <p className="text-muted-foreground mb-4">
               Você ainda não possui solicitações de certificado digital.
             </p>
-            <Button onClick={() => navigate("/documentos")}>
-              Voltar aos Documentos
+            <Button 
+              onClick={() => setShowCheckoutDialog(true)}
+              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+            >
+              <Plus className="h-4 w-4" />
+              Comprar Certificado
             </Button>
           </Card>
         ) : (
@@ -796,6 +843,18 @@ export default function CertificateRequests() {
                             )}
                           </div>
                           <div className="flex gap-2">
+                            {/* Continue process button - when paid */}
+                            {request.status === "paid" && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleContinueProcess(request)}
+                                className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                              >
+                                <ArrowRight className="h-4 w-4" />
+                                Continuar Processo
+                              </Button>
+                            )}
+
                             {/* Ownership term button - when approved */}
                             {request.status === "approved" && (
                               <Button 
@@ -1009,6 +1068,34 @@ export default function CertificateRequests() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Certificate Checkout Dialog */}
+      <CertificateCheckoutDialog
+        open={showCheckoutDialog}
+        onOpenChange={setShowCheckoutDialog}
+      />
+
+      {/* Certificate Purchase Dialog - for continuing paid certificates */}
+      {continuingRequest && (
+        <CertificatePurchaseDialog
+          open={showPurchaseDialog}
+          onOpenChange={(open) => {
+            setShowPurchaseDialog(open);
+            if (!open) setContinuingRequest(null);
+          }}
+          prefillData={{
+            name: continuingRequest.common_name,
+            cpf: continuingRequest.cpf,
+            email: continuingRequest.email,
+            phone: continuingRequest.phone,
+            birthDate: continuingRequest.birth_date,
+            type: continuingRequest.type as "PF" | "PJ",
+            cnpj: continuingRequest.cnpj || undefined,
+            responsibleName: continuingRequest.responsible_name || undefined,
+            certificateRequestId: continuingRequest.id,
+          }}
+        />
+      )}
     </Layout>
   );
 }
