@@ -681,7 +681,7 @@ export default function CertificateRequests() {
                                     <motion.div className={`
                                         w-10 h-10 rounded-full flex items-center justify-center
                                         ${isCompleted ? "bg-green-500 text-white" : ""}
-                                        ${isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : ""}
+                                        ${isCurrent ? "bg-blue-700 text-white ring-4 ring-blue-700/20" : ""}
                                         ${isRejected ? "bg-red-500 text-white" : ""}
                                         ${isWarning ? "bg-orange-500 text-white" : ""}
                                         ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
@@ -766,10 +766,15 @@ export default function CertificateRequests() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-2">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-gradient-to-r from-[#273d60] to-[#001a4d] rounded-full">
+                            {request.status === "paid" && <motion.div
+                              animate={{ scale: [1, 1.05, 1] }}
+                              transition={{ repeat: Infinity, duration: 2 }}
+                            >
+                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full">
                                 <ArrowRight className="h-3 w-3" />
                                 Continuar Processo
-                              </Button>}
+                              </Button>
+                            </motion.div>}
 
                             {/* Ownership term button - when approved */}
                             {request.status === "approved" && <Button size="sm" variant="outline" onClick={() => handleDownloadOwnershipTerm(request)} disabled={isDownloadingTerm} className="gap-2">
