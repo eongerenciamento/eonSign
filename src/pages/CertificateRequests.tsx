@@ -14,7 +14,6 @@ import {
   Video, 
   AlertCircle,
   RefreshCw,
-  ArrowLeft,
   ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
@@ -185,34 +184,23 @@ export default function CertificateRequests() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">
-                Solicitações de Certificado
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Acompanhe o status das suas solicitações em tempo real
-              </p>
-            </div>
+          <div>
+            <h1 className="text-sm font-bold text-gray-600">Certificados</h1>
+            <p className="text-xs text-gray-500">
+              Acompanhe suas solicitações de certificado digital
+            </p>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={refreshing}
+            className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
         </div>
