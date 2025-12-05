@@ -206,7 +206,7 @@ export default function CertificateRequests() {
             </Button>
             <Button
               size="sm"
-              onClick={() => window.open('/certificados/comprar', '_blank')}
+              onClick={() => window.open('https://sign.eongerenciamento.com.br/certificados/comprar', '_blank')}
               className="gap-2 bg-gradient-to-r from-[#273d60] to-[#1a2a42]"
             >
               <Award className="h-4 w-4" />
@@ -240,7 +240,7 @@ export default function CertificateRequests() {
               Você ainda não possui solicitações de certificado digital.
             </p>
             <Button 
-              onClick={() => window.open('/certificados/comprar', '_blank')}
+              onClick={() => window.open('https://sign.eongerenciamento.com.br/certificados/comprar', '_blank')}
               className="gap-2 bg-gradient-to-r from-[#273d60] to-[#1a2a42]"
             >
               <Award className="h-4 w-4" />
