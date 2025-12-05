@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { EnvelopeDocumentsDialog } from "./EnvelopeDocumentsDialog";
 import { BrySigningDialog } from "./BrySigningDialog";
-import { CertificatePreviewDialog } from "./CertificatePreviewDialog";
 import JSZip from "jszip";
 
 export interface EnvelopeDocument {
@@ -124,12 +123,6 @@ export const DocumentsTable = ({
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
   const [signingDocumentName, setSigningDocumentName] = useState("");
   const [signingDocumentId, setSigningDocumentId] = useState<string | null>(null);
-  
-  // Certificate preview dialog state
-  const [certificatePreviewOpen, setCertificatePreviewOpen] = useState(false);
-  const [certificatePdfUrl, setCertificatePdfUrl] = useState<string | null>(null);
-  const [certificateDocumentName, setCertificateDocumentName] = useState("");
-  const certificatePdfRef = useRef<jsPDF | null>(null);
 
   const handleOpenEnvelopeDialog = (doc: Document) => {
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
@@ -843,15 +836,11 @@ export const DocumentsTable = ({
       pdf.setFont("helvetica", "normal");
       pdf.text("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", margin, footerY + 15);
 
-      // Generate blob URL for preview instead of downloading
-      const pdfBlob = pdf.output('blob');
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      
-      // Store PDF reference for download
-      certificatePdfRef.current = pdf;
-      setCertificateDocumentName(document.name);
-      setCertificatePdfUrl(pdfUrl);
-      setCertificatePreviewOpen(true);
+      pdf.save(`${document.name}_validacao.pdf`);
+      toast({
+        title: "Certificado baixado",
+        description: "Página de validação baixada com sucesso.",
+      });
     } catch (error: any) {
       console.error("Error downloading certificate:", error);
       toast({
@@ -860,25 +849,6 @@ export const DocumentsTable = ({
         variant: "destructive",
       });
     }
-  };
-
-  const handleDownloadCertificateFromPreview = () => {
-    if (certificatePdfRef.current && certificateDocumentName) {
-      certificatePdfRef.current.save(`${certificateDocumentName}_validacao.pdf`);
-      toast({
-        title: "Certificado baixado",
-        description: "Página de validação baixada com sucesso.",
-      });
-    }
-  };
-
-  const handleCloseCertificatePreview = (open: boolean) => {
-    if (!open && certificatePdfUrl) {
-      URL.revokeObjectURL(certificatePdfUrl);
-      setCertificatePdfUrl(null);
-      certificatePdfRef.current = null;
-    }
-    setCertificatePreviewOpen(open);
   };
 
   const handleDownloadReport = async (documentId: string) => {
@@ -1446,15 +1416,5 @@ export const DocumentsTable = ({
         documentId={signingDocumentId}
         onSigningComplete={handleSigningComplete}
       />
-
-      {/* Certificate Preview Dialog */}
-      <CertificatePreviewDialog
-        open={certificatePreviewOpen}
-        onOpenChange={handleCloseCertificatePreview}
-        pdfUrl={certificatePdfUrl}
-        documentName={certificateDocumentName}
-        onDownload={handleDownloadCertificateFromPreview}
-      />
-    </>
-  );
+    </>;
 };
