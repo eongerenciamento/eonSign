@@ -678,12 +678,6 @@ const SignDocument = () => {
                         placeholder="Seu nome completo"
                         className="mt-1"
                       />
-                      {typedSignature && (
-                        <div className="mt-3 p-3 bg-muted rounded-lg border-2 border-dashed border-muted-foreground/30">
-                          <p className="text-xs text-muted-foreground mb-1">Preview da assinatura:</p>
-                          <p className="font-signature text-lg text-foreground">{typedSignature}</p>
-                        </div>
-                      )}
                     </div>
                   )}
 
