@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -817,7 +818,17 @@ export function CertificatePurchaseDialog({
                 </p>
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange(false);
+                    window.location.href = "/certificados";
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Acompanhar Solicitação
+                </Button>
                 <Button 
                   onClick={() => onOpenChange(false)}
                   className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
