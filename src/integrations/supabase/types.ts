@@ -163,6 +163,7 @@ export type Database = {
           logo_url: string | null
           medical_specialty: string | null
           neighborhood: string | null
+          professional_council: string | null
           professional_registration: string | null
           registration_state: string | null
           state: string | null
@@ -186,6 +187,7 @@ export type Database = {
           logo_url?: string | null
           medical_specialty?: string | null
           neighborhood?: string | null
+          professional_council?: string | null
           professional_registration?: string | null
           registration_state?: string | null
           state?: string | null
@@ -209,6 +211,7 @@ export type Database = {
           logo_url?: string | null
           medical_specialty?: string | null
           neighborhood?: string | null
+          professional_council?: string | null
           professional_registration?: string | null
           registration_state?: string | null
           state?: string | null

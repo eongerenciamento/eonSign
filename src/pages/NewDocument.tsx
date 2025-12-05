@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignerAutocomplete, SignerSuggestion, SignerGroup } from "@/components/documents/SignerAutocomplete";
 import { PatientAutocomplete, PatientSuggestion } from "@/components/documents/PatientAutocomplete";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import jsPDF from "jspdf";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
@@ -70,6 +71,20 @@ const SIGNATURE_MODES: {
   }
 ];
 
+// Prescription document types for healthcare professionals
+type PrescriptionDocType = 'MEDICAMENTO' | 'ATESTADO' | 'SOLICITACAO_EXAME' | 'LAUDO' | 'SUMARIA_ALTA' | 'ATENDIMENTO_CLINICO' | 'DISPENSACAO_MEDICAMENTO' | 'VACINACAO' | 'RELATORIO_MEDICO';
+const PRESCRIPTION_DOC_TYPES: { id: PrescriptionDocType; label: string }[] = [
+  { id: 'MEDICAMENTO', label: 'Prescrição de medicamento' },
+  { id: 'ATESTADO', label: 'Atestado médico' },
+  { id: 'SOLICITACAO_EXAME', label: 'Solicitação de exame' },
+  { id: 'LAUDO', label: 'Laudo laboratorial' },
+  { id: 'SUMARIA_ALTA', label: 'Sumária de alta' },
+  { id: 'ATENDIMENTO_CLINICO', label: 'Registro de atendimento clínico' },
+  { id: 'DISPENSACAO_MEDICAMENTO', label: 'Dispensação de medicamento' },
+  { id: 'VACINACAO', label: 'Indicação para vacinação' },
+  { id: 'RELATORIO_MEDICO', label: 'Relatório médico' },
+];
+
 interface Signer {
   name: string;
   phone: string;
@@ -122,8 +137,10 @@ const NewDocument = () => {
   const [healthcareInfo, setHealthcareInfo] = useState<HealthcareInfo | null>(null);
   const [showPrescriptionSheet, setShowPrescriptionSheet] = useState(false);
   const [prescriptionContent, setPrescriptionContent] = useState("");
+  const [prescriptionDocType, setPrescriptionDocType] = useState<PrescriptionDocType>('MEDICAMENTO');
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '' });
   const [patientSuggestions, setPatientSuggestions] = useState<PatientSuggestion[]>([]);
+  const [isPrescriptionSubmitting, setIsPrescriptionSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -213,7 +230,7 @@ const NewDocument = () => {
       if (user) {
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_registration, registration_state, medical_specialty').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_council, professional_registration, registration_state, medical_specialty').eq('user_id', user.id).single();
         if (companyData) {
           setCompanySigner({
             name: companyData.admin_name,
@@ -225,7 +242,7 @@ const NewDocument = () => {
           setIsHealthcareProfessional((companyData as any).is_healthcare || false);
           if ((companyData as any).is_healthcare) {
             setHealthcareInfo({
-              professionalCouncil: 'CRM', // Default to CRM since column doesn't exist
+              professionalCouncil: (companyData as any).professional_council || 'CRM',
               professionalRegistration: (companyData as any).professional_registration || '',
               registrationState: (companyData as any).registration_state || '',
               medicalSpecialty: (companyData as any).medical_specialty || null
@@ -611,8 +628,79 @@ const NewDocument = () => {
       // Prepare files - generate PDF from prescription if needed
       let filesToUpload = [...files];
       if (hasPrescriptionContent && files.length === 0) {
+        setIsPrescriptionSubmitting(true);
+        
+        // Generate the base prescription PDF
         const prescriptionPdf = await generatePrescriptionPdf();
-        filesToUpload = [prescriptionPdf];
+        
+        // Convert PDF to base64 for BRy prescription API
+        const arrayBuffer = await prescriptionPdf.arrayBuffer();
+        const base64 = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+        
+        // Check if we have healthcare info for BRy prescription metadata
+        if (healthcareInfo && healthcareInfo.professionalCouncil && healthcareInfo.professionalRegistration) {
+          // Call BRy prescription API to add OID metadata
+          try {
+            console.log('[PRESCRIPTION] Calling BRy prescription API with metadata:', {
+              prescriptionType: prescriptionDocType,
+              professionalCouncil: healthcareInfo.professionalCouncil,
+              registrationNumber: healthcareInfo.professionalRegistration,
+              registrationState: healthcareInfo.registrationState,
+              specialty: healthcareInfo.medicalSpecialty
+            });
+            
+            const { data: bryPrescriptionData, error: bryPrescriptionError } = await supabase.functions.invoke('bry-prescription-metadata', {
+              body: {
+                documentBase64: base64,
+                documentName: prescriptionPdf.name,
+                prescriptionType: prescriptionDocType,
+                professionalCouncil: healthcareInfo.professionalCouncil,
+                registrationNumber: healthcareInfo.professionalRegistration,
+                registrationState: healthcareInfo.registrationState,
+                specialty: healthcareInfo.medicalSpecialty || undefined
+              }
+            });
+            
+            if (bryPrescriptionError) {
+              console.error('[PRESCRIPTION] BRy prescription API error:', bryPrescriptionError);
+              toast({
+                title: "Aviso",
+                description: "Não foi possível adicionar metadados da prescrição. O documento será enviado sem os metadados OID.",
+              });
+              filesToUpload = [prescriptionPdf];
+            } else if (bryPrescriptionData?.success && bryPrescriptionData.pdfBase64) {
+              // Convert base64 back to File
+              const binaryString = atob(bryPrescriptionData.pdfBase64);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              const pdfWithMetadata = new Blob([bytes], { type: 'application/pdf' });
+              const pdfFile = new File([pdfWithMetadata], prescriptionPdf.name, { type: 'application/pdf' });
+              filesToUpload = [pdfFile];
+              console.log('[PRESCRIPTION] Successfully added OID metadata to PDF');
+            } else {
+              console.error('[PRESCRIPTION] BRy prescription API returned error:', bryPrescriptionData?.error);
+              toast({
+                title: "Aviso",
+                description: bryPrescriptionData?.error || "Erro ao processar metadados da prescrição.",
+              });
+              filesToUpload = [prescriptionPdf];
+            }
+          } catch (bryErr) {
+            console.error('[PRESCRIPTION] Error calling BRy prescription API:', bryErr);
+            toast({
+              title: "Aviso", 
+              description: "Não foi possível adicionar metadados da prescrição. O documento será enviado sem os metadados OID.",
+            });
+            filesToUpload = [prescriptionPdf];
+          }
+        } else {
+          // No healthcare info, just use the original PDF
+          filesToUpload = [prescriptionPdf];
+        }
+        
+        setIsPrescriptionSubmitting(false);
 
         // Save patient to database for autocomplete on future prescriptions
         if (patientInfo.name) {
@@ -1363,6 +1451,21 @@ const NewDocument = () => {
                 )}
               </div>
             )}
+
+            {/* Prescription Document Type Selector */}
+            <div className="space-y-2">
+              <Label htmlFor="prescription-type">Tipo de Documento</Label>
+              <Select value={prescriptionDocType} onValueChange={(value) => setPrescriptionDocType(value as PrescriptionDocType)}>
+                <SelectTrigger className="text-gray-600">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRESCRIPTION_DOC_TYPES.map(type => (
+                    <SelectItem key={type.id} value={type.id}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Patient Info Section */}
             <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
