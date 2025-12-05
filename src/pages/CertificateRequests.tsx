@@ -193,26 +193,16 @@ export default function CertificateRequests() {
               Acompanhe suas solicitações de certificado digital
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-              Atualizar
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => window.open('/certificados/comprar', '_blank')}
-              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#1a2a42]"
-            >
-              <Award className="h-4 w-4" />
-              Comprar Certificado
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            Atualizar
+          </Button>
         </div>
 
         {/* Content */}
@@ -239,12 +229,8 @@ export default function CertificateRequests() {
             <p className="text-muted-foreground mb-4">
               Você ainda não possui solicitações de certificado digital.
             </p>
-            <Button 
-              onClick={() => window.open('/certificados/comprar', '_blank')}
-              className="gap-2 bg-gradient-to-r from-[#273d60] to-[#1a2a42]"
-            >
-              <Award className="h-4 w-4" />
-              Comprar Certificado
+            <Button onClick={() => navigate("/documentos")}>
+              Voltar aos Documentos
             </Button>
           </Card>
         ) : (
