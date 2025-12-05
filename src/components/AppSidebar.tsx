@@ -1,4 +1,4 @@
-import { File, Folder, BarChart, Menu, Settings } from "lucide-react";
+import { File, Folder, BarChart, Menu, Settings, Award } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -29,6 +29,10 @@ const items = [{
   title: "Relatórios",
   url: "/relatorios",
   icon: BarChart
+}, {
+  title: "Certificados",
+  url: "/certificados",
+  icon: Award
 }, {
   title: "Configurações",
   url: "/configuracoes",
