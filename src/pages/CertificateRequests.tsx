@@ -565,7 +565,10 @@ export default function CertificateRequests() {
       setDeletingRequest(null);
     } catch (error: any) {
       console.error("Error deleting request:", error);
-      toast.error(error.message || "Erro ao excluir solicitação");
+      const errorMessage = error.message?.includes("não permite exclusão")
+        ? "Esta solicitação não pode ser excluída pois já está em processamento na certificadora."
+        : error.message || "Erro ao excluir solicitação";
+      toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
     }

@@ -110,9 +110,17 @@ serve(async (req) => {
     );
   } catch (error: any) {
     console.error("Delete request error:", error);
+    
+    // Return 422 for business logic errors (status doesn't allow deletion)
+    const isBusinessError = error.message?.includes("não permite exclusão") || 
+                           error.message?.includes("não encontrada");
+    
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        status: isBusinessError ? 422 : 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
     );
   }
 });
