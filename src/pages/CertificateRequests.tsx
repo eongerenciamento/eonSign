@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Award, Clock, CheckCircle, FileUp, Video, AlertCircle, RefreshCw, Download, Loader2, FileText, Trash2, Eye, MoreHorizontal, XCircle, AlertTriangle, ShieldX, CreditCard, Plus, ArrowRight } from "lucide-react";
+import { Award, Clock, CheckCircle, FileUp, Video, AlertCircle, RefreshCw, Download, Loader2, FileText, Trash2, Eye, MoreVertical, XCircle, AlertTriangle, ShieldX, CreditCard, Plus, ArrowRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -662,9 +662,9 @@ export default function CertificateRequests() {
                             {/* Actions dropdown */}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
+                                <button className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
+                                  <MoreVertical className="h-4 w-4" />
+                                </button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleSyncStatus(request)} disabled={isSyncing}>
