@@ -765,7 +765,7 @@ export default function CertificateRequests() {
                           </div>
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d] border-gray-400">
+                            {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d] border-gray-400 bg-slate-400 hover:bg-slate-300 rounded-full">
                                 <ArrowRight className="h-4 w-4" />
                                 Continuar Processo
                               </Button>}
