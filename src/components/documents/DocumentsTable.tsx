@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown } from "lucide-react";
-import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -594,258 +593,50 @@ export const DocumentsTable = ({
   const handleDownloadCertificatePDF = async (documentId: string) => {
     try {
       toast({
-        title: "Gerando certificado...",
+        title: "Gerando relatório...",
         description: "Obtendo dados do documento.",
       });
 
+      // Use edge function for consistency with email attachment
       const { data: result, error } = await supabase.functions.invoke(
-        "get-document-validation",
+        "generate-signature-report",
         { body: { documentId } }
       );
 
-      if (error || result.error) {
-        throw new Error(result?.error || error?.message || 'Erro ao obter dados');
+      if (error || result?.error) {
+        throw new Error(result?.error || error?.message || 'Erro ao gerar relatório');
       }
 
-      const { document, organization, signers } = result;
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      
-      // Colors matching the validation page style
-      const gray300 = [212, 215, 219]; // #d4d7db
-      const gray600 = [102, 107, 120]; // #666b78
-      const greenColor = [22, 163, 74]; // green-600
-      
-      // Header background - gray300
-      pdf.setFillColor(gray300[0], gray300[1], gray300[2]);
-      pdf.rect(0, 0, pageWidth, 35, 'F');
-
-      // Try to load and embed the system logo
-      try {
-        const logoImg = new Image();
-        logoImg.crossOrigin = "anonymous";
-        await new Promise<void>((resolve, reject) => {
-          logoImg.onload = () => resolve();
-          logoImg.onerror = () => reject(new Error("Failed to load logo"));
-          logoImg.src = "/logo-eon-gray.png";
-        });
-        
-        // Logo left justified with padding, centered vertically in header
-        const logoMaxHeight = 20;
-        const logoMaxWidth = 50;
-        const logoRatio = Math.min(logoMaxWidth / logoImg.width, logoMaxHeight / logoImg.height);
-        const logoWidth = logoImg.width * logoRatio;
-        const logoHeight = logoImg.height * logoRatio;
-        const logoY = (35 - logoHeight) / 2;
-        
-        pdf.addImage(logoImg, "PNG", margin, logoY, logoWidth, logoHeight);
-      } catch (logoError) {
-        console.error("Error loading logo:", logoError);
+      if (!result?.pdfBytes) {
+        throw new Error('Nenhum PDF gerado');
       }
 
-      // Title - "RELATÓRIO DE ASSINATURAS" right-aligned
-      pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-      pdf.setFontSize(16);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("RELATÓRIO DE ASSINATURAS", pageWidth - margin, 22, { align: "right" });
-
-      let yPos = 42;
-
-      // Document Info Section
-      pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("INFORMAÇÕES DO DOCUMENTO", margin, yPos);
+      // Convert bytes array to blob
+      const uint8Array = new Uint8Array(result.pdfBytes);
+      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
       
-      yPos += 8;
-
-      // Info box background
-      const infoBoxHeight = 35;
-      pdf.setFillColor(250, 250, 250);
-      pdf.setDrawColor(230, 230, 230);
-      pdf.roundedRect(margin, yPos, pageWidth - margin * 2, infoBoxHeight, 2, 2, 'FD');
+      // Get document name for filename
+      const doc = documents.find(d => d.id === documentId);
+      const fileName = doc?.name ? `${doc.name}_validacao.pdf` : 'relatorio_assinaturas.pdf';
       
-      yPos += 10;
-      pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-      const formatDate = (dateStr: string | null) => {
-        if (!dateStr) return "N/A";
-        return new Date(dateStr).toLocaleString("pt-BR", {
-          day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-        });
-      };
-
-      const formatCpf = (cpf: string | null) => {
-        if (!cpf) return "N/A";
-        const cleaned = cpf.replace(/\D/g, "");
-        if (cleaned.length === 11) {
-          return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
-        }
-        return cpf;
-      };
-
-      const formatPhone = (phone: string | null) => {
-        if (!phone) return "N/A";
-        const cleaned = phone.replace(/\D/g, "");
-        if (cleaned.length === 11) {
-          return `(${cleaned.slice(0, 2)})${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
-        }
-        return phone;
-      };
-
-      pdf.text(`Documento: ${document.name}`, margin + 5, yPos);
-      pdf.setFontSize(9);
-      pdf.text(`ID: ${document.id}`, margin + 5, yPos + 8);
-      pdf.text(`Data de conclusão: ${document.completedAt ? formatDate(document.completedAt) : "Pendente"}`, margin + 5, yPos + 16);
-      
-      yPos += infoBoxHeight + 15;
-
-      // Signers Section
-      pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("SIGNATÁRIOS", margin, yPos);
-      
-      yPos += 12;
-
-      signers.forEach((signer: any, index: number) => {
-        if (yPos > pageHeight - 70) {
-          pdf.addPage();
-          yPos = 20;
-          
-          pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-          pdf.setFontSize(11);
-          pdf.setFont("helvetica", "bold");
-          pdf.text("SIGNATÁRIOS (continuação)", margin, yPos);
-          yPos += 12;
-        }
-
-        // Signer card
-        const cardHeight = 55;
-        pdf.setFillColor(255, 255, 255);
-        pdf.setDrawColor(217, 217, 217);
-        pdf.roundedRect(margin, yPos, pageWidth - margin * 2, cardHeight, 2, 2, 'FD');
-
-        // Signer number badge - gray300 background
-        pdf.setFillColor(gray300[0], gray300[1], gray300[2]);
-        pdf.roundedRect(margin, yPos, 35, 12, 0, 0, 'F');
-        
-        pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-        pdf.setFontSize(8);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(`Signatário ${index + 1}`, margin + 3, yPos + 8);
-
-        // Signer name
-        pdf.setFontSize(10);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(signer.name || "N/A", margin + 40, yPos + 8);
-
-        // Signed status badge
-        if (signer.status === "signed") {
-          pdf.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-          pdf.setFontSize(8);
-          pdf.setFont("helvetica", "bold");
-          pdf.text("Assinado", pageWidth - margin - 20, yPos + 8);
-        }
-
-        // Signer details - two columns
-        const lineHeight = 7;
-        let leftY = yPos + 18;
-        let rightY = yPos + 18;
-        
-        pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-        pdf.setFontSize(9);
-        pdf.setFont("helvetica", "normal");
-
-        // Left column
-        pdf.text(`CPF/CNPJ: ${formatCpf(signer.cpf)}`, margin + 5, leftY);
-        leftY += lineHeight;
-        pdf.text(`Nascimento: ${signer.birth_date ? formatDate(signer.birth_date).split(" ")[0] : "N/A"}`, margin + 5, leftY);
-        leftY += lineHeight;
-        pdf.text(`E-mail: ${signer.email || "N/A"}`, margin + 5, leftY);
-        leftY += lineHeight;
-        pdf.text(`Telefone: ${formatPhone(signer.phone)}`, margin + 5, leftY);
-
-        // Right column
-        const rightX = pageWidth / 2 + 10;
-        pdf.text(`IP: ${signer.signature_ip || "N/A"}`, rightX, rightY);
-        rightY += lineHeight;
-        
-        let locationStr = "N/A";
-        if (signer.signature_city || signer.signature_state) {
-          locationStr = [signer.signature_city, signer.signature_state].filter(Boolean).join(", ");
-          if (signer.signature_country) {
-            locationStr += ` - ${signer.signature_country}`;
-          }
-        }
-        pdf.text(`Local: ${locationStr}`, rightX, rightY);
-        rightY += lineHeight;
-        
-        const shortSignatureId = signer.signature_id ? signer.signature_id.substring(0, 18) + "..." : "N/A";
-        pdf.text(`ID: ${shortSignatureId}`, rightX, rightY);
-        rightY += lineHeight;
-        
-        pdf.text(`Data/Hora: ${signer.signed_at ? formatDate(signer.signed_at) : "N/A"}`, rightX, rightY);
-
-        yPos += cardHeight + 8;
-      });
-
-      // QR Code section - bottom right (smaller size)
-      const validationUrl = `${window.location.origin}/validar/${documentId}`;
-      try {
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(validationUrl)}`;
-        const qrImg = new Image();
-        qrImg.crossOrigin = "anonymous";
-        await new Promise<void>((resolve, reject) => {
-          qrImg.onload = () => resolve();
-          qrImg.onerror = () => reject(new Error("Failed to load QR code"));
-          qrImg.src = qrCodeUrl;
-        });
-        
-        const qrX = pageWidth - margin - 28;
-        const qrY = pageHeight - 48;
-        pdf.addImage(qrImg, "PNG", qrX, qrY, 28, 28);
-        
-        // Text below QR code
-        pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-        pdf.setFontSize(8);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("Validação", qrX + 14, qrY + 33, { align: "center" });
-        pdf.setFontSize(7);
-        pdf.setFont("helvetica", "normal");
-        pdf.text("Escaneie o QR Code", qrX + 14, qrY + 38, { align: "center" });
-      } catch (qrError) {
-        console.error("Error loading QR code:", qrError);
-      }
-
-      // Footer
-      const footerY = pageHeight - 30;
-      pdf.setDrawColor(217, 217, 217);
-      pdf.line(margin, footerY, pageWidth - margin - 50, footerY);
-      
-      pdf.setTextColor(gray600[0], gray600[1], gray600[2]);
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Documento validado pelo sistema Eon Sign", margin, footerY + 8);
-      
-      pdf.setFontSize(8);
-      pdf.setFont("helvetica", "normal");
-      pdf.text("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", margin, footerY + 15);
-
-      pdf.save(`${document.name}_validacao.pdf`);
       toast({
-        title: "Certificado baixado",
-        description: "Página de validação baixada com sucesso.",
+        title: "Relatório baixado",
+        description: "Relatório de assinaturas baixado com sucesso.",
       });
     } catch (error: any) {
       console.error("Error downloading certificate:", error);
       toast({
-        title: "Erro ao baixar certificado",
-        description: error.message || "Não foi possível gerar o certificado.",
+        title: "Erro ao baixar relatório",
+        description: error.message || "Não foi possível gerar o relatório.",
         variant: "destructive",
       });
     }
