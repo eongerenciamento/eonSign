@@ -39,7 +39,8 @@ const Settings = () => {
   const [isAdmin, setIsAdmin] = useState(true);
   const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
   const [isHealthcare, setIsHealthcare] = useState(false);
-  const [professionalRegistration, setProfessionalRegistration] = useState("");
+  const [professionalCouncil, setProfessionalCouncil] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
   const [registrationState, setRegistrationState] = useState("");
   const [medicalSpecialty, setMedicalSpecialty] = useState("");
 
@@ -139,7 +140,8 @@ const Settings = () => {
           setPhone(companyData.admin_phone);
           setCompanyEmail(companyData.admin_email);
           setIsHealthcare((companyData as any).is_healthcare || false);
-          setProfessionalRegistration((companyData as any).professional_registration || "");
+          setProfessionalCouncil((companyData as any).professional_council || "");
+          setRegistrationNumber((companyData as any).professional_registration || "");
           setRegistrationState((companyData as any).registration_state || "");
           setMedicalSpecialty((companyData as any).medical_specialty || "");
         }
@@ -246,8 +248,8 @@ const Settings = () => {
     }
     
     // Validate healthcare fields if healthcare is enabled
-    if (isHealthcare && (!professionalRegistration || !registrationState)) {
-      toast.error("Por favor, preencha o conselho de classe e o estado do registro");
+    if (isHealthcare && (!professionalCouncil || !registrationNumber || !registrationState)) {
+      toast.error("Por favor, preencha o conselho de classe, número do registro e estado");
       return;
     }
     const {
@@ -268,9 +270,10 @@ const Settings = () => {
       admin_phone: phone,
       admin_email: companyEmail,
       is_healthcare: isHealthcare,
-      professional_registration: isHealthcare ? professionalRegistration : null,
+      professional_council: isHealthcare ? professionalCouncil : null,
+      professional_registration: isHealthcare ? registrationNumber : null,
       registration_state: isHealthcare ? registrationState : null,
-      medical_specialty: isHealthcare && ['CRM', 'CRO'].includes(professionalRegistration.split(' ')[0]) ? medicalSpecialty : null
+      medical_specialty: isHealthcare && ['CRM', 'CRO'].includes(professionalCouncil) ? medicalSpecialty : null
     };
     if (existingData) {
       const {
@@ -436,10 +439,7 @@ const Settings = () => {
                         <div className="grid md:grid-cols-3 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="council-type">Conselho de Classe</Label>
-                            <Select value={professionalRegistration.split(' ')[0] || ''} onValueChange={(council) => {
-                              const number = professionalRegistration.split(' ').slice(1).join(' ');
-                              setProfessionalRegistration(council + (number ? ' ' + number : ''));
-                            }}>
+                            <Select value={professionalCouncil} onValueChange={setProfessionalCouncil}>
                               <SelectTrigger className="text-gray-600">
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
@@ -458,11 +458,8 @@ const Settings = () => {
                             <Label htmlFor="registration-number">Número do Registro</Label>
                             <Input
                               id="registration-number"
-                              value={professionalRegistration.split(' ').slice(1).join(' ')}
-                              onChange={e => {
-                                const council = professionalRegistration.split(' ')[0] || '';
-                                setProfessionalRegistration(council + (e.target.value ? ' ' + e.target.value : ''));
-                              }}
+                              value={registrationNumber}
+                              onChange={e => setRegistrationNumber(e.target.value)}
                               placeholder="Ex: 12345"
                               className="text-gray-600"
                             />
@@ -484,14 +481,14 @@ const Settings = () => {
                         </div>
 
                         {/* Medical Specialty - Only for CRM and CRO */}
-                        {['CRM', 'CRO'].includes(professionalRegistration.split(' ')[0]) && (
+                        {['CRM', 'CRO'].includes(professionalCouncil) && (
                           <div className="grid gap-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                             <Label htmlFor="medical-specialty">Especialidade</Label>
                             <Input
                               id="medical-specialty"
                               value={medicalSpecialty}
                               onChange={e => setMedicalSpecialty(e.target.value)}
-                              placeholder={professionalRegistration.startsWith('CRM') ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'}
+                              placeholder={professionalCouncil === 'CRM' ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'}
                               className="text-gray-600"
                             />
                           </div>
