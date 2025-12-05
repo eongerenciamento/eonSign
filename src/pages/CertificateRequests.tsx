@@ -642,8 +642,9 @@ export default function CertificateRequests() {
                     <Card className="p-6 hover:shadow-md transition-shadow">
                       <div className="space-y-4">
                         {/* Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                          <div>
+                        <div className="flex items-start justify-between gap-4">
+                          {/* Left side - Info */}
+                          <div className="flex-shrink-0">
                             <h3 className="font-semibold bg-transparent text-gray-600 mb-1 text-sm">
                               {request.common_name}
                             </h3>
@@ -656,14 +657,54 @@ export default function CertificateRequests() {
                             {request.protocol && <p className="text-sm text-muted-foreground">
                                 <span className="font-bold">Protocolo:</span> {request.protocol}
                               </p>}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={`${statusConfig.color} border-0 shrink-0`}>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Criado em {formatDate(request.created_at)}
+                            </p>
+                            <Badge className={`${statusConfig.color} border-0 mt-2`}>
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {statusConfig.label}
                             </Badge>
-                            
-                            {/* Actions dropdown */}
+                          </div>
+                          
+                          {/* Center - Progress Steps */}
+                          <div className="flex-1 flex items-center justify-end">
+                            <div className="flex items-center">
+                              {STEPS.map((step, stepIndex) => {
+                                const status = stepStatus[step.key as keyof typeof stepStatus];
+                                const StepIcon = step.icon;
+                                const isCompleted = status === "completed";
+                                const isCurrent = status === "current";
+                                const isRejected = status === "rejected";
+                                const isWarning = status === "warning";
+                                return <div key={step.key} className="flex items-center">
+                                  <div className="flex flex-col items-center">
+                                    <motion.div className={`
+                                        w-10 h-10 rounded-full flex items-center justify-center
+                                        ${isCompleted ? "bg-green-500 text-white" : ""}
+                                        ${isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : ""}
+                                        ${isRejected ? "bg-red-500 text-white" : ""}
+                                        ${isWarning ? "bg-orange-500 text-white" : ""}
+                                        ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
+                                      `} animate={isCurrent ? {
+                                      scale: [1, 1.1, 1]
+                                    } : {}} transition={{
+                                      repeat: Infinity,
+                                      duration: 2
+                                    }}>
+                                      <StepIcon className="h-5 w-5" />
+                                    </motion.div>
+                                    <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                                      {step.label}
+                                    </span>
+                                  </div>
+                                  {stepIndex < STEPS.length - 1 && <div className={`w-12 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
+                                </div>;
+                              })}
+                            </div>
+                          </div>
+                          
+                          {/* Right side - Actions dropdown */}
+                          <div className="flex-shrink-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
@@ -721,51 +762,8 @@ export default function CertificateRequests() {
                             </AlertDescription>
                           </Alert>}
 
-                        {/* Progress Steps */}
-                        <div className="flex items-center justify-center py-4">
-                          <div className="flex items-center">
-                          {STEPS.map((step, stepIndex) => {
-                      const status = stepStatus[step.key as keyof typeof stepStatus];
-                      const StepIcon = step.icon;
-                      const isCompleted = status === "completed";
-                      const isCurrent = status === "current";
-                      const isRejected = status === "rejected";
-                      const isWarning = status === "warning";
-                      return <div key={step.key} className="flex items-center">
-                                <div className="flex flex-col items-center">
-                                  <motion.div className={`
-                                      w-10 h-10 rounded-full flex items-center justify-center
-                                      ${isCompleted ? "bg-green-500 text-white" : ""}
-                                      ${isCurrent ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : ""}
-                                      ${isRejected ? "bg-red-500 text-white" : ""}
-                                      ${isWarning ? "bg-orange-500 text-white" : ""}
-                                      ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
-                                    `} animate={isCurrent ? {
-                            scale: [1, 1.1, 1]
-                          } : {}} transition={{
-                            repeat: Infinity,
-                            duration: 2
-                          }}>
-                                    <StepIcon className="h-5 w-5" />
-                                  </motion.div>
-                                  <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                                    {step.label}
-                                  </span>
-                                </div>
-                                {stepIndex < STEPS.length - 1 && <div className={`w-12 h-1 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
-                              </div>;
-                    })}
-                          </div>
-                        </div>
-
                         {/* Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t">
-                          <div className="text-xs text-muted-foreground">
-                            <span>Criado em {formatDate(request.created_at)}</span>
-                            {request.updated_at !== request.created_at && <span className="ml-3">
-                                Atualizado em {formatDate(request.updated_at)}
-                              </span>}
-                          </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-2 border-t">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
                             {request.status === "paid" && <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d] border-gray-400 bg-slate-400 hover:bg-slate-300 rounded-full">
