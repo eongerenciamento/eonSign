@@ -670,13 +670,13 @@ export default function CertificateRequests() {
                           <div className="flex-1 flex items-center justify-end">
                             <div className="flex items-center">
                               {STEPS.map((step, stepIndex) => {
-                                const status = stepStatus[step.key as keyof typeof stepStatus];
-                                const StepIcon = step.icon;
-                                const isCompleted = status === "completed";
-                                const isCurrent = status === "current";
-                                const isRejected = status === "rejected";
-                                const isWarning = status === "warning";
-                                return <div key={step.key} className="flex items-center">
+                          const status = stepStatus[step.key as keyof typeof stepStatus];
+                          const StepIcon = step.icon;
+                          const isCompleted = status === "completed";
+                          const isCurrent = status === "current";
+                          const isRejected = status === "rejected";
+                          const isWarning = status === "warning";
+                          return <div key={step.key} className="flex items-center">
                                   <div className="flex flex-col items-center">
                                     <motion.div className={`
                                         w-10 h-10 rounded-full flex items-center justify-center
@@ -686,11 +686,11 @@ export default function CertificateRequests() {
                                         ${isWarning ? "bg-orange-500 text-white" : ""}
                                         ${!isCompleted && !isCurrent && !isRejected && !isWarning ? "bg-muted text-muted-foreground" : ""}
                                       `} animate={isCurrent ? {
-                                      scale: [1, 1.1, 1]
-                                    } : {}} transition={{
-                                      repeat: Infinity,
-                                      duration: 2
-                                    }}>
+                                scale: [1, 1.1, 1]
+                              } : {}} transition={{
+                                repeat: Infinity,
+                                duration: 2
+                              }}>
                                       <StepIcon className="h-5 w-5" />
                                     </motion.div>
                                     <span className={`text-xs mt-2 text-center ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
@@ -699,7 +699,7 @@ export default function CertificateRequests() {
                                   </div>
                                   {stepIndex < STEPS.length - 1 && <div className={`w-10 h-0.5 mx-2 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />}
                                 </div>;
-                              })}
+                        })}
                             </div>
                           </div>
                           
@@ -766,11 +766,13 @@ export default function CertificateRequests() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 -mt-2">
                           <div className="flex gap-2">
                             {/* Continue process button - when paid */}
-                            {request.status === "paid" && <motion.div
-                              animate={{ scale: [1, 1.05, 1] }}
-                              transition={{ repeat: Infinity, duration: 2 }}
-                            >
-                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full">
+                            {request.status === "paid" && <motion.div animate={{
+                        scale: [1, 1.05, 1]
+                      }} transition={{
+                        repeat: Infinity,
+                        duration: 2
+                      }}>
+                              <Button size="sm" onClick={() => handleContinueProcess(request)} className="gap-1 text-xs px-3 py-1 h-7 bg-blue-700 hover:bg-blue-800 rounded-full border-4 border-input">
                                 <ArrowRight className="h-3 w-3" />
                                 Continuar Processo
                               </Button>
