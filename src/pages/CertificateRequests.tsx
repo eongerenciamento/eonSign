@@ -6,6 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { 
   Award, 
   Clock, 
@@ -14,7 +18,8 @@ import {
   Video, 
   AlertCircle,
   RefreshCw,
-  ExternalLink
+  Download,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,6 +39,7 @@ interface CertificateRequest {
   videoconference_completed: boolean | null;
   certificate_issued: boolean | null;
   certificate_downloaded: boolean | null;
+  emission_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -43,9 +49,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   documents_sent: { label: "Documentos Enviados", color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock },
   videoconference_scheduled: { label: "Videoconferência Agendada", color: "bg-purple-100 text-purple-800 border-purple-300", icon: Video },
   videoconference_completed: { label: "Videoconferência Concluída", color: "bg-indigo-100 text-indigo-800 border-indigo-300", icon: CheckCircle },
+  in_validation: { label: "Em Validação", color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock },
   approved: { label: "Aprovado", color: "bg-green-100 text-green-800 border-green-300", icon: CheckCircle },
   issued: { label: "Certificado Emitido", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: Award },
   rejected: { label: "Rejeitado", color: "bg-red-100 text-red-800 border-red-300", icon: AlertCircle },
+  validation_rejected: { label: "Validação Rejeitada", color: "bg-red-100 text-red-800 border-red-300", icon: AlertCircle },
 };
 
 const STEPS = [
@@ -63,7 +71,7 @@ function getStepStatus(request: CertificateRequest) {
     emission: "pending",
   };
 
-  if (request.status === "rejected") {
+  if (request.status === "rejected" || request.status === "validation_rejected") {
     return { ...steps, request: "rejected" };
   }
 
@@ -71,14 +79,14 @@ function getStepStatus(request: CertificateRequest) {
   steps.request = "completed";
 
   // Documents step
-  if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "approved", "issued"].includes(request.status)) {
+  if (["documents_sent", "videoconference_scheduled", "videoconference_completed", "in_validation", "approved", "issued"].includes(request.status)) {
     steps.documents = "completed";
   } else if (request.status === "pending") {
     steps.documents = "current";
   }
 
   // Videoconference step
-  if (request.videoconference_completed || ["approved", "issued"].includes(request.status)) {
+  if (request.videoconference_completed || ["in_validation", "approved", "issued"].includes(request.status)) {
     steps.videoconference = "completed";
   } else if (["videoconference_scheduled", "documents_sent"].includes(request.status)) {
     steps.videoconference = "current";
@@ -99,6 +107,14 @@ export default function CertificateRequests() {
   const [requests, setRequests] = useState<CertificateRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Emission iframe state
+  const [showEmissionDialog, setShowEmissionDialog] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<CertificateRequest | null>(null);
+  const [isEmissionLoading, setIsEmissionLoading] = useState(true);
+  
+  // Download state
+  const [downloadingProtocol, setDownloadingProtocol] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -115,7 +131,7 @@ export default function CertificateRequests() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data || []) as CertificateRequest[]);
     } catch (error: any) {
       console.error("Error fetching certificate requests:", error);
       toast.error("Erro ao carregar solicitações");
@@ -182,6 +198,93 @@ export default function CertificateRequests() {
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
 
+  const getEmissionUrl = (request: CertificateRequest): string => {
+    if (request.emission_url) {
+      return request.emission_url;
+    }
+    // Fallback: construct URL if not stored
+    const cleanCpf = request.cpf.replace(/\D/g, "");
+    return `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cleanCpf}&protocolo=${request.protocol}`;
+  };
+
+  const handleOpenEmission = (request: CertificateRequest) => {
+    setSelectedRequest(request);
+    setIsEmissionLoading(true);
+    setShowEmissionDialog(true);
+  };
+
+  const handleCloseEmission = () => {
+    setShowEmissionDialog(false);
+    setSelectedRequest(null);
+    setIsEmissionLoading(true);
+  };
+
+  const handleDownloadCertificate = async (request: CertificateRequest) => {
+    if (!request.protocol) {
+      toast.error("Protocolo não encontrado");
+      return;
+    }
+
+    setDownloadingProtocol(request.protocol);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("bry-ar-download-certificate", {
+        body: { protocol: request.protocol },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        toast.error(data.error || "Erro ao baixar certificado");
+        return;
+      }
+
+      if (!data.pfx_data) {
+        toast.error("Certificado ainda não está disponível para download");
+        return;
+      }
+
+      // Convert base64 to blob and download
+      const byteCharacters = atob(data.pfx_data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/x-pkcs12" });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${data.common_name || request.common_name}.pfx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Show password if available
+      if (data.pfx_password) {
+        toast.success(`Certificado baixado! Senha: ${data.pfx_password}`, {
+          duration: 10000,
+        });
+      } else {
+        toast.success("Certificado baixado com sucesso!");
+      }
+
+      // Mark as downloaded
+      await supabase
+        .from("certificate_requests")
+        .update({ certificate_downloaded: true })
+        .eq("protocol", request.protocol);
+
+    } catch (error: any) {
+      console.error("Error downloading certificate:", error);
+      toast.error(error.message || "Erro ao baixar certificado");
+    } finally {
+      setDownloadingProtocol(null);
+    }
+  };
+
   return (
     <Layout>
       <div className="p-8 space-y-6">
@@ -240,6 +343,7 @@ export default function CertificateRequests() {
                 const statusConfig = STATUS_CONFIG[request.status] || STATUS_CONFIG.pending;
                 const StatusIcon = statusConfig.icon;
                 const stepStatus = getStepStatus(request);
+                const isDownloading = downloadingProtocol === request.protocol;
 
                 return (
                   <motion.div
@@ -326,12 +430,37 @@ export default function CertificateRequests() {
                               </span>
                             )}
                           </div>
-                          {request.certificate_issued && !request.certificate_downloaded && (
-                            <Button size="sm" className="gap-2">
-                              <ExternalLink className="h-4 w-4" />
-                              Baixar Certificado
-                            </Button>
-                          )}
+                          <div className="flex gap-2">
+                            {/* Emission button - when approved */}
+                            {request.status === "approved" && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleOpenEmission(request)}
+                                className="gap-2 bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                              >
+                                <Award className="h-4 w-4" />
+                                Emitir Certificado
+                              </Button>
+                            )}
+                            
+                            {/* Download button - when issued */}
+                            {request.certificate_issued && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleDownloadCertificate(request)}
+                                disabled={isDownloading}
+                                className="gap-2"
+                                variant={request.certificate_downloaded ? "outline" : "default"}
+                              >
+                                {isDownloading ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4" />
+                                )}
+                                {request.certificate_downloaded ? "Baixar Novamente" : "Baixar Certificado"}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -342,6 +471,55 @@ export default function CertificateRequests() {
           </AnimatePresence>
         )}
       </div>
+
+      {/* Emission Iframe Dialog */}
+      <Dialog open={showEmissionDialog} onOpenChange={setShowEmissionDialog}>
+        <DialogContent className="max-w-[95vw] w-[1200px] h-[90vh] p-0 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b">
+            <div>
+              <h2 className="text-lg font-semibold">Emissão do Certificado</h2>
+              <p className="text-xs text-muted-foreground">
+                {selectedRequest?.common_name} - Protocolo: {selectedRequest?.protocol}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleCloseEmission}>
+                Fechar
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => {
+                  handleCloseEmission();
+                  fetchRequests();
+                }}
+                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Concluir Emissão
+              </Button>
+            </div>
+          </div>
+          <div className="relative flex-1 w-full min-h-0">
+            {isEmissionLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Carregando ambiente de emissão...</p>
+                </div>
+              </div>
+            )}
+            {selectedRequest && (
+              <iframe
+                src={getEmissionUrl(selectedRequest)}
+                className="w-full h-full border-0"
+                style={{ minHeight: "calc(90vh - 80px)" }}
+                allow="camera; microphone"
+                onLoad={() => setIsEmissionLoading(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
