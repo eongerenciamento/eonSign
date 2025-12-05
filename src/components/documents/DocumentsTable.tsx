@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -122,6 +122,9 @@ export const DocumentsTable = ({
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
   const [signingDocumentName, setSigningDocumentName] = useState("");
   const [signingDocumentId, setSigningDocumentId] = useState<string | null>(null);
+  
+  // Loading state for certificate download
+  const [downloadingCertificateId, setDownloadingCertificateId] = useState<string | null>(null);
 
   const handleOpenEnvelopeDialog = (doc: Document) => {
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
@@ -591,12 +594,8 @@ export const DocumentsTable = ({
   };
 
   const handleDownloadCertificatePDF = async (documentId: string) => {
+    setDownloadingCertificateId(documentId);
     try {
-      toast({
-        title: "Gerando relatório...",
-        description: "Obtendo dados do documento.",
-      });
-
       // Use edge function for consistency with email attachment
       const { data: result, error } = await supabase.functions.invoke(
         "generate-signature-report",
@@ -639,6 +638,8 @@ export const DocumentsTable = ({
         description: error.message || "Não foi possível gerar o relatório.",
         variant: "destructive",
       });
+    } finally {
+      setDownloadingCertificateId(null);
     }
   };
 
@@ -948,8 +949,13 @@ export const DocumentsTable = ({
                           className="rounded-full hover:bg-transparent" 
                           onClick={() => handleDownloadCertificatePDF(doc.id)}
                           title="Baixar certificado de validação (PDF)"
+                          disabled={downloadingCertificateId === doc.id}
                         >
-                          <FileDown className="w-4 h-4 text-gray-500" />
+                          {downloadingCertificateId === doc.id ? (
+                            <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+                          ) : (
+                            <FileDown className="w-4 h-4 text-gray-500" />
+                          )}
                         </Button>
                       )}
                       {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
@@ -1055,8 +1061,13 @@ export const DocumentsTable = ({
                         className="rounded-full hover:bg-transparent h-8 w-8" 
                         onClick={() => handleDownloadCertificatePDF(doc.id)}
                         title="Baixar certificado de validação (PDF)"
+                        disabled={downloadingCertificateId === doc.id}
                       >
-                        <FileDown className="w-4 h-4 text-gray-500" />
+                        {downloadingCertificateId === doc.id ? (
+                          <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+                        ) : (
+                          <FileDown className="w-4 h-4 text-gray-500" />
+                        )}
                       </Button>
                     )}
                     {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
