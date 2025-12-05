@@ -151,7 +151,7 @@ export function CertificateCheckoutDialog({
         <div className="p-6 border-none">
 
           {/* Product Card */}
-          <div className="bg-gray-100 rounded-lg p-4 text-gray-600">
+          <div className="bg-gray-100/95 rounded-lg p-4 text-gray-600 border-0">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
