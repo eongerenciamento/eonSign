@@ -1015,8 +1015,8 @@ const NewDocument = () => {
             </RadioGroup>
           </div>
 
-          {/* Authentication Options Section - Only for BRy modes */}
-          {signatureMode !== 'SIMPLE' && (
+          {/* Authentication Options Section - Only for BRy modes (not SIMPLE or PRESCRIPTION) */}
+          {signatureMode !== 'SIMPLE' && signatureMode !== 'PRESCRIPTION' && (
             <div className="space-y-3">
               <Label className="text-sm font-semibold text-gray-600">Níveis de Verificação</Label>
               <div className="space-y-2">
