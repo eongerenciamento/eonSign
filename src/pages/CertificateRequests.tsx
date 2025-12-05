@@ -649,7 +649,7 @@ export default function CertificateRequests() {
                               {request.common_name}
                             </h3>
                             <p className="text-xs text-muted-foreground mb-1">
-                              Certificado Digital A1
+                              <span className="font-bold">Certificado</span> Digital A1
                             </p>
                             <p className="text-sm text-muted-foreground">
                               <span className="font-bold">{request.type === "PJ" ? "CNPJ" : "CPF"}:</span> {request.type === "PJ" && request.cnpj ? request.cnpj : formatCPF(request.cpf)}
@@ -668,7 +668,7 @@ export default function CertificateRequests() {
                             {/* Mobile Continue Button - Below badge */}
                             {request.status === "paid" && (
                               <motion.div 
-                                className="sm:hidden mt-3"
+                                className="sm:hidden mt-1.5"
                                 animate={{ scale: [1, 1.05, 1] }} 
                                 transition={{ repeat: Infinity, duration: 2 }}
                               >
