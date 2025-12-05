@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignerAutocomplete, SignerSuggestion, SignerGroup } from "@/components/documents/SignerAutocomplete";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import jsPDF from "jspdf";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
 const AUTHENTICATION_OPTIONS: {
@@ -65,15 +68,25 @@ const SIGNATURE_MODES: {
     description: 'Lei n. 14.063/20 - Res. n. 2.299/21 (CFM)'
   }
 ];
+
 interface Signer {
   name: string;
   phone: string;
   email: string;
 }
+
 interface CompanySigner extends Signer {
   cpf: string;
   companyName: string;
 }
+
+interface HealthcareInfo {
+  professionalCouncil: string;
+  professionalRegistration: string;
+  registrationState: string;
+  medicalSpecialty: string | null;
+}
+
 const NewDocument = () => {
   const MAX_DOCUMENTS = 10;
   const MAX_SIGNERS_ENVELOPE = 20;
@@ -99,6 +112,9 @@ const NewDocument = () => {
   const [signerSuggestions, setSignerSuggestions] = useState<SignerSuggestion[]>([]);
   const [signerGroups, setSignerGroups] = useState<SignerGroup[]>([]);
   const [isHealthcareProfessional, setIsHealthcareProfessional] = useState(false);
+  const [healthcareInfo, setHealthcareInfo] = useState<HealthcareInfo | null>(null);
+  const [showPrescriptionSheet, setShowPrescriptionSheet] = useState(false);
+  const [prescriptionContent, setPrescriptionContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -106,6 +122,7 @@ const NewDocument = () => {
   const navigate = useNavigate();
   const isEnvelope = files.length >= 2;
   const maxSigners = isEnvelope ? MAX_SIGNERS_ENVELOPE : MAX_SIGNERS_DOCUMENT;
+  const isPrescriptionMode = signatureMode === 'PRESCRIPTION';
 
   // Play subtle completion sound
   const playCompletionSound = (frequency: number = 800) => {
@@ -129,18 +146,20 @@ const NewDocument = () => {
 
   // Track step 1 completion (file upload)
   useEffect(() => {
-    if (files.length > 0) {
+    if (files.length > 0 || (isPrescriptionMode && prescriptionContent)) {
       playCompletionSound(800); // Mid-high frequency
     }
-  }, [files]);
+  }, [files, prescriptionContent, isPrescriptionMode]);
 
-  // Track step 2 completion (signers added)
+  // Track step 2 completion (signers added) - only for non-prescription modes
   useEffect(() => {
-    const hasCompleteSigner = signers.some(signer => signer.name && (signer.phone || signer.email));
-    if (hasCompleteSigner) {
-      playCompletionSound(900); // Slightly higher frequency
+    if (!isPrescriptionMode) {
+      const hasCompleteSigner = signers.some(signer => signer.name && (signer.phone || signer.email));
+      if (hasCompleteSigner) {
+        playCompletionSound(900); // Slightly higher frequency
+      }
     }
-  }, [signers]);
+  }, [signers, isPrescriptionMode]);
 
   // Track step 3 completion (submitted)
   useEffect(() => {
@@ -148,6 +167,7 @@ const NewDocument = () => {
       playCompletionSound(1000); // Highest frequency for final step
     }
   }, [isSubmitted]);
+
   useEffect(() => {
     const checkLimit = async () => {
       try {
@@ -173,6 +193,7 @@ const NewDocument = () => {
     };
     checkLimit();
   }, []);
+
   useEffect(() => {
     const loadCompanySigner = async () => {
       const {
@@ -183,7 +204,7 @@ const NewDocument = () => {
       if (user) {
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_registration, registration_state, medical_specialty').eq('user_id', user.id).single();
         if (companyData) {
           setCompanySigner({
             name: companyData.admin_name,
@@ -193,6 +214,14 @@ const NewDocument = () => {
             companyName: companyData.company_name
           });
           setIsHealthcareProfessional((companyData as any).is_healthcare || false);
+          if ((companyData as any).is_healthcare) {
+            setHealthcareInfo({
+              professionalCouncil: 'CRM', // Default to CRM since column doesn't exist
+              professionalRegistration: (companyData as any).professional_registration || '',
+              registrationState: (companyData as any).registration_state || '',
+              medicalSpecialty: (companyData as any).medical_specialty || null
+            });
+          }
         }
       }
     };
@@ -259,6 +288,7 @@ const NewDocument = () => {
     };
     loadGroups();
   }, []);
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -268,6 +298,7 @@ const NewDocument = () => {
       setDragActive(false);
     }
   };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -306,6 +337,7 @@ const NewDocument = () => {
       setFiles([...files, ...newFiles]);
     }
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const allowedTypes = [
@@ -341,12 +373,14 @@ const NewDocument = () => {
       setFiles([...files, ...newFiles]);
     }
   };
+
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 7) return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
     return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
+
   const handleSignerChange = (index: number, field: keyof Signer, value: string) => {
     const newSigners = [...signers];
     if (field === "phone") {
@@ -356,6 +390,7 @@ const NewDocument = () => {
     }
     setSigners(newSigners);
   };
+
   const addSigner = () => {
     setSigners([...signers, {
       name: "",
@@ -363,14 +398,17 @@ const NewDocument = () => {
       email: ""
     }]);
   };
+
   const removeSigner = (index: number) => {
     if (signers.length > 1) {
       setSigners(signers.filter((_, i) => i !== index));
     }
   };
+
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
+
   const toggleAuthOption = (option: AuthenticationOption) => {
     setAuthOptions(prev => {
       if (prev.includes(option)) {
@@ -379,34 +417,92 @@ const NewDocument = () => {
       return [...prev, option];
     });
   };
-  const handleSubmit = async () => {
-    if (files.length === 0 || !title) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha o título e selecione pelo menos um arquivo.",
-        variant: "destructive"
-      });
-      return;
+
+  // Generate PDF from prescription content
+  const generatePrescriptionPdf = async (): Promise<File> => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    
+    // Header with professional info
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(companySigner?.name || '', pageWidth / 2, 25, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    let yPos = 35;
+    
+    if (healthcareInfo) {
+      const councilText = `${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`;
+      doc.text(councilText, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 6;
+      
+      if (healthcareInfo.medicalSpecialty) {
+        doc.text(healthcareInfo.medicalSpecialty, pageWidth / 2, yPos, { align: 'center' });
+        yPos += 6;
+      }
     }
-    const hasInvalidSigner = signers.some(signer => !signer.name || !signer.phone && !signer.email);
-    if (hasInvalidSigner) {
+    
+    // Line separator
+    yPos += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 15;
+    
+    // Prescription content
+    doc.setFontSize(11);
+    const lines = doc.splitTextToSize(prescriptionContent, contentWidth);
+    doc.text(lines, margin, yPos);
+    
+    // Convert to File
+    const pdfBlob = doc.output('blob');
+    const fileName = title || 'Prescricao';
+    return new File([pdfBlob], `${fileName}.pdf`, { type: 'application/pdf' });
+  };
+
+  const handleSubmit = async () => {
+    // Determine the effective title
+    const effectiveTitle = title || (files.length > 0 ? files[0].name.replace(/\.[^/.]+$/, '') : 'Prescrição');
+    
+    // Check for prescription mode with content typed
+    const hasPrescriptionContent = isPrescriptionMode && prescriptionContent.trim();
+    
+    // Validate based on mode
+    if (!hasPrescriptionContent && files.length === 0) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha o nome e pelo menos telefone ou e-mail de cada signatário.",
+        description: "Por favor, selecione pelo menos um arquivo ou preencha a prescrição.",
         variant: "destructive"
       });
       return;
     }
 
-    // Validate signers limit based on mode
-    if (signers.length > maxSigners) {
-      toast({
-        title: "Limite de signatários",
-        description: `${isEnvelope ? 'Envelopes' : 'Documentos'} permitem no máximo ${maxSigners} signatários externos.`,
-        variant: "destructive"
-      });
-      return;
+    // For non-prescription modes, validate signers
+    if (!isPrescriptionMode) {
+      const hasInvalidSigner = signers.some(signer => !signer.name || !signer.phone && !signer.email);
+      if (hasInvalidSigner) {
+        toast({
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha o nome e pelo menos telefone ou e-mail de cada signatário.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate signers limit based on mode
+      if (signers.length > maxSigners) {
+        toast({
+          title: "Limite de signatários",
+          description: `${isEnvelope ? 'Envelopes' : 'Documentos'} permitem no máximo ${maxSigners} signatários externos.`,
+          variant: "destructive"
+        });
+        return;
+      }
     }
+
     if (!companySigner) {
       toast({
         title: "Erro",
@@ -415,6 +511,7 @@ const NewDocument = () => {
       });
       return;
     }
+
     try {
       // Get current user
       const {
@@ -424,81 +521,91 @@ const NewDocument = () => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Salvar signatários automaticamente na tabela contacts
-      const savedContactIds: string[] = [];
-      for (const signer of signers) {
-        if (!signer.name || (!signer.email && !signer.phone)) continue;
-        
-        // Verificar se já existe por email ou telefone
-        let query = supabase
-          .from('contacts')
-          .select('id')
-          .eq('user_id', user.id);
-        
-        if (signer.email && signer.phone) {
-          query = query.or(`email.eq.${signer.email},phone.eq.${signer.phone}`);
-        } else if (signer.email) {
-          query = query.eq('email', signer.email);
-        } else if (signer.phone) {
-          query = query.eq('phone', signer.phone);
-        }
-        
-        const { data: existingContact } = await query.maybeSingle();
-
-        if (existingContact) {
-          savedContactIds.push(existingContact.id);
-        } else {
-          // Criar novo contato
-          const { data: newContact } = await supabase.from('contacts').insert({
-            user_id: user.id,
-            name: signer.name,
-            email: signer.email || null,
-            phone: signer.phone || null
-          }).select('id').single();
-          
-          if (newContact) {
-            savedContactIds.push(newContact.id);
-          }
-        }
+      // Prepare files - generate PDF from prescription if needed
+      let filesToUpload = [...files];
+      if (hasPrescriptionContent && files.length === 0) {
+        const prescriptionPdf = await generatePrescriptionPdf();
+        filesToUpload = [prescriptionPdf];
       }
 
-      // Criar grupo automaticamente se houver mais de 1 signatário
-      if (signers.length > 1 && savedContactIds.length > 1) {
-        const { data: newGroup } = await supabase
-          .from('signer_groups')
-          .insert({
-            user_id: user.id,
-            name: 'Novo grupo'
-          })
-          .select('id')
-          .single();
-
-        if (newGroup) {
-          // Adicionar membros ao grupo
-          const groupMembers = savedContactIds.map(contactId => ({
-            group_id: newGroup.id,
-            contact_id: contactId
-          }));
+      // For non-prescription modes, save signers to contacts
+      if (!isPrescriptionMode) {
+        const savedContactIds: string[] = [];
+        for (const signer of signers) {
+          if (!signer.name || (!signer.email && !signer.phone)) continue;
           
-          await supabase.from('signer_group_members').insert(groupMembers);
+          // Verificar se já existe por email ou telefone
+          let query = supabase
+            .from('contacts')
+            .select('id')
+            .eq('user_id', user.id);
+          
+          if (signer.email && signer.phone) {
+            query = query.or(`email.eq.${signer.email},phone.eq.${signer.phone}`);
+          } else if (signer.email) {
+            query = query.eq('email', signer.email);
+          } else if (signer.phone) {
+            query = query.eq('phone', signer.phone);
+          }
+          
+          const { data: existingContact } = await query.maybeSingle();
+
+          if (existingContact) {
+            savedContactIds.push(existingContact.id);
+          } else {
+            // Criar novo contato
+            const { data: newContact } = await supabase.from('contacts').insert({
+              user_id: user.id,
+              name: signer.name,
+              email: signer.email || null,
+              phone: signer.phone || null
+            }).select('id').single();
+            
+            if (newContact) {
+              savedContactIds.push(newContact.id);
+            }
+          }
+        }
+
+        // Criar grupo automaticamente se houver mais de 1 signatário
+        if (signers.length > 1 && savedContactIds.length > 1) {
+          const { data: newGroup } = await supabase
+            .from('signer_groups')
+            .insert({
+              user_id: user.id,
+              name: 'Novo grupo'
+            })
+            .select('id')
+            .single();
+
+          if (newGroup) {
+            // Adicionar membros ao grupo
+            const groupMembers = savedContactIds.map(contactId => ({
+              group_id: newGroup.id,
+              contact_id: contactId
+            }));
+            
+            await supabase.from('signer_group_members').insert(groupMembers);
+          }
         }
       }
 
       let envelopeId: string | null = null;
 
       // If envelope mode (2+ documents), create envelope first
-      if (isEnvelope) {
+      if (filesToUpload.length >= 2) {
         const {
           data: envelopeData,
           error: envelopeError
         } = await supabase.from('envelopes').insert({
-          title: title,
+          title: effectiveTitle,
           user_id: user.id,
           status: 'pending'
         }).select().single();
         if (envelopeError) throw envelopeError;
         envelopeId = envelopeData.id;
       }
+
       const documentIds: string[] = [];
       const fileContents: {
         docId: string;
@@ -506,7 +613,7 @@ const NewDocument = () => {
       }[] = [];
 
       // Upload and create documents
-      for (const file of files) {
+      for (const file of filesToUpload) {
         // Upload PDF to storage
         const timestamp = Date.now();
         const sanitizedFileName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9.-]/g, '_').replace(/__+/g, '_');
@@ -524,12 +631,13 @@ const NewDocument = () => {
         } = supabase.storage.from('documents').getPublicUrl(filePath);
 
         // Create document record
-        const totalSigners = signers.length + 1;
+        // For prescription mode, only company signer (1 signer total)
+        const totalSigners = isPrescriptionMode ? 1 : signers.length + 1;
         const {
           data: documentData,
           error: docError
         } = await supabase.from('documents').insert({
-          name: isEnvelope ? `${title} - ${file.name}` : title,
+          name: filesToUpload.length >= 2 ? `${effectiveTitle} - ${file.name}` : effectiveTitle,
           file_url: publicUrl,
           user_id: user.id,
           status: 'pending',
@@ -549,10 +657,12 @@ const NewDocument = () => {
           base64
         });
       }
+
       const firstDocumentId = documentIds[0];
 
       // Create signers for all documents
       for (const docId of documentIds) {
+        // Always add company signer
         const {
           error: companySignerError
         } = await supabase.from('document_signers').insert({
@@ -565,25 +675,29 @@ const NewDocument = () => {
           status: 'pending'
         });
         if (companySignerError) throw companySignerError;
-        const externalSigners = signers.map(signer => ({
-          document_id: docId,
-          name: signer.name,
-          email: signer.email,
-          phone: signer.phone,
-          cpf: null,
-          is_company_signer: false,
-          status: 'pending'
-        }));
-        const {
-          error: signersError
-        } = await supabase.from('document_signers').insert(externalSigners);
-        if (signersError) throw signersError;
+
+        // For non-prescription modes, add external signers
+        if (!isPrescriptionMode) {
+          const externalSigners = signers.map(signer => ({
+            document_id: docId,
+            name: signer.name,
+            email: signer.email,
+            phone: signer.phone,
+            cpf: null,
+            is_company_signer: false,
+            status: 'pending'
+          }));
+          const {
+            error: signersError
+          } = await supabase.from('document_signers').insert(externalSigners);
+          if (signersError) throw signersError;
+        }
       }
 
       // For SIMPLE signatures, use native flow without BRy
       // For ADVANCED/QUALIFIED, use BRy integration
       const brySignerLinks: Map<string, string> = new Map();
-      const isSimpleSignature = signatureMode === 'SIMPLE';
+      const isSimpleSignature = signatureMode === 'SIMPLE' || signatureMode === 'PRESCRIPTION';
 
       if (!isSimpleSignature) {
         // Create BRy envelope only for ADVANCED/QUALIFIED signatures
@@ -597,7 +711,7 @@ const NewDocument = () => {
           const documentsForBry = fileContents.map(fc => ({
             documentId: fc.docId,
             base64: fc.base64,
-            fileName: files.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || title,
+            fileName: filesToUpload.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || effectiveTitle,
           }));
 
           const {
@@ -606,7 +720,7 @@ const NewDocument = () => {
           } = await supabase.functions.invoke('bry-create-envelope', {
             body: {
               documents: documentsForBry,
-              title: title,
+              title: effectiveTitle,
               signers: allSigners,
               userId: user.id,
               authenticationOptions: ['IP', 'GEOLOCATION', ...authOptions],
@@ -629,15 +743,22 @@ const NewDocument = () => {
           console.error('Error creating BRy envelope:', bryErr);
         }
       } else {
-        console.log('SIMPLE signature mode - using native flow without BRy');
+        console.log('SIMPLE/PRESCRIPTION signature mode - using native flow without BRy');
       }
 
-      // Send notifications - use BRy links for ADVANCED/QUALIFIED, internal links for SIMPLE
-      const allSignersForNotification = [{
-        name: companySigner.name,
-        email: companySigner.email,
-        phone: companySigner.phone
-      }, ...signers];
+      // Send notifications
+      // For prescription mode, only notify company signer
+      const allSignersForNotification = isPrescriptionMode 
+        ? [{
+            name: companySigner.name,
+            email: companySigner.email,
+            phone: companySigner.phone
+          }]
+        : [{
+            name: companySigner.name,
+            email: companySigner.email,
+            phone: companySigner.phone
+          }, ...signers];
 
       for (const signer of allSignersForNotification) {
         try {
@@ -649,7 +770,7 @@ const NewDocument = () => {
               body: {
                 signerName: signer.name,
                 signerEmail: signer.email,
-                documentName: title,
+                documentName: effectiveTitle,
                 documentId: firstDocumentId,
                 senderName: companySigner.name,
                 organizationName: companySigner.companyName,
@@ -664,7 +785,7 @@ const NewDocument = () => {
               body: {
                 signerName: signer.name,
                 signerPhone: signer.phone,
-                documentName: title,
+                documentName: effectiveTitle,
                 documentId: firstDocumentId,
                 organizationName: companySigner.companyName,
                 brySignerLink: bryLink // null for SIMPLE, BRy link for others
@@ -675,10 +796,15 @@ const NewDocument = () => {
           console.error(`Failed to send notification to ${signer.email || signer.phone}:`, error);
         }
       }
+
       setIsSubmitted(true);
       toast({
-        title: isEnvelope ? "Envelope enviado!" : "Documento enviado!",
-        description: isEnvelope ? `Envelope com ${files.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.` : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
+        title: isPrescriptionMode ? "Prescrição enviada!" : (filesToUpload.length >= 2 ? "Envelope enviado!" : "Documento enviado!"),
+        description: isPrescriptionMode 
+          ? "A prescrição foi enviada e você receberá o convite para assinatura por e-mail e WhatsApp."
+          : (filesToUpload.length >= 2 
+              ? `Envelope com ${filesToUpload.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.` 
+              : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp.")
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
@@ -689,28 +815,33 @@ const NewDocument = () => {
       });
     }
   };
+
+  // Check if form is ready to submit
+  const hasFileOrPrescription = files.length > 0 || (isPrescriptionMode && prescriptionContent.trim());
+  const hasValidSigners = isPrescriptionMode || signers.some(signer => signer.name && (signer.phone || signer.email));
+
   return <Layout>
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
         <div>
           <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
           <div className="mt-2 space-y-1">
-            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${files.length > 0 ? 'text-green-600' : 'text-gray-500'}`} initial={{
+            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${hasFileOrPrescription ? 'text-green-600' : 'text-gray-500'}`} initial={{
             opacity: 0,
             x: -10
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: files.length === 0 ? [1, 1.02, 1] : 1
+            scale: !hasFileOrPrescription ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             scale: {
-              repeat: files.length === 0 ? Infinity : 0,
+              repeat: !hasFileOrPrescription ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
           }}>
               <AnimatePresence mode="wait">
-                {files.length > 0 && <motion.div initial={{
+                {hasFileOrPrescription && <motion.div initial={{
                 scale: 0,
                 rotate: -180
               }} animate={{
@@ -727,45 +858,47 @@ const NewDocument = () => {
                     <Check className="w-3 h-3" />
                   </motion.div>}
               </AnimatePresence>
-              <span>Faça upload de 1 ou mais documentos (máx. {MAX_DOCUMENTS})</span>
+              <span>{isPrescriptionMode ? 'Faça upload ou preencha a prescrição' : `Faça upload de 1 ou mais documentos (máx. ${MAX_DOCUMENTS})`}</span>
             </motion.div>
             
-            <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${signers.some(signer => signer.name && (signer.phone || signer.email)) ? 'text-green-600' : 'text-gray-500'}`} initial={{
-            opacity: 0,
-            x: -10
-          }} animate={{
-            opacity: 1,
-            x: 0,
-            scale: files.length > 0 && !signers.some(signer => signer.name && (signer.phone || signer.email)) ? [1, 1.02, 1] : 1
-          }} transition={{
-            duration: 0.3,
-            delay: 0.1,
-            scale: {
-              repeat: files.length > 0 && !signers.some(signer => signer.name && (signer.phone || signer.email)) ? Infinity : 0,
-              duration: 2,
-              ease: "easeInOut"
-            }
-          }}>
-              <AnimatePresence mode="wait">
-                {signers.some(signer => signer.name && (signer.phone || signer.email)) && <motion.div initial={{
-                scale: 0,
-                rotate: -180
-              }} animate={{
-                scale: 1,
-                rotate: 0
-              }} exit={{
-                scale: 0,
-                rotate: 180
-              }} transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 15
-              }}>
-                    <Check className="w-3 h-3" />
-                  </motion.div>}
-              </AnimatePresence>
-              <span>Adicione pelo menos 1 signatário{isEnvelope ? ' (máx. 20 para envelope)' : ''}</span>
-            </motion.div>
+            {!isPrescriptionMode && (
+              <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${hasValidSigners ? 'text-green-600' : 'text-gray-500'}`} initial={{
+              opacity: 0,
+              x: -10
+            }} animate={{
+              opacity: 1,
+              x: 0,
+              scale: hasFileOrPrescription && !hasValidSigners ? [1, 1.02, 1] : 1
+            }} transition={{
+              duration: 0.3,
+              delay: 0.1,
+              scale: {
+                repeat: hasFileOrPrescription && !hasValidSigners ? Infinity : 0,
+                duration: 2,
+                ease: "easeInOut"
+              }
+            }}>
+                <AnimatePresence mode="wait">
+                  {hasValidSigners && <motion.div initial={{
+                  scale: 0,
+                  rotate: -180
+                }} animate={{
+                  scale: 1,
+                  rotate: 0
+                }} exit={{
+                  scale: 0,
+                  rotate: 180
+                }} transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 15
+                }}>
+                      <Check className="w-3 h-3" />
+                    </motion.div>}
+                </AnimatePresence>
+                <span>Adicione pelo menos 1 signatário{isEnvelope ? ' (máx. 20 para envelope)' : ''}</span>
+              </motion.div>
+            )}
             
             <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`} initial={{
             opacity: 0,
@@ -773,12 +906,12 @@ const NewDocument = () => {
           }} animate={{
             opacity: 1,
             x: 0,
-            scale: files.length > 0 && signers.some(signer => signer.name && (signer.phone || signer.email)) && !isSubmitted ? [1, 1.02, 1] : 1
+            scale: hasFileOrPrescription && hasValidSigners && !isSubmitted ? [1, 1.02, 1] : 1
           }} transition={{
             duration: 0.3,
             delay: 0.2,
             scale: {
-              repeat: files.length > 0 && signers.some(signer => signer.name && (signer.phone || signer.email)) && !isSubmitted ? Infinity : 0,
+              repeat: hasFileOrPrescription && hasValidSigners && !isSubmitted ? Infinity : 0,
               duration: 2,
               ease: "easeInOut"
             }
@@ -807,7 +940,43 @@ const NewDocument = () => {
         </div>
 
         <div className="space-y-6 bg-card p-6 rounded-lg border">
-          {/* Drag and Drop Area */}
+          {/* 1. Signature Mode Section - FIRST */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-gray-600">Tipo de Assinatura</Label>
+            <RadioGroup value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)} className="space-y-2">
+              {SIGNATURE_MODES
+                .filter(mode => mode.id !== 'PRESCRIPTION' || isHealthcareProfessional)
+                .map(mode => (
+                <div
+                  key={mode.id}
+                  onClick={() => setSignatureMode(mode.id)}
+                  className={`px-3 py-3 rounded cursor-pointer transition-colors ${
+                    signatureMode === mode.id 
+                      ? mode.id === 'PRESCRIPTION'
+                        ? 'bg-purple-100 border border-purple-300'
+                        : 'bg-primary/10 border border-primary/30' 
+                      : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value={mode.id} id={mode.id} />
+                    <span className="text-sm font-semibold text-gray-800">{mode.typeName}</span>
+                  </div>
+                  <div className="ml-6 mt-1">
+                    <span className="text-sm font-medium text-gray-700">{mode.label}</span>
+                    <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
+                    {mode.badge && (
+                      <span className="inline-block text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium mt-1.5">
+                        {mode.badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          {/* 2. Drag and Drop Area - SECOND */}
           <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${dragActive ? "border-primary bg-primary/10 scale-[1.02] shadow-lg" : "border-muted-foreground/25 hover:border-primary/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
             {files.length === 0 ? <>
                 <Upload className={`w-12 h-12 mx-auto mb-4 transition-all duration-300 ${dragActive ? "text-primary scale-110" : "text-muted-foreground"}`} />
@@ -874,145 +1043,127 @@ const NewDocument = () => {
                 </div>}
           </div>
 
+          {/* Prescription Fill Button - Only for Prescription Mode */}
+          {isPrescriptionMode && (
+            <div className="flex justify-center">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setShowPrescriptionSheet(true)}
+                className={`rounded-full border-purple-300 ${prescriptionContent ? 'bg-purple-200 text-purple-800' : 'bg-purple-100 text-purple-700'} hover:bg-purple-200 hover:text-purple-800`}
+              >
+                <FileEdit className="w-4 h-4 mr-2" />
+                {prescriptionContent ? 'Editar Prescrição' : 'Preencher Prescrição'}
+              </Button>
+            </div>
+          )}
+
           {/* Form Fields */}
           <div className="grid gap-6">
+            {/* 3. Title - THIRD */}
             <div className="grid gap-2">
-              <Label htmlFor="title">Título do Documento</Label>
+              <Label htmlFor="title">Título do Documento <span className="text-xs text-muted-foreground">(opcional - usa nome do arquivo)</span></Label>
               <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Contrato de Prestação de Serviços" className="placeholder:text-xs" />
             </div>
 
-            {/* Signers Section */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-600">Signatários</p>
-              </div>
-              {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted">
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    {signer.name && (signer.phone || signer.email) && (
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
-                        onClick={async () => {
-                          const { data: { user } } = await supabase.auth.getUser();
-                          if (!user) return;
-                          
-                          // Check if contact already exists
-                          const existingContact = signerSuggestions.find(
-                            s => s.email === signer.email || s.phone === signer.phone
-                          );
-                          if (existingContact) {
-                            toast({ title: "Contato já existe", description: "Este signatário já está salvo nos seus contatos." });
-                            return;
-                          }
-                          
-                          const { error } = await supabase.from('contacts').insert({
-                            user_id: user.id,
-                            name: signer.name,
-                            email: signer.email || null,
-                            phone: signer.phone || null
-                          });
-                          
-                          if (error) {
-                            toast({ title: "Erro", description: "Não foi possível salvar o contato.", variant: "destructive" });
-                          } else {
-                            toast({ title: "Contato salvo!", description: "Signatário adicionado aos seus contatos." });
-                            // Refresh suggestions
-                            setSignerSuggestions(prev => [...prev, { name: signer.name, email: signer.email, phone: signer.phone }]);
-                          }
-                        }}
-                        title="Salvar como contato"
-                      >
-                        <BookUser className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    )}
-                    {signers.length > 1 && (
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent" onClick={() => removeSigner(index)}>
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
-                    <SignerAutocomplete
-                      value={signer.name}
-                      onChange={(value) => handleSignerChange(index, "name", value)}
-                      onSelectSigner={(suggestion) => {
-                        const newSigners = [...signers];
-                        newSigners[index] = {
-                          name: suggestion.name,
-                          phone: suggestion.phone || "",
-                          email: suggestion.email || ""
-                        };
-                        setSigners(newSigners);
-                      }}
-                      onSelectGroup={(members) => {
-                        setSigners(members.map(m => ({
-                          name: m.name,
-                          phone: m.phone,
-                          email: m.email
-                        })));
-                      }}
-                      suggestions={signerSuggestions}
-                      groups={signerGroups}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor={`phone-${index}`}>Telefone</Label>
-                    <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="placeholder:text-xs" />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor={`email-${index}`}>E-mail</Label>
-                    <Input id={`email-${index}`} type="email" value={signer.email} onChange={e => handleSignerChange(index, "email", e.target.value)} placeholder="email@exemplo.com" className="placeholder:text-xs" />
-                  </div>
-                </div>)}
-              
-              <div className="flex justify-end">
-                <Button type="button" variant="ghost" size="icon" onClick={addSigner} className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent">
-                  <Plus className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Signature Mode Section */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-gray-600">Tipo de Assinatura</Label>
-            <RadioGroup value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)} className="space-y-2">
-              {SIGNATURE_MODES
-                .filter(mode => mode.id !== 'PRESCRIPTION' || isHealthcareProfessional)
-                .map(mode => (
-                <div
-                  key={mode.id}
-                  onClick={() => setSignatureMode(mode.id)}
-                  className={`px-3 py-3 rounded cursor-pointer transition-colors ${
-                    signatureMode === mode.id 
-                      ? mode.id === 'PRESCRIPTION'
-                        ? 'bg-purple-100 border border-purple-300'
-                        : 'bg-primary/10 border border-primary/30' 
-                      : 'bg-sidebar-foreground hover:bg-sidebar-foreground/80'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value={mode.id} id={mode.id} />
-                    <span className="text-sm font-semibold text-gray-800">{mode.typeName}</span>
-                  </div>
-                  <div className="ml-6 mt-1">
-                    <span className="text-sm font-medium text-gray-700">{mode.label}</span>
-                    <p className="text-xs text-gray-500 mt-0.5">{mode.description}</p>
-                    {mode.badge && (
-                      <span className="inline-block text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium mt-1.5">
-                        {mode.badge}
-                      </span>
-                    )}
-                  </div>
+            {/* 4. Signers Section - Only for non-prescription modes */}
+            {!isPrescriptionMode && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-gray-600">Signatários</p>
                 </div>
-              ))}
-            </RadioGroup>
+                {signers.map((signer, index) => <div key={index} className="relative p-4 border rounded-lg space-y-3 bg-muted">
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      {signer.name && (signer.phone || signer.email) && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent"
+                          onClick={async () => {
+                            const { data: { user } } = await supabase.auth.getUser();
+                            if (!user) return;
+                            
+                            // Check if contact already exists
+                            const existingContact = signerSuggestions.find(
+                              s => s.email === signer.email || s.phone === signer.phone
+                            );
+                            if (existingContact) {
+                              toast({ title: "Contato já existe", description: "Este signatário já está salvo nos seus contatos." });
+                              return;
+                            }
+                            
+                            const { error } = await supabase.from('contacts').insert({
+                              user_id: user.id,
+                              name: signer.name,
+                              email: signer.email || null,
+                              phone: signer.phone || null
+                            });
+                            
+                            if (error) {
+                              toast({ title: "Erro", description: "Não foi possível salvar o contato.", variant: "destructive" });
+                            } else {
+                              toast({ title: "Contato salvo!", description: "Signatário adicionado aos seus contatos." });
+                              // Refresh suggestions
+                              setSignerSuggestions(prev => [...prev, { name: signer.name, email: signer.email, phone: signer.phone }]);
+                            }
+                          }}
+                          title="Salvar como contato"
+                        >
+                          <BookUser className="w-4 h-4 text-gray-500" />
+                        </Button>
+                      )}
+                      {signers.length > 1 && (
+                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent" onClick={() => removeSigner(index)}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor={`name-${index}`}>Nome Completo / Razão Social</Label>
+                      <SignerAutocomplete
+                        value={signer.name}
+                        onChange={(value) => handleSignerChange(index, "name", value)}
+                        onSelectSigner={(suggestion) => {
+                          const newSigners = [...signers];
+                          newSigners[index] = {
+                            name: suggestion.name,
+                            phone: suggestion.phone || "",
+                            email: suggestion.email || ""
+                          };
+                          setSigners(newSigners);
+                        }}
+                        onSelectGroup={(members) => {
+                          setSigners(members.map(m => ({
+                            name: m.name,
+                            phone: m.phone,
+                            email: m.email
+                          })));
+                        }}
+                        suggestions={signerSuggestions}
+                        groups={signerGroups}
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor={`phone-${index}`}>Telefone</Label>
+                      <Input id={`phone-${index}`} value={signer.phone} onChange={e => handleSignerChange(index, "phone", e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="placeholder:text-xs" />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor={`email-${index}`}>E-mail</Label>
+                      <Input id={`email-${index}`} type="email" value={signer.email} onChange={e => handleSignerChange(index, "email", e.target.value)} placeholder="email@exemplo.com" className="placeholder:text-xs" />
+                    </div>
+                  </div>)}
+                
+                <div className="flex justify-end">
+                  <Button type="button" variant="ghost" size="icon" onClick={addSigner} className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent">
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Authentication Options Section - Only for BRy modes (not SIMPLE or PRESCRIPTION) */}
@@ -1071,6 +1222,52 @@ const NewDocument = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Prescription Sheet */}
+      <Sheet open={showPrescriptionSheet} onOpenChange={setShowPrescriptionSheet}>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Preencher Prescrição</SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-4">
+            {/* Professional Info Display */}
+            {healthcareInfo && companySigner && (
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <p className="font-semibold text-gray-800">{companySigner.name}</p>
+                <p className="text-sm text-gray-600">
+                  {healthcareInfo.professionalCouncil} {healthcareInfo.professionalRegistration}/{healthcareInfo.registrationState}
+                </p>
+                {healthcareInfo.medicalSpecialty && (
+                  <p className="text-sm text-gray-500">{healthcareInfo.medicalSpecialty}</p>
+                )}
+              </div>
+            )}
+
+            {/* Prescription Content */}
+            <div className="space-y-2">
+              <Label htmlFor="prescription-content">Conteúdo da Prescrição</Label>
+              <Textarea 
+                id="prescription-content"
+                value={prescriptionContent}
+                onChange={(e) => setPrescriptionContent(e.target.value)}
+                placeholder="Digite aqui o conteúdo da prescrição médica..."
+                className="min-h-[300px] resize-none"
+              />
+            </div>
+          </div>
+
+          <SheetFooter className="mt-6">
+            <Button 
+              onClick={() => setShowPrescriptionSheet(false)}
+              className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Confirmar
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </Layout>;
 };
 export default NewDocument;
