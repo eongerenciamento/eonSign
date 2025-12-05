@@ -12,7 +12,22 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Upload, CheckCircle2, AlertCircle, ExternalLink, FileText } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Loader2, 
+  Upload, 
+  CheckCircle2, 
+  AlertCircle, 
+  ExternalLink, 
+  FileText,
+  ClipboardList,
+  FileUp,
+  Video,
+  Award,
+  PartyPopper,
+  Check
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CertificatePurchaseDialogProps {
   open: boolean;
@@ -29,6 +44,20 @@ interface CertificatePurchaseDialogProps {
 }
 
 type Step = "form" | "document" | "videoconference" | "emission" | "complete";
+
+const STEPS_CONFIG = [
+  { key: "form", label: "Dados", icon: ClipboardList },
+  { key: "document", label: "Documento", icon: FileUp },
+  { key: "videoconference", label: "Vídeo", icon: Video },
+  { key: "emission", label: "Emissão", icon: Award },
+  { key: "complete", label: "Concluído", icon: PartyPopper },
+] as const;
+
+const stepVariants = {
+  initial: { opacity: 0, x: 20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+};
 
 export function CertificatePurchaseDialog({
   open,
@@ -60,6 +89,8 @@ export function CertificatePurchaseDialog({
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  const currentStepIndex = STEPS_CONFIG.findIndex((s) => s.key === step);
+
   // Initialize form data when dialog opens
   useEffect(() => {
     if (open) {
@@ -69,7 +100,6 @@ export function CertificatePurchaseDialog({
       
       const initializeDialog = async () => {
         try {
-          // Check authentication
           const { data: { user }, error: authError } = await supabase.auth.getUser();
           
           if (authError) {
@@ -86,7 +116,6 @@ export function CertificatePurchaseDialog({
           
           console.log("[CertificateDialog] User authenticated:", user.id);
           
-          // Set prefill data if available
           if (prefillData) {
             console.log("[CertificateDialog] Setting prefill data:", prefillData);
             setCommonName(prefillData.name || "");
@@ -173,17 +202,14 @@ export function CertificatePurchaseDialog({
     setIsLoading(true);
 
     try {
-      // Check PSBIO first
-      const psbioResult = await checkPsbio();
+      await checkPsbio();
       
-      // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
         throw new Error("Sessão expirada. Por favor, faça login novamente.");
       }
 
-      // Prepare request body
       const requestBody: any = {
         type,
         common_name: commonName,
@@ -238,7 +264,6 @@ export function CertificatePurchaseDialog({
     setIsUploading(true);
 
     try {
-      // Convert file to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => {
@@ -250,7 +275,6 @@ export function CertificatePurchaseDialog({
       reader.readAsDataURL(documentFile);
       const base64 = await base64Promise;
 
-      // Get file extension
       const extension = documentFile.name.split(".").pop()?.toLowerCase() || "pdf";
 
       const { data, error } = await supabase.functions.invoke("bry-ar-attach-document", {
@@ -288,7 +312,6 @@ export function CertificatePurchaseDialog({
     if (!protocol || !cpf) return;
     
     const cleanCpf = cpf.replace(/\D/g, "");
-    // Homologation URL
     const url = `https://mp-universal.hom.bry.com.br/protocolo/emissao?cpf=${cleanCpf}&protocolo=${protocol}`;
     window.open(url, "_blank");
     setStep("complete");
@@ -317,7 +340,6 @@ export function CertificatePurchaseDialog({
       step
     });
     
-    // Prevent closing during loading/processing states
     if (!newOpen && (isLoading || isUploading || isInitializing)) {
       console.log("[CertificateDialog] Prevented close during loading state");
       return;
@@ -329,7 +351,6 @@ export function CertificatePurchaseDialog({
     onOpenChange(newOpen);
   };
 
-  // Prevent closing on outside click during operations
   const handleInteractOutside = (e: Event) => {
     if (isLoading || isUploading || isInitializing) {
       console.log("[CertificateDialog] Prevented interact outside during loading");
@@ -347,38 +368,106 @@ export function CertificatePurchaseDialog({
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange} modal={true}>
       <DialogContent 
-        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
         onInteractOutside={handleInteractOutside}
         onEscapeKeyDown={handleEscapeKeyDown}
         onPointerDownOutside={handleInteractOutside}
       >
-        <DialogHeader>
-          <DialogTitle>Comprar Certificado Digital A1</DialogTitle>
-          <DialogDescription>
-            {step === "form" && "Preencha os dados para solicitar seu certificado digital ICP-Brasil"}
-            {step === "document" && "Anexe seu documento de identificação com foto"}
-            {step === "videoconference" && "Realize a videoconferência para validação"}
-            {step === "emission" && "Aguarde aprovação e emita seu certificado"}
-            {step === "complete" && "Processo concluído!"}
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">Certificado Digital A1</DialogTitle>
+          <DialogDescription className="text-xs">
+            Solicite seu certificado digital ICP-Brasil
           </DialogDescription>
         </DialogHeader>
 
+        {/* Step Indicator */}
+        {!isInitializing && !initError && (
+          <div className="flex items-center justify-between px-2 py-4 mb-2">
+            {STEPS_CONFIG.map((stepItem, index) => {
+              const Icon = stepItem.icon;
+              const isCompleted = index < currentStepIndex;
+              const isCurrent = index === currentStepIndex;
+              
+              return (
+                <div key={stepItem.key} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center">
+                    <motion.div
+                      initial={false}
+                      animate={{
+                        scale: isCurrent ? 1.1 : 1,
+                        backgroundColor: isCompleted 
+                          ? "hsl(var(--primary))" 
+                          : isCurrent 
+                            ? "hsl(var(--primary))" 
+                            : "hsl(var(--muted))",
+                      }}
+                      transition={{ duration: 0.3 }}
+                      className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                        (isCompleted || isCurrent) ? "shadow-md" : ""
+                      )}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-5 h-5 text-primary-foreground" />
+                      ) : (
+                        <Icon className={cn(
+                          "w-5 h-5",
+                          isCurrent ? "text-primary-foreground" : "text-muted-foreground"
+                        )} />
+                      )}
+                    </motion.div>
+                    <span className={cn(
+                      "text-[10px] mt-1.5 font-medium transition-colors",
+                      isCurrent ? "text-primary" : isCompleted ? "text-primary" : "text-muted-foreground"
+                    )}>
+                      {stepItem.label}
+                    </span>
+                  </div>
+                  
+                  {index < STEPS_CONFIG.length - 1 && (
+                    <div className="flex-1 mx-1">
+                      <div className="h-0.5 bg-muted relative overflow-hidden rounded-full">
+                        <motion.div
+                          initial={false}
+                          animate={{ 
+                            width: isCompleted ? "100%" : "0%" 
+                          }}
+                          transition={{ duration: 0.4, ease: "easeInOut" }}
+                          className="absolute top-0 left-0 h-full bg-primary"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Loading state */}
         {isInitializing && (
-          <div className="flex flex-col items-center justify-center py-8">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-8"
+          >
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
             <p className="text-sm text-muted-foreground">Carregando...</p>
-          </div>
+          </motion.div>
         )}
 
         {/* Error state */}
         {initError && !isInitializing && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
+          >
             <div className="flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
               <div>
-                <p className="font-medium text-red-700">Erro</p>
-                <p className="text-sm text-red-600">{initError}</p>
+                <p className="font-medium text-destructive">Erro</p>
+                <p className="text-sm text-destructive/80">{initError}</p>
               </div>
             </div>
             <div className="flex justify-end mt-4">
@@ -386,292 +475,359 @@ export function CertificatePurchaseDialog({
                 Fechar
               </Button>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Form step */}
-        {step === "form" && !isInitializing && !initError && (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-xs text-gray-500">Tipo de Certificado</Label>
-              <RadioGroup
-                value={type}
-                onValueChange={(value) => setType(value as "PF" | "PJ")}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="PF" id="pf" />
-                  <Label htmlFor="pf" className="cursor-pointer">Pessoa Física</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="PJ" id="pj" />
-                  <Label htmlFor="pj" className="cursor-pointer">Pessoa Jurídica</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div>
-              <Label htmlFor="commonName" className="text-xs text-gray-500">
-                {type === "PF" ? "Nome Completo" : "Razão Social"} *
-              </Label>
-              <Input
-                id="commonName"
-                value={commonName}
-                onChange={(e) => setCommonName(e.target.value)}
-                placeholder={type === "PF" ? "João da Silva" : "Empresa LTDA"}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="cpf" className="text-xs text-gray-500">CPF do Titular *</Label>
-              <Input
-                id="cpf"
-                value={cpf}
-                onChange={(e) => setCpf(formatCpf(e.target.value))}
-                placeholder="000.000.000-00"
-              />
-            </div>
-
-            {type === "PJ" && (
-              <>
-                <div>
-                  <Label htmlFor="cnpj" className="text-xs text-gray-500">CNPJ *</Label>
-                  <Input
-                    id="cnpj"
-                    value={cnpj}
-                    onChange={(e) => setCnpj(formatCnpj(e.target.value))}
-                    placeholder="00.000.000/0000-00"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="responsibleName" className="text-xs text-gray-500">Nome do Responsável *</Label>
-                  <Input
-                    id="responsibleName"
-                    value={responsibleName}
-                    onChange={(e) => setResponsibleName(e.target.value)}
-                    placeholder="Nome do responsável legal"
-                  />
-                </div>
-              </>
-            )}
-
-            <div>
-              <Label htmlFor="email" className="text-xs text-gray-500">E-mail *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@exemplo.com"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="phone" className="text-xs text-gray-500">Telefone *</Label>
-              <Input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="(00)00000-0000"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="birthDate" className="text-xs text-gray-500">Data de Nascimento *</Label>
-              <Input
-                id="birthDate"
-                value={birthDate}
-                onChange={(e) => setBirthDate(formatBirthDate(e.target.value))}
-                placeholder="DD/MM/AAAA"
-              />
-            </div>
-
-            {canIssue === false && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                <div className="text-sm text-yellow-700">
-                  <p className="font-medium">Atenção</p>
-                  <p>Cliente não cadastrado no PSBIO. Necessário CNH emitida/renovada a partir de 2018 para prosseguir.</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleSubmitRequest} 
-                disabled={isLoading}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
-                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Solicitar Certificado
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === "document" && (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-700">
-                <strong>Protocolo:</strong> {protocol}
-              </p>
-              <p className="text-xs text-blue-600 mt-1">
-                Guarde este protocolo para acompanhar sua solicitação.
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-xs text-gray-500">Documento de Identificação com Foto *</Label>
-              <p className="text-xs text-gray-400 mb-2">
-                Preferencialmente CNH exportada pelo aplicativo ou RG/DNI
-              </p>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                {documentFile ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <FileText className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-gray-700">{documentFile.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDocumentFile(null)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Remover
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">Clique para selecionar ou arraste o arquivo</p>
-                    <p className="text-xs text-gray-400">PDF, JPG ou PNG</p>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setStep("videoconference")}>
-                Pular por agora
-              </Button>
-              <Button 
-                onClick={handleUploadDocument} 
-                disabled={!documentFile || isUploading}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
-                {isUploading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Enviar Documento
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === "videoconference" && (
-          <div className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+        {/* Step Content with Animations */}
+        <AnimatePresence mode="wait">
+          {/* Form step */}
+          {step === "form" && !isInitializing && !initError && (
+            <motion.div
+              key="form"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
               <div>
-                <p className="font-medium text-green-700">Solicitação enviada!</p>
-                <p className="text-sm text-green-600">
-                  Agora você precisa realizar a videoconferência para validação de identidade.
+                <Label className="text-xs text-muted-foreground">Tipo de Certificado</Label>
+                <RadioGroup
+                  value={type}
+                  onValueChange={(value) => setType(value as "PF" | "PJ")}
+                  className="flex gap-4 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="PF" id="pf" />
+                    <Label htmlFor="pf" className="cursor-pointer">Pessoa Física</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="PJ" id="pj" />
+                    <Label htmlFor="pj" className="cursor-pointer">Pessoa Jurídica</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div>
+                <Label htmlFor="commonName" className="text-xs text-muted-foreground">
+                  {type === "PF" ? "Nome Completo" : "Razão Social"} *
+                </Label>
+                <Input
+                  id="commonName"
+                  value={commonName}
+                  onChange={(e) => setCommonName(e.target.value)}
+                  placeholder={type === "PF" ? "João da Silva" : "Empresa LTDA"}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cpf" className="text-xs text-muted-foreground">CPF do Titular *</Label>
+                <Input
+                  id="cpf"
+                  value={cpf}
+                  onChange={(e) => setCpf(formatCpf(e.target.value))}
+                  placeholder="000.000.000-00"
+                />
+              </div>
+
+              {type === "PJ" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-4 overflow-hidden"
+                >
+                  <div>
+                    <Label htmlFor="cnpj" className="text-xs text-muted-foreground">CNPJ *</Label>
+                    <Input
+                      id="cnpj"
+                      value={cnpj}
+                      onChange={(e) => setCnpj(formatCnpj(e.target.value))}
+                      placeholder="00.000.000/0000-00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="responsibleName" className="text-xs text-muted-foreground">Nome do Responsável *</Label>
+                    <Input
+                      id="responsibleName"
+                      value={responsibleName}
+                      onChange={(e) => setResponsibleName(e.target.value)}
+                      placeholder="Nome do responsável legal"
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              <div>
+                <Label htmlFor="email" className="text-xs text-muted-foreground">E-mail *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone" className="text-xs text-muted-foreground">Telefone *</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  placeholder="(00)00000-0000"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="birthDate" className="text-xs text-muted-foreground">Data de Nascimento *</Label>
+                <Input
+                  id="birthDate"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(formatBirthDate(e.target.value))}
+                  placeholder="DD/MM/AAAA"
+                />
+              </div>
+
+              {canIssue === false && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-start gap-2"
+                >
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div className="text-sm text-yellow-700">
+                    <p className="font-medium">Atenção</p>
+                    <p>Cliente não cadastrado no PSBIO. Necessário CNH emitida/renovada a partir de 2018 para prosseguir.</p>
+                  </div>
+                </motion.div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSubmitRequest} 
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                >
+                  {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Continuar
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Document step */}
+          {step === "document" && (
+            <motion.div
+              key="document"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                <p className="text-sm text-primary font-medium">
+                  Protocolo: {protocol}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Guarde este protocolo para acompanhar sua solicitação.
                 </p>
               </div>
-            </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-700 mb-3">
-                Clique no botão abaixo para acessar o ambiente de videoconferência. 
-                Tenha em mãos seu documento de identificação.
-              </p>
-              <Button 
-                onClick={handleOpenVideoconference}
-                className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Iniciar Videoconferência
-              </Button>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Fechar
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setStep("emission")}
-              >
-                Já realizei a videoconferência
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === "emission" && (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-700">
-                Após a aprovação da sua solicitação (você receberá uma notificação), 
-                clique no botão abaixo para emitir seu certificado.
-              </p>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <Button 
-                onClick={handleOpenEmission}
-                className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Emitir Certificado
-              </Button>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Fechar
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === "complete" && (
-          <div className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
               <div>
-                <p className="font-medium text-green-700">Processo concluído!</p>
-                <p className="text-sm text-green-600">
+                <Label className="text-xs text-muted-foreground">Documento de Identificação *</Label>
+                <p className="text-xs text-muted-foreground/70 mb-2">
+                  Preferencialmente CNH exportada pelo aplicativo ou RG/DNI
+                </p>
+                <motion.div 
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                >
+                  {documentFile ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <FileText className="w-5 h-5 text-green-600" />
+                      <span className="text-sm text-foreground">{documentFile.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDocumentFile(null)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Clique para selecionar ou arraste o arquivo</p>
+                      <p className="text-xs text-muted-foreground/70">PDF, JPG ou PNG</p>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  )}
+                </motion.div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setStep("videoconference")}>
+                  Pular
+                </Button>
+                <Button 
+                  onClick={handleUploadDocument} 
+                  disabled={!documentFile || isUploading}
+                  className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                >
+                  {isUploading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Enviar
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Videoconference step */}
+          {step === "videoconference" && (
+            <motion.div
+              key="videoconference"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-green-700">Solicitação enviada!</p>
+                  <p className="text-sm text-green-600/80">
+                    Realize a videoconferência para validar sua identidade.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Clique no botão abaixo para acessar o ambiente de videoconferência. 
+                  Tenha em mãos seu documento de identificação.
+                </p>
+                <Button 
+                  onClick={handleOpenVideoconference}
+                  className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                >
+                  <Video className="w-4 h-4 mr-2" />
+                  Iniciar Videoconferência
+                </Button>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Fechar
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setStep("emission")}
+                >
+                  Já realizei
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Emission step */}
+          {step === "emission" && (
+            <motion.div
+              key="emission"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <p className="text-sm text-foreground">
+                  Após a aprovação da sua solicitação (você receberá uma notificação), 
+                  clique no botão abaixo para emitir seu certificado.
+                </p>
+              </div>
+
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <Button 
+                  onClick={handleOpenEmission}
+                  className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                >
+                  <Award className="w-4 h-4 mr-2" />
+                  Emitir Certificado
+                </Button>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Complete step */}
+          {step === "complete" && (
+            <motion.div
+              key="complete"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                className="flex flex-col items-center py-4"
+              >
+                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                  <PartyPopper className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Processo Concluído!</h3>
+                <p className="text-sm text-muted-foreground text-center mt-1">
                   Siga as instruções na página de emissão para baixar e instalar seu certificado digital.
                 </p>
+              </motion.div>
+
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-foreground">
+                  <strong>Protocolo:</strong> {protocol}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Guarde este protocolo para referência futura.
+                </p>
               </div>
-            </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">
-                <strong>Protocolo:</strong> {protocol}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Guarde este protocolo para referência futura.
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button 
-                onClick={() => onOpenChange(false)}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
-              >
-                Concluir
-              </Button>
-            </div>
-          </div>
-        )}
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => onOpenChange(false)}
+                  className="bg-gradient-to-r from-[#273d60] to-[#001a4d]"
+                >
+                  Concluir
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </DialogContent>
     </Dialog>
   );
