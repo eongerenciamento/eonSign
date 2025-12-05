@@ -751,7 +751,7 @@ export default function CertificateRequests() {
 
                         {/* Mobile Progress Steps - Vertical layout */}
                         <div className="sm:hidden">
-                          <div className="flex flex-col items-center py-2">
+                          <div className="flex flex-col py-2 pl-4">
                             {STEPS.map((step, stepIndex) => {
                               const status = stepStatus[step.key as keyof typeof stepStatus];
                               const StepIcon = step.icon;
@@ -760,8 +760,9 @@ export default function CertificateRequests() {
                               const isRejected = status === "rejected";
                               const isWarning = status === "warning";
                               return (
-                                <div key={step.key} className="flex flex-col items-center">
-                                  <div className="flex items-center gap-3">
+                                <div key={step.key} className="flex">
+                                  {/* Icon column with centered line */}
+                                  <div className="flex flex-col items-center">
                                     <motion.div 
                                       className={`
                                         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
@@ -776,13 +777,14 @@ export default function CertificateRequests() {
                                     >
                                       <StepIcon className="h-4 w-4" />
                                     </motion.div>
-                                    <span className={`text-xs ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                                      {step.label}
-                                    </span>
+                                    {stepIndex < STEPS.length - 1 && (
+                                      <div className={`w-0.5 h-4 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
+                                    )}
                                   </div>
-                                  {stepIndex < STEPS.length - 1 && (
-                                    <div className={`w-0.5 h-4 my-1 rounded ${isCompleted ? "bg-green-500" : isWarning ? "bg-orange-500" : "bg-muted"}`} />
-                                  )}
+                                  {/* Label column */}
+                                  <span className={`text-xs ml-3 mt-2 ${isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                                    {step.label}
+                                  </span>
                                 </div>
                               );
                             })}
