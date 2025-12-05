@@ -310,17 +310,48 @@ export function CertificatePurchaseDialog({
   };
 
   const handleDialogOpenChange = (newOpen: boolean) => {
-    console.log("[CertificateDialog] onOpenChange called:", newOpen);
+    console.log("[CertificateDialog] onOpenChange called:", newOpen, {
+      isLoading,
+      isUploading,
+      isInitializing,
+      step
+    });
+    
+    // Prevent closing during loading/processing states
+    if (!newOpen && (isLoading || isUploading || isInitializing)) {
+      console.log("[CertificateDialog] Prevented close during loading state");
+      return;
+    }
+    
     if (!newOpen) {
-      // Only close if user explicitly requests it
       resetDialog();
     }
     onOpenChange(newOpen);
   };
 
+  // Prevent closing on outside click during operations
+  const handleInteractOutside = (e: Event) => {
+    if (isLoading || isUploading || isInitializing) {
+      console.log("[CertificateDialog] Prevented interact outside during loading");
+      e.preventDefault();
+    }
+  };
+
+  const handleEscapeKeyDown = (e: KeyboardEvent) => {
+    if (isLoading || isUploading || isInitializing) {
+      console.log("[CertificateDialog] Prevented escape during loading");
+      e.preventDefault();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleDialogOpenChange} modal={true}>
+      <DialogContent 
+        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+        onInteractOutside={handleInteractOutside}
+        onEscapeKeyDown={handleEscapeKeyDown}
+        onPointerDownOutside={handleInteractOutside}
+      >
         <DialogHeader>
           <DialogTitle>Comprar Certificado Digital A1</DialogTitle>
           <DialogDescription>
