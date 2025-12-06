@@ -866,7 +866,7 @@ export const DocumentsTable = ({
                         </div>
                         {/* Patient name for prescriptions */}
                         {isPrescription(doc.signatureMode) && doc.patientName && (
-                          <p className="text-xs text-purple-600 font-medium">Paciente: {doc.patientName}</p>
+                          <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
                         )}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-gray-500">{doc.createdAt}</p>
@@ -1179,7 +1179,7 @@ export const DocumentsTable = ({
                   </div>
                   {/* Patient name for prescriptions */}
                   {isPrescription(doc.signatureMode) && doc.patientName && (
-                    <p className="text-xs text-purple-600 font-medium">Paciente: {doc.patientName}</p>
+                    <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
                   )}
                   {/* For prescriptions, show prescription doc type instead of signature mode */}
                   {isPrescription(doc.signatureMode) && doc.prescriptionDocType ? (
