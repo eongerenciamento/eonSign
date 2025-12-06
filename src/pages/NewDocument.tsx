@@ -102,6 +102,7 @@ interface HealthcareInfo {
   professionalRegistration: string;
   registrationState: string;
   medicalSpecialty: string | null;
+  healthcareCep: string;
   healthcareStreet: string;
   healthcareNeighborhood: string;
   healthcareCity: string;
@@ -214,6 +215,7 @@ const NewDocument = () => {
               professionalRegistration: (companyData as any).professional_registration || '',
               registrationState: (companyData as any).registration_state || '',
               medicalSpecialty: (companyData as any).medical_specialty || null,
+              healthcareCep: (companyData as any).healthcare_cep || '',
               healthcareStreet: (companyData as any).healthcare_street || '',
               healthcareNeighborhood: (companyData as any).healthcare_neighborhood || '',
               healthcareCity: (companyData as any).healthcare_city || '',
@@ -507,12 +509,19 @@ const NewDocument = () => {
         doc.text(healthcareInfo.healthcareStreet, rightX, addressY, { align: 'right' });
         addressY += 4;
       }
-      if (healthcareInfo.healthcareNeighborhood) {
-        doc.text(healthcareInfo.healthcareNeighborhood, rightX, addressY, { align: 'right' });
+      // Neighborhood, City and State on same line
+      const neighborhoodCityState = [
+        healthcareInfo.healthcareNeighborhood,
+        healthcareInfo.healthcareCity,
+        healthcareInfo.healthcareState
+      ].filter(Boolean).join(', ');
+      if (neighborhoodCityState) {
+        doc.text(neighborhoodCityState, rightX, addressY, { align: 'right' });
         addressY += 4;
       }
-      if (healthcareInfo.healthcareCity && healthcareInfo.healthcareState) {
-        doc.text(`${healthcareInfo.healthcareCity} - ${healthcareInfo.healthcareState}`, rightX, addressY, { align: 'right' });
+      // CEP below
+      if (healthcareInfo.healthcareCep) {
+        doc.text(`CEP: ${healthcareInfo.healthcareCep}`, rightX, addressY, { align: 'right' });
         addressY += 4;
       }
     }
@@ -609,7 +618,7 @@ const NewDocument = () => {
     leftY += 3.5;
     
     if (healthcareInfo) {
-      doc.text(`Conselho: ${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`, leftColumnX, leftY);
+      doc.text(`${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`, leftColumnX, leftY);
       leftY += 3.5;
       if (healthcareInfo.medicalSpecialty) {
         doc.text(`Especialidade: ${healthcareInfo.medicalSpecialty}`, leftColumnX, leftY);
