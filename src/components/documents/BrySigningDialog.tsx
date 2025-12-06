@@ -126,10 +126,16 @@ export const BrySigningDialog = ({
         <div className="relative flex-1 w-full h-full min-h-0">
           {/* Loading overlay */}
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-              <div className="flex flex-col items-center gap-3">
-                <LoadingSpinner size="md" inline />
-                <p className="text-sm text-muted-foreground">Carregando interface de assinatura...</p>
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-muted rounded-full animate-pulse" />
+                  <div className="absolute inset-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <p className="text-base font-medium text-foreground">Carregando interface de assinatura</p>
+                  <p className="text-sm text-muted-foreground animate-pulse">Aguarde um momento...</p>
+                </div>
               </div>
             </div>
           )}
