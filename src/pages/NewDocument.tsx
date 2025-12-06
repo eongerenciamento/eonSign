@@ -102,6 +102,10 @@ interface HealthcareInfo {
   professionalRegistration: string;
   registrationState: string;
   medicalSpecialty: string | null;
+  healthcareStreet: string;
+  healthcareNeighborhood: string;
+  healthcareCity: string;
+  healthcareState: string;
 }
 
 interface PatientInfo {
@@ -231,7 +235,7 @@ const NewDocument = () => {
       if (user) {
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_council, professional_registration, registration_state, medical_specialty').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_council, professional_registration, registration_state, medical_specialty, healthcare_cep, healthcare_street, healthcare_neighborhood, healthcare_city, healthcare_state').eq('user_id', user.id).single();
         if (companyData) {
           setCompanySigner({
             name: companyData.admin_name,
@@ -246,7 +250,11 @@ const NewDocument = () => {
               professionalCouncil: (companyData as any).professional_council || 'CRM',
               professionalRegistration: (companyData as any).professional_registration || '',
               registrationState: (companyData as any).registration_state || '',
-              medicalSpecialty: (companyData as any).medical_specialty || null
+              medicalSpecialty: (companyData as any).medical_specialty || null,
+              healthcareStreet: (companyData as any).healthcare_street || '',
+              healthcareNeighborhood: (companyData as any).healthcare_neighborhood || '',
+              healthcareCity: (companyData as any).healthcare_city || '',
+              healthcareState: (companyData as any).healthcare_state || ''
             });
           }
         }
@@ -493,32 +501,62 @@ const NewDocument = () => {
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pageWidth - margin * 2;
-    const footerHeight = 45;
+    const footerHeight = 50;
     
-    // Header with professional info
+    // Gray color for text (gray-600 equivalent: rgb(75, 85, 99))
+    const gray600 = { r: 75, g: 85, b: 99 };
+    
+    // Header with professional info on LEFT and address on RIGHT
+    doc.setTextColor(gray600.r, gray600.g, gray600.b);
+    let yPos = 20;
+    
+    // LEFT SIDE - Professional info
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(companySigner?.name || '', pageWidth / 2, 25, { align: 'center' });
+    doc.text(companySigner?.name || '', margin, yPos);
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    
-    let yPos = 35;
+    yPos += 6;
     
     if (healthcareInfo) {
       const councilText = `${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`;
-      doc.text(councilText, pageWidth / 2, yPos, { align: 'center' });
-      yPos += 6;
+      doc.text(councilText, margin, yPos);
+      yPos += 5;
       
       if (healthcareInfo.medicalSpecialty) {
-        doc.text(healthcareInfo.medicalSpecialty, pageWidth / 2, yPos, { align: 'center' });
-        yPos += 6;
+        doc.text(healthcareInfo.medicalSpecialty, margin, yPos);
+        yPos += 5;
       }
     }
     
+    // RIGHT SIDE - Address
+    const rightX = pageWidth - margin;
+    let addressY = 20;
+    
+    if (healthcareInfo) {
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      
+      if (healthcareInfo.healthcareStreet) {
+        doc.text(healthcareInfo.healthcareStreet, rightX, addressY, { align: 'right' });
+        addressY += 4;
+      }
+      if (healthcareInfo.healthcareNeighborhood) {
+        doc.text(healthcareInfo.healthcareNeighborhood, rightX, addressY, { align: 'right' });
+        addressY += 4;
+      }
+      if (healthcareInfo.healthcareCity && healthcareInfo.healthcareState) {
+        doc.text(`${healthcareInfo.healthcareCity} - ${healthcareInfo.healthcareState}`, rightX, addressY, { align: 'right' });
+        addressY += 4;
+      }
+    }
+    
+    // Use the max of left and right content height
+    yPos = Math.max(yPos, addressY) + 5;
+    
     // Line separator
-    yPos += 5;
-    doc.setDrawColor(200, 200, 200);
+    doc.setDrawColor(gray600.r, gray600.g, gray600.b);
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 15;
 
@@ -554,7 +592,7 @@ const NewDocument = () => {
       
       // Another separator after patient info
       yPos += 5;
-      doc.setDrawColor(200, 200, 200);
+      doc.setDrawColor(gray600.r, gray600.g, gray600.b);
       doc.line(margin, yPos, pageWidth - margin, yPos);
       yPos += 10;
     }
@@ -571,9 +609,9 @@ const NewDocument = () => {
     doc.setFillColor(240, 240, 240);
     doc.rect(0, footerY, pageWidth, footerHeight, 'F');
     
-    // Footer content - metadata on the left
+    // Footer content - LEFT: professional data, metadata
     doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
+    doc.setTextColor(gray600.r, gray600.g, gray600.b);
     doc.setFont('helvetica', 'normal');
     
     let footerTextY = footerY + 8;

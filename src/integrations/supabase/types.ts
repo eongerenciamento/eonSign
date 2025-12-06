@@ -158,6 +158,11 @@ export type Database = {
           cnpj: string
           company_name: string
           created_at: string
+          healthcare_cep: string | null
+          healthcare_city: string | null
+          healthcare_neighborhood: string | null
+          healthcare_state: string | null
+          healthcare_street: string | null
           id: string
           is_healthcare: boolean | null
           logo_url: string | null
@@ -182,6 +187,11 @@ export type Database = {
           cnpj: string
           company_name: string
           created_at?: string
+          healthcare_cep?: string | null
+          healthcare_city?: string | null
+          healthcare_neighborhood?: string | null
+          healthcare_state?: string | null
+          healthcare_street?: string | null
           id?: string
           is_healthcare?: boolean | null
           logo_url?: string | null
@@ -206,6 +216,11 @@ export type Database = {
           cnpj?: string
           company_name?: string
           created_at?: string
+          healthcare_cep?: string | null
+          healthcare_city?: string | null
+          healthcare_neighborhood?: string | null
+          healthcare_state?: string | null
+          healthcare_street?: string | null
           id?: string
           is_healthcare?: boolean | null
           logo_url?: string | null

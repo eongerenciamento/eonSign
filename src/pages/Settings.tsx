@@ -43,6 +43,12 @@ const Settings = () => {
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [registrationState, setRegistrationState] = useState("");
   const [medicalSpecialty, setMedicalSpecialty] = useState("");
+  // Healthcare professional address
+  const [healthcareCep, setHealthcareCep] = useState("");
+  const [healthcareStreet, setHealthcareStreet] = useState("");
+  const [healthcareNeighborhood, setHealthcareNeighborhood] = useState("");
+  const [healthcareCity, setHealthcareCity] = useState("");
+  const [healthcareState, setHealthcareState] = useState("");
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -144,6 +150,12 @@ const Settings = () => {
           setRegistrationNumber((companyData as any).professional_registration || "");
           setRegistrationState((companyData as any).registration_state || "");
           setMedicalSpecialty((companyData as any).medical_specialty || "");
+          // Healthcare address
+          setHealthcareCep((companyData as any).healthcare_cep || "");
+          setHealthcareStreet((companyData as any).healthcare_street || "");
+          setHealthcareNeighborhood((companyData as any).healthcare_neighborhood || "");
+          setHealthcareCity((companyData as any).healthcare_city || "");
+          setHealthcareState((companyData as any).healthcare_state || "");
         }
       }
     };
@@ -217,6 +229,27 @@ const Settings = () => {
       }
     }
   };
+  const handleHealthcareCepChange = async (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    const formatted = formatCEP(value);
+    setHealthcareCep(formatted);
+    if (numbers.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${numbers}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          setHealthcareStreet(data.logradouro || "");
+          setHealthcareNeighborhood(data.bairro || "");
+          setHealthcareCity(data.localidade || "");
+          setHealthcareState(data.uf || "");
+        } else {
+          toast.error("CEP não encontrado");
+        }
+      } catch (error) {
+        toast.error("Erro ao buscar CEP");
+      }
+    }
+  };
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -273,7 +306,12 @@ const Settings = () => {
       professional_council: isHealthcare ? professionalCouncil : null,
       professional_registration: isHealthcare ? registrationNumber : null,
       registration_state: isHealthcare ? registrationState : null,
-      medical_specialty: isHealthcare && ['CRM', 'CRO'].includes(professionalCouncil) ? medicalSpecialty : null
+      medical_specialty: isHealthcare && ['CRM', 'CRO'].includes(professionalCouncil) ? medicalSpecialty : null,
+      healthcare_cep: isHealthcare ? healthcareCep : null,
+      healthcare_street: isHealthcare ? healthcareStreet : null,
+      healthcare_neighborhood: isHealthcare ? healthcareNeighborhood : null,
+      healthcare_city: isHealthcare ? healthcareCity : null,
+      healthcare_state: isHealthcare ? healthcareState : null
     };
     if (existingData) {
       const {
@@ -493,6 +531,71 @@ const Settings = () => {
                             />
                           </div>
                         )}
+
+                        {/* Healthcare Professional Address */}
+                        <Separator className="my-4" />
+                        <p className="text-sm font-medium text-gray-600">Endereço do Consultório</p>
+                        
+                        <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="grid gap-2">
+                            <Label htmlFor="healthcare-cep">CEP</Label>
+                            <Input
+                              id="healthcare-cep"
+                              value={healthcareCep}
+                              onChange={e => handleHealthcareCepChange(e.target.value)}
+                              placeholder="00.000-000"
+                              maxLength={10}
+                              inputMode="numeric"
+                              className="text-gray-600"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="healthcare-street">Endereço</Label>
+                            <Input
+                              id="healthcare-street"
+                              value={healthcareStreet}
+                              onChange={e => setHealthcareStreet(e.target.value)}
+                              placeholder="Rua, Avenida..."
+                              className="text-gray-600"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="grid gap-2">
+                            <Label htmlFor="healthcare-neighborhood">Bairro</Label>
+                            <Input
+                              id="healthcare-neighborhood"
+                              value={healthcareNeighborhood}
+                              onChange={e => setHealthcareNeighborhood(e.target.value)}
+                              placeholder="Bairro"
+                              className="text-gray-600"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="healthcare-city">Cidade</Label>
+                            <Input
+                              id="healthcare-city"
+                              value={healthcareCity}
+                              onChange={e => setHealthcareCity(e.target.value)}
+                              placeholder="Cidade"
+                              className="text-gray-600"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="healthcare-state">Estado</Label>
+                            <Select value={healthcareState} onValueChange={setHealthcareState}>
+                              <SelectTrigger className="text-gray-600">
+                                <SelectValue placeholder="UF" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
+                                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
