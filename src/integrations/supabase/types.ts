@@ -605,8 +605,10 @@ export type Database = {
           birth_date: string | null
           cpf: string | null
           created_at: string
+          email: string | null
           id: string
           name: string
+          phone: string | null
           updated_at: string
           user_id: string
         }
@@ -614,8 +616,10 @@ export type Database = {
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           name: string
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -623,8 +627,10 @@ export type Database = {
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           name?: string
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -7,6 +7,8 @@ export interface PatientSuggestion {
   name: string;
   cpf: string;
   birthDate: string;
+  phone?: string;
+  email?: string;
 }
 
 interface PatientAutocompleteProps {
@@ -86,9 +88,11 @@ export function PatientAutocomplete({
                 onClick={() => handleSelect(patient)}
               >
                 <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                <div className="text-xs text-gray-500 flex gap-3">
+                <div className="text-xs text-gray-500 flex flex-wrap gap-3">
                   {patient.cpf && <span>CPF: {patient.cpf}</span>}
                   {patient.birthDate && <span>Nasc: {patient.birthDate}</span>}
+                  {patient.phone && <span>Tel: {patient.phone}</span>}
+                  {patient.email && <span>E-mail: {patient.email}</span>}
                 </div>
               </button>
             ))}
