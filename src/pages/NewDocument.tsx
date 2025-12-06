@@ -65,7 +65,6 @@ const SIGNATURE_MODES: {
   },
   {
     id: 'PRESCRIPTION',
-    badge: 'ICP-Brasil obrigatório',
     label: 'Prescrição Médica',
     typeName: 'Área da saúde',
     description: 'Lei n. 14.063/20 - Res. n. 2.299/21 (CFM)'

@@ -42,7 +42,7 @@ export interface Document {
   documentCount?: number;
   envelopeId?: string | null;
   envelopeDocuments?: EnvelopeDocument[];
-  signatureMode?: "SIMPLE" | "ADVANCED" | "QUALIFIED" | null;
+  signatureMode?: "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null;
 }
 
 export interface Folder {
@@ -90,7 +90,16 @@ const signatureModeConfig = {
   QUALIFIED: {
     label: "ICP-Brasil",
     className: "bg-purple-600 text-white"
+  },
+  PRESCRIPTION: {
+    label: "Prescrição",
+    className: "bg-purple-600 text-white"
   }
+};
+
+// Check if document is a prescription
+const isPrescription = (signatureMode: string | null | undefined) => {
+  return signatureMode === 'PRESCRIPTION';
 };
 const getInitials = (name: string) => {
   const names = name.trim().split(' ');
@@ -819,7 +828,8 @@ export const DocumentsTable = ({
             {documents.map((doc, index) => {
             const statusInfo = statusConfig[doc.status];
             const progressPercentage = doc.signedBy / doc.signers * 100;
-            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:opacity-80`}>
+            const prescriptionBg = isPrescription(doc.signatureMode) ? 'bg-purple-50' : '';
+            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:opacity-80`}>
                   <TableCell>
                     <div 
                       className={`flex items-center gap-2 ${doc.isEnvelope ? 'cursor-pointer hover:opacity-70' : ''}`}
@@ -1018,7 +1028,8 @@ export const DocumentsTable = ({
       <div className="md:hidden space-y-4">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
-        return <div key={doc.id} className="bg-gray-100 rounded-lg p-4 space-y-3" draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
+        const prescriptionBg = isPrescription(doc.signatureMode) ? 'bg-purple-100' : 'bg-gray-100';
+        return <div key={doc.id} className={`${prescriptionBg} rounded-lg p-4 space-y-3`} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
                 {/* Date and Action Buttons on same line - ABOVE document name */}
                 <div className="flex items-center justify-between">
