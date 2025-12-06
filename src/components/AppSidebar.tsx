@@ -12,7 +12,7 @@ import { User } from "@supabase/supabase-js";
 import logoSign from "@/assets/logo-sign.png";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
+import { CertificateCheckoutSheet } from "@/components/certificate/CertificateCheckoutSheet";
 const items = [{
   title: "Dashboard",
   url: "/",
@@ -247,7 +247,7 @@ export function AppSidebar() {
 
       <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} userName={name} userEmail={user?.email || ""} userAvatar={avatarUrl} organization={organization} onAvatarChange={setAvatarUrl} onProfileUpdate={handleProfileUpdate} />
       
-      <CertificateCheckoutDialog 
+      <CertificateCheckoutSheet 
         open={certificateDialogOpen} 
         onOpenChange={setCertificateDialogOpen}
       />
