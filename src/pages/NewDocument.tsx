@@ -718,72 +718,9 @@ const NewDocument = () => {
         // Generate the base prescription PDF
         const prescriptionPdf = await generatePrescriptionPdf();
         
-        // Convert PDF to base64 for BRy prescription API
-        const arrayBuffer = await prescriptionPdf.arrayBuffer();
-        const base64 = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-        
-        // Check if we have healthcare info for BRy prescription metadata
-        if (healthcareInfo && healthcareInfo.professionalCouncil && healthcareInfo.professionalRegistration) {
-          // Call BRy prescription API to add OID metadata
-          try {
-            console.log('[PRESCRIPTION] Calling BRy prescription API with metadata:', {
-              prescriptionType: prescriptionDocType,
-              professionalCouncil: healthcareInfo.professionalCouncil,
-              registrationNumber: healthcareInfo.professionalRegistration,
-              registrationState: healthcareInfo.registrationState,
-              specialty: healthcareInfo.medicalSpecialty
-            });
-            
-            const { data: bryPrescriptionData, error: bryPrescriptionError } = await supabase.functions.invoke('bry-prescription-metadata', {
-              body: {
-                documentBase64: base64,
-                documentName: prescriptionPdf.name,
-                prescriptionType: prescriptionDocType,
-                professionalCouncil: healthcareInfo.professionalCouncil,
-                registrationNumber: healthcareInfo.professionalRegistration,
-                registrationState: healthcareInfo.registrationState,
-                specialty: healthcareInfo.medicalSpecialty || undefined
-              }
-            });
-            
-            if (bryPrescriptionError) {
-              console.error('[PRESCRIPTION] BRy prescription API error:', bryPrescriptionError);
-              toast({
-                title: "Aviso",
-                description: "Não foi possível adicionar metadados da prescrição. O documento será enviado sem os metadados OID.",
-              });
-              filesToUpload = [prescriptionPdf];
-            } else if (bryPrescriptionData?.success && bryPrescriptionData.pdfBase64) {
-              // Convert base64 back to File
-              const binaryString = atob(bryPrescriptionData.pdfBase64);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-              }
-              const pdfWithMetadata = new Blob([bytes], { type: 'application/pdf' });
-              const pdfFile = new File([pdfWithMetadata], prescriptionPdf.name, { type: 'application/pdf' });
-              filesToUpload = [pdfFile];
-              console.log('[PRESCRIPTION] Successfully added OID metadata to PDF');
-            } else {
-              console.error('[PRESCRIPTION] BRy prescription API returned error:', bryPrescriptionData?.error);
-              toast({
-                title: "Aviso",
-                description: bryPrescriptionData?.error || "Erro ao processar metadados da prescrição.",
-              });
-              filesToUpload = [prescriptionPdf];
-            }
-          } catch (bryErr) {
-            console.error('[PRESCRIPTION] Error calling BRy prescription API:', bryErr);
-            toast({
-              title: "Aviso", 
-              description: "Não foi possível adicionar metadados da prescrição. O documento será enviado sem os metadados OID.",
-            });
-            filesToUpload = [prescriptionPdf];
-          }
-        } else {
-          // No healthcare info, just use the original PDF
-          filesToUpload = [prescriptionPdf];
-        }
+        // Use the generated prescription PDF directly
+        // OID metadata will be applied by BRy during digital signature with certificate
+        filesToUpload = [prescriptionPdf];
         
         setIsPrescriptionSubmitting(false);
 
