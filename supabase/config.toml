@@ -113,3 +113,6 @@ verify_jwt = false
 
 [functions.bry-prescription-metadata]
 verify_jwt = false
+
+[functions.send-prescription-to-patient]
+verify_jwt = false

@@ -111,6 +111,8 @@ interface PatientInfo {
   name: string;
   cpf: string;
   birthDate: string;
+  phone: string;
+  email: string;
 }
 
 const NewDocument = () => {
@@ -142,7 +144,7 @@ const NewDocument = () => {
   const [showPrescriptionSheet, setShowPrescriptionSheet] = useState(false);
   const [prescriptionContent, setPrescriptionContent] = useState("");
   const [prescriptionDocType, setPrescriptionDocType] = useState<PrescriptionDocType>('MEDICAMENTO');
-  const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '' });
+  const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '', phone: '', email: '' });
   const [patientSuggestions, setPatientSuggestions] = useState<PatientSuggestion[]>([]);
   const [isPrescriptionSubmitting, setIsPrescriptionSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -333,7 +335,7 @@ const NewDocument = () => {
 
       const { data: patientsData } = await supabase
         .from('patients')
-        .select('id, name, cpf, birth_date')
+        .select('id, name, cpf, birth_date, phone, email')
         .eq('user_id', user.id)
         .order('name');
 
@@ -342,7 +344,9 @@ const NewDocument = () => {
           id: p.id,
           name: p.name,
           cpf: p.cpf || '',
-          birthDate: p.birth_date || ''
+          birthDate: p.birth_date || '',
+          phone: p.phone || '',
+          email: p.email || ''
         })));
       }
     };
@@ -831,13 +835,15 @@ const NewDocument = () => {
           );
 
           if (!existingPatient) {
-            const { data: newPatient, error: patientError } = await supabase
+          const { data: newPatient, error: patientError } = await supabase
               .from('patients')
               .insert({
                 user_id: user.id,
                 name: patientInfo.name,
                 cpf: patientInfo.cpf || null,
-                birth_date: patientInfo.birthDate || null
+                birth_date: patientInfo.birthDate || null,
+                phone: patientInfo.phone || null,
+                email: patientInfo.email || null
               })
               .select('id')
               .single();
@@ -848,7 +854,9 @@ const NewDocument = () => {
                 id: newPatient.id,
                 name: patientInfo.name,
                 cpf: patientInfo.cpf,
-                birthDate: patientInfo.birthDate
+                birthDate: patientInfo.birthDate,
+                phone: patientInfo.phone,
+                email: patientInfo.email
               }]);
             }
           }
@@ -1086,19 +1094,24 @@ const NewDocument = () => {
         console.log('SIMPLE signature mode - using native flow without BRy');
       }
 
-      // Send notifications
-      // For prescription mode, only notify company signer
-      const allSignersForNotification = isPrescriptionMode 
-        ? [{
-            name: companySigner.name,
-            email: companySigner.email,
-            phone: companySigner.phone
-          }]
-        : [{
-            name: companySigner.name,
-            email: companySigner.email,
-            phone: companySigner.phone
-          }, ...signers];
+      // For prescription mode: no notifications here, redirect to signing page
+      if (isPrescriptionMode) {
+        setIsSubmitted(true);
+        toast({
+          title: "Prescrição criada!",
+          description: "Redirecionando para assinatura digital..."
+        });
+        // Redirect to prescription signing page
+        navigate(`/prescricao/assinar/${firstDocumentId}`);
+        return;
+      }
+
+      // Send notifications for non-prescription modes
+      const allSignersForNotification = [{
+        name: companySigner.name,
+        email: companySigner.email,
+        phone: companySigner.phone
+      }, ...signers];
 
       for (const signer of allSignersForNotification) {
         try {
@@ -1139,12 +1152,10 @@ const NewDocument = () => {
 
       setIsSubmitted(true);
       toast({
-        title: isPrescriptionMode ? "Prescrição enviada!" : (filesToUpload.length >= 2 ? "Envelope enviado!" : "Documento enviado!"),
-        description: isPrescriptionMode 
-          ? "A prescrição foi enviada e você receberá o convite para assinatura por e-mail e WhatsApp."
-          : (filesToUpload.length >= 2 
-              ? `Envelope com ${filesToUpload.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.` 
-              : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp.")
+        title: filesToUpload.length >= 2 ? "Envelope enviado!" : "Documento enviado!",
+        description: filesToUpload.length >= 2 
+          ? `Envelope com ${filesToUpload.length} documentos enviado com sucesso. Os signatários receberão o convite por e-mail e WhatsApp.` 
+          : "O documento foi enviado com sucesso e os signatários receberão o convite por e-mail e WhatsApp."
       });
       navigate("/documentos?tab=pending-internal");
     } catch (error: any) {
@@ -1613,7 +1624,9 @@ const NewDocument = () => {
                     setPatientInfo({
                       name: patient.name,
                       cpf: patient.cpf,
-                      birthDate: patient.birthDate
+                      birthDate: patient.birthDate,
+                      phone: patient.phone || '',
+                      email: patient.email || ''
                     });
                   }}
                   suggestions={patientSuggestions}
@@ -1644,6 +1657,39 @@ const NewDocument = () => {
                     className="placeholder:text-xs"
                   />
                 </div>
+              </div>
+
+              {/* Patient contact fields (optional) */}
+              <div className="space-y-2 pt-2 border-t border-blue-200">
+                <p className="text-xs text-blue-600 font-medium">Contato para envio (opcional)</p>
+                <div className="grid gap-2">
+                  <Label htmlFor="patient-phone">Telefone</Label>
+                  <Input 
+                    id="patient-phone"
+                    value={patientInfo.phone}
+                    onChange={(e) => setPatientInfo(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+                    placeholder="(00)00000-0000"
+                    maxLength={14}
+                    inputMode="tel"
+                    className="placeholder:text-xs"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="patient-email">E-mail</Label>
+                  <Input 
+                    id="patient-email"
+                    type="email"
+                    value={patientInfo.email}
+                    onChange={(e) => setPatientInfo(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="email@exemplo.com"
+                    className="placeholder:text-xs"
+                  />
+                </div>
+                {(patientInfo.phone || patientInfo.email) && (
+                  <p className="text-xs text-green-600">
+                    ✓ Após assinar, você poderá enviar a prescrição para o paciente
+                  </p>
+                )}
               </div>
             </div>
 
