@@ -1,4 +1,4 @@
-import { File, Folder, BarChart, LogOut, Settings, Camera, X, Award } from "lucide-react";
+import { File, Folder, BarChart, LogOut, Settings, Camera, X, Award, Shield } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { CertificateCheckoutSheet } from "@/components/certificate/CertificateCheckoutSheet";
 
 const items = [
   { title: "Dashboard", url: "/", icon: DashboardIcon },
@@ -27,6 +28,7 @@ export function MobileNav() {
   const currentPath = location.pathname;
   const [user, setUser] = useState<User | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [certificateSheetOpen, setCertificateSheetOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -134,6 +136,15 @@ export function MobileNav() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
+      {/* Botão de certificado à esquerda */}
+      <button
+        onClick={() => setCertificateSheetOpen(true)}
+        className="flex-shrink-0 p-2 rounded-lg hover:bg-white/10 transition-colors"
+        title="Certificado Digital"
+      >
+        <Shield className="w-5 h-5 text-white" />
+      </button>
+
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
         {items.map((item) => (
@@ -267,6 +278,11 @@ export function MobileNav() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <CertificateCheckoutSheet 
+        open={certificateSheetOpen} 
+        onOpenChange={setCertificateSheetOpen}
+      />
     </nav>
   );
 }
