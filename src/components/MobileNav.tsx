@@ -136,14 +136,16 @@ export function MobileNav() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
-      {/* Botão de certificado à esquerda */}
-      <button
-        onClick={() => setCertificateSheetOpen(true)}
-        className="flex-shrink-0 p-2 rounded-lg hover:bg-white/10 transition-colors"
-        title="Certificado Digital"
-      >
-        <Shield className="w-5 h-5 text-white" />
-      </button>
+      {/* Botão de certificado à esquerda - só aparece se usuário está logado */}
+      {user && (
+        <button
+          onClick={() => setCertificateSheetOpen(true)}
+          className="flex-shrink-0 p-2 rounded-lg hover:bg-white/10 transition-colors"
+          title="Certificado Digital"
+        >
+          <Shield className="w-5 h-5 text-white" />
+        </button>
+      )}
 
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
