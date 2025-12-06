@@ -156,50 +156,6 @@ const NewDocument = () => {
   const maxSigners = isEnvelope ? MAX_SIGNERS_ENVELOPE : MAX_SIGNERS_DOCUMENT;
   const isPrescriptionMode = signatureMode === 'PRESCRIPTION';
 
-  // Play subtle completion sound
-  const playCompletionSound = (frequency: number = 800) => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      oscillator.frequency.value = frequency;
-      oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.2);
-    } catch (error) {
-      // Silently fail if audio is not supported
-      console.log('Audio feedback not available');
-    }
-  };
-
-  // Track step 1 completion (file upload)
-  useEffect(() => {
-    if (files.length > 0 || (isPrescriptionMode && prescriptionContent)) {
-      playCompletionSound(800); // Mid-high frequency
-    }
-  }, [files, prescriptionContent, isPrescriptionMode]);
-
-  // Track step 2 completion (signers added) - only for non-prescription modes
-  useEffect(() => {
-    if (!isPrescriptionMode) {
-      const hasCompleteSigner = signers.some(signer => signer.name && (signer.phone || signer.email));
-      if (hasCompleteSigner) {
-        playCompletionSound(900); // Slightly higher frequency
-      }
-    }
-  }, [signers, isPrescriptionMode]);
-
-  // Track step 3 completion (submitted)
-  useEffect(() => {
-    if (isSubmitted) {
-      playCompletionSound(1000); // Highest frequency for final step
-    }
-  }, [isSubmitted]);
-
   useEffect(() => {
     const checkLimit = async () => {
       try {
@@ -1602,18 +1558,6 @@ const NewDocument = () => {
           </SheetHeader>
           
           <div className="mt-6 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-            {/* Professional Info Display */}
-            {healthcareInfo && companySigner && (
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <p className="font-semibold text-gray-800">{companySigner.name}</p>
-                <p className="text-sm text-gray-600">
-                  {healthcareInfo.professionalCouncil} {healthcareInfo.professionalRegistration}/{healthcareInfo.registrationState}
-                </p>
-                {healthcareInfo.medicalSpecialty && (
-                  <p className="text-sm text-gray-500">{healthcareInfo.medicalSpecialty}</p>
-                )}
-              </div>
-            )}
 
             {/* Prescription Document Type Selector */}
             <div className="space-y-2">

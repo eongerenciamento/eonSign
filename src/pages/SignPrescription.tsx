@@ -42,6 +42,7 @@ const SignPrescription = () => {
   const [certificatePassword, setCertificatePassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSigningA1, setIsSigningA1] = useState(false);
+  const [autoOpenBry, setAutoOpenBry] = useState(true);
 
   useEffect(() => {
     const loadDocument = async () => {
@@ -101,6 +102,12 @@ const SignPrescription = () => {
         });
 
         setIsSigned(signedStatus);
+
+        // Auto-open BRy dialog if link is available and document not signed
+        if (signerData?.bry_signer_link && !signedStatus && autoOpenBry) {
+          setShowBryDialog(true);
+          setAutoOpenBry(false);
+        }
       } catch (error) {
         console.error('Error loading document:', error);
         toast({
@@ -114,7 +121,7 @@ const SignPrescription = () => {
     };
 
     loadDocument();
-  }, [documentId, toast]);
+  }, [documentId, toast, autoOpenBry]);
 
   const handleOpenCloudCertificate = () => {
     if (document?.brySignerLink) {
