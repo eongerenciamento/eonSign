@@ -1669,11 +1669,6 @@ const NewDocument = () => {
                     className="placeholder:text-xs"
                   />
                 </div>
-                {(patientInfo.phone || patientInfo.email) && (
-                  <p className="text-xs text-green-600">
-                    ✓ Após assinar, você poderá enviar a prescrição para o paciente
-                  </p>
-                )}
               </div>
             </div>
 
