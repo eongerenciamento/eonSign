@@ -573,56 +573,64 @@ const NewDocument = () => {
     doc.setFillColor(240, 240, 240);
     doc.rect(0, footerY, pageWidth, footerHeight, 'F');
     
-    // Footer content - LEFT: professional data, metadata
+    // Footer content - 3 columns: LEFT: professional data, CENTER: metadata, RIGHT: logo
     doc.setFontSize(7);
     doc.setTextColor(gray600.r, gray600.g, gray600.b);
     doc.setFont('helvetica', 'normal');
     
-    let footerTextY = footerY + 8;
     const footerMargin = 10;
+    const columnWidth = (pageWidth - footerMargin * 2) / 3;
+    const leftColumnX = footerMargin;
+    const centerColumnX = footerMargin + columnWidth;
+    const rightColumnX = footerMargin + columnWidth * 2;
     
-    // Professional data
+    // LEFT COLUMN - Professional data (left-justified)
+    let leftY = footerY + 8;
     doc.setFont('helvetica', 'bold');
-    doc.text('DADOS DO PROFISSIONAL', footerMargin, footerTextY);
+    doc.text('DADOS DO PROFISSIONAL', leftColumnX, leftY);
     doc.setFont('helvetica', 'normal');
-    footerTextY += 4;
+    leftY += 4;
     
-    doc.text(`Nome: ${companySigner?.name || '-'}`, footerMargin, footerTextY);
-    footerTextY += 3.5;
+    doc.text(`Nome: ${companySigner?.name || '-'}`, leftColumnX, leftY);
+    leftY += 3.5;
     
     if (healthcareInfo) {
-      doc.text(`Conselho: ${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`, footerMargin, footerTextY);
-      footerTextY += 3.5;
+      doc.text(`Conselho: ${healthcareInfo.professionalCouncil} ${healthcareInfo.professionalRegistration}/${healthcareInfo.registrationState}`, leftColumnX, leftY);
+      leftY += 3.5;
       if (healthcareInfo.medicalSpecialty) {
-        doc.text(`Especialidade: ${healthcareInfo.medicalSpecialty}`, footerMargin, footerTextY);
-        footerTextY += 3.5;
+        doc.text(`Especialidade: ${healthcareInfo.medicalSpecialty}`, leftColumnX, leftY);
+        leftY += 3.5;
       }
     }
     
     // Prescription type
     const prescriptionTypeLabel = PRESCRIPTION_DOC_TYPES.find(t => t.id === prescriptionDocType)?.label || prescriptionDocType;
-    doc.text(`Tipo: ${prescriptionTypeLabel}`, footerMargin, footerTextY);
-    footerTextY += 3.5;
+    doc.text(`Tipo: ${prescriptionTypeLabel}`, leftColumnX, leftY);
+    leftY += 3.5;
     
     // Date/time
     const now = new Date();
     const dateStr = now.toLocaleDateString('pt-BR');
     const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    doc.text(`Emitido em: ${dateStr} às ${timeStr}`, footerMargin, footerTextY);
-    footerTextY += 5;
+    doc.text(`Emitido em: ${dateStr} às ${timeStr}`, leftColumnX, leftY);
     
-    // Certificate info
+    // CENTER COLUMN - Certificate metadata (centered)
+    let centerY = footerY + 8;
     doc.setFont('helvetica', 'bold');
-    doc.text('METADADOS DO CERTIFICADO', footerMargin, footerTextY);
+    doc.text('METADADOS DO CERTIFICADO', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
     doc.setFont('helvetica', 'normal');
-    footerTextY += 4;
-    doc.text('Assinatura: Certificado Digital ICP-Brasil (QUALIFIED)', footerMargin, footerTextY);
-    footerTextY += 3.5;
-    doc.text('Lei n. 14.063/2020 - Res. n. 2.299/2021 (CFM)', footerMargin, footerTextY);
+    centerY += 4;
+    doc.text('Assinatura: Certificado Digital', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    centerY += 3.5;
+    doc.text('ICP-Brasil (QUALIFIED)', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    centerY += 3.5;
+    doc.text('Lei n. 14.063/2020', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    centerY += 3.5;
+    doc.text('Res. n. 2.299/2021 (CFM)', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
     
-    // Load and add logo to the right side of footer
+    // RIGHT COLUMN - Logo (right-justified)
     try {
-      const logoUrl = 'https://lbyoniuealghclfuahko.supabase.co/storage/v1/object/public/email-assets/header-banner.png';
+      const logoUrl = '/logo-eon-gray.png';
       const response = await fetch(logoUrl);
       if (response.ok) {
         const logoBlob = await response.blob();
@@ -632,10 +640,10 @@ const NewDocument = () => {
           reader.readAsDataURL(logoBlob);
         });
         
-        // Add logo to the right side of footer
-        const logoWidth = 35;
-        const logoHeight = 12;
-        const logoX = pageWidth - logoWidth - 10;
+        // Add logo to the right column, vertically centered
+        const logoWidth = 40;
+        const logoHeight = 14;
+        const logoX = pageWidth - logoWidth - footerMargin;
         const logoY = footerY + (footerHeight - logoHeight) / 2;
         doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
       }
