@@ -795,8 +795,37 @@ const NewDocument = () => {
                  (patientInfo.cpf && p.cpf === patientInfo.cpf)
           );
 
-          if (!existingPatient) {
-          const { data: newPatient, error: patientError } = await supabase
+          if (existingPatient) {
+            // Update existing patient with new contact information
+            const updateData: Record<string, string | null> = {};
+            if (patientInfo.phone && patientInfo.phone !== existingPatient.phone) {
+              updateData.phone = patientInfo.phone;
+            }
+            if (patientInfo.email && patientInfo.email !== existingPatient.email) {
+              updateData.email = patientInfo.email;
+            }
+            if (patientInfo.cpf && patientInfo.cpf !== existingPatient.cpf) {
+              updateData.cpf = patientInfo.cpf;
+            }
+            if (patientInfo.birthDate && patientInfo.birthDate !== existingPatient.birthDate) {
+              updateData.birth_date = patientInfo.birthDate;
+            }
+
+            if (Object.keys(updateData).length > 0) {
+              await supabase
+                .from('patients')
+                .update(updateData)
+                .eq('id', existingPatient.id);
+
+              // Update local suggestions
+              setPatientSuggestions(prev => prev.map(p => 
+                p.id === existingPatient.id 
+                  ? { ...p, ...patientInfo, birthDate: patientInfo.birthDate }
+                  : p
+              ));
+            }
+          } else {
+            const { data: newPatient, error: patientError } = await supabase
               .from('patients')
               .insert({
                 user_id: user.id,
