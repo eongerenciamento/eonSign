@@ -15,7 +15,7 @@ import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { useQuery } from "@tanstack/react-query";
-import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
+import { CertificateCheckoutSheet } from "@/components/certificate/CertificateCheckoutSheet";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -752,7 +752,7 @@ const Settings = () => {
         </Tabs>
       </div>
       
-      <CertificateCheckoutDialog 
+      <CertificateCheckoutSheet 
         open={certificateDialogOpen} 
         onOpenChange={setCertificateDialogOpen}
       />
