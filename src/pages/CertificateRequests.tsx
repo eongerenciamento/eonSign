@@ -14,7 +14,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { CertificateCheckoutDialog } from "@/components/certificate/CertificateCheckoutDialog";
+import { CertificateCheckoutSheet } from "@/components/certificate/CertificateCheckoutSheet";
 import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
 interface CertificateRequest {
   id: string;
@@ -971,8 +971,8 @@ export default function CertificateRequests() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Certificate Checkout Dialog */}
-      <CertificateCheckoutDialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog} />
+      {/* Certificate Checkout Sheet */}
+      <CertificateCheckoutSheet open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog} />
 
       {/* Certificate Purchase Dialog - for continuing paid certificates */}
       {continuingRequest && <CertificatePurchaseDialog open={showPurchaseDialog} onOpenChange={open => {
