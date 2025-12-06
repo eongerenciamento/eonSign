@@ -1007,7 +1007,7 @@ const NewDocument = () => {
               title: effectiveTitle,
               signers: allSigners,
               userId: user.id,
-              authenticationOptions: isPrescriptionMode ? ['IP', 'GEOLOCATION'] : ['IP', 'GEOLOCATION', ...authOptions],
+              authenticationOptions: isPrescriptionMode ? ['IP'] : ['IP', 'GEOLOCATION', ...authOptions],
               signatureMode: effectiveSignatureMode
             }
           });
