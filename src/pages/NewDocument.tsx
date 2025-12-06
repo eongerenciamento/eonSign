@@ -417,6 +417,35 @@ const NewDocument = () => {
     return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
+  const validateCpf = (cpf: string): boolean => {
+    const numbers = cpf.replace(/\D/g, "");
+    
+    if (numbers.length !== 11) return false;
+    
+    // Check for all same digits
+    if (/^(\d)\1{10}$/.test(numbers)) return false;
+    
+    // Validate first check digit
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(numbers[i]) * (10 - i);
+    }
+    let remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(numbers[9])) return false;
+    
+    // Validate second check digit
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(numbers[i]) * (11 - i);
+    }
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(numbers[10])) return false;
+    
+    return true;
+  };
+
   const formatBirthDate = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
@@ -700,6 +729,19 @@ const NewDocument = () => {
       });
       setIsSubmitting(false);
       return;
+    }
+
+    // Validate patient CPF for prescription mode
+    if (isPrescriptionMode && patientInfo.cpf) {
+      if (!validateCpf(patientInfo.cpf)) {
+        toast({
+          title: "CPF inválido",
+          description: "O CPF do paciente informado é inválido.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     // For non-prescription modes, validate signers
