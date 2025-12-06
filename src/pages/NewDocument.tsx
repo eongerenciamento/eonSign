@@ -16,6 +16,7 @@ import { SignerAutocomplete, SignerSuggestion, SignerGroup } from "@/components/
 import { PatientAutocomplete, PatientSuggestion } from "@/components/documents/PatientAutocomplete";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BrySigningDialog } from "@/components/documents/BrySigningDialog";
 import jsPDF from "jspdf";
 
 type AuthenticationOption = 'IP' | 'SELFIE' | 'GEOLOCATION' | 'OTP_WHATSAPP' | 'OTP_EMAIL' | 'OTP_PHONE';
@@ -147,6 +148,10 @@ const NewDocument = () => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '', phone: '', email: '' });
   const [patientSuggestions, setPatientSuggestions] = useState<PatientSuggestion[]>([]);
   const [isPrescriptionSubmitting, setIsPrescriptionSubmitting] = useState(false);
+  const [showBryDialog, setShowBryDialog] = useState(false);
+  const [prescriptionBryUrl, setPrescriptionBryUrl] = useState<string | null>(null);
+  const [prescriptionDocumentId, setPrescriptionDocumentId] = useState<string | null>(null);
+  const [prescriptionDocumentName, setPrescriptionDocumentName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -1050,12 +1055,12 @@ const NewDocument = () => {
         console.log('SIMPLE signature mode - using native flow without BRy');
       }
 
-      // For prescription mode: no notifications here, redirect to signing page
+      // For prescription mode: open BRy dialog directly
       if (isPrescriptionMode) {
-        console.log('[PRESCRIPTION] Mode detected, preparing redirect. DocumentId:', firstDocumentId);
+        console.log('[PRESCRIPTION] Mode detected, opening BRy dialog. DocumentId:', firstDocumentId);
         
         if (!firstDocumentId) {
-          console.error('[PRESCRIPTION] No document ID found, cannot redirect');
+          console.error('[PRESCRIPTION] No document ID found');
           toast({
             title: "Erro",
             description: "Não foi possível criar o documento de prescrição.",
@@ -1064,18 +1069,30 @@ const NewDocument = () => {
           return;
         }
         
-        // Set state and show toast
+        // Get BRy signer link for company signer
+        const bryLink = brySignerLinks.get(companySigner.email) || brySignerLinks.get(companySigner.phone);
+        
+        if (!bryLink) {
+          console.error('[PRESCRIPTION] No BRy signer link found');
+          toast({
+            title: "Erro",
+            description: "Não foi possível obter o link de assinatura.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Set state to open BRy dialog directly
+        setPrescriptionDocumentId(firstDocumentId);
+        setPrescriptionDocumentName(effectiveTitle);
+        setPrescriptionBryUrl(bryLink);
+        setShowBryDialog(true);
         setIsSubmitted(true);
+        
         toast({
           title: "Prescrição criada!",
-          description: "Redirecionando para assinatura digital..."
+          description: "Abrindo interface de assinatura digital..."
         });
-        
-        // Use setTimeout to ensure React state updates complete before navigation
-        console.log('[PRESCRIPTION] Navigating to:', `/prescricao/assinar/${firstDocumentId}`);
-        setTimeout(() => {
-          navigate(`/prescricao/assinar/${firstDocumentId}`);
-        }, 100);
         return;
       }
 
@@ -1143,6 +1160,43 @@ const NewDocument = () => {
   // Check if form is ready to submit
   const hasFileOrPrescription = files.length > 0 || (isPrescriptionMode && prescriptionContent.trim());
   const hasValidSigners = isPrescriptionMode || signers.some(signer => signer.name && (signer.phone || signer.email));
+
+  // Handler for when prescription signing is completed via BRy
+  const handlePrescriptionSigningComplete = async () => {
+    setShowBryDialog(false);
+    
+    // Send prescription to patient after signing
+    if (prescriptionDocumentId && patientInfo.name) {
+      try {
+        await supabase.functions.invoke('send-prescription-to-patient', {
+          body: {
+            documentId: prescriptionDocumentId,
+            patientName: patientInfo.name,
+            patientEmail: patientInfo.email || null,
+            patientPhone: patientInfo.phone || null
+          }
+        });
+        
+        toast({
+          title: "Prescrição assinada e enviada!",
+          description: "A prescrição foi assinada digitalmente e enviada ao paciente."
+        });
+      } catch (error) {
+        console.error('Error sending prescription to patient:', error);
+        toast({
+          title: "Prescrição assinada!",
+          description: "A prescrição foi assinada. Não foi possível enviar ao paciente automaticamente."
+        });
+      }
+    } else {
+      toast({
+        title: "Prescrição assinada!",
+        description: "A assinatura digital foi aplicada com sucesso."
+      });
+    }
+    
+    navigate("/documentos?tab=pending-internal");
+  };
 
   return <Layout>
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
@@ -1680,6 +1734,18 @@ const NewDocument = () => {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      {/* BRy Signing Dialog for Prescriptions */}
+      {prescriptionBryUrl && prescriptionDocumentId && (
+        <BrySigningDialog
+          open={showBryDialog}
+          onOpenChange={setShowBryDialog}
+          signingUrl={prescriptionBryUrl}
+          documentName={prescriptionDocumentName}
+          documentId={prescriptionDocumentId}
+          onSigningComplete={handlePrescriptionSigningComplete}
+        />
+      )}
     </Layout>;
 };
 export default NewDocument;

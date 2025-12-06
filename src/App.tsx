@@ -16,9 +16,10 @@ import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
 import ValidateDocument from "./pages/ValidateDocument";
 import CertificateRequests from "./pages/CertificateRequests";
-import SignPrescription from "./pages/SignPrescription";
 import ProtectedRoute from "./components/ProtectedRoute";
+
 const queryClient = new QueryClient();
+
 const AppRoutes = () => {
   return <Routes>
       <Route path="/auth" element={<Auth />} />
@@ -34,11 +35,11 @@ const AppRoutes = () => {
       <Route path="/relatorios" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/certificados" element={<ProtectedRoute><CertificateRequests /></ProtectedRoute>} />
-      <Route path="/prescricao/assinar/:documentId" element={<ProtectedRoute><SignPrescription /></ProtectedRoute>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>;
 };
+
 const App = () => {
   return <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -50,4 +51,5 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>;
 };
+
 export default App;
