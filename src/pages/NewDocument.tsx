@@ -475,8 +475,8 @@ const NewDocument = () => {
     doc.setTextColor(gray600.r, gray600.g, gray600.b);
     let yPos = 20;
     
-    // LEFT SIDE - Professional info
-    doc.setFontSize(14);
+    // LEFT SIDE - Professional info (smaller size)
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.text(companySigner?.name || '', margin, yPos);
     
@@ -559,8 +559,21 @@ const NewDocument = () => {
       yPos += 5;
       doc.setDrawColor(gray600.r, gray600.g, gray600.b);
       doc.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
+    
+    // CENTRALIZED TITLE - "PRESCRIÇÃO" + type
+    const prescriptionTypeLabel = PRESCRIPTION_DOC_TYPES.find(t => t.id === prescriptionDocType)?.label || prescriptionDocType;
+    
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PRESCRIÇÃO', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(prescriptionTypeLabel, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
     
     // Prescription content
     doc.setFontSize(11);
@@ -604,8 +617,7 @@ const NewDocument = () => {
       }
     }
     
-    // Prescription type
-    const prescriptionTypeLabel = PRESCRIPTION_DOC_TYPES.find(t => t.id === prescriptionDocType)?.label || prescriptionDocType;
+    // Prescription type (using already defined prescriptionTypeLabel from title section)
     doc.text(`Tipo: ${prescriptionTypeLabel}`, leftColumnX, leftY);
     leftY += 3.5;
     
@@ -615,23 +627,23 @@ const NewDocument = () => {
     const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     doc.text(`Emitido em: ${dateStr} às ${timeStr}`, leftColumnX, leftY);
     
-    // CENTER COLUMN - Certificate metadata (centered)
+    // CENTER COLUMN - Certificate metadata (left-justified within column)
     let centerY = footerY + 8;
     doc.setFont('helvetica', 'bold');
-    doc.text('METADADOS DO CERTIFICADO', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    doc.text('METADADOS DO CERTIFICADO', centerColumnX, centerY);
     doc.setFont('helvetica', 'normal');
     centerY += 4;
-    doc.text('Assinatura: Certificado Digital', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    doc.text('Assinatura: Certificado Digital', centerColumnX, centerY);
     centerY += 3.5;
-    doc.text('ICP-Brasil (QUALIFIED)', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    doc.text('ICP-Brasil (QUALIFIED)', centerColumnX, centerY);
     centerY += 3.5;
-    doc.text('Lei n. 14.063/2020', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    doc.text('Lei n. 14.063/2020', centerColumnX, centerY);
     centerY += 3.5;
-    doc.text('Res. n. 2.299/2021 (CFM)', centerColumnX + columnWidth / 2, centerY, { align: 'center' });
+    doc.text('Res. n. 2.299/2021 (CFM)', centerColumnX, centerY);
     
     // RIGHT COLUMN - Logo (right-justified)
     try {
-      const logoUrl = '/logo-eon-gray.png';
+      const logoUrl = '/logo-eon-branca.png';
       const response = await fetch(logoUrl);
       if (response.ok) {
         const logoBlob = await response.blob();
