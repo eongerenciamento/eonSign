@@ -125,6 +125,7 @@ const Dashboard = () => {
         envelopeId: item.envelope_id,
         envelopeDocuments,
         signatureMode: item.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null,
+        patientName: item.patient_name,
       };
     }));
     setDocuments(documentsWithSigners);

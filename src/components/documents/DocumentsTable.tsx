@@ -43,6 +43,7 @@ export interface Document {
   envelopeId?: string | null;
   envelopeDocuments?: EnvelopeDocument[];
   signatureMode?: "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null;
+  patientName?: string | null;
 }
 
 export interface Folder {
@@ -849,6 +850,10 @@ export const DocumentsTable = ({
                             </span>
                           )}
                         </div>
+                        {/* Patient name for prescriptions */}
+                        {isPrescription(doc.signatureMode) && doc.patientName && (
+                          <p className="text-xs text-purple-600 font-medium">Paciente: {doc.patientName}</p>
+                        )}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-gray-500">{doc.createdAt}</p>
                           {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
@@ -861,6 +866,8 @@ export const DocumentsTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
+                    {/* Hide signer badges for prescriptions */}
+                    {!isPrescription(doc.signatureMode) && (
                     <TooltipProvider>
                       <div className="flex items-center gap-1">
                         {doc.signerNames?.map((name, idx) => {
@@ -885,6 +892,7 @@ export const DocumentsTable = ({
                         })}
                       </div>
                     </TooltipProvider>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-4">
@@ -1150,14 +1158,18 @@ export const DocumentsTable = ({
                       </span>
                     )}
                   </div>
+                  {/* Patient name for prescriptions */}
+                  {isPrescription(doc.signatureMode) && doc.patientName && (
+                    <p className="text-xs text-purple-600 font-medium">Paciente: {doc.patientName}</p>
+                  )}
                   {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
                     <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
                       {signatureModeConfig[doc.signatureMode].label}
                     </Badge>
                   )}
                   
-                  {/* Signer Badges below document name */}
-                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && (
+                  {/* Signer Badges below document name - hide for prescriptions */}
+                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc.signatureMode) && (
                     <TooltipProvider>
                       <div className="flex gap-1 justify-end">
                         {doc.signerStatuses?.map((status, idx) => {
