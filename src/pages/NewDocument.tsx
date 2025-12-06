@@ -1555,7 +1555,29 @@ const NewDocument = () => {
               Cancelar
             </Button>
             <Button className="flex-1 gap-2 bg-[#273d60] text-white hover:bg-[#273d60]/90" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <AnimatePresence mode="wait" initial={false}>
+                {isSubmitting ? (
+                  <motion.div
+                    key="loader"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="send"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Send className="w-4 h-4" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               Assinar
             </Button>
           </div>
