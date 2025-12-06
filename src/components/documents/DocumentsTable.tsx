@@ -949,7 +949,7 @@ export const DocumentsTable = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 justify-end">
-                      {doc.signerStatuses?.[0] === "pending" && (
+                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
                         <Button 
                           variant="ghost"
                           size="icon" 
@@ -1062,7 +1062,7 @@ export const DocumentsTable = ({
                 <div className="flex items-center justify-between">
                   <p className="text-gray-500 text-sm">{doc.createdAt}</p>
                   <div className="flex gap-1">
-                    {doc.signerStatuses?.[0] === "pending" && (
+                    {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
                       <Button 
                         variant="ghost"
                         size="icon" 
