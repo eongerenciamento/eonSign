@@ -112,9 +112,9 @@ const prescriptionDocTypeLabels: Record<string, string> = {
   'RELATORIO_MEDICO': 'Relatório',
 };
 
-// Check if document is a prescription
-const isPrescription = (signatureMode: string | null | undefined) => {
-  return signatureMode === 'PRESCRIPTION';
+// Check if document is a prescription (by signature mode OR prescription doc type)
+const isPrescription = (doc: { signatureMode?: string | null; prescriptionDocType?: string | null }) => {
+  return doc.signatureMode === 'PRESCRIPTION' || !!doc.prescriptionDocType;
 };
 const getInitials = (name: string) => {
   const names = name.trim().split(' ');
@@ -843,7 +843,7 @@ export const DocumentsTable = ({
             {documents.map((doc, index) => {
             const statusInfo = statusConfig[doc.status];
             const progressPercentage = doc.signedBy / doc.signers * 100;
-            const prescriptionBg = isPrescription(doc.signatureMode) ? 'bg-purple-50' : '';
+            const prescriptionBg = isPrescription(doc) ? 'bg-purple-50' : '';
             return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:opacity-80`}>
                   <TableCell>
                     <div 
@@ -865,13 +865,13 @@ export const DocumentsTable = ({
                           )}
                         </div>
                         {/* Patient name for prescriptions */}
-                        {isPrescription(doc.signatureMode) && doc.patientName && (
+                        {isPrescription(doc) && doc.patientName && (
                           <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
                         )}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-gray-500">{doc.createdAt}</p>
                           {/* For prescriptions, show prescription doc type instead of signature mode */}
-                          {isPrescription(doc.signatureMode) && doc.prescriptionDocType ? (
+                          {isPrescription(doc) && doc.prescriptionDocType ? (
                             <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0">
                               {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                             </Badge>
@@ -886,7 +886,7 @@ export const DocumentsTable = ({
                   </TableCell>
                   <TableCell>
                     {/* Hide signer badges for prescriptions */}
-                    {!isPrescription(doc.signatureMode) && (
+                    {!isPrescription(doc) && (
                     <TooltipProvider>
                       <div className="flex items-center gap-1">
                         {doc.signerNames?.map((name, idx) => {
@@ -1055,7 +1055,7 @@ export const DocumentsTable = ({
       <div className="md:hidden space-y-4">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
-        const prescriptionBg = isPrescription(doc.signatureMode) ? 'bg-purple-100' : 'bg-gray-100';
+        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100' : 'bg-gray-100';
         return <div key={doc.id} className={`${prescriptionBg} rounded-lg p-4 space-y-3`} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
                 {/* Date and Action Buttons on same line - ABOVE document name */}
@@ -1178,11 +1178,11 @@ export const DocumentsTable = ({
                     )}
                   </div>
                   {/* Patient name for prescriptions */}
-                  {isPrescription(doc.signatureMode) && doc.patientName && (
+                  {isPrescription(doc) && doc.patientName && (
                     <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
                   )}
                   {/* For prescriptions, show prescription doc type instead of signature mode */}
-                  {isPrescription(doc.signatureMode) && doc.prescriptionDocType ? (
+                  {isPrescription(doc) && doc.prescriptionDocType ? (
                     <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0 w-fit">
                       {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                     </Badge>
@@ -1193,7 +1193,7 @@ export const DocumentsTable = ({
                   ) : null}
                   
                   {/* Signer Badges below document name - hide for prescriptions */}
-                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc.signatureMode) && (
+                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) && (
                     <TooltipProvider>
                       <div className="flex gap-1 justify-end">
                         {doc.signerStatuses?.map((status, idx) => {
