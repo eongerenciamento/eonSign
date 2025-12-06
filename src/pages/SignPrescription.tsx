@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BrySigningDialog } from "@/components/documents/BrySigningDialog";
-import { FileText, CloudUpload, Key, CheckCircle, Send, AlertCircle } from "lucide-react";
+import { FileText, CloudUpload, Key, CheckCircle, Send, AlertCircle, Upload, Eye, EyeOff, Loader2 } from "lucide-react";
 import logoGray from "@/assets/logo-eon-gray.png";
 
 interface DocumentData {
@@ -25,6 +27,7 @@ const SignPrescription = () => {
   const { documentId } = useParams<{ documentId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<DocumentData | null>(null);
@@ -32,6 +35,13 @@ const SignPrescription = () => {
   const [isSigned, setIsSigned] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  
+  // A1 Certificate states
+  const [showA1Upload, setShowA1Upload] = useState(false);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [certificatePassword, setCertificatePassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSigningA1, setIsSigningA1] = useState(false);
 
   useEffect(() => {
     const loadDocument = async () => {
@@ -125,6 +135,84 @@ const SignPrescription = () => {
       title: "Prescrição assinada!",
       description: "Agora você pode enviar para o paciente."
     });
+  };
+
+  const handleCertificateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validExtensions = ['.pfx', '.p12'];
+      const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+      
+      if (!validExtensions.includes(extension)) {
+        toast({
+          title: "Formato inválido",
+          description: "Selecione um arquivo .pfx ou .p12",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setCertificateFile(file);
+    }
+  };
+
+  const handleSignWithA1 = async () => {
+    if (!certificateFile || !certificatePassword) {
+      toast({
+        title: "Dados incompletos",
+        description: "Selecione o certificado e informe a senha.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSigningA1(true);
+
+    try {
+      // Read certificate file as base64
+      const fileReader = new FileReader();
+      const certificateBase64 = await new Promise<string>((resolve, reject) => {
+        fileReader.onload = () => {
+          const result = fileReader.result as string;
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        fileReader.onerror = reject;
+        fileReader.readAsDataURL(certificateFile);
+      });
+
+      // Call edge function to sign with A1 certificate
+      const { data, error } = await supabase.functions.invoke('sign-with-a1-certificate', {
+        body: {
+          documentId: document?.id,
+          certificateBase64,
+          certificatePassword
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setIsSigned(true);
+        setShowA1Upload(false);
+        toast({
+          title: "Prescrição assinada!",
+          description: "Sua assinatura digital foi aplicada com sucesso."
+        });
+      } else {
+        throw new Error(data?.error || "Erro ao assinar documento");
+      }
+
+    } catch (error: any) {
+      console.error('Error signing with A1:', error);
+      toast({
+        title: "Erro ao assinar",
+        description: error.message || "Verifique a senha do certificado e tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSigningA1(false);
+    }
   };
 
   const handleSendToPatient = async () => {
@@ -260,28 +348,123 @@ const SignPrescription = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                onClick={handleOpenCloudCertificate}
-                className="w-full justify-start gap-3 h-auto py-4 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
-              >
-                <CloudUpload className="w-5 h-5" />
-                <div className="text-left">
-                  <p className="font-semibold">Certificado em Nuvem</p>
-                  <p className="text-xs opacity-80">Assinar com certificado digital na nuvem</p>
-                </div>
-              </Button>
+              {!showA1Upload ? (
+                <>
+                  <Button
+                    onClick={handleOpenCloudCertificate}
+                    className="w-full justify-start gap-3 h-auto py-4 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
+                  >
+                    <CloudUpload className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="font-semibold">Certificado em Nuvem</p>
+                      <p className="text-xs opacity-80">Assinar com certificado digital na nuvem</p>
+                    </div>
+                  </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => toast({ title: "Em breve", description: "Upload de certificado A1 estará disponível em breve." })}
-                className="w-full justify-start gap-3 h-auto py-4"
-              >
-                <Key className="w-5 h-5 text-gray-500" />
-                <div className="text-left">
-                  <p className="font-semibold text-gray-700">Upload de Certificado A1</p>
-                  <p className="text-xs text-gray-500">Fazer upload do arquivo .pfx ou .p12</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowA1Upload(true)}
+                    className="w-full justify-start gap-3 h-auto py-4"
+                  >
+                    <Key className="w-5 h-5 text-gray-500" />
+                    <div className="text-left">
+                      <p className="font-semibold text-gray-700">Upload de Certificado A1</p>
+                      <p className="text-xs text-gray-500">Fazer upload do arquivo .pfx ou .p12</p>
+                    </div>
+                  </Button>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-gray-700">Upload de Certificado A1</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        setShowA1Upload(false);
+                        setCertificateFile(null);
+                        setCertificatePassword("");
+                      }}
+                      className="text-gray-500"
+                    >
+                      Voltar
+                    </Button>
+                  </div>
+
+                  {/* Certificate File Upload */}
+                  <div className="space-y-2">
+                    <Label htmlFor="certificate">Arquivo do Certificado (.pfx ou .p12)</Label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      id="certificate"
+                      accept=".pfx,.p12"
+                      onChange={handleCertificateFileChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full justify-start gap-2 h-auto py-3"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {certificateFile ? (
+                        <span className="truncate">{certificateFile.name}</span>
+                      ) : (
+                        <span className="text-gray-500">Selecionar arquivo...</span>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Certificate Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha do Certificado</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={certificatePassword}
+                        onChange={(e) => setCertificatePassword(e.target.value)}
+                        placeholder="Digite a senha do certificado"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Sign Button */}
+                  <Button
+                    onClick={handleSignWithA1}
+                    disabled={!certificateFile || !certificatePassword || isSigningA1}
+                    className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
+                  >
+                    {isSigningA1 ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Assinando...
+                      </>
+                    ) : (
+                      <>
+                        <Key className="w-4 h-4 mr-2" />
+                        Assinar com Certificado A1
+                      </>
+                    )}
+                  </Button>
                 </div>
-              </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
