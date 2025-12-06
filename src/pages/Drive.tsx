@@ -96,6 +96,9 @@ const Drive = () => {
           fileUrl: doc.file_url,
           signerStatuses: [],
           signerNames: externalSigners,
+          signatureMode: doc.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null,
+          patientName: doc.patient_name,
+          prescriptionDocType: doc.prescription_doc_type,
         };
       });
       setDocuments(mappedDocs);

@@ -370,6 +370,7 @@ export type Database = {
           id: string
           name: string
           patient_name: string | null
+          prescription_doc_type: string | null
           signature_mode: string | null
           signed_by: number
           signers: number
@@ -388,6 +389,7 @@ export type Database = {
           id?: string
           name: string
           patient_name?: string | null
+          prescription_doc_type?: string | null
           signature_mode?: string | null
           signed_by?: number
           signers?: number
@@ -406,6 +408,7 @@ export type Database = {
           id?: string
           name?: string
           patient_name?: string | null
+          prescription_doc_type?: string | null
           signature_mode?: string | null
           signed_by?: number
           signers?: number

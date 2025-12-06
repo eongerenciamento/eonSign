@@ -972,7 +972,8 @@ const NewDocument = () => {
           signed_by: 0,
           envelope_id: envelopeId,
           signature_mode: dbSignatureMode,
-          patient_name: isPrescriptionMode && patientInfo.name ? patientInfo.name : null
+          patient_name: isPrescriptionMode && patientInfo.name ? patientInfo.name : null,
+          prescription_doc_type: isPrescriptionMode ? prescriptionDocType : null
         }).select().single();
         if (docError) throw docError;
         documentIds.push(documentData.id);

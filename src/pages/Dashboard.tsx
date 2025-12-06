@@ -126,6 +126,7 @@ const Dashboard = () => {
         envelopeDocuments,
         signatureMode: item.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null,
         patientName: item.patient_name,
+        prescriptionDocType: item.prescription_doc_type,
       };
     }));
     setDocuments(documentsWithSigners);
