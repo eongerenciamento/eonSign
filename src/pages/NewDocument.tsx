@@ -641,9 +641,9 @@ const NewDocument = () => {
     centerY += 3.5;
     doc.text('Res. n. 2.299/2021 (CFM)', centerColumnX, centerY);
     
-    // RIGHT COLUMN - Logo (right-justified)
+    // RIGHT COLUMN - Logo (centered with other columns, positioned higher)
     try {
-      const logoUrl = '/logo-eon-branca.png';
+      const logoUrl = '/logo-eon-sign.png';
       const response = await fetch(logoUrl);
       if (response.ok) {
         const logoBlob = await response.blob();
@@ -653,11 +653,11 @@ const NewDocument = () => {
           reader.readAsDataURL(logoBlob);
         });
         
-        // Add logo to the right column, vertically centered
-        const logoWidth = 40;
-        const logoHeight = 14;
-        const logoX = pageWidth - logoWidth - footerMargin;
-        const logoY = footerY + (footerHeight - logoHeight) / 2;
+        // Add logo to the right column, aligned with headers of other columns
+        const logoWidth = 30;
+        const logoHeight = 18;
+        const logoX = rightColumnX + (columnWidth - logoWidth) / 2; // Center in column
+        const logoY = footerY + 6; // Align with column headers
         doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
       }
     } catch (logoError) {
