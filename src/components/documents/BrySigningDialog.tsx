@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Loader2, CheckCircle, XCircle } from "lucide-react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { X, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,6 +14,8 @@ interface BrySigningDialogProps {
   onSigningComplete?: () => void;
 }
 
+const LOADING_TIMEOUT_MS = 30000; // 30 seconds
+
 export const BrySigningDialog = ({
   open,
   onOpenChange,
@@ -25,7 +26,10 @@ export const BrySigningDialog = ({
 }: BrySigningDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
   const [signingStatus, setSigningStatus] = useState<"idle" | "signed" | "error" | "syncing">("idle");
+  const [iframeKey, setIframeKey] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync signature status with database via BRy API
   const syncSignatureStatus = useCallback(async () => {
@@ -88,20 +92,49 @@ export const BrySigningDialog = ({
     }
   }, [toast, syncSignatureStatus]);
 
+  // Start timeout when loading begins
+  const startLoadingTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setHasTimedOut(false);
+    timeoutRef.current = setTimeout(() => {
+      if (isLoading) {
+        setHasTimedOut(true);
+      }
+    }, LOADING_TIMEOUT_MS);
+  }, [isLoading]);
+
   useEffect(() => {
     if (open) {
       setIsLoading(true);
       setSigningStatus("idle");
+      setHasTimedOut(false);
+      startLoadingTimeout();
       window.addEventListener("message", handleMessage);
     }
 
     return () => {
       window.removeEventListener("message", handleMessage);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [open, handleMessage]);
+  }, [open, handleMessage, startLoadingTimeout]);
 
   const handleIframeLoad = () => {
     setIsLoading(false);
+    setHasTimedOut(false);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  };
+
+  const handleReload = () => {
+    setIsLoading(true);
+    setHasTimedOut(false);
+    setIframeKey(prev => prev + 1);
+    startLoadingTimeout();
   };
 
   if (!signingUrl) return null;
@@ -125,7 +158,7 @@ export const BrySigningDialog = ({
         
         <div className="relative flex-1 w-full h-full min-h-0">
           {/* Loading overlay */}
-          {isLoading && (
+          {isLoading && !hasTimedOut && (
             <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
@@ -140,11 +173,35 @@ export const BrySigningDialog = ({
             </div>
           )}
 
+          {/* Timeout overlay */}
+          {hasTimedOut && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <RefreshCw className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <p className="text-base font-medium text-foreground">O carregamento está demorando</p>
+                  <p className="text-sm text-muted-foreground text-center max-w-xs">
+                    A interface de assinatura está demorando para carregar. Tente recarregar.
+                  </p>
+                </div>
+                <Button onClick={handleReload} variant="outline" className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Recarregar
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Syncing overlay */}
           {signingStatus === "syncing" && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-20">
-              <div className="flex flex-col items-center gap-3">
-                <LoadingSpinner size="lg" inline />
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-muted rounded-full" />
+                  <div className="absolute inset-0 w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
                 <p className="text-lg font-medium">Sincronizando assinatura...</p>
                 <p className="text-sm text-muted-foreground">Aguarde um momento</p>
               </div>
@@ -177,6 +234,7 @@ export const BrySigningDialog = ({
 
           {/* BRy signing iframe */}
           <iframe
+            key={iframeKey}
             src={signingUrl}
             id="brySigningIframe"
             className="w-full h-full border-0"
