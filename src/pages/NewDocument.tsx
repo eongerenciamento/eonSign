@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit, Send } from "lucide-react";
+import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -148,6 +148,7 @@ const NewDocument = () => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({ name: '', cpf: '', birthDate: '', phone: '', email: '' });
   const [patientSuggestions, setPatientSuggestions] = useState<PatientSuggestion[]>([]);
   const [isPrescriptionSubmitting, setIsPrescriptionSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showBryDialog, setShowBryDialog] = useState(false);
   const [prescriptionBryUrl, setPrescriptionBryUrl] = useState<string | null>(null);
   const [prescriptionDocumentId, setPrescriptionDocumentId] = useState<string | null>(null);
@@ -661,6 +662,8 @@ const NewDocument = () => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+    
     // Determine the effective title
     const effectiveTitle = title || (files.length > 0 ? files[0].name.replace(/\.[^/.]+$/, '') : 'Prescrição');
     
@@ -674,6 +677,7 @@ const NewDocument = () => {
         description: "Por favor, selecione pelo menos um arquivo ou preencha a prescrição.",
         variant: "destructive"
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -686,6 +690,7 @@ const NewDocument = () => {
           description: "Por favor, preencha o nome e pelo menos telefone ou e-mail de cada signatário.",
           variant: "destructive"
         });
+        setIsSubmitting(false);
         return;
       }
 
@@ -696,6 +701,7 @@ const NewDocument = () => {
           description: `${isEnvelope ? 'Envelopes' : 'Documentos'} permitem no máximo ${maxSigners} signatários externos.`,
           variant: "destructive"
         });
+        setIsSubmitting(false);
         return;
       }
     }
@@ -706,6 +712,7 @@ const NewDocument = () => {
         description: "Configure os dados da empresa antes de enviar documentos.",
         variant: "destructive"
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -1054,6 +1061,7 @@ const NewDocument = () => {
             description: "Não foi possível obter o link de assinatura.",
             variant: "destructive"
           });
+          setIsSubmitting(false);
           return;
         }
         
@@ -1063,6 +1071,7 @@ const NewDocument = () => {
         setPrescriptionBryUrl(bryLink);
         setShowBryDialog(true);
         setIsSubmitted(true);
+        setIsSubmitting(false);
         
         toast({
           title: "Prescrição criada!",
@@ -1129,6 +1138,7 @@ const NewDocument = () => {
         description: error.message,
         variant: "destructive"
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -1544,8 +1554,8 @@ const NewDocument = () => {
               <X className="w-4 h-4" />
               Cancelar
             </Button>
-            <Button className="flex-1 gap-2 bg-[#273d60] text-white hover:bg-[#273d60]/90" onClick={handleSubmit} disabled={showLimitDialog}>
-              <Send className="w-4 h-4" />
+            <Button className="flex-1 gap-2 bg-[#273d60] text-white hover:bg-[#273d60]/90" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Assinar
             </Button>
           </div>
