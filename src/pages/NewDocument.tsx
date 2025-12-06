@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit } from "lucide-react";
+import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1555,11 +1555,13 @@ const NewDocument = () => {
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <Button variant="outline" className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white border-none hover:opacity-90" onClick={() => navigate("/documentos")}>
+            <Button className="flex-1 gap-2 bg-[#273d60] text-white border-none hover:bg-[#273d60]/90" onClick={() => navigate("/documentos")}>
+              <X className="w-4 h-4" />
               Cancelar
             </Button>
-            <Button className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90" onClick={handleSubmit} disabled={showLimitDialog}>
-              Enviar para Assinatura
+            <Button className="flex-1 gap-2 bg-[#273d60] text-white hover:bg-[#273d60]/90" onClick={handleSubmit} disabled={showLimitDialog}>
+              <Send className="w-4 h-4" />
+              Assinar
             </Button>
           </div>
         </div>
