@@ -88,7 +88,7 @@ export function PatientAutocomplete({
                 onClick={() => handleSelect(patient)}
               >
                 <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                <div className="text-xs text-gray-500 flex flex-wrap gap-3">
+                <div className="text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-0.5">
                   {patient.cpf && <span>CPF: {patient.cpf}</span>}
                   {patient.birthDate && <span>Nasc: {patient.birthDate}</span>}
                   {patient.phone && <span>Tel: {patient.phone}</span>}
