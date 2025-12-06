@@ -229,7 +229,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       for (const brySign of envelopeData.signers) {
         const signerEmail = brySign.email;
-        const signerLink = brySign.link?.href || '';
+        const signerLink = brySign.iframe?.href || brySign.link?.href || '';
         
         let signerNonce = brySign.nonce || '';
         if (!signerNonce && signerLink) {
