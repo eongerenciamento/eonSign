@@ -1096,13 +1096,30 @@ const NewDocument = () => {
 
       // For prescription mode: no notifications here, redirect to signing page
       if (isPrescriptionMode) {
+        console.log('[PRESCRIPTION] Mode detected, preparing redirect. DocumentId:', firstDocumentId);
+        
+        if (!firstDocumentId) {
+          console.error('[PRESCRIPTION] No document ID found, cannot redirect');
+          toast({
+            title: "Erro",
+            description: "Não foi possível criar o documento de prescrição.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Set state and show toast
         setIsSubmitted(true);
         toast({
           title: "Prescrição criada!",
           description: "Redirecionando para assinatura digital..."
         });
-        // Redirect to prescription signing page
-        navigate(`/prescricao/assinar/${firstDocumentId}`);
+        
+        // Use setTimeout to ensure React state updates complete before navigation
+        console.log('[PRESCRIPTION] Navigating to:', `/prescricao/assinar/${firstDocumentId}`);
+        setTimeout(() => {
+          navigate(`/prescricao/assinar/${firstDocumentId}`);
+        }, 100);
         return;
       }
 
