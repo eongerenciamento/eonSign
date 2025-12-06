@@ -165,19 +165,26 @@ export function CertificateCheckoutSheet({
     >
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[420px] p-0 overflow-y-auto [&>button]:text-white [&>button]:hover:text-white/80 [&>button]:top-5 [&>button]:right-5"
+        className="w-full sm:max-w-[420px] p-0 flex flex-col h-full [&>button]:hidden"
       >
         {/* Header */}
-        <div className="bg-[#273d60] p-4 flex items-center justify-between sticky top-0 z-10">
+        <div className="bg-[#273d60] p-4 flex items-center justify-between flex-shrink-0">
           <img
             alt="Eon Sign"
             className="h-10 w-auto"
             src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png"
           />
-          <h2 className="text-white text-lg font-normal pr-8">Certificado Digital A1</h2>
+          <h2 className="text-white text-lg font-normal">Certificado Digital A1</h2>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="text-white hover:text-white/80 p-1"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
           {/* Product Card */}
           <div className="bg-gray-100/95 rounded-lg p-4 text-gray-600 border-0">
             <div className="flex items-center justify-between mb-3">
@@ -329,6 +336,7 @@ export function CertificateCheckoutSheet({
               )}
               Pagar
             </Button>
+          </div>
           </div>
         </div>
       </SheetContent>
