@@ -124,7 +124,7 @@ const Dashboard = () => {
         documentCount: item.documentCount,
         envelopeId: item.envelope_id,
         envelopeDocuments,
-        signatureMode: item.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | null,
+        signatureMode: item.signature_mode as "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null,
       };
     }));
     setDocuments(documentsWithSigners);
