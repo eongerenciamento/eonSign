@@ -44,6 +44,7 @@ export interface Document {
   envelopeDocuments?: EnvelopeDocument[];
   signatureMode?: "SIMPLE" | "ADVANCED" | "QUALIFIED" | "PRESCRIPTION" | null;
   patientName?: string | null;
+  prescriptionDocType?: string | null;
 }
 
 export interface Folder {
@@ -96,6 +97,19 @@ const signatureModeConfig = {
     label: "Prescrição",
     className: "bg-purple-600 text-white"
   }
+};
+
+// Map prescription doc types to readable labels
+const prescriptionDocTypeLabels: Record<string, string> = {
+  'MEDICAMENTO': 'Medicamento',
+  'ATESTADO': 'Atestado',
+  'SOLICITACAO_EXAME': 'Exame',
+  'LAUDO': 'Laudo',
+  'SUMARIA_ALTA': 'Alta',
+  'ATENDIMENTO_CLINICO': 'Atendimento',
+  'DISPENSACAO_MEDICAMENTO': 'Dispensação',
+  'VACINACAO': 'Vacina',
+  'RELATORIO_MEDICO': 'Relatório',
 };
 
 // Check if document is a prescription
@@ -856,11 +870,16 @@ export const DocumentsTable = ({
                         )}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-gray-500">{doc.createdAt}</p>
-                          {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
+                          {/* For prescriptions, show prescription doc type instead of signature mode */}
+                          {isPrescription(doc.signatureMode) && doc.prescriptionDocType ? (
+                            <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0">
+                              {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                            </Badge>
+                          ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
                             <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
                               {signatureModeConfig[doc.signatureMode].label}
                             </Badge>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -1162,11 +1181,16 @@ export const DocumentsTable = ({
                   {isPrescription(doc.signatureMode) && doc.patientName && (
                     <p className="text-xs text-purple-600 font-medium">Paciente: {doc.patientName}</p>
                   )}
-                  {doc.signatureMode && signatureModeConfig[doc.signatureMode] && (
+                  {/* For prescriptions, show prescription doc type instead of signature mode */}
+                  {isPrescription(doc.signatureMode) && doc.prescriptionDocType ? (
+                    <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0 w-fit">
+                      {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                    </Badge>
+                  ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
                     <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
                       {signatureModeConfig[doc.signatureMode].label}
                     </Badge>
-                  )}
+                  ) : null}
                   
                   {/* Signer Badges below document name - hide for prescriptions */}
                   {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc.signatureMode) && (
