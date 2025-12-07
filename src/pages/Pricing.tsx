@@ -193,6 +193,12 @@ const PLANS = [{
   }]
 }];
 const FAQS = [{
+  question: "Quais tipos de assinatura o Eon Sign permite?",
+  answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
+}, {
+  question: "Sou obrigado a ter certificado digital?",
+  answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela Eon Sign."
+}, {
   question: "Como funciona a contagem de documentos?",
   answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
 }, {
