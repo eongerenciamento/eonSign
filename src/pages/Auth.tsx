@@ -210,7 +210,9 @@ export default function Auth() {
         <div className="text-center animate-fade-in animate-scale-in" style={{
         animationDelay: '0.1s'
       }}>
-          <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8" src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" />
+          <a href="https://www.eongerenciamento.com.br" target="_blank" rel="noopener noreferrer">
+            <img alt="ē o n ponto" className="mx-auto h-24 w-auto mb-8 cursor-pointer" src="/lovable-uploads/75f16f37-9686-4d42-81df-fbe35fe8735c.png" />
+          </a>
         </div>
 
         <div className="p-8 rounded-2xl shadow-xl bg-white/5 border border-white/20 animate-fade-in" style={{
