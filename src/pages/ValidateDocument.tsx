@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Download, Copy, Share2, FileDown } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Download, Copy, Share2, FileDown, Timer, AlertTriangle } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,14 @@ interface Signer {
   cpf: string | null;
 }
 
+interface TimestampInfo {
+  applied: boolean;
+  profile: string;
+  authority: string;
+  standard: string;
+  legalBasis: string;
+}
+
 interface DocumentValidation {
   valid: boolean;
   document: {
@@ -36,6 +44,8 @@ interface DocumentValidation {
     totalSigners: number;
     signedCount: number;
     downloadUrl: string | null;
+    hasTimestamp: boolean;
+    timestampInfo: TimestampInfo | null;
   };
   organization: {
     name: string;
@@ -178,18 +188,6 @@ const ValidateDocument = () => {
       ["Data de Conclusão:", document.completedAt ? formatDate(document.completedAt) : "Pendente"],
       ["ID do Documento:", document.id],
     ];
-
-    docInfo.forEach(([label, value]) => {
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(60, 60, 60);
-      doc.text(label, margin, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(100, 100, 100);
-      doc.text(value, margin + 45, yPos);
-      yPos += 7;
-    });
-
-    yPos += 10;
 
     // Signers Section
     doc.setTextColor(39, 61, 96);
@@ -480,6 +478,56 @@ const ValidateDocument = () => {
                 <p className="font-mono text-sm text-gray-600 break-all">{document.id}</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Timestamp Info */}
+        <Card className={`mb-6 ${document.hasTimestamp ? "border-green-200 bg-green-50/30" : "border-yellow-200 bg-yellow-50/30"}`}>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2 text-primary">
+              <Timer className="w-5 h-5" />
+              <h3 className="font-semibold">Carimbo do Tempo</h3>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {document.hasTimestamp && document.timestampInfo ? (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <span className="font-semibold text-green-700">Carimbo do Tempo Aplicado</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Perfil</p>
+                    <p className="font-medium text-gray-900">{document.timestampInfo.profile}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Autoridade</p>
+                    <p className="font-medium text-gray-900">{document.timestampInfo.authority}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Padrão</p>
+                    <p className="font-medium text-gray-900">{document.timestampInfo.standard}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Base Legal</p>
+                    <p className="font-medium text-gray-900">{document.timestampInfo.legalBasis}</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  <span className="font-semibold text-yellow-700">Sem Carimbo do Tempo de Autoridade</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Este documento foi assinado no modo Simples, que não inclui carimbo do tempo de uma 
+                  Autoridade de Carimbo do Tempo (ACT). O registro de data/hora é baseado no momento 
+                  da assinatura no sistema.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
