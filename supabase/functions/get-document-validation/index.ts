@@ -90,6 +90,16 @@ serve(async (req) => {
     const isCompleted = document.status === "signed";
     const isValid = isCompleted && document.signed_by === document.signers;
 
+    // Determine timestamp info based on signature mode
+    const hasTimestamp = ['ADVANCED', 'QUALIFIED'].includes(document.signature_mode || '');
+    const timestampInfo = hasTimestamp ? {
+      applied: isCompleted,
+      profile: document.signature_mode === 'QUALIFIED' ? 'ICP-Brasil (Qualificado)' : 'Avançado',
+      authority: 'BRy Tecnologia - Autoridade de Carimbo do Tempo (ACT)',
+      standard: 'RFC 3161',
+      legalBasis: 'Lei n. 14.063/2020'
+    } : null;
+
     // Generate signed URL for download if document is completed
     let downloadUrl = null;
     if (isCompleted && document.bry_signed_file_url) {
@@ -121,7 +131,9 @@ serve(async (req) => {
           completedAt: isCompleted ? document.updated_at : null,
           totalSigners: document.signers,
           signedCount: document.signed_by,
-          downloadUrl
+          downloadUrl,
+          hasTimestamp,
+          timestampInfo
         },
         organization: {
           name: companySettings?.company_name || "Organização",
