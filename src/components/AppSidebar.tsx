@@ -215,9 +215,8 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto bg-[#273d60]">
-        {!collapsed && <button onClick={() => setCertificateDialogOpen(true)} className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white text-sm font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-400/40 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 border border-amber-400/30">
-            <Award className="w-4 h-4" />
-            Certificado Digital A1 R$109,90
+        {!collapsed && <button onClick={() => setCertificateDialogOpen(true)} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-medium">
+            Certificado Digital A1 R$109.90    
           </button>}
         
         {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white">
