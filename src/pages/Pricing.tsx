@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, ChevronDown, ChevronUp, Instagram, Facebook, Youtube, Linkedin } from "lucide-react";
+import { Check, X, ChevronDown, ChevronUp, Shield, ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PlanCheckoutDialog } from "@/components/pricing/PlanCheckoutDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -197,7 +197,7 @@ const FAQS = [{
   answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
 }, {
   question: "Sou obrigado a ter certificado digital?",
-  answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela Eon Sign."
+  answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil. Você pode adquirir seu certificado em certifica.eongerenciamento.com.br."
 }, {
   question: "Como funciona a contagem de documentos?",
   answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
@@ -433,6 +433,39 @@ export default function Pricing() {
                     </AccordionContent>
                   </AccordionItem>)}
               </Accordion>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Certificate Banner */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-gradient-to-r from-[#273d60] to-[#1e2d47] border-0 shadow-lg">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/10 rounded-full">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h3 className="text-lg md:text-xl font-bold text-white">
+                      Certificado Digital A1
+                    </h3>
+                    <p className="text-white/80 text-sm md:text-base">
+                      Adquira seu certificado ICP-Brasil para assinaturas qualificadas
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="secondary"
+                  className="bg-white text-[#273d60] hover:bg-gray-100 font-semibold"
+                  onClick={() => window.open('https://certifica.eongerenciamento.com.br', '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Comprar Certificado
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
