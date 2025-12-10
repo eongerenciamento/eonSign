@@ -15,7 +15,6 @@ import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
 import ValidateDocument from "./pages/ValidateDocument";
-import CertificateRequests from "./pages/CertificateRequests";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -34,7 +33,6 @@ const AppRoutes = () => {
       <Route path="/novo-documento" element={<ProtectedRoute><NewDocument /></ProtectedRoute>} />
       <Route path="/relatorios" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="/certificados" element={<ProtectedRoute><CertificateRequests /></ProtectedRoute>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>;
