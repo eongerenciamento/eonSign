@@ -165,7 +165,7 @@ export function CertificateCheckoutSheet({
     >
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[420px] p-0 flex flex-col h-full [&>button]:hidden bg-[#273d60]"
+        className="w-full sm:max-w-[420px] p-0 flex flex-col h-full [&>button]:hidden bg-[#273d60] border-l-0"
       >
         {/* Header with notch coverage */}
         <div className="bg-[#273d60] pt-[env(safe-area-inset-top)] flex-shrink-0">
