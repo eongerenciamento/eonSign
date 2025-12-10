@@ -1,11 +1,5 @@
 project_id = "lbyoniuealghclfuahko"
 
-[functions.create-certificate-checkout]
-verify_jwt = false
-
-[functions.send-certificate-purchase-email]
-verify_jwt = false
-
 [functions.send-signature-email]
 verify_jwt = false
 
@@ -63,45 +57,6 @@ verify_jwt = false
 [functions.get-document-validation]
 verify_jwt = false
 
-[functions.bry-ar-auth]
-verify_jwt = false
-
-[functions.bry-ar-request-certificate]
-verify_jwt = false
-
-[functions.bry-ar-attach-document]
-verify_jwt = false
-
-[functions.bry-ar-check-psbio]
-verify_jwt = false
-
-[functions.bry-ar-list-requests]
-verify_jwt = false
-
-[functions.bry-ar-webhook]
-verify_jwt = false
-
-[functions.bry-ar-download-certificate]
-verify_jwt = false
-
-[functions.bry-ar-list-documents]
-verify_jwt = false
-
-[functions.bry-ar-get-document]
-verify_jwt = false
-
-[functions.bry-ar-delete-request]
-verify_jwt = false
-
-[functions.bry-ar-delete-document]
-verify_jwt = false
-
-[functions.bry-ar-get-request]
-verify_jwt = false
-
-[functions.bry-ar-download-ownership-term]
-verify_jwt = false
-
 [functions.generate-signature-report]
 verify_jwt = false
 
@@ -116,6 +71,3 @@ verify_jwt = false
 
 [functions.send-prescription-to-patient]
 verify_jwt = false
-
-[functions.sign-with-a1-certificate]
-verify_jwt = true

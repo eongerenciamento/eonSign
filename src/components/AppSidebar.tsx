@@ -1,4 +1,4 @@
-import { File, Folder, BarChart, Menu, Settings, Award } from "lucide-react";
+import { File, Folder, BarChart, Menu, Settings } from "lucide-react";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import { User } from "@supabase/supabase-js";
 import logoSign from "@/assets/logo-sign.png";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CertificateCheckoutSheet } from "@/components/certificate/CertificateCheckoutSheet";
+
 const items = [{
   title: "Dashboard",
   url: "/",
@@ -30,14 +30,11 @@ const items = [{
   url: "/relatorios",
   icon: BarChart
 }, {
-  title: "Certificado Digital",
-  url: "/certificados",
-  icon: Award
-}, {
   title: "Configurações",
   url: "/configuracoes",
   icon: Settings
 }];
+
 export function AppSidebar() {
   const {
     state
@@ -56,7 +53,7 @@ export function AppSidebar() {
   const [pendingDocuments, setPendingDocuments] = useState(0);
   const [supportTickets, setSupportTickets] = useState(0);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
-  const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
+
   useEffect(() => {
     const loadUserData = async () => {
       const {
@@ -134,15 +131,18 @@ export function AppSidebar() {
       supabase.removeChannel(documentsChannel);
     };
   }, []);
+
   const isActive = (path: string) => {
     if (path === "/") return currentPath === path;
     return currentPath.startsWith(path);
   };
+
   const getUserInitials = () => {
     if (name) return name.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
   };
+
   const handleProfileUpdate = async () => {
     const {
       data: {
@@ -160,6 +160,11 @@ export function AppSidebar() {
       }
     }
   };
+
+  const handleCertificateRedirect = () => {
+    window.open('https://certifica.eongerenciamento.com.br', '_blank');
+  };
+
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center bg-[#273d60]`}>
@@ -215,7 +220,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto bg-[#273d60]">
-        {!collapsed && <button onClick={() => setCertificateDialogOpen(true)} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-medium">
+        {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-medium">
             Certificado Digital A1 R$109.90    
           </button>}
         
@@ -248,10 +253,5 @@ export function AppSidebar() {
       </div>
 
       <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} userName={name} userEmail={user?.email || ""} userAvatar={avatarUrl} organization={organization} onAvatarChange={setAvatarUrl} onProfileUpdate={handleProfileUpdate} />
-      
-      <CertificateCheckoutSheet 
-        open={certificateDialogOpen} 
-        onOpenChange={setCertificateDialogOpen}
-      />
     </Sidebar>;
 }

@@ -10,7 +10,6 @@ import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, 
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign.png";
-import { CertificatePurchaseDialog } from "@/components/certificate/CertificatePurchaseDialog";
 
 const emailSchema = z.string()
   .trim()
@@ -77,8 +76,6 @@ const SignDocument = () => {
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
   
-  // Certificate purchase dialog
-  const [showCertificateDialog, setShowCertificateDialog] = useState(false);
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
@@ -652,7 +649,7 @@ const SignDocument = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => setShowCertificateDialog(true)}
+                              onClick={() => window.open('https://certifica.eongerenciamento.com.br', '_blank')}
                               className="border-blue-300 text-blue-700 hover:bg-blue-100"
                             >
                               <Award className="h-4 w-4 mr-2" />
@@ -765,17 +762,6 @@ const SignDocument = () => {
               </Card>
             )}
 
-            {/* Certificate Purchase Dialog */}
-            <CertificatePurchaseDialog
-              open={showCertificateDialog}
-              onOpenChange={setShowCertificateDialog}
-              signerId={currentSigner?.id}
-              documentId={document?.id}
-              prefillData={currentSigner ? {
-                name: currentSigner.name,
-                email: currentSigner.email,
-              } : undefined}
-            />
 
             {currentSigner && currentSigner.status === "signed" && (
               <Card className="p-6 text-center">
