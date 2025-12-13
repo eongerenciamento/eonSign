@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     const fromNumber = Deno.env.get("TWILIO_WHATSAPP_NUMBER");
     const templateInvitation = Deno.env.get("TWILIO_TEMPLATE_INVITATION");
     const templateCompleted = Deno.env.get("TWILIO_TEMPLATE_COMPLETED");
-    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
 
     if (!accountSid || !authToken || !fromNumber) {
       console.error("Twilio credentials not configured");

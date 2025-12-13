@@ -63,7 +63,7 @@ serve(async (req) => {
       logStep("Found customer by email", { customerId });
     }
 
-    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
+    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/configuracoes?tab=subscription`,

@@ -162,7 +162,7 @@ export function AppSidebar() {
   };
 
   const handleCertificateRedirect = () => {
-    window.open('https://certifica.eongerenciamento.com.br', '_blank');
+    window.open('https://certifica.eonhub.com.br', '_blank');
   };
 
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
@@ -173,7 +173,7 @@ export function AppSidebar() {
         </SidebarTrigger>
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
-            <a href="https://www.eongerenciamento.com.br" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
               <img alt="Éon Sign" className="h-13 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
             </a>
           </div>}
