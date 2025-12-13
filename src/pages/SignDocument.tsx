@@ -649,7 +649,7 @@ const SignDocument = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open('https://certifica.eongerenciamento.com.br', '_blank')}
+                              onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')}
                               className="border-blue-300 text-blue-700 hover:bg-blue-100"
                             >
                               <Award className="h-4 w-4 mr-2" />

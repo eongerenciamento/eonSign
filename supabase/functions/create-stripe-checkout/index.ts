@@ -41,7 +41,7 @@ serve(async (req) => {
     }
 
     // Create checkout session for new account registration
-    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
+    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : email,

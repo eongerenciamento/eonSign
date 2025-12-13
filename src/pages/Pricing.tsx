@@ -197,7 +197,7 @@ const FAQS = [{
   answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
 }, {
   question: "Sou obrigado a ter certificado digital?",
-  answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil. Você pode adquirir seu certificado em certifica.eongerenciamento.com.br."
+  answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil. Você pode adquirir seu certificado em certifica.eonhub.com.br."
 }, {
   question: "Como funciona a contagem de documentos?",
   answer: "A contagem de documentos é mensal e reinicia automaticamente no primeiro dia de cada mês. Você pode enviar até o limite do seu plano por mês."
@@ -460,7 +460,7 @@ export default function Pricing() {
                 <Button 
                   variant="secondary"
                   className="bg-white text-[#273d60] hover:bg-gray-100 font-semibold"
-                  onClick={() => window.open('https://certifica.eongerenciamento.com.br', '_blank')}
+                  onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Comprar Certificado

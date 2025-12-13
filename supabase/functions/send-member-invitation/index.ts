@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send invitation email
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    const appUrl = Deno.env.get("APP_URL") || "https://sign.eongerenciamento.com.br";
+    const appUrl = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
 
     const emailHtml = `
       <!DOCTYPE html>
