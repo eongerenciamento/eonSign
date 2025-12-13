@@ -171,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eongerenciamento.com.br>",
+      from: "Eon Sign <noreply@eonhub.com.br>",
       to: [memberEmail],
       subject: `${adminName} convidou você para ${organizationName}`,
       html: emailHtml,

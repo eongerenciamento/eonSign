@@ -282,7 +282,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to each signatory
     const emailPromises = recipients.map(async (email) => {
       return await resend.emails.send({
-        from: "Eon Sign <noreply@eongerenciamento.com.br>",
+        from: "Eon Sign <noreply@eonhub.com.br>",
         to: [email],
         subject: `Documento Assinado - ${documentName}`,
         html: `

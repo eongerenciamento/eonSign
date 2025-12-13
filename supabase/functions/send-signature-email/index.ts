@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
       : "Clique no botão abaixo para visualizar e assinar o documento. Você precisará informar seu CPF/CNPJ para concluir a assinatura.";
 
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eongerenciamento.com.br>",
+      from: "Eon Sign <noreply@eonhub.com.br>",
       to: [signerEmail],
       subject: `Você tem um documento para assinar - ${documentName}`,
       html: `
