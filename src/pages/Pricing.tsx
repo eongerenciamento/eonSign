@@ -275,8 +275,8 @@ export default function Pricing() {
         <p className="mb-1 max-w-2xl mx-auto text-gray-500 text-base">Escolha o plano ideal para sua empresa</p>
         <p className="mb-4 max-w-2xl mx-auto text-sm text-gray-400">
           Se seu volume de assinaturas é maior entre em contato:{" "}
-          <a href="mailto:contato@eongerenciamento.com.br" className="underline text-primary">
-            contato@eongerenciamento.com.br
+          <a href="mailto:contato@eonhub.com.br" className="underline text-primary">
+            contato@eonhub.com.br
           </a>
         </p>
       </div>

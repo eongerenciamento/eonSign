@@ -737,7 +737,7 @@ const Settings = () => {
               <CardContent className="p-6 text-center">
                 <p className="text-sm text-gray-600 mb-2">Precisa de mais ajuda?</p>
                 <p className="text-sm text-gray-900">
-                  Entre em contato: <a href="mailto:contato@eongerenciamento.com.br" className="font-semibold hover:underline text-blue-700">contato@eongerenciamento.com.br</a>
+                  Entre em contato: <a href="mailto:contato@eonhub.com.br" className="font-semibold hover:underline text-blue-700">contato@eonhub.com.br</a>
                 </p>
               </CardContent>
             </Card>

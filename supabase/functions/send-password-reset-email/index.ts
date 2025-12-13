@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email com as credenciais
     const emailResponse = await resend.emails.send({
-      from: "Éon Sign <noreply@eongerenciamento.com.br>",
+      from: "Eon Sign <noreply@eonhub.com.br>",
       to: [email],
       subject: "Nova Senha - Éon Sign",
       html: `

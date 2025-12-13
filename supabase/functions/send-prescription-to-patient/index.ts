@@ -86,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const emailPayload: any = {
-          from: "Eon Sign <noreply@eongerenciamento.com.br>",
+          from: "Eon Sign <noreply@eonhub.com.br>",
           to: [patientEmail],
           subject: `Sua Prescrição Médica - ${documentName}`,
           html: `
