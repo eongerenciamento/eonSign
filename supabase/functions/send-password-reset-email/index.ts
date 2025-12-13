@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Eon Sign <noreply@eonhub.com.br>",
       to: [email],
-      subject: "Nova Senha - Éon Sign",
+      subject: "Nova Senha",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
