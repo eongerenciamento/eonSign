@@ -86,15 +86,22 @@ const SignDocument = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Fetch admin_email from company_settings
+          // Fetch admin_email and admin_cpf from company_settings
           const { data: companyData } = await supabase
             .from('company_settings')
-            .select('admin_email')
+            .select('admin_email, admin_cpf')
             .eq('user_id', user.id)
             .maybeSingle();
           
           if (companyData?.admin_email) {
             setEmail(companyData.admin_email);
+          }
+          
+          // Pre-fill CPF if available
+          if (companyData?.admin_cpf) {
+            const formattedCpf = formatCpfCnpj(companyData.admin_cpf);
+            setCpf(formattedCpf);
+            setCpfValid(validateCpfCnpj(formattedCpf));
           }
         }
       } catch (error) {
