@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       company_settings: {
         Row: {
+          admin_birth_date: string | null
           admin_cpf: string
           admin_email: string
           admin_name: string
@@ -45,6 +46,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_birth_date?: string | null
           admin_cpf: string
           admin_email: string
           admin_name: string
@@ -74,6 +76,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_birth_date?: string | null
           admin_cpf?: string
           admin_email?: string
           admin_name?: string

@@ -32,6 +32,7 @@ const Settings = () => {
   const [state, setState] = useState("");
   const [adminName, setAdminName] = useState("");
   const [adminCpf, setAdminCpf] = useState("");
+  const [adminBirthDate, setAdminBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -142,6 +143,7 @@ const Settings = () => {
           setState(companyData.state);
           setAdminName(companyData.admin_name);
           setAdminCpf(companyData.admin_cpf);
+          setAdminBirthDate((companyData as any).admin_birth_date || "");
           setPhone(companyData.admin_phone);
           setCompanyEmail(companyData.admin_email);
           setIsHealthcare((companyData as any).is_healthcare || false);
@@ -299,6 +301,7 @@ const Settings = () => {
       state,
       admin_name: adminName,
       admin_cpf: adminCpf,
+      admin_birth_date: adminBirthDate || null,
       admin_phone: phone,
       admin_email: companyEmail,
       is_healthcare: isHealthcare,
@@ -441,6 +444,11 @@ const Settings = () => {
                     <div className="grid gap-2">
                       <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
                       <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" className="text-gray-600" />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="admin-birth-date">Data de Nascimento</Label>
+                      <Input id="admin-birth-date" type="date" value={adminBirthDate} onChange={e => setAdminBirthDate(e.target.value)} className="text-gray-600" />
                     </div>
                   </div>
 
