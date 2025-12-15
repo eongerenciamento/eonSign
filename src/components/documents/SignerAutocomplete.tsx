@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
+
 
 export interface SignerSuggestion {
   name: string;
@@ -97,44 +97,46 @@ export function SignerAutocomplete({
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Command shouldFilter={false}>
-          <CommandList>
-            {!hasResults && <CommandEmpty>Nenhum resultado encontrado</CommandEmpty>}
-            
-            {filteredSuggestions.length > 0 && (
-              <CommandGroup heading="Contatos recentes">
-                {filteredSuggestions.map((signer, index) => (
-                  <CommandItem
-                    key={`signer-${signer.email}-${signer.phone}-${index}`}
-                    onSelect={() => handleSelectSigner(signer)}
-                    className="flex flex-col items-start gap-0.5 cursor-pointer bg-gray-50 hover:bg-gray-100 data-[selected=true]:bg-gray-100"
-                  >
-                    <span className="font-medium text-gray-700">{signer.name}</span>
-                    <div className="flex flex-col text-xs">
-                      {signer.phone && <span className="text-gray-600">{signer.phone}</span>}
-                      {signer.email && <span className="text-gray-500">{signer.email}</span>}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+        <div className="max-h-64 overflow-auto">
+          {!hasResults && (
+            <p className="p-3 text-sm text-muted-foreground text-center">Nenhum resultado encontrado</p>
+          )}
+          
+          {filteredSuggestions.length > 0 && (
+            <div className="p-1">
+              <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Contatos recentes</p>
+              {filteredSuggestions.map((signer, index) => (
+                <div
+                  key={`signer-${signer.email}-${signer.phone}-${index}`}
+                  onClick={() => handleSelectSigner(signer)}
+                  className="flex flex-col items-start gap-0.5 cursor-pointer px-2 py-2 rounded bg-muted/50 hover:bg-muted mb-1"
+                >
+                  <span className="font-medium text-foreground">{signer.name}</span>
+                  <div className="flex flex-col text-xs">
+                    {signer.phone && <span className="text-muted-foreground">{signer.phone}</span>}
+                    {signer.email && <span className="text-muted-foreground/70">{signer.email}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-            {filteredGroups.length > 0 && onSelectGroup && (
-              <CommandGroup heading="Grupos">
-                {filteredGroups.map((group) => (
-                  <CommandItem
-                    key={`group-${group.id}`}
-                    onSelect={() => handleSelectGroup(group)}
-                    className="flex items-center justify-between cursor-pointer bg-gray-50 hover:bg-gray-100 data-[selected=true]:bg-gray-100"
-                  >
-                    <span className="font-medium text-gray-700">{group.name}</span>
-                    <span className="text-xs text-gray-500">({group.members.length} membros)</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
+          {filteredGroups.length > 0 && onSelectGroup && (
+            <div className="p-1">
+              <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Grupos</p>
+              {filteredGroups.map((group) => (
+                <div
+                  key={`group-${group.id}`}
+                  onClick={() => handleSelectGroup(group)}
+                  className="flex items-center justify-between cursor-pointer px-2 py-2 rounded bg-muted/50 hover:bg-muted mb-1"
+                >
+                  <span className="font-medium text-foreground">{group.name}</span>
+                  <span className="text-xs text-muted-foreground">({group.members.length} membros)</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );
