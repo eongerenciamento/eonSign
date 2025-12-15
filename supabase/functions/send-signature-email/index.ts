@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // URL para página de assinatura - usa link BRy se disponível, senão link interno
-    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 

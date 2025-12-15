@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending welcome email to:", email);
 
-    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const supabase = createClient(supabaseUrl, supabaseKey);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 

@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("[PRESCRIPTION] Sending prescription to patient:", { patientName, patientEmail, patientPhone });
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     // Get the signed document URL
