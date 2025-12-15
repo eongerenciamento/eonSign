@@ -38,11 +38,12 @@ export function SignerAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter suggestions based on input value - use includes for flexible search
+  const phoneSearchValue = value.replace(/\D/g, '');
   const filteredSuggestions = value.length >= 2
     ? suggestions.filter(s => 
         s.name.toLowerCase().includes(value.toLowerCase()) ||
         s.email.toLowerCase().includes(value.toLowerCase()) ||
-        s.phone.includes(value.replace(/\D/g, ''))
+        (phoneSearchValue.length > 0 && s.phone.includes(phoneSearchValue))
       ).slice(0, 10)
     : [];
 
