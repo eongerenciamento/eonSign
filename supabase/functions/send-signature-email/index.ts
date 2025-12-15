@@ -36,7 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // URL para página de assinatura - usa link BRy se disponível, senão link interno
-    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    let APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    // Garantir que tenha https://
+    if (APP_URL && !APP_URL.startsWith("http")) {
+      APP_URL = `https://${APP_URL}`;
+    }
     console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
     console.log("[DEBUG] APP_URL being used:", APP_URL);
     const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
