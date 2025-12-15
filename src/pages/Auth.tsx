@@ -251,7 +251,7 @@ export default function Auth() {
                 Esqueci a senha
               </button>
 
-              <button type="button" onClick={() => navigate('/planos')} disabled={isLoading} className="w-full transition-colors text-sm text-gray-300">
+              <button type="button" onClick={() => window.location.href = 'https://eonhub.com.br/sign'} disabled={isLoading} className="w-full transition-colors text-sm text-gray-300">
                 Criar nova conta
               </button>
 
