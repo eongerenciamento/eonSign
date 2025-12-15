@@ -9,7 +9,6 @@ import Drive from "./pages/Drive";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
-import Pricing from "./pages/Pricing";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
@@ -22,7 +21,6 @@ const queryClient = new QueryClient();
 const AppRoutes = () => {
   return <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/planos" element={<Pricing />} />
       <Route path="/install" element={<Install />} />
       <Route path="/assinar/:documentId" element={<SignDocument />} />
       <Route path="/validar/:documentId" element={<ValidateDocument />} />
