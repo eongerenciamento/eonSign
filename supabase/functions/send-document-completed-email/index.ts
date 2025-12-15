@@ -170,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending document completed email for document:", documentId);
 
-    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 

@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Generating signature report for document:", documentId);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const APP_URL = Deno.env.get("APP_URL") || "https://lbyoniuealghclfuahko.lovable.app";
+    const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
 
     // Fetch document
     const { data: document, error: docError } = await supabase
