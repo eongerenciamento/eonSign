@@ -7,14 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, SquarePen, Trash2, X, Check, Search } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
 interface Contact {
   id: string;
   name: string;
   email: string | null;
   phone: string | null;
 }
-
 export function ContactsTab() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,48 +20,39 @@ export function ContactsTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  
+
   // Form state
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
-
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 7) return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
     return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
-
   const loadContacts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('contacts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('name');
-
+    const {
+      data,
+      error
+    } = await supabase.from('contacts').select('*').eq('user_id', user.id).order('name');
     if (error) {
       toast.error("Erro ao carregar contatos");
       return;
     }
-
     setContacts(data || []);
     setLoading(false);
   };
-
   useEffect(() => {
     loadContacts();
   }, []);
-
-  const filteredContacts = contacts.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.phone?.includes(search.replace(/\D/g, ''))
-  );
-
+  const filteredContacts = contacts.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search.replace(/\D/g, '')));
   const resetForm = () => {
     setFormName("");
     setFormEmail("");
@@ -71,7 +60,6 @@ export function ContactsTab() {
     setEditingId(null);
     setShowAddForm(false);
   };
-
   const startEdit = (contact: Contact) => {
     setFormName(contact.name);
     setFormEmail(contact.email || "");
@@ -79,27 +67,26 @@ export function ContactsTab() {
     setEditingId(contact.id);
     setShowAddForm(false);
   };
-
   const handleSave = async () => {
-    if (!formName || (!formEmail && !formPhone)) {
+    if (!formName || !formEmail && !formPhone) {
       toast.error("Preencha o nome e pelo menos telefone ou e-mail");
       return;
     }
-
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
     if (!user) return;
-
     if (editingId) {
       // Update
-      const { error } = await supabase
-        .from('contacts')
-        .update({
-          name: formName,
-          email: formEmail || null,
-          phone: formPhone || null
-        })
-        .eq('id', editingId);
-
+      const {
+        error
+      } = await supabase.from('contacts').update({
+        name: formName,
+        email: formEmail || null,
+        phone: formPhone || null
+      }).eq('id', editingId);
       if (error) {
         toast.error("Erro ao atualizar contato");
         return;
@@ -107,54 +94,44 @@ export function ContactsTab() {
       toast.success("Contato atualizado!");
     } else {
       // Create
-      const { error } = await supabase
-        .from('contacts')
-        .insert({
-          user_id: user.id,
-          name: formName,
-          email: formEmail || null,
-          phone: formPhone || null
-        });
-
+      const {
+        error
+      } = await supabase.from('contacts').insert({
+        user_id: user.id,
+        name: formName,
+        email: formEmail || null,
+        phone: formPhone || null
+      });
       if (error) {
         toast.error("Erro ao criar contato");
         return;
       }
       toast.success("Contato adicionado!");
     }
-
     resetForm();
     loadContacts();
   };
-
   const handleDelete = async () => {
     if (!deleteId) return;
-
-    const { error } = await supabase
-      .from('contacts')
-      .delete()
-      .eq('id', deleteId);
-
+    const {
+      error
+    } = await supabase.from('contacts').delete().eq('id', deleteId);
     if (error) {
       toast.error("Erro ao excluir contato");
       return;
     }
-
     toast.success("Contato excluído!");
     setDeleteId(null);
     loadContacts();
   };
-
-  return (
-    <div className="space-y-6 mt-6">
+  return <div className="space-y-6 mt-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-gray-600 text-base">Contatos Salvos</CardTitle>
-          <Button 
-            onClick={() => { resetForm(); setShowAddForm(true); }}
-            className="bg-[#273d60] hover:bg-[#273d60]/90 gap-2"
-            size="sm"
-          >
+          <Button onClick={() => {
+          resetForm();
+          setShowAddForm(true);
+        }} className="bg-[#273d60] hover:bg-[#273d60]/90 gap-2" size="sm">
             <Plus className="w-4 h-4" />
             Novo Contato
           </Button>
@@ -163,43 +140,23 @@ export function ContactsTab() {
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, e-mail ou telefone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+            <Input placeholder="Buscar por nome, e-mail ou telefone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
 
           {/* Add/Edit Form */}
-          {(showAddForm || editingId) && (
-            <div className="p-4 border rounded-lg bg-orange-50 space-y-3">
+          {(showAddForm || editingId) && <div className="p-4 border rounded-lg bg-orange-50 space-y-3">
               <div className="grid gap-2">
                 <Label>Nome Completo / Razão Social</Label>
-                <Input
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Digite o nome"
-                />
+                <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Digite o nome" />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Telefone</Label>
-                  <Input
-                    value={formPhone}
-                    onChange={(e) => setFormPhone(formatPhone(e.target.value))}
-                    placeholder="(00)00000-0000"
-                    maxLength={14}
-                  />
+                  <Input value={formPhone} onChange={e => setFormPhone(formatPhone(e.target.value))} placeholder="(00)00000-0000" maxLength={14} />
                 </div>
                 <div className="grid gap-2">
                   <Label>E-mail</Label>
-                  <Input
-                    type="email"
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    placeholder="email@exemplo.com"
-                  />
+                  <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@exemplo.com" />
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -212,54 +169,32 @@ export function ContactsTab() {
                   Salvar
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Contacts List */}
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-          ) : filteredContacts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+          {loading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : filteredContacts.length === 0 ? <div className="text-center py-8 text-muted-foreground">
               {search ? "Nenhum contato encontrado" : "Nenhum contato salvo"}
-            </div>
-          ) : (
-            <div className="divide-y-0">
-              {filteredContacts.map((contact, index) => (
-                <div 
-                  key={contact.id} 
-                  className={`flex items-center px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                >
+            </div> : <div className="divide-y-0">
+              {filteredContacts.map((contact, index) => <div key={contact.id} className={`flex items-center px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-700 truncate">{contact.name}</p>
+                    <p className="font-medium text-gray-700 truncate text-sm">{contact.name}</p>
                   </div>
                   <div className="flex-1 text-center">
-                    <span className="text-sm text-muted-foreground">{contact.phone || '-'}</span>
+                    <span className="text-muted-foreground text-xs">{contact.phone || '-'}</span>
                   </div>
                   <div className="flex-1 text-right">
-                    <span className="text-sm text-muted-foreground">{contact.email || '-'}</span>
+                    <span className="text-muted-foreground text-xs">{contact.email || '-'}</span>
                   </div>
                   <div className="flex items-center gap-1 ml-4">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => startEdit(contact)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(contact)}>
                       <SquarePen className="w-4 h-4 text-gray-500" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => setDeleteId(contact.id)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(contact.id)}>
                       <Trash2 className="w-4 h-4 text-gray-500" />
                     </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </CardContent>
       </Card>
 
@@ -280,6 +215,5 @@ export function ContactsTab() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 }
