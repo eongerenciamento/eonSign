@@ -112,7 +112,7 @@ export function SignerAutocomplete({
                   onClick={() => handleSelectSigner(signer)}
                   className="flex flex-col items-start gap-0.5 cursor-pointer px-2 py-2 rounded bg-muted/50 hover:bg-muted mb-1"
                 >
-                  <span className="font-medium text-foreground">{signer.name}</span>
+                  <span className="text-sm font-medium text-foreground">{signer.name}</span>
                   <div className="flex flex-col text-xs">
                     {signer.phone && <span className="text-muted-foreground">{signer.phone}</span>}
                     {signer.email && <span className="text-muted-foreground/70">{signer.email}</span>}
