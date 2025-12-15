@@ -36,15 +36,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // URL base dependendo do ambiente
-    const baseUrl = environment === 'production' 
-      ? 'https://cloud.bry.com.br'
-      : 'https://cloud-hom.bry.com.br';
+    const tokenUrl = 'https://ar.syngularid.com.br/api/auth/applications';
 
-    console.log(`Requesting new BRy token from ${baseUrl}`);
+    console.log(`Requesting new BRy token from ${tokenUrl}`);
 
     // Fazer requisição para obter novo token
-    const tokenResponse = await fetch(`${baseUrl}/token-service/jwt`, {
+    const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

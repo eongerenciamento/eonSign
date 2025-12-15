@@ -8,15 +8,12 @@ const corsHeaders = {
 async function getToken(): Promise<string> {
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
-  const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
   
-  const baseUrl = environment === 'production' 
-    ? 'https://cloud.bry.com.br'
-    : 'https://cloud-hom.bry.com.br';
+  const tokenUrl = 'https://ar.syngularid.com.br/api/auth/applications';
 
-  console.log('Getting BRy token from:', baseUrl);
+  console.log('Getting BRy token from:', tokenUrl);
 
-  const tokenResponse = await fetch(`${baseUrl}/token-service/jwt`, {
+  const tokenResponse = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
