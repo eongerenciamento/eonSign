@@ -37,7 +37,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // URL para página de assinatura - usa link BRy se disponível, senão link interno
     const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
+    console.log("[DEBUG] APP_URL being used:", APP_URL);
     const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
+    console.log("[DEBUG] Final signature URL:", signatureUrl);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     // Texto diferente se for BRy

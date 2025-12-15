@@ -169,8 +169,11 @@ const handler = async (req: Request): Promise<Response> => {
     const { documentId, documentName, signerEmails, senderName }: DocumentCompletedEmailRequest = await req.json();
 
     console.log("Sending document completed email for document:", documentId);
+    console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
 
     const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    console.log("[DEBUG] APP_URL being used:", APP_URL);
+    console.log("[DEBUG] Drive URL will be:", `${APP_URL}/drive`);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
