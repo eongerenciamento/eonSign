@@ -97,7 +97,7 @@ export function SignerAutocomplete({
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Command>
+        <Command shouldFilter={false}>
           <CommandList>
             {!hasResults && <CommandEmpty>Nenhum resultado encontrado</CommandEmpty>}
             
