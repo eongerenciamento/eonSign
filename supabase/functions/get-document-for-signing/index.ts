@@ -38,16 +38,26 @@ serve(async (req) => {
 
     // Gerar URL assinada temporária para o documento
     let documentWithSignedUrl = document;
-    if (document.file_url) {
+    
+    // Determine which file to use - signed version if available, otherwise original
+    let filePathToUse: string | null = null;
+    
+    if (document.bry_signed_file_url) {
+      // Use the signed document path
+      filePathToUse = document.bry_signed_file_url;
+      console.log("Using signed document:", filePathToUse);
+    } else if (document.file_url) {
+      // Extract path from original URL
+      filePathToUse = document.file_url.split('/documents/').pop() || null;
+      console.log("Using original document, extracted path:", filePathToUse);
+    }
+    
+    if (filePathToUse) {
       try {
-        // Extrair o caminho do arquivo da URL armazenada
-        const filePath = document.file_url.split('/documents/').pop();
-        console.log("Extracted file path:", filePath);
-
         // Gerar URL assinada com validade de 1 hora (3600 segundos)
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('documents')
-          .createSignedUrl(filePath!, 3600);
+          .createSignedUrl(filePathToUse, 3600);
 
         if (signedUrlError) {
           console.error("Error creating signed URL:", signedUrlError);
