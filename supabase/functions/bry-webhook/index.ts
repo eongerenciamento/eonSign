@@ -86,10 +86,13 @@ async function stampPdf(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer | null> {
 async function getAccessToken(): Promise<string> {
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
+  const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
   
-  const tokenUrl = 'https://ar.syngularid.com.br/api/auth/applications';
+  const tokenBaseUrl = environment === 'production' 
+    ? 'https://cloud.bry.com.br'
+    : 'https://cloud-hom.bry.com.br';
 
-  const tokenResponse = await fetch(tokenUrl, {
+  const tokenResponse = await fetch(`${tokenBaseUrl}/token-service/jwt`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

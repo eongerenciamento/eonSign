@@ -52,6 +52,7 @@ interface PrescriptionRequest {
 }
 
 async function getToken(): Promise<string> {
+  const bryEnvironment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
 
@@ -59,9 +60,11 @@ async function getToken(): Promise<string> {
     throw new Error('BRy credentials not configured');
   }
 
-  const tokenUrl = 'https://ar.syngularid.com.br/api/auth/applications';
+  const baseUrl = bryEnvironment === 'production' 
+    ? 'https://cloud.bry.com.br' 
+    : 'https://cloud-hom.bry.com.br';
 
-  const response = await fetch(tokenUrl, {
+  const response = await fetch(`${baseUrl}/token-service/jwt`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
