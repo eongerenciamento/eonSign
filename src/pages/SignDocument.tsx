@@ -72,6 +72,7 @@ const SignDocument = () => {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState(false);
   const [linkExpired, setLinkExpired] = useState(false);
+  const [autoIdentifyChecked, setAutoIdentifyChecked] = useState(false);
   
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
@@ -79,11 +80,39 @@ const SignDocument = () => {
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
+  // Auto-identify logged-in user (internal signer)
   useEffect(() => {
-    if (documentId) {
-      fetchDocumentData();
+    const autoIdentifyLoggedUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Fetch admin_email from company_settings
+          const { data: companyData } = await supabase
+            .from('company_settings')
+            .select('admin_email')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (companyData?.admin_email) {
+            setEmail(companyData.admin_email);
+          }
+        }
+      } catch (error) {
+        console.log("User not logged in, manual identification required");
+      } finally {
+        setAutoIdentifyChecked(true);
+      }
+    };
+    
+    autoIdentifyLoggedUser();
+  }, []);
+
+  // Fetch document data after auto-identify check completes
+  useEffect(() => {
+    if (documentId && autoIdentifyChecked) {
+      fetchDocumentData(email);
     }
-  }, [documentId]);
+  }, [documentId, autoIdentifyChecked]);
 
   useEffect(() => {
     if (isIdentified && !location && !locationError) {
@@ -115,11 +144,11 @@ const SignDocument = () => {
     }
   }, [currentSigner]);
 
-  const fetchDocumentData = async () => {
+  const fetchDocumentData = async (signerEmail?: string) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase.functions.invoke("get-document-for-signing", {
-        body: { documentId, signerEmail: email || "" },
+        body: { documentId, signerEmail: signerEmail || email || "" },
       });
 
       if (error) {
