@@ -193,7 +193,7 @@ export function MembersTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-red-500"
+                      className="h-8 w-8 text-gray-500 hover:text-gray-500 hover:bg-transparent cursor-pointer"
                       onClick={() => setMemberToDelete(member)}
                     >
                       <Trash2 className="h-4 w-4" />
