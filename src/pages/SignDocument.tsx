@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import logo from "@/assets/logo-sign.png";
+import logo from "@/assets/logo-sign-white.png";
 
 const emailSchema = z.string()
   .trim()
