@@ -37,19 +37,19 @@ export function SignerAutocomplete({
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter suggestions based on input value - use startsWith for name
+  // Filter suggestions based on input value - use includes for flexible search
   const filteredSuggestions = value.length >= 2
     ? suggestions.filter(s => 
-        s.name.toLowerCase().startsWith(value.toLowerCase()) ||
-        s.email.toLowerCase().startsWith(value.toLowerCase()) ||
+        s.name.toLowerCase().includes(value.toLowerCase()) ||
+        s.email.toLowerCase().includes(value.toLowerCase()) ||
         s.phone.includes(value.replace(/\D/g, ''))
       ).slice(0, 10)
     : [];
 
-  // Filter groups based on input value - use startsWith for name
+  // Filter groups based on input value - use includes for flexible search
   const filteredGroups = value.length >= 2
     ? groups.filter(g => 
-        g.name.toLowerCase().startsWith(value.toLowerCase())
+        g.name.toLowerCase().includes(value.toLowerCase())
       ).slice(0, 5)
     : [];
 
