@@ -7,11 +7,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper to remove accents and special characters for PDF compatibility
+const normalizeText = (text: string | null): string => {
+  if (!text) return "";
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove combining diacritical marks
+    .replace(/[^\x00-\x7F]/g, ""); // Remove any remaining non-ASCII characters
+};
+
 // Truncate name to fit within signature box
 const truncateName = (name: string, maxLength: number = 18): string => {
   if (!name) return "";
-  if (name.length <= maxLength) return name;
-  return name.substring(0, maxLength - 3) + "...";
+  const normalized = normalizeText(name);
+  if (normalized.length <= maxLength) return normalized;
+  return normalized.substring(0, maxLength - 3) + "...";
 };
 
 serve(async (req) => {
@@ -161,8 +171,8 @@ serve(async (req) => {
       color: rgb(0.1, 0.1, 0.3),
     });
 
-    // Draw "Assinatura Eletrônica" label
-    lastPage.drawText("Assinatura Eletrônica", {
+    // Draw "Assinatura Eletronica" label (no accent for PDF compatibility)
+    lastPage.drawText("Assinatura Eletronica", {
       x: sigX + 5,
       y: sigY + signatureBoxHeight - 28,
       size: 6,
