@@ -340,7 +340,7 @@ export function SignerGroupsTab() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8"
+                          className="h-8 w-8 hover:bg-transparent cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); startEdit(group); }}
                         >
                           <SquarePen className="w-4 h-4 text-gray-500" />
@@ -348,7 +348,7 @@ export function SignerGroupsTab() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8"
+                          className="h-8 w-8 hover:bg-transparent cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); setDeleteId(group.id); }}
                         >
                           <Trash2 className="w-4 h-4 text-gray-500" />

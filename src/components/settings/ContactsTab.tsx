@@ -186,10 +186,10 @@ export function ContactsTab() {
                     <span className="text-muted-foreground text-xs">{contact.email || '-'}</span>
                   </div>
                   <div className="flex items-center gap-1 ml-4">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(contact)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent cursor-pointer" onClick={() => startEdit(contact)}>
                       <SquarePen className="w-4 h-4 text-gray-500" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(contact.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent cursor-pointer" onClick={() => setDeleteId(contact.id)}>
                       <Trash2 className="w-4 h-4 text-gray-500" />
                     </Button>
                   </div>
