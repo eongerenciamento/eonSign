@@ -69,7 +69,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
     const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    console.log("[DEBUG] APP_URL being used:", APP_URL);
+    console.log("[DEBUG] Auth URL will be:", `${APP_URL}/auth`);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     // Enviar email com as credenciais
