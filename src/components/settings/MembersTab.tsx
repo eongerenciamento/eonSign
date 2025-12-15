@@ -176,13 +176,13 @@ export function MembersTab() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {members.map((member) => (
+            <div className="divide-y-0">
+              {members.map((member, index) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-700">{member.member_email}</p>
                     <p className="text-xs text-gray-500">
                       Convidado em {new Date(member.invited_at).toLocaleDateString('pt-BR')}

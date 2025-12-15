@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Check, Search } from "lucide-react";
+import { Plus, SquarePen, Trash2, X, Check, Search } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface Contact {
@@ -223,27 +223,29 @@ export function ContactsTab() {
               {search ? "Nenhum contato encontrado" : "Nenhum contato salvo"}
             </div>
           ) : (
-            <div className="space-y-2">
-              {filteredContacts.map((contact) => (
+            <div className="divide-y-0">
+              {filteredContacts.map((contact, index) => (
                 <div 
                   key={contact.id} 
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className={`flex items-center px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-700 truncate">{contact.name}</p>
-                    <div className="flex flex-wrap gap-x-4 text-sm text-muted-foreground">
-                      {contact.phone && <span>{contact.phone}</span>}
-                      {contact.email && <span>{contact.email}</span>}
-                    </div>
                   </div>
-                  <div className="flex items-center gap-1 ml-2">
+                  <div className="flex-1 text-center">
+                    <span className="text-sm text-muted-foreground">{contact.phone || '-'}</span>
+                  </div>
+                  <div className="flex-1 text-right">
+                    <span className="text-sm text-muted-foreground">{contact.email || '-'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 ml-4">
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="h-8 w-8"
                       onClick={() => startEdit(contact)}
                     >
-                      <Pencil className="w-4 h-4 text-gray-500" />
+                      <SquarePen className="w-4 h-4 text-gray-500" />
                     </Button>
                     <Button 
                       variant="ghost" 

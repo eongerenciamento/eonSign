@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Check, Search, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, SquarePen, Trash2, X, Check, Search, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -311,20 +311,22 @@ export function SignerGroupsTab() {
               {search ? "Nenhum grupo encontrado" : "Nenhum grupo criado"}
             </div>
           ) : (
-            <div className="space-y-2">
-              {filteredGroups.map((group) => (
+            <div className="divide-y-0">
+              {filteredGroups.map((group, index) => (
                 <Collapsible 
                   key={group.id}
                   open={expandedGroups.has(group.id)}
                   onOpenChange={() => toggleExpanded(group.id)}
                 >
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+                  <div className="overflow-hidden">
+                    <div className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
                       <CollapsibleTrigger className="flex items-center gap-3 flex-1">
                         <Users className="w-4 h-4 text-gray-500" />
                         <div className="flex-1 text-left">
                           <p className="font-medium text-gray-700">{group.name}</p>
-                          <p className="text-xs text-muted-foreground">
+                        </div>
+                        <div className="flex-1 text-center">
+                          <p className="text-sm text-muted-foreground">
                             {group.members.length} {group.members.length === 1 ? 'membro' : 'membros'}
                           </p>
                         </div>
@@ -341,7 +343,7 @@ export function SignerGroupsTab() {
                           className="h-8 w-8"
                           onClick={(e) => { e.stopPropagation(); startEdit(group); }}
                         >
-                          <Pencil className="w-4 h-4 text-gray-500" />
+                          <SquarePen className="w-4 h-4 text-gray-500" />
                         </Button>
                         <Button 
                           variant="ghost" 
@@ -354,13 +356,15 @@ export function SignerGroupsTab() {
                       </div>
                     </div>
                     <CollapsibleContent>
-                      <div className="border-t px-3 py-2 bg-muted/30 space-y-1">
-                        {group.members.map(member => (
-                          <div key={member.id} className="flex items-center gap-2 text-sm py-1">
-                            <span className="font-medium text-gray-600">{member.name}</span>
-                            <span className="text-muted-foreground text-xs">
-                              {member.email || member.phone}
-                            </span>
+                      <div className="px-4 py-2 bg-muted/30">
+                        {group.members.map((member, memberIndex) => (
+                          <div 
+                            key={member.id} 
+                            className={`flex items-center px-4 py-2 ${memberIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                          >
+                            <span className="flex-1 font-medium text-gray-600 text-sm">{member.name}</span>
+                            <span className="flex-1 text-center text-muted-foreground text-sm">{member.phone || '-'}</span>
+                            <span className="flex-1 text-right text-muted-foreground text-sm">{member.email || '-'}</span>
                           </div>
                         ))}
                       </div>
