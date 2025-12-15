@@ -14,6 +14,15 @@ interface GenerateReportRequest {
   documentId: string;
 }
 
+// Helper to remove accents and special characters for PDF compatibility
+const normalizeText = (text: string | null): string => {
+  if (!text) return "N/A";
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove combining diacritical marks
+    .replace(/[^\x00-\x7F]/g, ""); // Remove any remaining non-ASCII characters
+};
+
 // Helper functions
 const formatDate = (dateStr: string | null): string => {
   if (!dateStr) return "N/A";
@@ -47,8 +56,9 @@ const formatPhone = (phone: string | null): string => {
 // Truncate text to fit within a certain width
 const truncateText = (text: string | null, maxLength: number): string => {
   if (!text) return "N/A";
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 3) + "...";
+  const normalized = normalizeText(text);
+  if (normalized.length <= maxLength) return normalized;
+  return normalized.substring(0, maxLength - 3) + "...";
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -346,7 +356,7 @@ const handler = async (req: Request): Promise<Response> => {
           locationStr += ` - ${signer.signature_country}`;
         }
       }
-      // Truncate location if too long
+      // Truncate and normalize location
       const displayLocation = truncateText(locationStr, 30);
       
       page.drawText(`Local: ${displayLocation}`, {
