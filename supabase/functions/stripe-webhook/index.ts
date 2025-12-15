@@ -164,6 +164,8 @@ serve(async (req) => {
                   name: organizationName,
                   userId: newUser.user.id,
                   tempPassword,
+                  organizationName,
+                  tierName,
                 }),
               });
 
