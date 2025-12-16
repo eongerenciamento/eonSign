@@ -36,15 +36,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // URL base dependendo do ambiente
-    const baseUrl = environment === 'production' 
-      ? 'https://cloud.bry.com.br'
-      : 'https://cloud-hom.bry.com.br';
+    // Endpoint oficial de autenticação EasySign (SyngularID)
+    const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
 
-    console.log(`Requesting new BRy token from ${baseUrl}`);
+    console.log(`[BRy Auth] Environment: ${environment}`);
+    console.log(`[BRy Auth] Requesting new BRy token from ${authUrl}`);
 
     // Fazer requisição para obter novo token
-    const tokenResponse = await fetch(`${baseUrl}/token-service/jwt`, {
+    const tokenResponse = await fetch(authUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

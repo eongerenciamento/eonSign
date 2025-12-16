@@ -60,11 +60,12 @@ async function getToken(): Promise<string> {
     throw new Error('BRy credentials not configured');
   }
 
-  const baseUrl = bryEnvironment === 'production' 
-    ? 'https://cloud.bry.com.br' 
-    : 'https://cloud-hom.bry.com.br';
+  const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
 
-  const response = await fetch(`${baseUrl}/token-service/jwt`, {
+  console.log('[BRY-PRESCRIPTION] Environment:', bryEnvironment);
+  console.log('[BRY-PRESCRIPTION] Requesting token from:', authUrl);
+
+  const response = await fetch(authUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -73,13 +74,13 @@ async function getToken(): Promise<string> {
       grant_type: 'client_credentials',
       client_id: clientId,
       client_secret: clientSecret,
-    }),
+    }).toString(),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('[BRY-PRESCRIPTION] Token error:', errorText);
-    throw new Error('Failed to obtain BRy token');
+    console.error('[BRY-PRESCRIPTION] Token error:', response.status, errorText);
+    throw new Error(`Failed to obtain BRy token: ${response.status}`);
   }
 
   const data = await response.json();

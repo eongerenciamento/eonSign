@@ -64,20 +64,25 @@ async function getToken(): Promise<string> {
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
   const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
-  
-  const baseUrl = environment === 'production' 
-    ? 'https://cloud.bry.com.br'
-    : 'https://cloud-hom.bry.com.br';
 
-  const tokenResponse = await fetch(`${baseUrl}/token-service/jwt`, {
+  if (!clientId || !clientSecret) {
+    throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
+  }
+
+  const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
+
+  console.log('[BRy Auth] Environment:', environment);
+  console.log('[BRy Auth] Requesting token from:', authUrl);
+
+  const tokenResponse = await fetch(authUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       grant_type: 'client_credentials',
-      client_id: clientId!,
-      client_secret: clientSecret!,
+      client_id: clientId,
+      client_secret: clientSecret,
     }).toString(),
   });
 
