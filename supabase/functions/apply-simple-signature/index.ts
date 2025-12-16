@@ -16,12 +16,10 @@ const normalizeText = (text: string | null): string => {
     .replace(/[^\x00-\x7F]/g, ""); // Remove any remaining non-ASCII characters
 };
 
-// Truncate name to fit within signature box
-const truncateName = (name: string, maxLength: number = 18): string => {
+// Get display name without truncation
+const getDisplayName = (name: string): string => {
   if (!name) return "";
-  const normalized = normalizeText(name);
-  if (normalized.length <= maxLength) return normalized;
-  return normalized.substring(0, maxLength - 3) + "...";
+  return normalizeText(name);
 };
 
 serve(async (req) => {
@@ -108,54 +106,56 @@ serve(async (req) => {
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Signature box dimensions
-    const signatureBoxWidth = 140;
+    // Get display name (full name, no truncation)
+    const displayName = getDisplayName(typedSignature || signerData.name);
+    
+    // Adjust font size based on name length
+    let nameFontSize = 9;
+    if (displayName.length > 40) {
+      nameFontSize = 7;
+    } else if (displayName.length > 30) {
+      nameFontSize = 8;
+    }
+    
+    // Calculate dynamic signature box width based on text
+    const textWidth = helveticaBold.widthOfTextAtSize(displayName, nameFontSize);
+    const signatureBoxWidth = Math.max(120, textWidth + 10);
     const signatureBoxHeight = 42;
     const margin = 40;
     const bottomMargin = 30;
-    const spacing = 10;
+    const gap = 15;
 
-    // Calculate automatic position based on signer index and total signers
-    // Layout: Y-shaped for 2 signers (side by side), grid for 3+ signers
+    // Calculate position: horizontal layout side by side with gap
     let sigX: number;
-    let sigY: number;
+    let sigY: number = bottomMargin;
 
-    const availableWidth = width - (margin * 2);
-
-    if (totalSigners === 1) {
-      // Single signer: center at bottom
-      sigX = (width - signatureBoxWidth) / 2;
-      sigY = bottomMargin;
-    } else if (totalSigners === 2) {
-      // 2 signers: Y-layout (side by side)
-      const gap = 20;
-      const totalWidth = (signatureBoxWidth * 2) + gap;
-      const startX = (width - totalWidth) / 2;
-      sigX = signerIndex === 0 ? startX : startX + signatureBoxWidth + gap;
-      sigY = bottomMargin;
+    // Calculate starting X position based on signer index
+    // Each signature starts after the previous one ends + gap
+    if (signerIndex === 0) {
+      sigX = margin;
     } else {
-      // 3+ signers: grid layout (3 per row)
-      const signersPerRow = 3;
-      const row = Math.floor(signerIndex / signersPerRow);
-      const col = signerIndex % signersPerRow;
+      // Estimate previous signatures' total width
+      // Use average width estimation for consistent spacing
+      const avgBoxWidth = 140; // Average estimated width
+      sigX = margin + (signerIndex * (avgBoxWidth + gap));
       
-      const totalRowWidth = (signatureBoxWidth * signersPerRow) + (spacing * (signersPerRow - 1));
-      const startX = (width - totalRowWidth) / 2;
-      
-      sigX = startX + (col * (signatureBoxWidth + spacing));
-      sigY = bottomMargin + (row * (signatureBoxHeight + spacing));
+      // If would exceed page width, wrap to next row
+      if (sigX + signatureBoxWidth > width - margin) {
+        const signersPerRow = Math.floor((width - (margin * 2) + gap) / (avgBoxWidth + gap));
+        const row = Math.floor(signerIndex / signersPerRow);
+        const col = signerIndex % signersPerRow;
+        sigX = margin + (col * (avgBoxWidth + gap));
+        sigY = bottomMargin + (row * (signatureBoxHeight + gap));
+      }
     }
 
-    console.log(`Signature position calculated: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}`);
+    console.log(`Signature position: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}, name: ${displayName}`);
 
-    // Truncate name to fit within box
-    const displayName = truncateName(typedSignature || signerData.name, 18);
-
-    // Draw typed signature name - smaller, gray700, medium bold
+    // Draw typed signature name - dynamic font size, gray700
     lastPage.drawText(displayName, {
       x: sigX,
       y: sigY + signatureBoxHeight - 12,
-      size: 9,
+      size: nameFontSize,
       font: helveticaBold,
       color: rgb(0.22, 0.25, 0.32), // gray700
     });
