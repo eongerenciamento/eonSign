@@ -148,39 +148,28 @@ serve(async (req) => {
 
     console.log(`Signature position calculated: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}`);
 
-    // Draw signature box
-    lastPage.drawRectangle({
-      x: sigX,
-      y: sigY,
-      width: signatureBoxWidth,
-      height: signatureBoxHeight,
-      color: rgb(0.98, 0.98, 0.98),
-      borderColor: rgb(0.7, 0.7, 0.7),
-      borderWidth: 0.5,
-    });
-
     // Truncate name to fit within box
     const displayName = truncateName(typedSignature || signerData.name, 18);
 
-    // Draw typed signature name
+    // Draw typed signature name - smaller, gray700, medium bold
     lastPage.drawText(displayName, {
-      x: sigX + 5,
-      y: sigY + signatureBoxHeight - 16,
-      size: 11,
+      x: sigX,
+      y: sigY + signatureBoxHeight - 12,
+      size: 9,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.3),
+      color: rgb(0.22, 0.25, 0.32), // gray700
     });
 
-    // Draw "Assinatura Eletronica" label (no accent for PDF compatibility)
-    lastPage.drawText("Assinatura Eletronica", {
-      x: sigX + 5,
-      y: sigY + signatureBoxHeight - 28,
+    // Draw "Assinado Eletronicamente" label - gray600
+    lastPage.drawText("Assinado Eletronicamente", {
+      x: sigX,
+      y: sigY + signatureBoxHeight - 22,
       size: 6,
       font: helveticaFont,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.29, 0.33, 0.39), // gray600
     });
 
-    // Draw signature date
+    // Draw signature date - gray500
     const signDate = new Date().toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -189,11 +178,11 @@ serve(async (req) => {
       minute: "2-digit",
     });
     lastPage.drawText(signDate, {
-      x: sigX + 5,
-      y: sigY + 5,
+      x: sigX,
+      y: sigY + signatureBoxHeight - 32,
       size: 6,
       font: helveticaFont,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.42, 0.45, 0.50), // gray500
     });
 
     // Save the modified PDF
