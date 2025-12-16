@@ -1,7 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Clock, MapPin, Shield, FileText, Users, Calendar, Building2, Download, Copy, Share2, FileDown, Timer, AlertTriangle } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  MapPin,
+  Shield,
+  FileText,
+  Users,
+  Calendar,
+  Building2,
+  Download,
+  Copy,
+  Share2,
+  FileDown,
+  Timer,
+  AlertTriangle,
+} from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,10 +85,9 @@ const ValidateDocument = () => {
       }
 
       try {
-        const { data: result, error: fetchError } = await supabase.functions.invoke(
-          "get-document-validation",
-          { body: { documentId } }
-        );
+        const { data: result, error: fetchError } = await supabase.functions.invoke("get-document-validation", {
+          body: { documentId },
+        });
 
         if (fetchError) {
           throw fetchError;
@@ -129,18 +144,18 @@ const ValidateDocument = () => {
 
     // Header background
     doc.setFillColor(39, 61, 96);
-    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.rect(0, 0, pageWidth, 45, "F");
 
     // Header text
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
     doc.text("CERTIFICADO DE VALIDAÇÃO", pageWidth / 2, 20, { align: "center" });
-    
+
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.text("Eon Sign - Assinatura Eletrônica", pageWidth / 2, 30, { align: "center" });
-    
+    doc.text("eonSign", pageWidth / 2, 30, { align: "center" });
+
     doc.setFontSize(10);
     doc.text(`Emitido por: ${organization.name}`, pageWidth / 2, 38, { align: "center" });
 
@@ -150,16 +165,18 @@ const ValidateDocument = () => {
     doc.setTextColor(0, 0, 0);
     const statusColor = data.valid ? [34, 197, 94] : [234, 179, 8];
     doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
-    doc.roundedRect(margin, yPos, pageWidth - margin * 2, 25, 3, 3, 'F');
-    
+    doc.roundedRect(margin, yPos, pageWidth - margin * 2, 25, 3, 3, "F");
+
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(data.valid ? "✓ DOCUMENTO VÁLIDO" : "⏳ DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, { align: "center" });
-    
+    doc.text(data.valid ? "✓ DOCUMENTO VÁLIDO" : "⏳ DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, {
+      align: "center",
+    });
+
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    const statusText = data.valid 
+    const statusText = data.valid
       ? "Este documento foi assinado por todos os signatários e possui validade jurídica."
       : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s).`;
     doc.text(statusText, pageWidth / 2, yPos + 18, { align: "center" });
@@ -171,11 +188,11 @@ const ValidateDocument = () => {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text("INFORMAÇÕES DO DOCUMENTO", margin, yPos);
-    
+
     yPos += 8;
     doc.setDrawColor(39, 61, 96);
     doc.line(margin, yPos, pageWidth - margin, yPos);
-    
+
     yPos += 10;
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(10);
@@ -194,7 +211,7 @@ const ValidateDocument = () => {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text(`SIGNATÁRIOS (${document.signedCount}/${document.totalSigners})`, margin, yPos);
-    
+
     yPos += 8;
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 10;
@@ -209,7 +226,7 @@ const ValidateDocument = () => {
       // Signer box
       const boxHeight = signer.status === "signed" ? 35 : 15;
       doc.setFillColor(245, 245, 245);
-      doc.roundedRect(margin, yPos - 5, pageWidth - margin * 2, boxHeight, 2, 2, 'F');
+      doc.roundedRect(margin, yPos - 5, pageWidth - margin * 2, boxHeight, 2, 2, "F");
 
       // Signer status indicator
       if (signer.status === "signed") {
@@ -217,42 +234,50 @@ const ValidateDocument = () => {
       } else {
         doc.setFillColor(156, 163, 175);
       }
-      doc.circle(margin + 5, yPos + 3, 3, 'F');
+      doc.circle(margin + 5, yPos + 3, 3, "F");
 
       // Signer name and status
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.text(signer.name, margin + 12, yPos + 5);
-      
+
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       const statusLabel = signer.status === "signed" ? "Assinado" : "Pendente";
-      doc.setTextColor(signer.status === "signed" ? 34 : 156, signer.status === "signed" ? 197 : 163, signer.status === "signed" ? 94 : 175);
+      doc.setTextColor(
+        signer.status === "signed" ? 34 : 156,
+        signer.status === "signed" ? 197 : 163,
+        signer.status === "signed" ? 94 : 175,
+      );
       doc.text(`[${statusLabel}]`, margin + 12 + doc.getTextWidth(signer.name) + 3, yPos + 5);
 
       if (signer.status === "signed") {
         doc.setTextColor(100, 100, 100);
         doc.setFontSize(9);
-        
+
         let infoY = yPos + 12;
-        
+
         if (signer.signed_at) {
           doc.text(`Data: ${formatDate(signer.signed_at)}`, margin + 12, infoY);
           infoY += 6;
         }
-        
+
         const location = [signer.signature_city, signer.signature_state].filter(Boolean).join(", ");
         if (location) {
-          doc.text(`Local: ${location}${signer.signature_country ? ` - ${signer.signature_country}` : ""}`, margin + 12, infoY);
+          doc.text(
+            `Local: ${location}${signer.signature_country ? ` - ${signer.signature_country}` : ""}`,
+            margin + 12,
+            infoY,
+          );
           infoY += 6;
         }
-        
+
         if (signer.cpf) {
           doc.text(`CPF: ${signer.cpf}`, margin + 12, infoY);
           infoY += 6;
         }
-        
+
         if (signer.signature_ip) {
           doc.text(`IP: ${signer.signature_ip}`, margin + 12, infoY);
         }
@@ -270,13 +295,20 @@ const ValidateDocument = () => {
 
     doc.setDrawColor(200, 200, 200);
     doc.line(margin, yPos, pageWidth - margin, yPos);
-    
+
     yPos += 8;
     doc.setTextColor(150, 150, 150);
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", pageWidth / 2, yPos, { align: "center" });
-    doc.text(`Verificado pelo sistema Eon Sign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, { align: "center" });
+    doc.text(
+      "Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001",
+      pageWidth / 2,
+      yPos,
+      { align: "center" },
+    );
+    doc.text(`Verificado pelo sistema Eon Sign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, {
+      align: "center",
+    });
     doc.text(`URL de Validação: ${window.location.href}`, pageWidth / 2, yPos + 10, { align: "center" });
 
     // Save the PDF
@@ -324,9 +356,9 @@ const ValidateDocument = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {organization.logoUrl ? (
-                <img 
-                  src={organization.logoUrl} 
-                  alt={organization.name} 
+                <img
+                  src={organization.logoUrl}
+                  alt={organization.name}
                   className="h-12 w-auto object-contain bg-white rounded-lg p-1"
                 />
               ) : (
@@ -357,10 +389,14 @@ const ValidateDocument = () => {
           </Button>
         </div>
         {/* Validation Status Card */}
-        <Card className={`mb-6 border-2 ${isValid ? "border-green-200 bg-green-50/50" : "border-yellow-200 bg-yellow-50/50"}`}>
+        <Card
+          className={`mb-6 border-2 ${isValid ? "border-green-200 bg-green-50/50" : "border-yellow-200 bg-yellow-50/50"}`}
+        >
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${isValid ? "bg-green-100" : "bg-yellow-100"}`}>
+              <div
+                className={`w-14 h-14 rounded-full flex items-center justify-center ${isValid ? "bg-green-100" : "bg-yellow-100"}`}
+              >
                 {isValid ? (
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
                 ) : (
@@ -372,10 +408,9 @@ const ValidateDocument = () => {
                   {isValid ? "Documento Valido" : "Documento Pendente"}
                 </h1>
                 <p className={`${isValid ? "text-green-700" : "text-yellow-700"}`}>
-                  {isValid 
+                  {isValid
                     ? "Este documento foi assinado por todos os signatarios e possui validade juridica."
-                    : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`
-                  }
+                    : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`}
                 </p>
               </div>
               <Badge variant={isValid ? "default" : "secondary"} className={isValid ? "bg-green-600" : "bg-yellow-600"}>
@@ -383,13 +418,13 @@ const ValidateDocument = () => {
                 {isValid ? "Verificado" : "Pendente"}
               </Badge>
             </div>
-            
+
             {/* Download and Share Buttons */}
             {isValid && (
               <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
                 {document.downloadUrl && (
                   <Button
-                    onClick={() => window.open(document.downloadUrl!, '_blank')}
+                    onClick={() => window.open(document.downloadUrl!, "_blank")}
                     className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] hover:opacity-90"
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -422,7 +457,7 @@ const ValidateDocument = () => {
                     onClick={() => {
                       const text = `Verifique o documento "${document.name}" assinado digitalmente: ${window.location.href}`;
                       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                      window.open(whatsappUrl, '_blank');
+                      window.open(whatsappUrl, "_blank");
                     }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
@@ -471,7 +506,9 @@ const ValidateDocument = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Data de Conclusao</p>
-                <p className="font-medium text-gray-900">{document.completedAt ? formatDate(document.completedAt) : "Pendente"}</p>
+                <p className="font-medium text-gray-900">
+                  {document.completedAt ? formatDate(document.completedAt) : "Pendente"}
+                </p>
               </div>
               <div className="md:col-span-2">
                 <p className="text-sm text-gray-500">ID do Documento</p>
@@ -482,7 +519,9 @@ const ValidateDocument = () => {
         </Card>
 
         {/* Timestamp Info */}
-        <Card className={`mb-6 ${document.hasTimestamp ? "border-green-200 bg-green-50/30" : "border-yellow-200 bg-yellow-50/30"}`}>
+        <Card
+          className={`mb-6 ${document.hasTimestamp ? "border-green-200 bg-green-50/30" : "border-yellow-200 bg-yellow-50/30"}`}
+        >
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2 text-primary">
               <Timer className="w-5 h-5" />
@@ -522,9 +561,8 @@ const ValidateDocument = () => {
                   <span className="font-semibold text-yellow-700">Sem Carimbo do Tempo de Autoridade</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  Este documento foi assinado no modo Simples, que não inclui carimbo do tempo de uma 
-                  Autoridade de Carimbo do Tempo (ACT). O registro de data/hora é baseado no momento 
-                  da assinatura no sistema.
+                  Este documento foi assinado no modo Simples, que não inclui carimbo do tempo de uma Autoridade de
+                  Carimbo do Tempo (ACT). O registro de data/hora é baseado no momento da assinatura no sistema.
                 </p>
               </div>
             )}
@@ -550,9 +588,11 @@ const ValidateDocument = () => {
                 <div key={signer.id}>
                   {index > 0 && <Separator className="my-4" />}
                   <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                      signer.status === "signed" ? "bg-green-500" : "bg-gray-400"
-                    }`}>
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                        signer.status === "signed" ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    >
                       {signer.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -570,14 +610,14 @@ const ValidateDocument = () => {
                           </Badge>
                         )}
                       </div>
-                      
+
                       {signer.status === "signed" && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
                           <div className="flex items-center gap-2 text-gray-600">
                             <Calendar className="w-4 h-4 text-gray-400" />
                             <span>{formatDate(signer.signed_at)}</span>
                           </div>
-                          
+
                           {(signer.signature_city || signer.signature_state) && (
                             <div className="flex items-center gap-2 text-gray-600">
                               <MapPin className="w-4 h-4 text-gray-400" />
@@ -587,17 +627,19 @@ const ValidateDocument = () => {
                               </span>
                             </div>
                           )}
-                          
+
                           {signer.cpf && (
                             <div className="flex items-center gap-2 text-gray-600">
                               <Shield className="w-4 h-4 text-gray-400" />
                               <span>CPF: {signer.cpf}</span>
                             </div>
                           )}
-                          
+
                           {signer.signature_id && (
                             <div className="flex items-center gap-2 text-gray-600">
-                              <span className="text-xs text-gray-400">ID: {signer.signature_id.substring(0, 18)}...</span>
+                              <span className="text-xs text-gray-400">
+                                ID: {signer.signature_id.substring(0, 18)}...
+                              </span>
                             </div>
                           )}
                         </div>
