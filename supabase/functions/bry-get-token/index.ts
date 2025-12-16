@@ -36,8 +36,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Endpoint oficial de autenticação EasySign (SyngularID)
-    const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
+    // Endpoint oficial de autenticação EasySign
+    const authUrl = 'https://easysign.bry.com.br/api/auth/applications';
 
     console.log(`[BRy Auth] Environment: ${environment}`);
     console.log(`[BRy Auth] Requesting new BRy token from ${authUrl}`);

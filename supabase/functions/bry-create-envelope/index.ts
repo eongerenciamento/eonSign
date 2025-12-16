@@ -46,8 +46,8 @@ async function getToken(): Promise<string> {
     throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
   }
 
-  // BRy EasySign auth endpoint (SyngularID)
-  const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
+  // BRy EasySign auth endpoint
+  const authUrl = 'https://easysign.bry.com.br/api/auth/applications';
 
   console.log('[BRy Auth] ========================================');
   console.log('[BRy Auth] Environment:', environment);
