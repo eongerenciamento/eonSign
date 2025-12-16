@@ -556,7 +556,7 @@ export function SubscriptionTab() {
                     As assinaturas digitais têm validade jurídica?
                   </AccordionTrigger>
                   <AccordionContent className="text-left">
-                    Sim, todas as assinaturas realizadas através do Eon Sign utilizam certificação ICP-Brasil e possuem
+                    Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem
                     plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada
                     com timestamp, IP e geolocalização para máxima segurança.
                   </AccordionContent>

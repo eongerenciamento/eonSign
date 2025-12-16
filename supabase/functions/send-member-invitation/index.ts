@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
                       Olá,
                     </p>
                     <p style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
-                      <strong>${adminName}</strong> convidou você para fazer parte da organização <strong>${organizationName}</strong> no Eon Sign.
+                      <strong>${adminName}</strong> convidou você para fazer parte da organização <strong>${organizationName}</strong> no eonSign.
                     </p>
                     <p style="margin: 0 0 30px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
                       Como membro da organização, você terá acesso à plataforma utilizando a assinatura da empresa, sem custos adicionais.

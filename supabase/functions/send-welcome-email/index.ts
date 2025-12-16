@@ -41,21 +41,21 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
-    const displayName = name || organizationName || 'Usuário';
-    const displayOrganization = organizationName || name || 'Sua Organização';
-    const displayTier = tierName || 'Básico';
+    const displayName = name || organizationName || "Usuário";
+    const displayOrganization = organizationName || name || "Sua Organização";
+    const displayTier = tierName || "Básico";
 
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eonhub.com.br>",
+      from: "eonSign <noreply@eonhub.com.br>",
       to: [email],
-      subject: "Bem-Vindo ao Eon Sign",
+      subject: "Bem-Vindo ao eonSign",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f3f4f6;">
           <div style="border-radius: 16px 16px 0 0; overflow: hidden;">
-            <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
+            <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
           </div>
           <div style="padding: 30px; background: #f3f4f6;">
-            <h1 style="color: #273d60; font-size: 24px; margin: 0 0 20px 0;">Bem-Vindo ao Eon Sign, ${displayName}!</h1>
+            <h1 style="color: #273d60; font-size: 24px; margin: 0 0 20px 0;">Bem-Vindo ao eonSign, ${displayName}!</h1>
             <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
               Sua conta foi criada com sucesso. Aqui estão suas credenciais de acesso:
             </p>
@@ -63,11 +63,15 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
                 <strong style="color: #273d60;">E-mail:</strong> ${email}
               </p>
-              ${tempPassword ? `
+              ${
+                tempPassword
+                  ? `
               <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
                 <strong style="color: #273d60;">Senha:</strong> ${tempPassword}
               </p>
-              ` : ''}
+              `
+                  : ""
+              }
               <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
                 <strong style="color: #273d60;">Organização:</strong> ${displayOrganization}
               </p>
@@ -95,7 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="border-top: 1px solid #e5e7eb;"></div>
           <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 0 0 16px 16px;">
             <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Eon Sign. Todos os direitos reservados.
+              © ${new Date().getFullYear()} eonSign. Todos os direitos reservados.
             </p>
           </div>
         </div>
@@ -106,12 +110,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Salvar no histórico se tivermos userId
     if (userId) {
-      await supabase.from('email_history').insert({
+      await supabase.from("email_history").insert({
         user_id: userId,
         recipient_email: email,
-        subject: "Bem-Vindo ao Eon Sign",
-        email_type: 'welcome',
-        status: 'sent'
+        subject: "Bem-Vindo ao eonSign",
+        email_type: "welcome",
+        status: "sent",
       });
     }
 
@@ -121,10 +125,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending welcome email:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 

@@ -29,44 +29,43 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Buscar o admin_name na tabela company_settings usando o email
     const { data: companyData, error: queryError } = await supabaseAdmin
-      .from('company_settings')
-      .select('admin_name, user_id')
-      .eq('admin_email', email)
+      .from("company_settings")
+      .select("admin_name, user_id")
+      .eq("admin_email", email)
       .single();
 
     if (queryError || !companyData) {
       console.error("User not found in company_settings:", queryError);
-      return new Response(
-        JSON.stringify({ error: "Usuário não encontrado" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      return new Response(JSON.stringify({ error: "Usuário não encontrado" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
     // Gerar senha aleatória de 8 caracteres
     const generateRandomPassword = () => {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-      let password = '';
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+      let password = "";
       for (let i = 0; i < 8; i++) {
         password += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       return password;
     };
-    
+
     const newPassword = generateRandomPassword();
     console.log("Setting new random password for user:", companyData.user_id);
 
     // Definir a nova senha usando o Supabase Admin API
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      companyData.user_id,
-      { password: newPassword }
-    );
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(companyData.user_id, {
+      password: newPassword,
+    });
 
     if (updateError) {
       console.error("Error updating password:", updateError);
-      return new Response(
-        JSON.stringify({ error: "Erro ao atualizar senha" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      return new Response(JSON.stringify({ error: "Erro ao atualizar senha" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
     console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
@@ -81,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email com as credenciais
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eonhub.com.br>",
+      from: "eonSign <noreply@eonhub.com.br>",
       to: [email],
       subject: "Nova Senha",
       html: `
@@ -135,10 +134,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending password reset email:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 

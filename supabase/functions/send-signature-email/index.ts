@@ -28,7 +28,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerEmail, documentName, documentId, senderName, organizationName, userId, brySignerLink }: SignatureEmailRequest = await req.json();
+    const {
+      signerName,
+      signerEmail,
+      documentName,
+      documentId,
+      senderName,
+      organizationName,
+      userId,
+      brySignerLink,
+    }: SignatureEmailRequest = await req.json();
 
     console.log("Sending signature email to:", signerEmail);
     console.log("BRy link provided:", brySignerLink ? "Yes" : "No");
@@ -49,12 +58,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Texto diferente se for BRy
     const isBrySignature = !!brySignerLink;
-    const instructionText = isBrySignature 
+    const instructionText = isBrySignature
       ? "Clique no botão abaixo para visualizar e assinar o documento digitalmente com certificado ICP-Brasil."
       : "Clique no botão abaixo para visualizar e assinar o documento. Você precisará informar seu CPF/CNPJ para concluir a assinatura.";
 
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eonhub.com.br>",
+      from: "eonSign <noreply@eonhub.com.br>",
       to: [signerEmail],
       subject: `Você tem um documento para assinar - ${documentName}`,
       html: `
@@ -63,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
             <img src="${BANNER_URL}" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
           </div>
           <div style="padding: 30px; background: #f9f9f9;">
-            <h2 style="color: #273d60;">Olá, ${signerName || 'Signatário'}!</h2>
+            <h2 style="color: #273d60;">Olá, ${signerName || "Signatário"}!</h2>
             <p style="color: #333; font-size: 16px;">
               <strong>${organizationName}</strong> enviou um documento para você assinar digitalmente.
             </p>
@@ -102,13 +111,13 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Email sent successfully:", emailResponse);
 
     // Salvar no histórico
-    await supabase.from('email_history').insert({
+    await supabase.from("email_history").insert({
       user_id: userId,
       recipient_email: signerEmail,
       subject: `Você tem um documento para assinar - ${documentName}`,
-      email_type: 'signature_invitation',
+      email_type: "signature_invitation",
       document_id: documentId,
-      status: 'sent'
+      status: "sent",
     });
 
     return new Response(JSON.stringify(emailResponse), {
@@ -117,30 +126,30 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending email:", error);
-    
+
     // Salvar erro no histórico se tivermos as informações necessárias
     try {
       const body = await req.clone().json();
       if (body.userId && body.signerEmail) {
         const supabase = createClient(supabaseUrl, supabaseKey);
-        await supabase.from('email_history').insert({
+        await supabase.from("email_history").insert({
           user_id: body.userId,
           recipient_email: body.signerEmail,
-          subject: `Você tem um documento para assinar - ${body.documentName || 'Documento'}`,
-          email_type: 'signature_invitation',
+          subject: `Você tem um documento para assinar - ${body.documentName || "Documento"}`,
+          email_type: "signature_invitation",
           document_id: body.documentId,
-          status: 'failed',
-          error_message: error.message
+          status: "failed",
+          error_message: error.message,
         });
       }
     } catch (historyError) {
       console.error("Error saving to history:", historyError);
     }
-    
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 

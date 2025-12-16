@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Draw "eonSign" text as logo
-    page.drawText("EON SIGN", {
+    page.drawText("eonSign", {
       x: margin,
       y: pageHeight - 45,
       size: 20,

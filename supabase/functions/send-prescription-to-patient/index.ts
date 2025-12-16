@@ -28,15 +28,15 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { 
-      documentId, 
-      documentName, 
-      patientName, 
-      patientPhone, 
-      patientEmail, 
-      organizationName, 
+    const {
+      documentId,
+      documentName,
+      patientName,
+      patientPhone,
+      patientEmail,
+      organizationName,
       senderName,
-      userId 
+      userId,
     }: PrescriptionRequest = await req.json();
 
     console.log("[PRESCRIPTION] Sending prescription to patient:", { patientName, patientEmail, patientPhone });
@@ -51,9 +51,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get the signed document URL
     const { data: docData, error: docError } = await supabase
-      .from('documents')
-      .select('bry_signed_file_url, file_url')
-      .eq('id', documentId)
+      .from("documents")
+      .select("bry_signed_file_url, file_url")
+      .eq("id", documentId)
       .single();
 
     if (docError) {
@@ -78,10 +78,12 @@ const handler = async (req: Request): Promise<Response> => {
             const pdfResponse = await fetch(documentUrl);
             if (pdfResponse.ok) {
               const pdfBuffer = await pdfResponse.arrayBuffer();
-              const pdfBase64 = btoa(new Uint8Array(pdfBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+              const pdfBase64 = btoa(
+                new Uint8Array(pdfBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ""),
+              );
               pdfAttachment = {
                 filename: `${documentName}.pdf`,
-                content: pdfBase64
+                content: pdfBase64,
               };
             }
           } catch (pdfErr) {
@@ -90,13 +92,13 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const emailPayload: any = {
-          from: "Eon Sign <noreply@eonhub.com.br>",
+          from: "eonSign <noreply@eonhub.com.br>",
           to: [patientEmail],
           subject: `Sua Prescrição Médica - ${documentName}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="padding: 0; text-align: center;">
-                <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
+                <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
               </div>
               <div style="padding: 30px; background: #f9f9f9;">
                 <h2 style="color: #273d60;">Olá, ${patientName}!</h2>
@@ -129,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               <div style="background: #f9f9f9; padding: 20px; text-align: center;">
                 <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                  © ${new Date().getFullYear()} Eon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+                  © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
                 </p>
               </div>
             </div>
@@ -145,25 +147,24 @@ const handler = async (req: Request): Promise<Response> => {
         emailSent = true;
 
         // Save to email history
-        await supabase.from('email_history').insert({
+        await supabase.from("email_history").insert({
           user_id: userId,
           recipient_email: patientEmail,
           subject: `Sua Prescrição Médica - ${documentName}`,
-          email_type: 'prescription_delivery',
+          email_type: "prescription_delivery",
           document_id: documentId,
-          status: 'sent'
+          status: "sent",
         });
-
       } catch (emailErr: any) {
         console.error("[PRESCRIPTION] Error sending email:", emailErr);
-        await supabase.from('email_history').insert({
+        await supabase.from("email_history").insert({
           user_id: userId,
           recipient_email: patientEmail,
           subject: `Sua Prescrição Médica - ${documentName}`,
-          email_type: 'prescription_delivery',
+          email_type: "prescription_delivery",
           document_id: documentId,
-          status: 'failed',
-          error_message: emailErr.message
+          status: "failed",
+          error_message: emailErr.message,
         });
       }
     }
@@ -172,9 +173,9 @@ const handler = async (req: Request): Promise<Response> => {
     if (patientPhone) {
       try {
         // Format phone for Twilio
-        const cleanPhone = patientPhone.replace(/\D/g, '');
-        const formattedPhone = cleanPhone.startsWith('55') ? `+${cleanPhone}` : `+55${cleanPhone}`;
-        
+        const cleanPhone = patientPhone.replace(/\D/g, "");
+        const formattedPhone = cleanPhone.startsWith("55") ? `+${cleanPhone}` : `+55${cleanPhone}`;
+
         const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
         const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
         const TWILIO_WHATSAPP_NUMBER = Deno.env.get("TWILIO_WHATSAPP_NUMBER");
@@ -187,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
           // Use completion template for prescription delivery
           const contentVariables = JSON.stringify({
             "1": patientName || "Paciente",
-            "2": documentName
+            "2": documentName,
           });
 
           const formData = new URLSearchParams();
@@ -199,7 +200,7 @@ const handler = async (req: Request): Promise<Response> => {
           const twilioResponse = await fetch(twilioUrl, {
             method: "POST",
             headers: {
-              "Authorization": `Basic ${auth}`,
+              Authorization: `Basic ${auth}`,
               "Content-Type": "application/x-www-form-urlencoded",
             },
             body: formData.toString(),
@@ -212,53 +213,51 @@ const handler = async (req: Request): Promise<Response> => {
             whatsappSent = true;
 
             // Save to WhatsApp history
-            await supabase.from('whatsapp_history').insert({
+            await supabase.from("whatsapp_history").insert({
               user_id: userId,
               document_id: documentId,
               recipient_name: patientName,
               recipient_phone: patientPhone,
-              message_type: 'prescription_delivery',
+              message_type: "prescription_delivery",
               message_sid: twilioData.sid,
-              status: 'sent'
+              status: "sent",
             });
           } else {
             console.error("[PRESCRIPTION] Twilio error:", twilioData);
-            await supabase.from('whatsapp_history').insert({
+            await supabase.from("whatsapp_history").insert({
               user_id: userId,
               document_id: documentId,
               recipient_name: patientName,
               recipient_phone: patientPhone,
-              message_type: 'prescription_delivery',
-              status: 'failed',
+              message_type: "prescription_delivery",
+              status: "failed",
               error_code: twilioData.code?.toString(),
-              error_message: twilioData.message
+              error_message: twilioData.message,
             });
           }
         } else {
           console.log("[PRESCRIPTION] WhatsApp credentials not configured");
         }
-
       } catch (whatsappErr: any) {
         console.error("[PRESCRIPTION] Error sending WhatsApp:", whatsappErr);
       }
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        emailSent, 
+      JSON.stringify({
+        success: true,
+        emailSent,
         whatsappSent,
-        message: emailSent || whatsappSent ? "Prescrição enviada com sucesso" : "Nenhum canal de envio disponível"
+        message: emailSent || whatsappSent ? "Prescrição enviada com sucesso" : "Nenhum canal de envio disponível",
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
-
   } catch (error: any) {
     console.error("[PRESCRIPTION] Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 
