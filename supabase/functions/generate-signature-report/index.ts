@@ -60,8 +60,6 @@ const truncateText = (text: string | null, maxLength: number): string => {
   if (normalized.length <= maxLength) return normalized;
   return normalized.substring(0, maxLength - 3) + "...";
 };
-// Eon Sign logo in Base64 (white PNG)
-const LOGO_BASE64 = "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";
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -127,31 +125,14 @@ const handler = async (req: Request): Promise<Response> => {
       color: headerBg,
     });
 
-    // Embed logo from Base64
-    try {
-      const logoBytes = Uint8Array.from(atob(LOGO_BASE64), c => c.charCodeAt(0));
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoMaxHeight = 40;
-      const logoScale = logoMaxHeight / logoImage.height;
-      const logoWidth = logoImage.width * logoScale;
-      page.drawImage(logoImage, {
-        x: margin,
-        y: pageHeight - 55,
-        width: logoWidth,
-        height: logoMaxHeight,
-      });
-      console.log("Logo embedded successfully from Base64");
-    } catch (e) {
-      console.log("Could not embed logo from Base64, drawing text fallback:", e);
-      // Fallback: draw "EON SIGN" text
-      page.drawText("EON SIGN", {
-        x: margin,
-        y: pageHeight - 45,
-        size: 20,
-        font: helveticaBold,
-        color: white,
-      });
-    }
+    // Draw "EON SIGN" text as logo
+    page.drawText("EON SIGN", {
+      x: margin,
+      y: pageHeight - 45,
+      size: 20,
+      font: helveticaBold,
+      color: white,
+    });
 
     // Title - white for contrast with dark header
     page.drawText("RELATÓRIO DE ASSINATURAS", {
