@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.send-prescription-to-patient]
 verify_jwt = false
+
+[functions.sign-with-local-certificate]
+verify_jwt = false

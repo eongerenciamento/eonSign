@@ -25,6 +25,7 @@ export type Database = {
           cep: string | null
           certificate_file_url: string | null
           certificate_issuer: string | null
+          certificate_password_encrypted: string | null
           certificate_serial_number: string | null
           certificate_subject: string | null
           certificate_uploaded_at: string | null
@@ -62,6 +63,7 @@ export type Database = {
           cep?: string | null
           certificate_file_url?: string | null
           certificate_issuer?: string | null
+          certificate_password_encrypted?: string | null
           certificate_serial_number?: string | null
           certificate_subject?: string | null
           certificate_uploaded_at?: string | null
@@ -99,6 +101,7 @@ export type Database = {
           cep?: string | null
           certificate_file_url?: string | null
           certificate_issuer?: string | null
+          certificate_password_encrypted?: string | null
           certificate_serial_number?: string | null
           certificate_subject?: string | null
           certificate_uploaded_at?: string | null
