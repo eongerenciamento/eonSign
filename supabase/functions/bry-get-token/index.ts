@@ -43,16 +43,15 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[BRy Auth] Requesting new BRy token from ${authUrl}`);
 
     // Fazer requisição para obter novo token
+    const basicAuth = btoa(`${clientId}:${clientSecret}`);
+
     const tokenResponse = await fetch(authUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${basicAuth}`,
       },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
-      }).toString(),
+      body: 'grant_type=client_credentials',
     });
 
     if (!tokenResponse.ok) {
