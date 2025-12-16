@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import logoEon from "@/assets/logo-eon.png";
+import logoEon from "@/assets/logo-eon-white.png";
 import { jsPDF } from "jspdf";
 
 interface Signer {
