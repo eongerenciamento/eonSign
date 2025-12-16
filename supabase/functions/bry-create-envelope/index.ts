@@ -36,6 +36,21 @@ interface CreateEnvelopeRequest {
   signatureMode?: SignatureMode;
 }
 
+// Função para sanitizar nome do envelope para a API BRy
+// Remove acentos, caracteres especiais e espaços extras
+function sanitizeEnvelopeName(name: string): string {
+  return name
+    // Remove acentos
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    // Remove caracteres especiais (mantém apenas letras, números, espaços e hífen)
+    .replace(/[^a-zA-Z0-9\s\-]/g, '')
+    // Remove espaços múltiplos
+    .replace(/\s+/g, ' ')
+    // Trim
+    .trim();
+}
+
 async function getToken(): Promise<string> {
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
@@ -182,8 +197,12 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Criar envelope na BRy com TODOS os documentos
+    // Sanitizar o nome para remover acentos e caracteres especiais
+    const sanitizedTitle = sanitizeEnvelopeName(title);
+    console.log('Original title:', title, '-> Sanitized:', sanitizedTitle);
+    
     const envelopePayload = {
-      name: title,
+      name: sanitizedTitle,
       clientName: 'Eon Sign',
       signersData: signersData,
       typeMessaging: ['LINK'],
