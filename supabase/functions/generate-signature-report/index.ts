@@ -115,8 +115,8 @@ const handler = async (req: Request): Promise<Response> => {
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
     let yPos = pageHeight;
 
-    // Header background - dark blue for white logo
-    const headerBg = rgb(39 / 255, 61 / 255, 96 / 255); // #273d60
+    // Header background - medium gray
+    const headerBg = rgb(156 / 255, 163 / 255, 175 / 255); // medium gray
     page.drawRectangle({
       x: 0,
       y: pageHeight - 70,
@@ -433,17 +433,46 @@ const handler = async (req: Request): Promise<Response> => {
       color: cardBorderGray,
     });
 
-    lastPage.drawText("Documento validado pelo sistema Eon Sign", {
+    // Footer line 1: "Documento validado pelo sistema eonSign" - only eonSign bold
+    const footerText1Part1 = "Documento validado pelo sistema ";
+    const footerText1Part2 = "eonSign";
+    lastPage.drawText(footerText1Part1, {
       x: margin,
+      y: footerY,
+      size: 9,
+      font: helveticaFont,
+      color: gray600,
+    });
+    lastPage.drawText(footerText1Part2, {
+      x: margin + helveticaFont.widthOfTextAtSize(footerText1Part1, 9),
       y: footerY,
       size: 9,
       font: helveticaBold,
       color: gray600,
     });
 
-    lastPage.drawText("Este documento possui validade jurídica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
+    // Footer line 2: "Powered by eonhub" - only eonhub bold
+    const footerText2Part1 = "Powered by ";
+    const footerText2Part2 = "eonhub";
+    lastPage.drawText(footerText2Part1, {
       x: margin,
       y: footerY - 12,
+      size: 9,
+      font: helveticaFont,
+      color: gray600,
+    });
+    lastPage.drawText(footerText2Part2, {
+      x: margin + helveticaFont.widthOfTextAtSize(footerText2Part1, 9),
+      y: footerY - 12,
+      size: 9,
+      font: helveticaBold,
+      color: gray600,
+    });
+
+    // Footer line 3: Legal validity
+    lastPage.drawText("Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
+      x: margin,
+      y: footerY - 24,
       size: 8,
       font: helveticaFont,
       color: gray600,
