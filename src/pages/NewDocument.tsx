@@ -1145,54 +1145,71 @@ const NewDocument = () => {
         }
       } else if (!isSimpleSignature) {
         // Create BRy envelope for ADVANCED/QUALIFIED (without local cert)/PRESCRIPTION signatures
-        try {
-          // For prescription mode, only company signer
-          const allSigners = isPrescriptionMode 
-            ? [{
-                name: companySigner.name,
-                email: companySigner.email,
-                phone: companySigner.phone
-              }]
-            : [{
-                name: companySigner.name,
-                email: companySigner.email,
-                phone: companySigner.phone
-              }, ...signers];
+        // For prescription mode, only company signer
+        const allSigners = isPrescriptionMode 
+          ? [{
+              name: companySigner.name,
+              email: companySigner.email,
+              phone: companySigner.phone
+            }]
+          : [{
+              name: companySigner.name,
+              email: companySigner.email,
+              phone: companySigner.phone
+            }, ...signers];
 
-          const documentsForBry = fileContents.map(fc => ({
-            documentId: fc.docId,
-            base64: fc.base64,
-            fileName: filesToUpload.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || effectiveTitle,
-          }));
+        const documentsForBry = fileContents.map(fc => ({
+          documentId: fc.docId,
+          base64: fc.base64,
+          fileName: filesToUpload.find(f => documentIds.indexOf(fc.docId) !== -1)?.name || effectiveTitle,
+        }));
 
-          const {
-            data: bryData,
-            error: bryError
-          } = await supabase.functions.invoke('bry-create-envelope', {
-            body: {
-              documents: documentsForBry,
-              title: effectiveTitle,
-              signers: allSigners,
-              userId: user.id,
-              authenticationOptions: isPrescriptionMode ? ['IP'] : ['IP', 'GEOLOCATION', ...authOptions],
-              signatureMode: effectiveSignatureMode
-            }
-          });
+        console.log('[BRy] Creating envelope for', effectiveSignatureMode, 'signature with', documentsForBry.length, 'documents');
 
-          if (bryError) {
-            console.error('BRy envelope creation failed:', bryError);
-          } else if (bryData?.signerLinks) {
-            for (const link of bryData.signerLinks) {
-              const key = link.email || link.phone;
-              if (key) {
-                brySignerLinks.set(key, link.link);
-              }
-            }
-            console.log('BRy envelope created:', bryData.envelopeUuid, 'with', documentsForBry.length, 'documents');
+        const {
+          data: bryData,
+          error: bryError
+        } = await supabase.functions.invoke('bry-create-envelope', {
+          body: {
+            documents: documentsForBry,
+            title: effectiveTitle,
+            signers: allSigners,
+            userId: user.id,
+            authenticationOptions: isPrescriptionMode ? ['IP'] : ['IP', 'GEOLOCATION', ...authOptions],
+            signatureMode: effectiveSignatureMode
           }
-        } catch (bryErr) {
-          console.error('Error creating BRy envelope:', bryErr);
+        });
+
+        // CRITICAL: Block document creation if BRy fails for non-SIMPLE modes
+        if (bryError || !bryData?.signerLinks || bryData.signerLinks.length === 0) {
+          console.error('[BRy] Envelope creation FAILED:', bryError || 'No signer links returned');
+          console.error('[BRy] Response data:', bryData);
+          
+          toast({
+            title: "Erro na integração de assinatura",
+            description: "Não foi possível criar o envelope de assinatura digital. Verifique se as credenciais BRy estão configuradas corretamente ou tente novamente.",
+            variant: "destructive"
+          });
+          
+          // Clean up created documents since BRy failed
+          for (const docId of documentIds) {
+            await supabase.from('document_signers').delete().eq('document_id', docId);
+            await supabase.from('documents').delete().eq('id', docId);
+          }
+          
+          setIsSubmitting(false);
+          return;
         }
+
+        // Store signer links
+        for (const link of bryData.signerLinks) {
+          const key = link.email || link.phone;
+          if (key) {
+            brySignerLinks.set(key, link.link);
+          }
+        }
+        console.log('[BRy] Envelope created successfully:', bryData.envelopeUuid, 'with', documentsForBry.length, 'documents');
+        console.log('[BRy] Signer links:', Array.from(brySignerLinks.entries()));
       } else {
         console.log('SIMPLE signature mode - using native flow without BRy');
       }

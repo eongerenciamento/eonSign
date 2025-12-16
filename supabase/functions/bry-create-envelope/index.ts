@@ -42,34 +42,49 @@ async function getToken(): Promise<string> {
   const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
 
   if (!clientId || !clientSecret) {
+    console.error('[BRy Auth] CRITICAL: Credentials not configured');
     throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
   }
 
   // BRy EasySign auth endpoint (SyngularID)
   const authUrl = 'https://ar.syngularid.com.br/api/auth/applications';
 
+  console.log('[BRy Auth] ========================================');
   console.log('[BRy Auth] Environment:', environment);
+  console.log('[BRy Auth] Client ID (first 8 chars):', clientId.substring(0, 8) + '...');
   console.log('[BRy Auth] Requesting token from:', authUrl);
 
-  const tokenResponse = await fetch(authUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-    }).toString(),
-  });
+  try {
+    const tokenResponse = await fetch(authUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+      }).toString(),
+    });
 
-  if (!tokenResponse.ok) {
-    const errorText = await tokenResponse.text();
-    throw new Error(`Failed to get BRy token: ${tokenResponse.status} - ${errorText}`);
+    console.log('[BRy Auth] Response status:', tokenResponse.status);
+    console.log('[BRy Auth] Response headers:', JSON.stringify(Object.fromEntries(tokenResponse.headers.entries())));
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error('[BRy Auth] FAILED - Status:', tokenResponse.status);
+      console.error('[BRy Auth] FAILED - Error body:', errorText);
+      throw new Error(`BRy authentication failed: ${tokenResponse.status} - ${errorText}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    console.log('[BRy Auth] SUCCESS - Token obtained, expires_in:', tokenData.expires_in);
+    console.log('[BRy Auth] ========================================');
+    return tokenData.access_token;
+  } catch (fetchError: any) {
+    console.error('[BRy Auth] FETCH ERROR:', fetchError.message);
+    throw new Error(`BRy authentication network error: ${fetchError.message}`);
   }
-
-  const tokenData = await tokenResponse.json();
-  return tokenData.access_token;
 }
 
 const handler = async (req: Request): Promise<Response> => {
