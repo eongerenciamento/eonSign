@@ -9,11 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Upload, Building2, CreditCard, HelpCircle, X, Check, ClipboardList } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
+import { CertificateUpload } from "@/components/settings/CertificateUpload";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -49,6 +50,17 @@ const Settings = () => {
   const [healthcareNeighborhood, setHealthcareNeighborhood] = useState("");
   const [healthcareCity, setHealthcareCity] = useState("");
   const [healthcareState, setHealthcareState] = useState("");
+  
+  // Certificate data
+  const [certificateData, setCertificateData] = useState<{
+    certificate_file_url: string | null;
+    certificate_subject: string | null;
+    certificate_issuer: string | null;
+    certificate_valid_from: string | null;
+    certificate_valid_to: string | null;
+    certificate_serial_number: string | null;
+    certificate_uploaded_at: string | null;
+  } | null>(null);
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -157,6 +169,16 @@ const Settings = () => {
           setHealthcareNeighborhood((companyData as any).healthcare_neighborhood || "");
           setHealthcareCity((companyData as any).healthcare_city || "");
           setHealthcareState((companyData as any).healthcare_state || "");
+          // Certificate data
+          setCertificateData({
+            certificate_file_url: (companyData as any).certificate_file_url || null,
+            certificate_subject: (companyData as any).certificate_subject || null,
+            certificate_issuer: (companyData as any).certificate_issuer || null,
+            certificate_valid_from: (companyData as any).certificate_valid_from || null,
+            certificate_valid_to: (companyData as any).certificate_valid_to || null,
+            certificate_serial_number: (companyData as any).certificate_serial_number || null,
+            certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null,
+          });
         }
       }
     };
@@ -334,6 +356,29 @@ const Settings = () => {
     }
     toast.success("Dados da empresa salvos com sucesso!");
   };
+
+  const handleCertificateChange = useCallback(async () => {
+    if (!user) return;
+    const { data: companyData } = await supabase
+      .from('company_settings')
+      .select('certificate_file_url, certificate_subject, certificate_issuer, certificate_valid_from, certificate_valid_to, certificate_serial_number, certificate_uploaded_at')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (companyData) {
+      setCertificateData({
+        certificate_file_url: (companyData as any).certificate_file_url || null,
+        certificate_subject: (companyData as any).certificate_subject || null,
+        certificate_issuer: (companyData as any).certificate_issuer || null,
+        certificate_valid_from: (companyData as any).certificate_valid_from || null,
+        certificate_valid_to: (companyData as any).certificate_valid_to || null,
+        certificate_serial_number: (companyData as any).certificate_serial_number || null,
+        certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null,
+      });
+    } else {
+      setCertificateData(null);
+    }
+  }, [user]);
   return <Layout>
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
         <div className="flex items-center justify-between">
@@ -633,6 +678,15 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Certificate Upload */}
+            {user && (
+              <CertificateUpload
+                userId={user.id}
+                certificateData={certificateData}
+                onCertificateChange={handleCertificateChange}
+              />
+            )}
 
             {/* Footer Logo */}
             <div className="flex flex-col items-center pt-0 pb-4">

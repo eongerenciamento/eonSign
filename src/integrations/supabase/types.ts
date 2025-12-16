@@ -23,6 +23,13 @@ export type Database = {
           admin_phone: string
           avatar_url: string | null
           cep: string | null
+          certificate_file_url: string | null
+          certificate_issuer: string | null
+          certificate_serial_number: string | null
+          certificate_subject: string | null
+          certificate_uploaded_at: string | null
+          certificate_valid_from: string | null
+          certificate_valid_to: string | null
           city: string | null
           cnpj: string
           company_name: string
@@ -53,6 +60,13 @@ export type Database = {
           admin_phone: string
           avatar_url?: string | null
           cep?: string | null
+          certificate_file_url?: string | null
+          certificate_issuer?: string | null
+          certificate_serial_number?: string | null
+          certificate_subject?: string | null
+          certificate_uploaded_at?: string | null
+          certificate_valid_from?: string | null
+          certificate_valid_to?: string | null
           city?: string | null
           cnpj: string
           company_name: string
@@ -83,6 +97,13 @@ export type Database = {
           admin_phone?: string
           avatar_url?: string | null
           cep?: string | null
+          certificate_file_url?: string | null
+          certificate_issuer?: string | null
+          certificate_serial_number?: string | null
+          certificate_subject?: string | null
+          certificate_uploaded_at?: string | null
+          certificate_valid_from?: string | null
+          certificate_valid_to?: string | null
           city?: string | null
           cnpj?: string
           company_name?: string
