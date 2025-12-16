@@ -19,7 +19,7 @@ async function getToken(): Promise<string> {
     throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
   }
 
-  const authUrl = 'https://easysign.bry.com.br/api/auth/applications';
+  const authUrl = 'https://cloud.bry.com.br/token-service/jwt';
 
   console.log('[BRy Auth] Environment:', environment);
   console.log('[BRy Auth] Requesting token from:', authUrl);
