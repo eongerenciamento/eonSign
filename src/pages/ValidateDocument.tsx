@@ -382,6 +382,9 @@ const ValidateDocument = () => {
                     ? "Este documento foi assinado por todos os signatarios e possui validade juridica"
                     : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`}
                 </p>
+                {isValid && (
+                  <p className="text-[10px] text-green-700">Lei n. 14.063/2020 e MP 2.200-2/2001</p>
+                )}
               </div>
             </div>
 
@@ -605,8 +608,7 @@ const ValidateDocument = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001</p>
-          <p className="mt-1">
+          <p>
             Verificado pelo sistema{" "}
             <a href="https://www.eonhub.com.br/sign" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
               eonSign
