@@ -20,36 +20,35 @@ const Install = () => {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const {
-      outcome
-    } = await deferredPrompt.userChoice;
+    const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       setIsInstallable(false);
     }
     setDeferredPrompt(null);
   };
-  return <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#273d60] to-[#001a4d]">
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#273d60] to-[#001a4d]">
       <button onClick={() => navigate("/auth")} className="absolute top-8 left-8 text-gray-400" aria-label="Voltar">
         <ArrowLeft className="h-6 w-6 text-slate-50" />
       </button>
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img alt="Eon Sign" className="h-20 w-20 rounded-2xl shadow-lg" src="/lovable-uploads/35e8816b-11ae-40a9-acbb-c1f64eb8ee31.png" />
+            <img
+              alt="eonSign"
+              className="h-20 w-20 rounded-2xl shadow-lg"
+              src="/lovable-uploads/35e8816b-11ae-40a9-acbb-c1f64eb8ee31.png"
+            />
           </div>
-          <CardTitle className="text-2xl text-gray-600">Instalar Eon Sign</CardTitle>
-          <CardDescription>
-            Instale nosso app para uma melhor experiência
-          </CardDescription>
+          <CardTitle className="text-2xl text-gray-600">Instalar eonSign</CardTitle>
+          <CardDescription>Instale nosso app para uma melhor experiência</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
             <Smartphone className="h-5 w-5 mt-0.5 text-gray-700" />
             <div>
               <h3 className="font-semibold mb-1">Acesso Rápido</h3>
-              <p className="text-sm text-muted-foreground">
-                Adicione à tela inicial para acesso instantâneo
-              </p>
+              <p className="text-sm text-muted-foreground">Adicione à tela inicial para acesso instantâneo</p>
             </div>
           </div>
 
@@ -57,28 +56,30 @@ const Install = () => {
             <Download className="h-5 w-5 mt-0.5 text-gray-700" />
             <div>
               <h3 className="font-semibold mb-1">Funciona Offline</h3>
-              <p className="text-sm text-muted-foreground">
-                Acesse seus documentos mesmo sem internet
-              </p>
+              <p className="text-sm text-muted-foreground">Acesse seus documentos mesmo sem internet</p>
             </div>
           </div>
 
-          {isInstallable ? <Button onClick={handleInstall} className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
+          {isInstallable ? (
+            <Button onClick={handleInstall} className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
               Instalar Agora
-            </Button> : <div className="text-center text-sm text-muted-foreground space-y-2">
+            </Button>
+          ) : (
+            <div className="text-center text-sm text-muted-foreground space-y-2">
               <p className="font-medium">Para instalar em dispositivos móveis:</p>
               <p className="font-medium">
-                iPhone: Toque em <span className="text-primary">Compartilhar</span> → 
+                iPhone: Toque em <span className="text-primary">Compartilhar</span> →
                 <span className="text-primary"> Adicionar à Tela de Início</span>
               </p>
               <p className="font-medium">
-                Android: Toque no menu → 
-                <span className="text-primary"> Instalar app</span> ou 
+                Android: Toque no menu →<span className="text-primary"> Instalar app</span> ou
                 <span className="text-primary"> Adicionar à tela inicial</span>
               </p>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
 export default Install;

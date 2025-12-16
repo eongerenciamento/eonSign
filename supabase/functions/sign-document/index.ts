@@ -11,7 +11,7 @@ const validateCPF = (cpf: string): boolean => {
   const cleanCpf = cpf.replace(/\D/g, "");
   if (cleanCpf.length !== 11) return false;
   if (/^(\d)\1+$/.test(cleanCpf)) return false;
-  
+
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
@@ -19,7 +19,7 @@ const validateCPF = (cpf: string): boolean => {
   let remainder = (sum * 10) % 11;
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cleanCpf.charAt(9))) return false;
-  
+
   sum = 0;
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
@@ -27,7 +27,7 @@ const validateCPF = (cpf: string): boolean => {
   remainder = (sum * 10) % 11;
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cleanCpf.charAt(10))) return false;
-  
+
   return true;
 };
 
@@ -36,34 +36,34 @@ const validateCNPJ = (cnpj: string): boolean => {
   const cleanCnpj = cnpj.replace(/\D/g, "");
   if (cleanCnpj.length !== 14) return false;
   if (/^(\d)\1+$/.test(cleanCnpj)) return false;
-  
+
   let size = cleanCnpj.length - 2;
   let numbers = cleanCnpj.substring(0, size);
   const digits = cleanCnpj.substring(size);
   let sum = 0;
   let pos = size - 7;
-  
+
   for (let i = size; i >= 1; i--) {
     sum += parseInt(numbers.charAt(size - i)) * pos--;
     if (pos < 2) pos = 9;
   }
-  
+
   let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(0))) return false;
-  
+
   size = size + 1;
   numbers = cleanCnpj.substring(0, size);
   sum = 0;
   pos = size - 7;
-  
+
   for (let i = size; i >= 1; i--) {
     sum += parseInt(numbers.charAt(size - i)) * pos--;
     if (pos < 2) pos = 9;
   }
-  
+
   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(1))) return false;
-  
+
   return true;
 };
 
@@ -83,36 +83,29 @@ serve(async (req) => {
   }
 
   try {
-    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                     req.headers.get('x-real-ip') ||
-                     req.headers.get('cf-connecting-ip') ||
-                     null;
-    
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      req.headers.get("x-real-ip") ||
+      req.headers.get("cf-connecting-ip") ||
+      null;
+
     console.log("Client IP:", clientIp);
 
-    const { 
-      documentId, 
-      signerId, 
-      cpf, 
-      birthDate, 
-      latitude, 
-      longitude,
-      typedSignature
-    } = await req.json();
+    const { documentId, signerId, cpf, birthDate, latitude, longitude, typedSignature } = await req.json();
 
     if (!documentId || !signerId || !cpf || !birthDate) {
-      return new Response(
-        JSON.stringify({ error: "Campos obrigatórios não fornecidos" }), 
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Campos obrigatórios não fornecidos" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const birthDateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!birthDateRegex.test(birthDate)) {
-      return new Response(
-        JSON.stringify({ error: "Formato de data inválido" }), 
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Formato de data inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const birth = new Date(birthDate);
@@ -124,10 +117,10 @@ serve(async (req) => {
     }
 
     if (age < 18) {
-      return new Response(
-        JSON.stringify({ error: "Signatário deve ter pelo menos 18 anos" }), 
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Signatário deve ter pelo menos 18 anos" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log("Processing signature:", { documentId, signerId, cpf, birthDate });
@@ -136,17 +129,16 @@ serve(async (req) => {
     if (!validation.valid) {
       console.error("Invalid CPF/CNPJ:", cpf);
       return new Response(
-        JSON.stringify({ error: `${validation.type || "CPF/CNPJ"} inválido. Por favor, verifique o número informado.` }), 
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: `${validation.type || "CPF/CNPJ"} inválido. Por favor, verifique o número informado.`,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     console.log(`Valid ${validation.type} provided`);
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // Get document to check signature mode
     const { data: document, error: docFetchError } = await supabase
@@ -157,10 +149,10 @@ serve(async (req) => {
 
     if (docFetchError || !document) {
       console.error("Document not found:", docFetchError);
-      return new Response(
-        JSON.stringify({ error: "Documento não encontrado" }), 
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Documento não encontrado" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Get signer info
@@ -172,10 +164,10 @@ serve(async (req) => {
 
     if (signerFetchError || !signerInfo) {
       console.error("Signer not found:", signerFetchError);
-      return new Response(
-        JSON.stringify({ error: "Signatário não encontrado" }), 
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Signatário não encontrado" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Generate unique signature ID
@@ -191,9 +183,9 @@ serve(async (req) => {
         console.log(`Reverse geocoding coordinates: ${latitude}, ${longitude}`);
         const geoResponse = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=pt-BR`,
-          { headers: { 'User-Agent': 'EonSign/1.0' } }
+          { headers: { "User-Agent": "EonSign/1.0" } },
         );
-        
+
         if (geoResponse.ok) {
           const geoData = await geoResponse.json();
           city = geoData.address?.city || geoData.address?.town || geoData.address?.village || null;
@@ -230,23 +222,25 @@ serve(async (req) => {
 
     if (signerError) {
       console.error("Error updating signer:", signerError);
-      return new Response(
-        JSON.stringify({ error: "Erro ao processar assinatura" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Erro ao processar assinatura" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Check if all signers have signed BEFORE applying signature
     const { data: signers, error: signersError } = await supabase
       .from("document_signers")
-      .select("id, name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id")
+      .select(
+        "id, name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id",
+      )
       .eq("document_id", documentId);
 
     if (signersError) {
       console.error("Error fetching signers:", signersError);
     }
 
-    const signedCount = signers?.filter(s => s.status === "signed").length || 0;
+    const signedCount = signers?.filter((s) => s.status === "signed").length || 0;
     const allSigned = signedCount === signers?.length;
     const isLastSigner = allSigned;
 
@@ -258,7 +252,7 @@ serve(async (req) => {
       console.log("Processing SIMPLE signature - native flow");
 
       // Get current signer index for automatic positioning
-      const signerIndex = signers?.findIndex(s => s.id === signerId) || 0;
+      const signerIndex = signers?.findIndex((s) => s.id === signerId) || 0;
       const totalSigners = signers?.length || 1;
 
       // Call apply-simple-signature to process the PDF
@@ -281,11 +275,11 @@ serve(async (req) => {
                 city,
                 state,
                 country,
-                signatureId
+                signatureId,
               },
-              isLastSigner
-            }
-          }
+              isLastSigner,
+            },
+          },
         );
 
         if (signatureError) {
@@ -311,10 +305,7 @@ serve(async (req) => {
       console.log("Updating bry_signed_file_url to:", signedFilePath);
     }
 
-    const { error: docError } = await supabase
-      .from("documents")
-      .update(updateData)
-      .eq("id", documentId);
+    const { error: docError } = await supabase.from("documents").update(updateData).eq("id", documentId);
 
     if (docError) {
       console.error("Error updating document:", docError);
@@ -323,7 +314,7 @@ serve(async (req) => {
     // If all signed, send notifications
     if (allSigned) {
       console.log("All signatures completed, sending confirmation emails");
-      
+
       const { data: companySettings } = await supabase
         .from("company_settings")
         .select("admin_name")
@@ -336,17 +327,17 @@ serve(async (req) => {
         .eq("document_id", documentId);
 
       if (allSignersForNotification && allSignersForNotification.length > 0) {
-        const signerEmails = allSignersForNotification.map(s => s.email).filter(Boolean);
-        const senderName = companySettings?.admin_name || "Eon Sign";
+        const signerEmails = allSignersForNotification.map((s) => s.email).filter(Boolean);
+        const senderName = companySettings?.admin_name || "eonSign";
 
         try {
-          await supabase.functions.invoke('send-document-completed-email', {
+          await supabase.functions.invoke("send-document-completed-email", {
             body: {
               documentId,
               documentName: document.name,
               signerEmails,
-              senderName
-            }
+              senderName,
+            },
           });
           console.log("Confirmation emails sent successfully");
         } catch (emailError) {
@@ -356,15 +347,15 @@ serve(async (req) => {
         for (const signer of allSignersForNotification) {
           if (signer.phone) {
             try {
-              await supabase.functions.invoke('send-whatsapp-message', {
+              await supabase.functions.invoke("send-whatsapp-message", {
                 body: {
                   signerName: signer.name,
                   signerPhone: signer.phone,
                   documentName: document.name,
                   documentId,
-                  organizationName: companySettings?.admin_name || "Eon Sign",
-                  isCompleted: true
-                }
+                  organizationName: companySettings?.admin_name || "eonSign",
+                  isCompleted: true,
+                },
               });
               console.log(`WhatsApp confirmation sent to ${signer.phone}`);
             } catch (whatsappError) {
@@ -377,15 +368,15 @@ serve(async (req) => {
 
     console.log("Signature processed successfully");
 
-    return new Response(
-      JSON.stringify({ success: true, allSigned, signatureId }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true, allSigned, signatureId }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("Error in sign-document:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

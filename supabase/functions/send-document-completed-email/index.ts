@@ -24,15 +24,14 @@ async function getBryToken(): Promise<string | null> {
   const clientId = Deno.env.get("BRY_CLIENT_ID");
   const clientSecret = Deno.env.get("BRY_CLIENT_SECRET");
   const bryEnvironment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
-  
+
   if (!clientId || !clientSecret) {
     console.log("BRy credentials not configured");
     return null;
   }
 
-  const apiBaseUrl = bryEnvironment === "production" 
-    ? "https://easysign.bry.com.br" 
-    : "https://easysign.hom.bry.com.br";
+  const apiBaseUrl =
+    bryEnvironment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
   try {
     const tokenResponse = await fetch(`${apiBaseUrl}/api/service/token-service/jwt`, {
@@ -56,14 +55,13 @@ async function getBryToken(): Promise<string | null> {
 
 // Download BRy evidence report
 async function downloadBryReport(
-  envelopeUuid: string, 
-  documentUuid: string, 
-  accessToken: string
+  envelopeUuid: string,
+  documentUuid: string,
+  accessToken: string,
 ): Promise<ArrayBuffer | null> {
   const bryEnvironment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
-  const apiBaseUrl = bryEnvironment === "production" 
-    ? "https://easysign.bry.com.br" 
-    : "https://easysign.hom.bry.com.br";
+  const apiBaseUrl =
+    bryEnvironment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
   try {
     const reportUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${envelopeUuid}/documents/${documentUuid}/reportUnified`;
@@ -72,8 +70,8 @@ async function downloadBryReport(
     const response = await fetch(reportUrl, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Accept": "application/pdf",
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/pdf",
       },
     });
 
@@ -93,12 +91,12 @@ async function downloadBryReport(
 async function generateLocalReport(documentId: string): Promise<ArrayBuffer | null> {
   try {
     console.log("Generating local signature report for SIMPLE mode...");
-    
+
     const response = await fetch(`${supabaseUrl}/functions/v1/generate-signature-report`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${supabaseKey}`,
+        Authorization: `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({ documentId }),
     });
@@ -130,17 +128,17 @@ async function generateLocalReport(documentId: string): Promise<ArrayBuffer | nu
 // Merge two PDFs into one
 async function mergePdfs(signedPdfBuffer: ArrayBuffer, reportPdfBuffer: ArrayBuffer): Promise<ArrayBuffer> {
   const mergedPdf = await PDFDocument.create();
-  
+
   // Load signed document
   const signedDoc = await PDFDocument.load(signedPdfBuffer);
   const signedPages = await mergedPdf.copyPages(signedDoc, signedDoc.getPageIndices());
-  signedPages.forEach(page => mergedPdf.addPage(page));
-  
+  signedPages.forEach((page) => mergedPdf.addPage(page));
+
   // Load evidence report
   const reportDoc = await PDFDocument.load(reportPdfBuffer);
   const reportPages = await mergedPdf.copyPages(reportDoc, reportDoc.getPageIndices());
-  reportPages.forEach(page => mergedPdf.addPage(page));
-  
+  reportPages.forEach((page) => mergedPdf.addPage(page));
+
   // Save merged PDF and copy to new ArrayBuffer
   const mergedBytes = await mergedPdf.save();
   const result = new ArrayBuffer(mergedBytes.length);
@@ -151,7 +149,7 @@ async function mergePdfs(signedPdfBuffer: ArrayBuffer, reportPdfBuffer: ArrayBuf
 // Convert ArrayBuffer to base64 safely
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  let binary = '';
+  let binary = "";
   const chunkSize = 0x8000; // 32KB chunks to avoid stack overflow
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
@@ -183,9 +181,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Fetch document from database including signature_mode
     const { data: document, error: docError } = await supabase
-      .from('documents')
-      .select('file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url, signature_mode')
-      .eq('id', documentId)
+      .from("documents")
+      .select("file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url, signature_mode")
+      .eq("id", documentId)
       .single();
 
     if (docError || !document) {
@@ -196,27 +194,24 @@ const handler = async (req: Request): Promise<Response> => {
     let filePath: string;
     if (document.bry_signed_file_url) {
       // bry_signed_file_url can be either a full URL or just a path
-      if (document.bry_signed_file_url.includes('/documents/')) {
+      if (document.bry_signed_file_url.includes("/documents/")) {
         // It's a full URL, extract the path
-        const urlParts = document.bry_signed_file_url.split('/documents/');
-        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+        const urlParts = document.bry_signed_file_url.split("/documents/");
+        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
       } else {
         // It's already a path
         filePath = document.bry_signed_file_url;
       }
     } else if (document.file_url) {
-      const urlParts = document.file_url.split('/documents/');
-      filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+      const urlParts = document.file_url.split("/documents/");
+      filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
     } else {
       throw new Error("URL do documento não encontrada");
     }
-    
+
     // Download signed document from Storage
     console.log("Downloading signed document from path:", filePath);
-    const { data: fileData, error: fileError } = await supabase
-      .storage
-      .from('documents')
-      .download(filePath);
+    const { data: fileData, error: fileError } = await supabase.storage.from("documents").download(filePath);
 
     if (fileError || !fileData) {
       console.error("Error downloading document:", fileError);
@@ -235,7 +230,7 @@ const handler = async (req: Request): Promise<Response> => {
       // SIMPLE mode: Generate local report
       console.log("Using local report generation for SIMPLE signature mode");
       const localReportBuffer = await generateLocalReport(documentId);
-      
+
       if (localReportBuffer) {
         console.log(`Local report size: ${localReportBuffer.byteLength} bytes`);
         try {
@@ -251,13 +246,13 @@ const handler = async (req: Request): Promise<Response> => {
     } else if (document.bry_envelope_uuid && document.bry_document_uuid) {
       // ADVANCED/QUALIFIED mode: Use BRy report
       console.log("Using BRy report for ADVANCED/QUALIFIED signature mode");
-      
+
       const bryToken = await getBryToken();
       if (bryToken) {
         const reportPdfBuffer = await downloadBryReport(
           document.bry_envelope_uuid,
           document.bry_document_uuid,
-          bryToken
+          bryToken,
         );
 
         if (reportPdfBuffer) {
@@ -289,13 +284,13 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to each signatory
     const emailPromises = recipients.map(async (email) => {
       return await resend.emails.send({
-        from: "Eon Sign <noreply@eonhub.com.br>",
+        from: "eonSign <noreply@eonhub.com.br>",
         to: [email],
         subject: `Documento Assinado - ${documentName}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="padding: 0; text-align: center;">
-              <img src="${BANNER_URL}" alt="Eon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
+              <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
             </div>
             <div style="padding: 30px; background: #f9f9f9;">
               <h2 style="color: #273d60;">Documento Assinado com Sucesso!</h2>
@@ -330,7 +325,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div style="background: #f9f9f9; padding: 20px; text-align: center;">
               <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                © ${new Date().getFullYear()} Eon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+                © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
               </p>
             </div>
           </div>
@@ -339,54 +334,57 @@ const handler = async (req: Request): Promise<Response> => {
           {
             filename: attachmentFilename,
             content: base64Content,
-          }
-        ]
+          },
+        ],
       });
     });
 
     const results = await Promise.allSettled(emailPromises);
-    
+
     // Save to email history
     const historyPromises = recipients.map(async (email, index) => {
       const result = results[index];
-      return supabase.from('email_history').insert({
+      return supabase.from("email_history").insert({
         user_id: document.user_id,
         recipient_email: email,
         subject: `Documento Assinado - ${documentName}`,
-        email_type: 'document_completed',
+        email_type: "document_completed",
         document_id: documentId,
-        status: result.status === 'fulfilled' ? 'sent' : 'failed',
-        error_message: result.status === 'rejected' ? String(result.reason) : null
+        status: result.status === "fulfilled" ? "sent" : "failed",
+        error_message: result.status === "rejected" ? String(result.reason) : null,
       });
     });
 
     await Promise.allSettled(historyPromises);
-    
+
     // Log results
     results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         console.log(`Email sent successfully to ${recipients[index]}`);
       } else {
         console.error(`Error sending email to ${recipients[index]}:`, result.reason);
       }
     });
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      sent: results.filter(r => r.status === 'fulfilled').length,
-      total: results.length,
-      merged: attachmentFilename.includes('_completo'),
-      reportType: isSimpleMode ? 'local' : 'bry'
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        sent: results.filter((r) => r.status === "fulfilled").length,
+        total: results.length,
+        merged: attachmentFilename.includes("_completo"),
+        reportType: isSimpleMode ? "local" : "bry",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
   } catch (error: any) {
     console.error("Error sending document completed email:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 

@@ -2,14 +2,14 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 // Função para converter ArrayBuffer para base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  let binary = '';
+  let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
@@ -30,59 +30,59 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 async function stampPdf(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer | null> {
   try {
     const base64Pdf = arrayBufferToBase64(pdfBuffer);
-    console.log('Calling stamp API...');
-    
-    const response = await fetch('https://example.com/fw/v1/pdf/carimbar', {
-      method: 'POST',
+    console.log("Calling stamp API...");
+
+    const response = await fetch("https://example.com/fw/v1/pdf/carimbar", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ pdf: base64Pdf }),
     });
 
     if (!response.ok) {
-      console.error('Stamp API failed:', response.status);
+      console.error("Stamp API failed:", response.status);
       return null;
     }
 
     const result = await response.json();
-    
+
     if (result.pdf) {
-      console.log('PDF stamped successfully');
+      console.log("PDF stamped successfully");
       return base64ToArrayBuffer(result.pdf);
     }
-    
-    console.error('Stamp API response missing pdf field');
+
+    console.error("Stamp API response missing pdf field");
     return null;
   } catch (error) {
-    console.error('Error stamping PDF:', error);
+    console.error("Error stamping PDF:", error);
     return null;
   }
 }
 
 async function getToken(): Promise<string> {
-  const clientId = Deno.env.get('BRY_CLIENT_ID');
-  const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
-  const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
+  const clientId = Deno.env.get("BRY_CLIENT_ID");
+  const clientSecret = Deno.env.get("BRY_CLIENT_SECRET");
+  const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
 
   if (!clientId || !clientSecret) {
-    throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
+    throw new Error("BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)");
   }
 
-  const authUrl = 'https://cloud.bry.com.br/token-service/jwt';
+  const authUrl = "https://cloud.bry.com.br/token-service/jwt";
 
-  console.log('[BRy Auth] Environment:', environment);
-  console.log('[BRy Auth] Requesting token from:', authUrl);
+  console.log("[BRy Auth] Environment:", environment);
+  console.log("[BRy Auth] Requesting token from:", authUrl);
 
   const basicAuth = btoa(`${clientId}:${clientSecret}`);
 
   const tokenResponse = await fetch(authUrl, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${basicAuth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
     },
-    body: 'grant_type=client_credentials',
+    body: "grant_type=client_credentials",
   });
 
   if (!tokenResponse.ok) {
@@ -94,31 +94,33 @@ async function getToken(): Promise<string> {
   return tokenData.access_token;
 }
 
-async function downloadSignedDocument(envelopeUuid: string, documentUuid: string, accessToken: string): Promise<ArrayBuffer | null> {
+async function downloadSignedDocument(
+  envelopeUuid: string,
+  documentUuid: string,
+  accessToken: string,
+): Promise<ArrayBuffer | null> {
   try {
-    const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
-    const apiBaseUrl = environment === 'production'
-      ? 'https://easysign.bry.com.br'
-      : 'https://easysign.hom.bry.com.br';
+    const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
+    const apiBaseUrl = environment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
     const downloadUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${envelopeUuid}/documents/${documentUuid}/signed`;
-    console.log('Downloading signed document from:', downloadUrl);
+    console.log("Downloading signed document from:", downloadUrl);
 
     const downloadResponse = await fetch(downloadUrl, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
     if (!downloadResponse.ok) {
-      console.error('Failed to download signed document:', downloadResponse.status);
+      console.error("Failed to download signed document:", downloadResponse.status);
       return null;
     }
 
     return await downloadResponse.arrayBuffer();
   } catch (error) {
-    console.error('Error downloading signed document:', error);
+    console.error("Error downloading signed document:", error);
     return null;
   }
 }
@@ -133,64 +135,58 @@ interface SyncResult {
   error?: string;
 }
 
-async function syncSingleDocument(
-  supabase: any,
-  documentId: string,
-  accessToken: string
-): Promise<SyncResult> {
+async function syncSingleDocument(supabase: any, documentId: string, accessToken: string): Promise<SyncResult> {
   try {
     // Buscar documento
     const { data: document, error: docError } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('id', documentId)
+      .from("documents")
+      .select("*")
+      .eq("id", documentId)
       .single();
 
     if (docError || !document) {
-      return { documentId, success: false, changed: false, error: 'Document not found' };
+      return { documentId, success: false, changed: false, error: "Document not found" };
     }
 
     if (!document.bry_envelope_uuid) {
-      return { documentId, success: false, changed: false, error: 'No BRy envelope' };
+      return { documentId, success: false, changed: false, error: "No BRy envelope" };
     }
 
-    const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
-    const apiBaseUrl = environment === 'production'
-      ? 'https://easysign.bry.com.br'
-      : 'https://easysign.hom.bry.com.br';
+    const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
+    const apiBaseUrl = environment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
     // Tentar endpoint completo do envelope primeiro (retorna signers e documents)
     const envelopeUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}`;
     console.log(`Fetching BRy envelope from: ${envelopeUrl}`);
-    
+
     const envelopeResponse = await fetch(envelopeUrl, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
-    
+
     let statusData: any = {};
-    
+
     if (envelopeResponse.ok) {
       statusData = await envelopeResponse.json();
       console.log(`BRy envelope data for ${documentId}:`, JSON.stringify(statusData));
     } else {
       // Fallback para endpoint de status
-      console.log('Envelope endpoint failed, trying status endpoint...');
+      console.log("Envelope endpoint failed, trying status endpoint...");
       const statusUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}/status`;
-      
+
       const statusResponse = await fetch(statusUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
       if (!statusResponse.ok) {
         const errorText = await statusResponse.text();
         console.error(`Failed to get BRy status for ${documentId}:`, statusResponse.status, errorText);
-        return { documentId, success: false, changed: false, error: 'Failed to get BRy status' };
+        return { documentId, success: false, changed: false, error: "Failed to get BRy status" };
       }
 
       statusData = await statusResponse.json();
@@ -201,44 +197,41 @@ async function syncSingleDocument(
     let signedCount = 0;
     let hasChanges = false;
     const previousSignedBy = document.signed_by || 0;
-    
+
     // BRy pode retornar signers no nivel raiz ou dentro de documents
     const signersList = statusData.signers || statusData.subscribers || [];
     const documentsList = statusData.documents || [];
-    
+
     // Log detalhado para debug
     console.log(`BRy signers count: ${signersList.length}, documents count: ${documentsList.length}`);
-    
+
     // Extrair documentUuid se não temos
     if (!document.bry_document_uuid && documentsList.length > 0) {
       const docUuid = documentsList[0].documentUuid || documentsList[0].uuid;
       if (docUuid) {
-        await supabase
-          .from('documents')
-          .update({ bry_document_uuid: docUuid })
-          .eq('id', documentId);
+        await supabase.from("documents").update({ bry_document_uuid: docUuid }).eq("id", documentId);
         console.log(`Updated bry_document_uuid: ${docUuid}`);
       }
     }
 
     if (signersList.length > 0) {
       for (const brySigner of signersList) {
-        const isCompleted = brySigner.status === 'COMPLETED' || brySigner.status === 'SIGNED';
+        const isCompleted = brySigner.status === "COMPLETED" || brySigner.status === "SIGNED";
         console.log(`BRy signer ${brySigner.email}: status=${brySigner.status}, isCompleted=${isCompleted}`);
-        
+
         if (isCompleted) {
           signedCount++;
 
           // Atualizar signatário no banco
           const { data: updated } = await supabase
-            .from('document_signers')
+            .from("document_signers")
             .update({
-              status: 'signed',
+              status: "signed",
               signed_at: brySigner.signedAt || brySigner.completedAt || new Date().toISOString(),
             })
-            .eq('document_id', documentId)
-            .eq('email', brySigner.email)
-            .eq('status', 'pending')
+            .eq("document_id", documentId)
+            .eq("email", brySigner.email)
+            .eq("status", "pending")
             .select();
 
           if (updated && updated.length > 0) {
@@ -250,12 +243,12 @@ async function syncSingleDocument(
     } else {
       // Se não há signers na resposta, buscar do banco para contar
       const { data: dbSigners } = await supabase
-        .from('document_signers')
-        .select('status')
-        .eq('document_id', documentId);
-      
+        .from("document_signers")
+        .select("status")
+        .eq("document_id", documentId);
+
       if (dbSigners) {
-        signedCount = dbSigners.filter((s: { status: string }) => s.status === 'signed').length;
+        signedCount = dbSigners.filter((s: { status: string }) => s.status === "signed").length;
       }
     }
 
@@ -265,10 +258,11 @@ async function syncSingleDocument(
     }
 
     // Verificar se todos assinaram (BRy usa FINISHED, COMPLETED ou SIGNED)
-    const envelopeCompleted = statusData.status === 'COMPLETED' || statusData.status === 'SIGNED' || statusData.status === 'FINISHED';
+    const envelopeCompleted =
+      statusData.status === "COMPLETED" || statusData.status === "SIGNED" || statusData.status === "FINISHED";
     const totalSigners = signersList.length || document.signers || 0;
-    
-    if (envelopeCompleted && document.status !== 'signed') {
+
+    if (envelopeCompleted && document.status !== "signed") {
       console.log(`All signatures completed for ${documentId}, downloading signed document`);
       hasChanges = true;
 
@@ -280,84 +274,78 @@ async function syncSingleDocument(
 
       if (docUuid) {
         // Baixar documento assinado
-        let signedPdf = await downloadSignedDocument(
-          document.bry_envelope_uuid,
-          docUuid,
-          accessToken
-        );
+        let signedPdf = await downloadSignedDocument(document.bry_envelope_uuid, docUuid, accessToken);
 
         if (signedPdf) {
           // Carimbar o PDF antes de fazer upload
-          console.log('Stamping signed PDF...');
+          console.log("Stamping signed PDF...");
           const stampedPdf = await stampPdf(signedPdf);
-          
+
           // Usar PDF carimbado se disponível, senão usar original
           const finalPdf = stampedPdf || signedPdf;
           if (stampedPdf) {
-            console.log('Using stamped PDF');
+            console.log("Using stamped PDF");
           } else {
-            console.log('Stamp failed, using original signed PDF');
+            console.log("Stamp failed, using original signed PDF");
           }
 
           const fileName = `${document.user_id}/${document.id}_signed.pdf`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('documents')
-            .upload(fileName, finalPdf, {
-              contentType: 'application/pdf',
-              upsert: true,
-            });
+
+          const { error: uploadError } = await supabase.storage.from("documents").upload(fileName, finalPdf, {
+            contentType: "application/pdf",
+            upsert: true,
+          });
 
           if (uploadError) {
-            console.error('Error uploading signed document:', uploadError);
+            console.error("Error uploading signed document:", uploadError);
           } else {
-            console.log('Signed document uploaded:', fileName);
+            console.log("Signed document uploaded:", fileName);
 
             // Atualizar documento
             await supabase
-              .from('documents')
+              .from("documents")
               .update({
-                status: 'signed',
+                status: "signed",
                 bry_signed_file_url: fileName,
                 bry_document_uuid: docUuid,
                 signed_by: signedCount,
               })
-              .eq('id', documentId);
+              .eq("id", documentId);
 
-            console.log('Document status updated to signed');
+            console.log("Document status updated to signed");
 
             // Enviar email e WhatsApp de conclusão
             try {
               const { data: signers } = await supabase
-                .from('document_signers')
-                .select('email, name, phone')
-                .eq('document_id', documentId);
+                .from("document_signers")
+                .select("email, name, phone")
+                .eq("document_id", documentId);
 
               if (signers && signers.length > 0) {
                 const signerEmails = signers.map((s: { email: string }) => s.email);
-                
+
                 // Enviar email de conclusão
-                await supabase.functions.invoke('send-document-completed-email', {
+                await supabase.functions.invoke("send-document-completed-email", {
                   body: {
                     documentId: document.id,
                     documentName: document.name,
                     signerEmails,
-                    senderName: 'Eon Sign',
+                    senderName: "eonSign",
                   },
                 });
-                console.log('Document completed email sent');
+                console.log("Document completed email sent");
 
                 // Enviar WhatsApp de conclusão para cada signatário com telefone
                 for (const signer of signers) {
                   if (signer.phone) {
                     try {
-                      await supabase.functions.invoke('send-whatsapp-message', {
+                      await supabase.functions.invoke("send-whatsapp-message", {
                         body: {
                           signerName: signer.name,
                           signerPhone: signer.phone,
                           documentName: document.name,
                           documentId: document.id,
-                          messageType: 'completed',
+                          messageType: "completed",
                         },
                       });
                       console.log(`Document completed WhatsApp sent to ${signer.phone}`);
@@ -368,12 +356,12 @@ async function syncSingleDocument(
                 }
               }
             } catch (emailError) {
-              console.error('Error sending completed notifications:', emailError);
+              console.error("Error sending completed notifications:", emailError);
             }
           }
         }
       } else {
-        console.error('No document UUID available to download signed PDF');
+        console.error("No document UUID available to download signed PDF");
       }
 
       return {
@@ -386,10 +374,7 @@ async function syncSingleDocument(
       };
     } else if (hasChanges) {
       // Atualizar apenas contagem de assinaturas
-      await supabase
-        .from('documents')
-        .update({ signed_by: signedCount })
-        .eq('id', documentId);
+      await supabase.from("documents").update({ signed_by: signedCount }).eq("id", documentId);
     }
 
     return {
@@ -400,7 +385,6 @@ async function syncSingleDocument(
       totalSigners,
       completed: envelopeCompleted,
     };
-
   } catch (error: any) {
     console.error(`Error syncing document ${documentId}:`, error);
     return { documentId, success: false, changed: false, error: error.message };
@@ -408,24 +392,24 @@ async function syncSingleDocument(
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
     const body = await req.json();
-    
+
     // Support both single documentId and array of documentIds
     const documentIds: string[] = body.documentIds || (body.documentId ? [body.documentId] : []);
 
     if (documentIds.length === 0) {
-      return new Response(JSON.stringify({ error: 'documentId or documentIds is required' }), {
+      return new Response(JSON.stringify({ error: "documentId or documentIds is required" }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -433,41 +417,46 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get BRy token once for all documents
     const accessToken = await getToken();
-    console.log('BRy token obtained');
+    console.log("BRy token obtained");
 
     // Process all documents
     const results: SyncResult[] = await Promise.all(
-      documentIds.map((id) => syncSingleDocument(supabase, id, accessToken))
+      documentIds.map((id) => syncSingleDocument(supabase, id, accessToken)),
     );
 
     // For single document requests, return backward-compatible response
     if (body.documentId && !body.documentIds) {
       const result = results[0];
-      return new Response(JSON.stringify({
-        success: result.success,
-        signedCount: result.signedCount,
-        totalSigners: result.totalSigners,
-        completed: result.completed,
-        changed: result.changed,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          success: result.success,
+          signedCount: result.signedCount,
+          totalSigners: result.totalSigners,
+          completed: result.completed,
+          changed: result.changed,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // For multiple documents, return array of results
-    return new Response(JSON.stringify({
-      success: true,
-      results,
-      totalChanged: results.filter((r) => r.changed).length,
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        results,
+        totalChanged: results.filter((r) => r.changed).length,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error: any) {
-    console.error('Error in bry-sync-status:', error);
+    console.error("Error in bry-sync-status:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 };

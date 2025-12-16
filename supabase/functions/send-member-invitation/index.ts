@@ -21,20 +21,20 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("[MEMBER-INVITATION] Function started");
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    const supabaseClient = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
     // Get authenticated user
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseClient.auth.getUser(token);
 
     if (authError || !user) {
       console.error("[MEMBER-INVITATION] Auth error:", authError);
@@ -84,14 +84,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Create member record
-    const { error: insertError } = await supabaseAdmin
-      .from("organization_members")
-      .insert({
-        organization_id: organizationId,
-        member_email: memberEmail.toLowerCase(),
-        role: "member",
-        status: "pending"
-      });
+    const { error: insertError } = await supabaseAdmin.from("organization_members").insert({
+      organization_id: organizationId,
+      member_email: memberEmail.toLowerCase(),
+      role: "member",
+      status: "pending",
+    });
 
     if (insertError) {
       console.error("[MEMBER-INVITATION] Insert error:", insertError);
@@ -119,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #273d60 0%, #001f3f 100%); padding: 30px; text-align: center;">
-                    <img src="https://lbyoniuealghclfuahko.supabase.co/storage/v1/object/public/email-assets/header-banner.png" alt="Eon Sign" style="max-width: 200px; height: auto; margin: 0 auto;">
+                    <img src="https://lbyoniuealghclfuahko.supabase.co/storage/v1/object/public/email-assets/header-banner.png" alt="eonSign" style="max-width: 200px; height: auto; margin: 0 auto;">
                   </td>
                 </tr>
                 
@@ -158,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="background-color: #f7fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
                     <p style="margin: 0; color: #718096; font-size: 12px;">
-                      © ${new Date().getFullYear()} Eon Sign. Todos os direitos reservados.
+                      © ${new Date().getFullYear()} eonSign. Todos os direitos reservados.
                     </p>
                   </td>
                 </tr>
@@ -171,7 +169,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "Eon Sign <noreply@eonhub.com.br>",
+      from: "eonSign <noreply@eonhub.com.br>",
       to: [memberEmail],
       subject: `${adminName} convidou você para ${organizationName}`,
       html: emailHtml,
@@ -179,22 +177,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("[MEMBER-INVITATION] Email sent:", emailResponse);
 
-    return new Response(
-      JSON.stringify({ success: true, message: "Convite enviado com sucesso" }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ success: true, message: "Convite enviado com sucesso" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("[MEMBER-INVITATION] Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 };
 

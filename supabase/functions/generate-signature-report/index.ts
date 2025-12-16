@@ -87,7 +87,9 @@ const handler = async (req: Request): Promise<Response> => {
     // Fetch signers with all details
     const { data: signers, error: signersError } = await supabase
       .from("document_signers")
-      .select("name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id")
+      .select(
+        "name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id",
+      )
       .eq("document_id", documentId);
 
     if (signersError) {
@@ -125,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
       color: headerBg,
     });
 
-    // Draw "EON SIGN" text as logo
+    // Draw "eonSign" text as logo
     page.drawText("EON SIGN", {
       x: margin,
       y: pageHeight - 45,
@@ -220,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (yPos - cardHeight < 100) {
         page = pdfDoc.addPage([pageWidth, pageHeight]);
         yPos = pageHeight - 40;
-        
+
         page.drawText("SIGNATÁRIOS (continuação)", {
           x: margin,
           y: yPos,
@@ -228,7 +230,7 @@ const handler = async (req: Request): Promise<Response> => {
           font: helveticaBold,
           color: gray600,
         });
-        
+
         yPos -= 25;
       }
 
@@ -348,7 +350,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
       // Truncate and normalize location
       const displayLocation = truncateText(locationStr, 30);
-      
+
       page.drawText(`Local: ${displayLocation}`, {
         x: rightX,
         y: rightY,
@@ -390,11 +392,11 @@ const handler = async (req: Request): Promise<Response> => {
       if (qrResponse.ok) {
         const qrBytes = await qrResponse.arrayBuffer();
         const qrImage = await pdfDoc.embedPng(new Uint8Array(qrBytes));
-        
+
         const qrSize = 56;
         const qrX = pageWidth - margin - qrSize;
         const qrY = 55;
-        
+
         lastPage.drawImage(qrImage, {
           x: qrX,
           y: qrY,
@@ -425,7 +427,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Footer
     const footerY = 45;
-    
+
     lastPage.drawLine({
       start: { x: margin, y: footerY + 15 },
       end: { x: pageWidth - margin - 80, y: footerY + 15 },
@@ -484,20 +486,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Generated signature report PDF, size: ${pdfBytes.length} bytes`);
 
-    return new Response(JSON.stringify({
-      success: true,
-      pdfBase64: base64Content,
-      pdfBytes: Array.from(pdfBytes),
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        pdfBase64: base64Content,
+        pdfBytes: Array.from(pdfBytes),
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
   } catch (error: any) {
     console.error("Error generating signature report:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 

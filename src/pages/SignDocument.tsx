@@ -11,13 +11,15 @@ import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign-white.png";
 
-const emailSchema = z.string()
+const emailSchema = z
+  .string()
   .trim()
   .min(1, "E-mail é obrigatório")
   .email("Formato de e-mail inválido")
   .max(255, "E-mail deve ter no máximo 255 caracteres");
 
-const birthDateSchema = z.string()
+const birthDateSchema = z
+  .string()
   .min(1, "Data de nascimento é obrigatória")
   .refine((date) => {
     if (!date) return false;
@@ -54,7 +56,7 @@ const SignDocument = () => {
   const { documentId } = useParams();
   const navigate = useNavigate();
   const pdfContainerRef = useRef<HTMLDivElement>(null);
-  
+
   const [document, setDocument] = useState<Document | null>(null);
   const [signers, setSigners] = useState<Signer[]>([]);
   const [currentSigner, setCurrentSigner] = useState<Signer | null>(null);
@@ -73,10 +75,9 @@ const SignDocument = () => {
   const [locationError, setLocationError] = useState(false);
   const [linkExpired, setLinkExpired] = useState(false);
   const [autoIdentifyChecked, setAutoIdentifyChecked] = useState(false);
-  
+
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
-  
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
 
@@ -84,26 +85,28 @@ const SignDocument = () => {
   useEffect(() => {
     const autoIdentifyLoggedUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           // Fetch admin_email, admin_cpf and admin_birth_date from company_settings
           const { data: companyData } = await supabase
-            .from('company_settings')
-            .select('admin_email, admin_cpf, admin_birth_date')
-            .eq('user_id', user.id)
+            .from("company_settings")
+            .select("admin_email, admin_cpf, admin_birth_date")
+            .eq("user_id", user.id)
             .maybeSingle();
-          
+
           if (companyData?.admin_email) {
             setEmail(companyData.admin_email);
           }
-          
+
           // Pre-fill CPF if available
           if (companyData?.admin_cpf) {
             const formattedCpf = formatCpfCnpj(companyData.admin_cpf);
             setCpf(formattedCpf);
             setCpfValid(validateCpfCnpj(formattedCpf));
           }
-          
+
           // Pre-fill birth date if available
           if ((companyData as any)?.admin_birth_date) {
             setBirthDate((companyData as any).admin_birth_date);
@@ -115,7 +118,7 @@ const SignDocument = () => {
         setAutoIdentifyChecked(true);
       }
     };
-    
+
     autoIdentifyLoggedUser();
   }, []);
 
@@ -141,7 +144,7 @@ const SignDocument = () => {
             console.warn("Erro ao obter localização:", error);
             setLocationError(true);
             toast.info("Permissão de localização negada. A assinatura ainda é válida.");
-          }
+          },
         );
       } else {
         setLocationError(true);
@@ -175,7 +178,7 @@ const SignDocument = () => {
 
       setDocument(data.document);
       setSigners(data.signers || []);
-      
+
       if (data.currentSigner) {
         setCurrentSigner(data.currentSigner);
         setIsIdentified(true);
@@ -242,7 +245,7 @@ const SignDocument = () => {
 
   const formatCpfCnpj = (value: string) => {
     const numbers = value.replace(/\D/g, "");
-    
+
     if (numbers.length <= 11) {
       return numbers
         .replace(/(\d{3})(\d)/, "$1.$2")
@@ -261,7 +264,7 @@ const SignDocument = () => {
     const cleanCpf = cpf.replace(/\D/g, "");
     if (cleanCpf.length !== 11) return false;
     if (/^(\d)\1+$/.test(cleanCpf)) return false;
-    
+
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       sum += parseInt(cleanCpf.charAt(i)) * (10 - i);
@@ -269,7 +272,7 @@ const SignDocument = () => {
     let remainder = (sum * 10) % 11;
     if (remainder === 10 || remainder === 11) remainder = 0;
     if (remainder !== parseInt(cleanCpf.charAt(9))) return false;
-    
+
     sum = 0;
     for (let i = 0; i < 10; i++) {
       sum += parseInt(cleanCpf.charAt(i)) * (11 - i);
@@ -277,7 +280,7 @@ const SignDocument = () => {
     remainder = (sum * 10) % 11;
     if (remainder === 10 || remainder === 11) remainder = 0;
     if (remainder !== parseInt(cleanCpf.charAt(10))) return false;
-    
+
     return true;
   };
 
@@ -285,34 +288,34 @@ const SignDocument = () => {
     const cleanCnpj = cnpj.replace(/\D/g, "");
     if (cleanCnpj.length !== 14) return false;
     if (/^(\d)\1+$/.test(cleanCnpj)) return false;
-    
+
     let size = cleanCnpj.length - 2;
     let numbers = cleanCnpj.substring(0, size);
     const digits = cleanCnpj.substring(size);
     let sum = 0;
     let pos = size - 7;
-    
+
     for (let i = size; i >= 1; i--) {
       sum += parseInt(numbers.charAt(size - i)) * pos--;
       if (pos < 2) pos = 9;
     }
-    
+
     let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
     if (result !== parseInt(digits.charAt(0))) return false;
-    
+
     size = size + 1;
     numbers = cleanCnpj.substring(0, size);
     sum = 0;
     pos = size - 7;
-    
+
     for (let i = size; i >= 1; i--) {
       sum += parseInt(numbers.charAt(size - i)) * pos--;
       if (pos < 2) pos = 9;
     }
-    
+
     result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
     if (result !== parseInt(digits.charAt(1))) return false;
-    
+
     return true;
   };
 
@@ -329,7 +332,7 @@ const SignDocument = () => {
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCpfCnpj(e.target.value);
     setCpf(formatted);
-    
+
     const clean = formatted.replace(/\D/g, "");
     if (clean.length === 11 || clean.length === 14) {
       setCpfValid(validateCpfCnpj(formatted));
@@ -360,7 +363,7 @@ const SignDocument = () => {
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--;
     }
@@ -419,16 +422,16 @@ const SignDocument = () => {
   };
 
   const handleZoomIn = () => {
-    setPdfScale(prev => Math.min(prev + 0.25, 2.5));
+    setPdfScale((prev) => Math.min(prev + 0.25, 2.5));
   };
 
   const handleZoomOut = () => {
-    setPdfScale(prev => Math.max(prev - 0.25, 0.5));
+    setPdfScale((prev) => Math.max(prev - 0.25, 0.5));
   };
 
   const handleDownload = async () => {
     if (!document?.file_url) return;
-    
+
     try {
       const response = await fetch(document.file_url);
       const blob = await response.blob();
@@ -473,8 +476,8 @@ const SignDocument = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground mb-2">Link Expirado</h2>
           <p className="text-muted-foreground">
-            Este documento não está mais disponível para assinatura. 
-            O link pode ter expirado ou o documento foi removido pelo remetente.
+            Este documento não está mais disponível para assinatura. O link pode ter expirado ou o documento foi
+            removido pelo remetente.
           </p>
         </Card>
       </div>
@@ -486,9 +489,9 @@ const SignDocument = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
         <div className="max-w-2xl mx-auto pt-8">
           <div className="text-center mb-8">
-            <img src={logo} alt="Eon Sign" className="h-16 mx-auto mb-4" />
+            <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
           </div>
-          
+
           <Card className="p-8 text-center">
             <CheckCircle className="h-16 w-16 text-green-700 mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-4">Assinatura Concluída!</h1>
@@ -496,13 +499,13 @@ const SignDocument = () => {
               Sua assinatura foi registrada com sucesso no documento "{document.name}".
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              {document.signed_by === document.signers 
+              {document.signed_by === document.signers
                 ? "Todas as assinaturas foram coletadas. O documento está finalizado."
                 : "Aguardando assinatura dos demais signatários."}
             </p>
-            
+
             {currentSigner?.is_company_signer && (
-              <Button 
+              <Button
                 onClick={() => navigate("/dashboard")}
                 className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
               >
@@ -520,7 +523,7 @@ const SignDocument = () => {
       <div className="max-w-4xl mx-auto pt-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <img src={logo} alt="Eon Sign" className="h-16 mx-auto mb-4" />
+          <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Assinatura de Documento</h1>
         </div>
 
@@ -528,9 +531,7 @@ const SignDocument = () => {
         {!isIdentified && (
           <Card className="p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">Identificação</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Por favor, informe seu e-mail para acessar o documento
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Por favor, informe seu e-mail para acessar o documento</p>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email">E-mail</Label>
@@ -543,12 +544,10 @@ const SignDocument = () => {
                   maxLength={255}
                   className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
-                {emailError && (
-                  <p className="text-xs text-red-500 mt-1">{emailError}</p>
-                )}
+                {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
               </div>
-              <Button 
-                onClick={handleIdentify} 
+              <Button
+                onClick={handleIdentify}
                 disabled={isLoading || !email || !!emailError}
                 className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
               >
@@ -573,25 +572,13 @@ const SignDocument = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Visualizar Documento</h3>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleZoomOut}
-                    className="h-8 w-8"
-                    title="Diminuir zoom"
-                  >
+                  <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8" title="Diminuir zoom">
                     <Minus className="h-4 w-4" />
                   </Button>
                   <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
                     {Math.round(pdfScale * 100)}%
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleZoomIn}
-                    className="h-8 w-8"
-                    title="Aumentar zoom"
-                  >
+                  <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8" title="Aumentar zoom">
                     <Plus className="h-4 w-4" />
                   </Button>
                   <Button
@@ -606,10 +593,10 @@ const SignDocument = () => {
                 </div>
               </div>
               {document.file_url ? (
-                <div 
+                <div
                   ref={pdfContainerRef}
                   className="relative overflow-auto border rounded-md bg-gray-100"
-                  style={{ height: 'calc(100vh - 380px)', minHeight: '400px' }}
+                  style={{ height: "calc(100vh - 380px)", minHeight: "400px" }}
                 >
                   <iframe
                     src={`${document.file_url}#view=Fit&zoom=page-fit`}
@@ -630,7 +617,9 @@ const SignDocument = () => {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>Status: {getStatusBadge(document.status)}</span>
                     <span>•</span>
-                    <span>Assinaturas: {document.signed_by}/{document.signers}</span>
+                    <span>
+                      Assinaturas: {document.signed_by}/{document.signers}
+                    </span>
                     {isSimpleSignature && (
                       <>
                         <span>•</span>
@@ -676,8 +665,8 @@ const SignDocument = () => {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium text-blue-900 mb-1">
-                            {document.signature_mode === "QUALIFIED" 
-                              ? "Assinatura Qualificada (ICP-Brasil)" 
+                            {document.signature_mode === "QUALIFIED"
+                              ? "Assinatura Qualificada (ICP-Brasil)"
                               : "Assinatura Avançada"}
                           </h4>
                           <p className="text-sm text-blue-700 mb-3">
@@ -690,7 +679,7 @@ const SignDocument = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')}
+                              onClick={() => window.open("https://certifica.eonhub.com.br", "_blank")}
                               className="border-blue-300 text-blue-700 hover:bg-blue-100"
                             >
                               <Award className="h-4 w-4 mr-2" />
@@ -729,23 +718,15 @@ const SignDocument = () => {
                         placeholder="000.000.000-00"
                         maxLength={18}
                         className={
-                          cpfValid === false 
-                            ? "border-red-500 focus-visible:ring-red-500" 
-                            : cpfValid === true 
-                            ? "border-green-500 focus-visible:ring-green-500" 
-                            : ""
+                          cpfValid === false
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : cpfValid === true
+                              ? "border-green-500 focus-visible:ring-green-500"
+                              : ""
                         }
                       />
-                      {cpfValid === false && (
-                        <p className="text-xs text-red-500 mt-1">
-                          CPF/CNPJ inválido
-                        </p>
-                      )}
-                      {cpfValid === true && (
-                        <p className="text-xs text-green-600 mt-1">
-                          ✓ CPF/CNPJ válido
-                        </p>
-                      )}
+                      {cpfValid === false && <p className="text-xs text-red-500 mt-1">CPF/CNPJ inválido</p>}
+                      {cpfValid === true && <p className="text-xs text-green-600 mt-1">✓ CPF/CNPJ válido</p>}
                     </div>
                   </div>
                   <div>
@@ -773,21 +754,26 @@ const SignDocument = () => {
                       max={(() => {
                         const today = new Date();
                         today.setFullYear(today.getFullYear() - 18);
-                        return today.toISOString().split('T')[0];
+                        return today.toISOString().split("T")[0];
                       })()}
                       className={birthDateError ? "border-red-500 focus-visible:ring-red-500" : ""}
                     />
                     {birthDateError ? (
                       <p className="text-xs text-red-500 mt-1">{birthDateError}</p>
                     ) : (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Você deve ter pelo menos 18 anos
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Você deve ter pelo menos 18 anos</p>
                     )}
                   </div>
                   <Button
                     onClick={handleSign}
-                    disabled={isSigning || !cpf || !birthDate || cpfValid === false || !!birthDateError || (isSimpleSignature && !typedSignature.trim())}
+                    disabled={
+                      isSigning ||
+                      !cpf ||
+                      !birthDate ||
+                      cpfValid === false ||
+                      !!birthDateError ||
+                      (isSimpleSignature && !typedSignature.trim())
+                    }
                     className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
                   >
                     {isSigning ? (
@@ -802,7 +788,6 @@ const SignDocument = () => {
                 </div>
               </Card>
             )}
-
 
             {currentSigner && currentSigner.status === "signed" && (
               <Card className="p-6 text-center">

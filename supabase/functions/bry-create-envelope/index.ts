@@ -2,8 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface Signer {
@@ -19,9 +19,9 @@ interface DocumentInfo {
 }
 
 // Available authentication options for BRy
-type AuthenticationOption = 'IP' | 'GEOLOCATION' | 'OTP_EMAIL' | 'OTP_PHONE' | 'OTP_WHATSAPP' | 'SELFIE';
+type AuthenticationOption = "IP" | "GEOLOCATION" | "OTP_EMAIL" | "OTP_PHONE" | "OTP_WHATSAPP" | "SELFIE";
 
-type SignatureMode = 'SIMPLE' | 'ADVANCED' | 'QUALIFIED';
+type SignatureMode = "SIMPLE" | "ADVANCED" | "QUALIFIED";
 
 interface CreateEnvelopeRequest {
   // Novo formato: múltiplos documentos
@@ -39,70 +39,72 @@ interface CreateEnvelopeRequest {
 // Função para sanitizar nome do envelope para a API BRy
 // Remove acentos, caracteres especiais e espaços extras
 function sanitizeEnvelopeName(name: string): string {
-  return name
-    // Remove acentos
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    // Remove caracteres especiais (mantém apenas letras, números, espaços e hífen)
-    .replace(/[^a-zA-Z0-9\s\-]/g, '')
-    // Remove espaços múltiplos
-    .replace(/\s+/g, ' ')
-    // Trim
-    .trim();
+  return (
+    name
+      // Remove acentos
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      // Remove caracteres especiais (mantém apenas letras, números, espaços e hífen)
+      .replace(/[^a-zA-Z0-9\s\-]/g, "")
+      // Remove espaços múltiplos
+      .replace(/\s+/g, " ")
+      // Trim
+      .trim()
+  );
 }
 
 async function getToken(): Promise<string> {
-  const clientId = Deno.env.get('BRY_CLIENT_ID');
-  const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
-  const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
+  const clientId = Deno.env.get("BRY_CLIENT_ID");
+  const clientSecret = Deno.env.get("BRY_CLIENT_SECRET");
+  const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
 
   if (!clientId || !clientSecret) {
-    console.error('[BRy Auth] CRITICAL: Credentials not configured');
-    throw new Error('BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)');
+    console.error("[BRy Auth] CRITICAL: Credentials not configured");
+    throw new Error("BRy credentials not configured (BRY_CLIENT_ID / BRY_CLIENT_SECRET)");
   }
 
   // BRy Cloud auth endpoint
-  const authUrl = 'https://cloud.bry.com.br/token-service/jwt';
+  const authUrl = "https://cloud.bry.com.br/token-service/jwt";
 
-  console.log('[BRy Auth] ========================================');
-  console.log('[BRy Auth] Environment:', environment);
-  console.log('[BRy Auth] Client ID (first 8 chars):', clientId.substring(0, 8) + '...');
-  console.log('[BRy Auth] Requesting token from:', authUrl);
+  console.log("[BRy Auth] ========================================");
+  console.log("[BRy Auth] Environment:", environment);
+  console.log("[BRy Auth] Client ID (first 8 chars):", clientId.substring(0, 8) + "...");
+  console.log("[BRy Auth] Requesting token from:", authUrl);
 
   try {
     const basicAuth = btoa(`${clientId}:${clientSecret}`);
 
     const tokenResponse = await fetch(authUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${basicAuth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${basicAuth}`,
       },
-      body: 'grant_type=client_credentials',
+      body: "grant_type=client_credentials",
     });
 
-    console.log('[BRy Auth] Response status:', tokenResponse.status);
-    console.log('[BRy Auth] Response headers:', JSON.stringify(Object.fromEntries(tokenResponse.headers.entries())));
+    console.log("[BRy Auth] Response status:", tokenResponse.status);
+    console.log("[BRy Auth] Response headers:", JSON.stringify(Object.fromEntries(tokenResponse.headers.entries())));
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
-      console.error('[BRy Auth] FAILED - Status:', tokenResponse.status);
-      console.error('[BRy Auth] FAILED - Error body:', errorText);
+      console.error("[BRy Auth] FAILED - Status:", tokenResponse.status);
+      console.error("[BRy Auth] FAILED - Error body:", errorText);
       throw new Error(`BRy authentication failed: ${tokenResponse.status} - ${errorText}`);
     }
 
     const tokenData = await tokenResponse.json();
-    console.log('[BRy Auth] SUCCESS - Token obtained, expires_in:', tokenData.expires_in);
-    console.log('[BRy Auth] ========================================');
+    console.log("[BRy Auth] SUCCESS - Token obtained, expires_in:", tokenData.expires_in);
+    console.log("[BRy Auth] ========================================");
     return tokenData.access_token;
   } catch (fetchError: any) {
-    console.error('[BRy Auth] FETCH ERROR:', fetchError.message);
+    console.error("[BRy Auth] FETCH ERROR:", fetchError.message);
     throw new Error(`BRy authentication network error: ${fetchError.message}`);
   }
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -112,51 +114,50 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Suportar formato novo (documents array) e legado (documentId + documentBase64)
     let documentsToProcess: DocumentInfo[] = [];
-    
+
     if (requestData.documents && requestData.documents.length > 0) {
       // Novo formato: múltiplos documentos
       documentsToProcess = requestData.documents;
       console.log(`Creating BRy envelope with ${documentsToProcess.length} documents`);
     } else if (requestData.documentId && requestData.documentBase64) {
       // Formato legado: documento único
-      documentsToProcess = [{
-        documentId: requestData.documentId,
-        base64: requestData.documentBase64,
-        fileName: title,
-      }];
-      console.log('Creating BRy envelope with single document (legacy format)');
+      documentsToProcess = [
+        {
+          documentId: requestData.documentId,
+          base64: requestData.documentBase64,
+          fileName: title,
+        },
+      ];
+      console.log("Creating BRy envelope with single document (legacy format)");
     } else {
-      throw new Error('No documents provided');
+      throw new Error("No documents provided");
     }
 
-    console.log('Title:', title);
-    console.log('Number of signers:', signers.length);
-    console.log('Number of documents:', documentsToProcess.length);
-    console.log('Authentication options:', authenticationOptions);
-    console.log('Signature mode:', signatureMode || 'SIMPLE');
+    console.log("Title:", title);
+    console.log("Number of signers:", signers.length);
+    console.log("Number of documents:", documentsToProcess.length);
+    console.log("Authentication options:", authenticationOptions);
+    console.log("Signature mode:", signatureMode || "SIMPLE");
 
     // Obter token da BRy
     const accessToken = await getToken();
-    console.log('BRy token obtained successfully');
+    console.log("BRy token obtained successfully");
 
-    const environment = Deno.env.get('BRY_ENVIRONMENT') || 'homologation';
-    const apiBaseUrl = environment === 'production'
-      ? 'https://easysign.bry.com.br'
-      : 'https://easysign.hom.bry.com.br';
+    const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
+    const apiBaseUrl = environment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
     // Default authentication options if not provided
-    const selectedAuthOptions: AuthenticationOption[] = authenticationOptions && authenticationOptions.length > 0 
-      ? authenticationOptions 
-      : ['IP', 'GEOLOCATION'];
+    const selectedAuthOptions: AuthenticationOption[] =
+      authenticationOptions && authenticationOptions.length > 0 ? authenticationOptions : ["IP", "GEOLOCATION"];
 
     // Configurar signatureConfig baseado no modo selecionado
-    const selectedSignatureMode = signatureMode || 'SIMPLE';
-    
+    const selectedSignatureMode = signatureMode || "SIMPLE";
+
     // Preparar dados dos signatários para a BRy com formato E.164
     // signatureConfig deve estar DENTRO de cada signatário
-    const signersData = signers.map(signer => {
-      let phone = signer.phone ? signer.phone.replace(/\D/g, '') : '';
-      
+    const signersData = signers.map((signer) => {
+      let phone = signer.phone ? signer.phone.replace(/\D/g, "") : "";
+
       // Configurar signatureConfig para este signatário
       const signerSignatureConfig: {
         mode: string;
@@ -164,12 +165,12 @@ const handler = async (req: Request): Promise<Response> => {
       } = {
         mode: selectedSignatureMode,
       };
-      
+
       // Para ADVANCED e QUALIFIED, adicionar perfil com timestamp
-      if (selectedSignatureMode === 'ADVANCED' || selectedSignatureMode === 'QUALIFIED') {
-        signerSignatureConfig.profile = 'TIMESTAMP';
+      if (selectedSignatureMode === "ADVANCED" || selectedSignatureMode === "QUALIFIED") {
+        signerSignatureConfig.profile = "TIMESTAMP";
       }
-      
+
       const signerData: {
         name: string;
         email: string;
@@ -182,63 +183,70 @@ const handler = async (req: Request): Promise<Response> => {
         authenticationOptions: selectedAuthOptions,
         signatureConfig: signerSignatureConfig,
       };
-      
+
       if (phone && phone.length >= 10) {
-        if (!phone.startsWith('55')) {
-          phone = '55' + phone;
+        if (!phone.startsWith("55")) {
+          phone = "55" + phone;
         }
-        signerData.phone = '+' + phone;
-        console.log(`Signer ${signer.name}: phone formatted to ${signerData.phone}, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`);
+        signerData.phone = "+" + phone;
+        console.log(
+          `Signer ${signer.name}: phone formatted to ${signerData.phone}, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`,
+        );
       } else {
-        console.log(`Signer ${signer.name}: no valid phone provided, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`);
+        console.log(
+          `Signer ${signer.name}: no valid phone provided, signatureConfig: ${JSON.stringify(signerSignatureConfig)}`,
+        );
       }
-      
+
       return signerData;
     });
 
     // Criar envelope na BRy com TODOS os documentos
     // Sanitizar o nome para remover acentos e caracteres especiais
     const sanitizedTitle = sanitizeEnvelopeName(title);
-    console.log('Original title:', title, '-> Sanitized:', sanitizedTitle);
-    
+    console.log("Original title:", title, "-> Sanitized:", sanitizedTitle);
+
     const envelopePayload = {
       name: sanitizedTitle,
-      clientName: 'Eon Sign',
+      clientName: "eonSign",
       signersData: signersData,
-      typeMessaging: ['LINK'],
-      documents: documentsToProcess.map(doc => ({
+      typeMessaging: ["LINK"],
+      documents: documentsToProcess.map((doc) => ({
         base64Document: doc.base64,
       })),
     };
 
-    console.log('Sending request to BRy API:', `${apiBaseUrl}/api/service/sign/v1/signatures`);
-    console.log('Envelope payload (without base64):', JSON.stringify({
-      ...envelopePayload,
-      documents: envelopePayload.documents.map(() => ({ base64Document: '[BASE64_CONTENT_HIDDEN]' }))
-    }));
+    console.log("Sending request to BRy API:", `${apiBaseUrl}/api/service/sign/v1/signatures`);
+    console.log(
+      "Envelope payload (without base64):",
+      JSON.stringify({
+        ...envelopePayload,
+        documents: envelopePayload.documents.map(() => ({ base64Document: "[BASE64_CONTENT_HIDDEN]" })),
+      }),
+    );
 
     const envelopeResponse = await fetch(`${apiBaseUrl}/api/service/sign/v1/signatures`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(envelopePayload),
     });
 
     if (!envelopeResponse.ok) {
       const errorText = await envelopeResponse.text();
-      console.error('BRy envelope creation failed:', envelopeResponse.status, errorText);
+      console.error("BRy envelope creation failed:", envelopeResponse.status, errorText);
       throw new Error(`Failed to create BRy envelope: ${envelopeResponse.status} - ${errorText}`);
     }
 
     const envelopeData = await envelopeResponse.json();
-    console.log('BRy envelope created successfully');
-    console.log('BRy response:', JSON.stringify(envelopeData));
+    console.log("BRy envelope created successfully");
+    console.log("BRy response:", JSON.stringify(envelopeData));
 
     // Extrair informações do envelope
     const envelopeUuid = envelopeData.uuid;
-    
+
     // Extrair UUIDs de cada documento
     const documentUuids: { documentId: string; bryDocumentUuid: string }[] = [];
     if (envelopeData.documents && envelopeData.documents.length > 0) {
@@ -246,7 +254,7 @@ const handler = async (req: Request): Promise<Response> => {
         const bryDoc = envelopeData.documents[i];
         const localDoc = documentsToProcess[i];
         const docUuid = bryDoc.documentUuid || bryDoc.uuid;
-        
+
         documentUuids.push({
           documentId: localDoc.documentId,
           bryDocumentUuid: docUuid,
@@ -254,33 +262,33 @@ const handler = async (req: Request): Promise<Response> => {
         console.log(`Document ${localDoc.documentId} -> BRy UUID: ${docUuid}`);
       }
     }
-    
-    console.log('Envelope UUID:', envelopeUuid);
-    console.log('Document UUIDs:', JSON.stringify(documentUuids));
-    
+
+    console.log("Envelope UUID:", envelopeUuid);
+    console.log("Document UUIDs:", JSON.stringify(documentUuids));
+
     // Extrair links de assinatura por signatário
     const signerLinks: { email: string; nonce: string; link: string }[] = [];
-    
+
     if (envelopeData.signers) {
-      console.log('Processing signers from BRy response:', envelopeData.signers.length);
-      
+      console.log("Processing signers from BRy response:", envelopeData.signers.length);
+
       for (const brySign of envelopeData.signers) {
         const signerEmail = brySign.email;
-        const signerLink = brySign.iframe?.href || brySign.link?.href || '';
-        
-        let signerNonce = brySign.nonce || '';
+        const signerLink = brySign.iframe?.href || brySign.link?.href || "";
+
+        let signerNonce = brySign.nonce || "";
         if (!signerNonce && signerLink) {
-          const linkParts = signerLink.split('/');
-          const signIndex = linkParts.indexOf('sign');
+          const linkParts = signerLink.split("/");
+          const signIndex = linkParts.indexOf("sign");
           if (signIndex !== -1 && linkParts[signIndex + 1]) {
             signerNonce = linkParts[signIndex + 1];
           } else {
-            signerNonce = linkParts[linkParts.length - 1] || '';
+            signerNonce = linkParts[linkParts.length - 1] || "";
           }
         }
-        
+
         console.log(`Signer ${signerEmail}: nonce=${signerNonce}, link=${signerLink}`);
-        
+
         signerLinks.push({
           email: signerEmail,
           nonce: signerNonce,
@@ -289,40 +297,42 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log('Signer links extracted:', signerLinks.length);
+    console.log("Signer links extracted:", signerLinks.length);
 
     // Atualizar banco de dados com informações da BRy
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Atualizar TODOS os documentos com o MESMO envelope UUID e modo de assinatura
     for (const docInfo of documentUuids) {
       const { error: docError } = await supabase
-        .from('documents')
+        .from("documents")
         .update({
           bry_envelope_uuid: envelopeUuid,
           bry_document_uuid: docInfo.bryDocumentUuid,
           signature_mode: selectedSignatureMode,
         })
-        .eq('id', docInfo.documentId);
+        .eq("id", docInfo.documentId);
 
       if (docError) {
         console.error(`Error updating document ${docInfo.documentId} with BRy UUIDs:`, docError);
       } else {
-        console.log(`Document ${docInfo.documentId} updated with envelope UUID: ${envelopeUuid}, signature mode: ${selectedSignatureMode}`);
+        console.log(
+          `Document ${docInfo.documentId} updated with envelope UUID: ${envelopeUuid}, signature mode: ${selectedSignatureMode}`,
+        );
       }
 
       // Atualizar signatários de CADA documento com links da BRy
       for (const signerLink of signerLinks) {
         const { error: signerError } = await supabase
-          .from('document_signers')
+          .from("document_signers")
           .update({
             bry_signer_nonce: signerLink.nonce,
             bry_signer_link: signerLink.link,
           })
-          .eq('document_id', docInfo.documentId)
-          .eq('email', signerLink.email);
+          .eq("document_id", docInfo.documentId)
+          .eq("email", signerLink.email);
 
         if (signerError) {
           console.error(`Error updating signer ${signerLink.email} for doc ${docInfo.documentId}:`, signerError);
@@ -330,22 +340,24 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log('Database updated with BRy information for all documents');
+    console.log("Database updated with BRy information for all documents");
 
-    return new Response(JSON.stringify({
-      success: true,
-      envelopeUuid,
-      documentUuids,
-      signerLinks,
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        envelopeUuid,
+        documentUuids,
+        signerLinks,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error: any) {
-    console.error('Error in bry-create-envelope:', error);
+    console.error("Error in bry-create-envelope:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 };

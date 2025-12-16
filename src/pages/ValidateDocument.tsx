@@ -304,7 +304,7 @@ const ValidateDocument = () => {
       yPos,
       { align: "center" },
     );
-    doc.text(`Verificado pelo sistema Eon Sign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, {
+    doc.text(`Verificado pelo sistema eonSign em ${formatDate(new Date().toISOString())}`, pageWidth / 2, yPos + 5, {
       align: "center",
     });
     doc.text(`URL de Validação: ${window.location.href}`, pageWidth / 2, yPos + 10, { align: "center" });
@@ -352,7 +352,7 @@ const ValidateDocument = () => {
       <div className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center">
-            <img src={logoEon} alt="Eon Sign" className="h-12" />
+            <img src={logoEon} alt="eonSign" className="h-12" />
           </div>
         </div>
       </div>
@@ -382,9 +382,7 @@ const ValidateDocument = () => {
                     ? "Este documento foi assinado por todos os signatarios e possui validade juridica"
                     : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`}
                 </p>
-                {isValid && (
-                  <p className="text-[10px] text-green-700">Lei n. 14.063/2020 e MP 2.200-2/2001</p>
-                )}
+                {isValid && <p className="text-[10px] text-green-700">Lei n. 14.063/2020 e MP 2.200-2/2001</p>}
               </div>
             </div>
 
@@ -584,17 +582,13 @@ const ValidateDocument = () => {
 
                           {signer.signature_id && (
                             <div className="text-gray-600">
-                              <span className="text-xs text-gray-400 break-all">
-                                ID: {signer.signature_id}
-                              </span>
+                              <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
                             </div>
                           )}
 
                           {signer.signature_ip && (
                             <div className="text-gray-600">
-                              <span className="text-xs text-gray-400">
-                                IP: {signer.signature_ip}
-                              </span>
+                              <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
                             </div>
                           )}
                         </div>
@@ -611,14 +605,24 @@ const ValidateDocument = () => {
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             Verificado pelo sistema{" "}
-            <a href="https://www.eonhub.com.br/sign" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
+            <a
+              href="https://www.eonhub.com.br/sign"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold hover:underline"
+            >
               eonSign
             </a>{" "}
             em {formatDate(new Date().toISOString())}
           </p>
           <p className="mt-1">
             Powered by{" "}
-            <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
+            <a
+              href="https://www.eonhub.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold hover:underline"
+            >
               eonhub
             </a>
           </p>
