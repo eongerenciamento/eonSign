@@ -10,7 +10,6 @@ import {
   FileText,
   Users,
   Calendar,
-  Building2,
   Download,
   Copy,
   Share2,
@@ -353,41 +352,13 @@ const ValidateDocument = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {organization.logoUrl ? (
-                <img
-                  src={organization.logoUrl}
-                  alt={organization.name}
-                  className="h-12 w-auto object-contain bg-white rounded-lg p-1"
-                />
-              ) : (
-                <div className="h-12 w-12 bg-white/10 rounded-lg flex items-center justify-center">
-                  <Building2 className="w-6 h-6" />
-                </div>
-              )}
-              <div>
-                <p className="text-white/70 text-sm">Emitido por</p>
-                <h2 className="font-semibold">{organization.name}</h2>
-              </div>
-            </div>
-            <img src={logoEon} alt="Eon Sign" className="h-8 opacity-80" />
+          <div className="flex items-center justify-center">
+            <img src={logoEon} alt="Eon Sign" className="h-12" />
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Quick Actions Bar */}
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary/5"
-            onClick={handleDownloadCertificate}
-          >
-            <FileDown className="w-4 h-4 mr-2" />
-            Baixar Certificado PDF
-          </Button>
-        </div>
         {/* Validation Status Card */}
         <Card
           className={`mb-6 border-2 ${isValid ? "border-green-200 bg-green-50/50" : "border-yellow-200 bg-yellow-50/50"}`}
@@ -422,27 +393,27 @@ const ValidateDocument = () => {
             {/* Download and Share Buttons */}
             {isValid && (
               <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
-                {document.downloadUrl && (
+                <div className="flex gap-2">
+                  {document.downloadUrl && (
+                    <Button
+                      onClick={() => window.open(document.downloadUrl!, "_blank")}
+                      className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Baixar Documento
+                    </Button>
+                  )}
                   <Button
-                    onClick={() => window.open(document.downloadUrl!, "_blank")}
-                    className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] hover:opacity-90"
+                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                    onClick={handleDownloadCertificate}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Baixar Documento Assinado
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Baixar Certificado
                   </Button>
-                )}
-                <Button
-                  variant="outline"
-                  className="w-full border-primary text-primary hover:bg-primary/5"
-                  onClick={handleDownloadCertificate}
-                >
-                  <FileDown className="w-4 h-4 mr-2" />
-                  Baixar Certificado de Validação (PDF)
-                </Button>
+                </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    className="flex-1"
+                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none"
                     onClick={() => {
                       navigator.clipboard.writeText(window.location.href);
                       toast.success("Link copiado para a area de transferencia!");
@@ -452,8 +423,7 @@ const ValidateDocument = () => {
                     Copiar Link
                   </Button>
                   <Button
-                    variant="outline"
-                    className="flex-1 text-green-600 border-green-300 hover:bg-green-50"
+                    className="flex-1 bg-white text-green-600 hover:bg-green-50 border-0 shadow-none"
                     onClick={() => {
                       const text = `Verifique o documento "${document.name}" assinado digitalmente: ${window.location.href}`;
                       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -468,14 +438,13 @@ const ValidateDocument = () => {
             )}
             {/* Download certificate button for pending documents */}
             {!isValid && (
-              <div className="mt-4 pt-4 border-t border-yellow-200">
+              <div className="mt-4 pt-4 border-t border-yellow-200 flex gap-2">
                 <Button
-                  variant="outline"
-                  className="w-full border-yellow-500 text-yellow-700 hover:bg-yellow-50"
+                  className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
                   onClick={handleDownloadCertificate}
                 >
                   <FileDown className="w-4 h-4 mr-2" />
-                  Baixar Certificado de Validação (PDF)
+                  Baixar Certificado
                 </Button>
               </div>
             )}
