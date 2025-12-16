@@ -542,13 +542,6 @@ const ValidateDocument = () => {
                 <div key={signer.id}>
                   {index > 0 && <Separator className="my-4" />}
                   <div className="flex items-start gap-4">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                        signer.status === "signed" ? "bg-green-500" : "bg-gray-400"
-                      }`}
-                    >
-                      {signer.name.charAt(0).toUpperCase()}
-                    </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-semibold text-gray-900">{signer.name}</h4>
@@ -590,9 +583,17 @@ const ValidateDocument = () => {
                           )}
 
                           {signer.signature_id && (
-                            <div className="flex items-center gap-2 text-gray-600">
+                            <div className="text-gray-600">
+                              <span className="text-xs text-gray-400 break-all">
+                                ID: {signer.signature_id}
+                              </span>
+                            </div>
+                          )}
+
+                          {signer.signature_ip && (
+                            <div className="text-gray-600">
                               <span className="text-xs text-gray-400">
-                                ID: {signer.signature_id.substring(0, 18)}...
+                                IP: {signer.signature_ip}
                               </span>
                             </div>
                           )}
