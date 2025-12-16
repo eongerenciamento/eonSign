@@ -15,7 +15,6 @@ import {
   Share2,
   FileDown,
   Timer,
-  AlertTriangle,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -376,18 +375,14 @@ const ValidateDocument = () => {
               </div>
               <div className="flex-1">
                 <h1 className={`text-xl font-bold ${isValid ? "text-green-800" : "text-yellow-800"}`}>
-                  {isValid ? "Documento Valido" : "Documento Pendente"}
+                  {isValid ? "Documento Válido" : "Documento Pendente"}
                 </h1>
-                <p className={`${isValid ? "text-green-700" : "text-yellow-700"}`}>
+                <p className={`text-[10px] ${isValid ? "text-green-700" : "text-yellow-700"}`}>
                   {isValid
-                    ? "Este documento foi assinado por todos os signatarios e possui validade juridica."
+                    ? "Este documento foi assinado por todos os signatarios e possui validade juridica"
                     : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`}
                 </p>
               </div>
-              <Badge variant={isValid ? "default" : "secondary"} className={isValid ? "bg-green-600" : "bg-yellow-600"}>
-                <Shield className="w-3 h-3 mr-1" />
-                {isValid ? "Verificado" : "Pendente"}
-              </Badge>
             </div>
 
             {/* Download and Share Buttons */}
@@ -487,18 +482,16 @@ const ValidateDocument = () => {
           </CardContent>
         </Card>
 
-        {/* Timestamp Info */}
-        <Card
-          className={`mb-6 ${document.hasTimestamp ? "border-green-200 bg-green-50/30" : "border-yellow-200 bg-yellow-50/30"}`}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2 text-primary">
-              <Timer className="w-5 h-5" />
-              <h3 className="font-semibold">Carimbo do Tempo</h3>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {document.hasTimestamp && document.timestampInfo ? (
+        {/* Timestamp Info - only show when timestamp is applied */}
+        {document.hasTimestamp && document.timestampInfo && (
+          <Card className="mb-6 border-green-200 bg-green-50/30">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2 text-primary">
+                <Timer className="w-5 h-5" />
+                <h3 className="font-semibold">Carimbo do Tempo</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle2 className="w-5 h-5 text-green-600" />
@@ -523,20 +516,9 @@ const ValidateDocument = () => {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                  <span className="font-semibold text-yellow-700">Sem Carimbo do Tempo de Autoridade</span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Este documento foi assinado no modo Simples, que não inclui carimbo do tempo de uma Autoridade de
-                  Carimbo do Tempo (ACT). O registro de data/hora é baseado no momento da assinatura no sistema.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Signers */}
         <Card>
@@ -624,7 +606,19 @@ const ValidateDocument = () => {
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001</p>
-          <p className="mt-1">Verificado pelo sistema Eon Sign em {formatDate(new Date().toISOString())}</p>
+          <p className="mt-1">
+            Verificado pelo sistema{" "}
+            <a href="https://www.eonhub.com.br/sign" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
+              eonSign
+            </a>{" "}
+            em {formatDate(new Date().toISOString())}
+          </p>
+          <p className="mt-1">
+            Powered by{" "}
+            <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
+              eonhub
+            </a>
+          </p>
         </div>
       </div>
     </div>
