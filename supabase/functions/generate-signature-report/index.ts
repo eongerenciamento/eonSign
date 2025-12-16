@@ -115,18 +115,19 @@ const handler = async (req: Request): Promise<Response> => {
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
     let yPos = pageHeight;
 
-    // Header background
+    // Header background - dark blue for white logo
+    const headerBg = rgb(39 / 255, 61 / 255, 96 / 255); // #273d60
     page.drawRectangle({
       x: 0,
       y: pageHeight - 70,
       width: pageWidth,
       height: 70,
-      color: gray300,
+      color: headerBg,
     });
 
-    // Try to add logo
+    // Try to add logo - high quality white logo
     try {
-      const logoResponse = await fetch(`${supabaseUrl}/storage/v1/object/public/email-assets/logo-eon-gray.png`);
+      const logoResponse = await fetch(`${supabaseUrl}/storage/v1/object/public/email-assets/logobranca-3.png`);
       if (logoResponse.ok) {
         const logoBytes = await logoResponse.arrayBuffer();
         const logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
@@ -144,13 +145,13 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Could not load logo:", e);
     }
 
-    // Title
+    // Title - white for contrast with dark header
     page.drawText("RELATÓRIO DE ASSINATURAS", {
       x: pageWidth - margin - helveticaBold.widthOfTextAtSize("RELATÓRIO DE ASSINATURAS", 16),
       y: pageHeight - 45,
       size: 16,
       font: helveticaBold,
-      color: gray600,
+      color: white,
     });
 
     yPos = pageHeight - 95;
