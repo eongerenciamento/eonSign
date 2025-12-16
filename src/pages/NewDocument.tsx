@@ -154,6 +154,7 @@ const NewDocument = () => {
   const [prescriptionBryUrl, setPrescriptionBryUrl] = useState<string | null>(null);
   const [prescriptionDocumentId, setPrescriptionDocumentId] = useState<string | null>(null);
   const [prescriptionDocumentName, setPrescriptionDocumentName] = useState<string>("");
+  const [hasLocalCertificate, setHasLocalCertificate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -199,7 +200,7 @@ const NewDocument = () => {
       if (user) {
         const {
           data: companyData
-        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_council, professional_registration, registration_state, medical_specialty, healthcare_cep, healthcare_street, healthcare_neighborhood, healthcare_city, healthcare_state').eq('user_id', user.id).single();
+        } = await supabase.from('company_settings').select('admin_name, admin_cpf, admin_phone, admin_email, company_name, is_healthcare, professional_council, professional_registration, registration_state, medical_specialty, healthcare_cep, healthcare_street, healthcare_neighborhood, healthcare_city, healthcare_state, certificate_file_url, certificate_password_encrypted, certificate_valid_to').eq('user_id', user.id).single();
         if (companyData) {
           setCompanySigner({
             name: companyData.admin_name,
@@ -221,6 +222,17 @@ const NewDocument = () => {
               healthcareCity: (companyData as any).healthcare_city || '',
               healthcareState: (companyData as any).healthcare_state || ''
             });
+          }
+          // Check if user has a valid local certificate for QUALIFIED signatures
+          const certUrl = (companyData as any).certificate_file_url;
+          const certPassword = (companyData as any).certificate_password_encrypted;
+          const certValidTo = (companyData as any).certificate_valid_to;
+          if (certUrl && certPassword) {
+            // Check if certificate is not expired
+            const validTo = certValidTo ? new Date(certValidTo) : null;
+            const isValid = validTo ? validTo > new Date() : false;
+            setHasLocalCertificate(isValid);
+            console.log('[NewDocument] Local certificate found, valid:', isValid);
           }
         }
       }
@@ -1039,15 +1051,100 @@ const NewDocument = () => {
       }
 
       // For SIMPLE signatures, use native flow without BRy
-      // For ADVANCED/QUALIFIED/PRESCRIPTION, use BRy integration with ICP-Brasil certificate
+      // For ADVANCED, use BRy integration with cloud certificate
+      // For QUALIFIED with local certificate, use sign-with-local-certificate
+      // For QUALIFIED without local certificate or PRESCRIPTION, use BRy with ICP-Brasil
       const brySignerLinks: Map<string, string> = new Map();
       const isSimpleSignature = signatureMode === 'SIMPLE';
+      const useLocalCertificate = signatureMode === 'QUALIFIED' && hasLocalCertificate;
       
       // Prescription mode uses QUALIFIED (ICP-Brasil) for legal compliance with Lei 14.063/2020
       const effectiveSignatureMode = isPrescriptionMode ? 'QUALIFIED' : signatureMode;
 
-      if (!isSimpleSignature) {
-        // Create BRy envelope for ADVANCED/QUALIFIED/PRESCRIPTION signatures
+      if (useLocalCertificate) {
+        // Sign with user's local A1 certificate for QUALIFIED signatures
+        console.log('[QUALIFIED] Using local A1 certificate for company signer');
+        
+        try {
+          for (const docId of documentIds) {
+            const { data: signResult, error: signError } = await supabase.functions.invoke('sign-with-local-certificate', {
+              body: {
+                documentId: docId,
+                userId: user.id,
+              }
+            });
+
+            if (signError) {
+              console.error('Local certificate signing failed:', signError);
+              throw new Error('Erro ao assinar com certificado digital: ' + signError.message);
+            }
+            
+            console.log('[QUALIFIED] Document signed with local certificate:', signResult);
+          }
+          
+          // For external signers (if any), still send them to sign via BRy or internal flow
+          // External signers will use SIMPLE signature mode
+          if (signers.length > 0) {
+            console.log('[QUALIFIED] Sending notifications to external signers for SIMPLE signature');
+            // External signers will use the internal /assinar/:documentId flow
+          }
+          
+          toast({
+            title: "Documento assinado!",
+            description: "O documento foi assinado com seu certificado digital."
+          });
+
+          // Send notifications to external signers if any
+          for (const signer of signers) {
+            try {
+              if (signer.email) {
+                await supabase.functions.invoke('send-signature-email', {
+                  body: {
+                    signerName: signer.name,
+                    signerEmail: signer.email,
+                    documentName: effectiveTitle,
+                    documentId: documentIds[0],
+                    senderName: companySigner.name,
+                    organizationName: companySigner.companyName,
+                    userId: user.id,
+                    brySignerLink: null // External signers use internal flow
+                  }
+                });
+              }
+
+              if (signer.phone) {
+                await supabase.functions.invoke('send-whatsapp-message', {
+                  body: {
+                    signerName: signer.name,
+                    signerPhone: signer.phone,
+                    documentName: effectiveTitle,
+                    documentId: documentIds[0],
+                    organizationName: companySigner.companyName,
+                    brySignerLink: null
+                  }
+                });
+              }
+            } catch (notifError) {
+              console.error('Failed to send notification:', notifError);
+            }
+          }
+
+          setIsSubmitted(true);
+          setIsSubmitting(false);
+          navigate("/documentos?tab=pending-internal");
+          return;
+        } catch (localSignError: any) {
+          console.error('Error signing with local certificate:', localSignError);
+          toast({
+            title: "Erro na assinatura",
+            description: localSignError.message || "Erro ao assinar com certificado digital",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      } else if (!isSimpleSignature) {
+        // Create BRy envelope for ADVANCED/QUALIFIED (without local cert)/PRESCRIPTION signatures
         try {
           // For prescription mode, only company signer
           const allSigners = isPrescriptionMode 

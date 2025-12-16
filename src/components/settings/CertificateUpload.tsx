@@ -49,6 +49,20 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
     }
   };
 
+  // Simple XOR-based encryption (matches edge function decryption)
+  const encryptPassword = (plainPassword: string, key: string): string => {
+    const keyClean = key.replace(/-/g, '').substring(0, 32);
+    const encoder = new TextEncoder();
+    const passwordBytes = encoder.encode(plainPassword);
+    
+    const encrypted = new Uint8Array(passwordBytes.length);
+    for (let i = 0; i < passwordBytes.length; i++) {
+      encrypted[i] = passwordBytes[i] ^ keyClean.charCodeAt(i % keyClean.length);
+    }
+    
+    return btoa(String.fromCharCode(...encrypted));
+  };
+
   const handleParseAndUpload = async () => {
     if (!selectedFile) {
       toast.error("Selecione um arquivo de certificado");
@@ -85,12 +99,10 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
 
       if (uploadError) throw uploadError;
 
-      // Get signed URL for the file
-      const { data: { signedUrl } } = await supabase.storage
-        .from('certificates')
-        .createSignedUrl(fileName, 60 * 60 * 24 * 365 * 10); // 10 years
+      // Encrypt password for secure storage
+      const encryptedPassword = encryptPassword(password, userId);
 
-      // Update company_settings with certificate metadata
+      // Update company_settings with certificate metadata and encrypted password
       const { error: updateError } = await supabase
         .from('company_settings')
         .update({
@@ -101,6 +113,7 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
           certificate_valid_to: metadata.validTo.toISOString(),
           certificate_serial_number: metadata.serialNumber,
           certificate_uploaded_at: new Date().toISOString(),
+          certificate_password_encrypted: encryptedPassword,
         })
         .eq('user_id', userId);
 
@@ -128,7 +141,7 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
         .from('certificates')
         .remove([certificateData.certificate_file_url]);
 
-      // Clear certificate data in database
+      // Clear certificate data in database (including encrypted password)
       const { error } = await supabase
         .from('company_settings')
         .update({
@@ -139,6 +152,7 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
           certificate_valid_to: null,
           certificate_serial_number: null,
           certificate_uploaded_at: null,
+          certificate_password_encrypted: null,
         })
         .eq('user_id', userId);
 
