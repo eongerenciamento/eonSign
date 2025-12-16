@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Try to add logo - high quality white logo
     try {
-      const logoResponse = await fetch(`${supabaseUrl}/storage/v1/object/public/email-assets/logobranca-3.png`);
+      const logoResponse = await fetch(`${supabaseUrl}/storage/v1/object/public/email-assets/logobranca-5.png`);
       if (logoResponse.ok) {
         const logoBytes = await logoResponse.arrayBuffer();
         const logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
