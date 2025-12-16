@@ -65,16 +65,15 @@ async function getToken(): Promise<string> {
   console.log('[BRY-PRESCRIPTION] Environment:', bryEnvironment);
   console.log('[BRY-PRESCRIPTION] Requesting token from:', authUrl);
 
+  const basicAuth = btoa(`${clientId}:${clientSecret}`);
+
   const response = await fetch(authUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${basicAuth}`,
     },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-    }).toString(),
+    body: 'grant_type=client_credentials',
   });
 
   if (!response.ok) {
