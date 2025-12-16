@@ -117,37 +117,25 @@ serve(async (req) => {
       nameFontSize = 8;
     }
     
-    // Calculate dynamic signature box width based on text
-    const textWidth = helveticaBold.widthOfTextAtSize(displayName, nameFontSize);
-    const signatureBoxWidth = Math.max(120, textWidth + 10);
+    // Signature box dimensions
     const signatureBoxHeight = 42;
     const margin = 40;
     const bottomMargin = 30;
-    const gap = 15;
+    const gap = 10;
 
-    // Calculate position: horizontal layout side by side with gap
-    let sigX: number;
-    let sigY: number = bottomMargin;
+    // Calculate available width and divide equally among all signers
+    const availableWidth = width - (margin * 2);
+    const maxSignersPerRow = 4; // Maximum signers per row
+    const signersInRow = Math.min(totalSigners, maxSignersPerRow);
+    const totalGapWidth = (signersInRow - 1) * gap;
+    const widthPerSigner = (availableWidth - totalGapWidth) / signersInRow;
 
-    // Calculate starting X position based on signer index
-    // Each signature starts after the previous one ends + gap
-    if (signerIndex === 0) {
-      sigX = margin;
-    } else {
-      // Estimate previous signatures' total width
-      // Use average width estimation for consistent spacing
-      const avgBoxWidth = 140; // Average estimated width
-      sigX = margin + (signerIndex * (avgBoxWidth + gap));
-      
-      // If would exceed page width, wrap to next row
-      if (sigX + signatureBoxWidth > width - margin) {
-        const signersPerRow = Math.floor((width - (margin * 2) + gap) / (avgBoxWidth + gap));
-        const row = Math.floor(signerIndex / signersPerRow);
-        const col = signerIndex % signersPerRow;
-        sigX = margin + (col * (avgBoxWidth + gap));
-        sigY = bottomMargin + (row * (signatureBoxHeight + gap));
-      }
-    }
+    // Calculate position based on fixed slots (not dynamic width)
+    const row = Math.floor(signerIndex / maxSignersPerRow);
+    const col = signerIndex % maxSignersPerRow;
+    
+    const sigX = margin + (col * (widthPerSigner + gap));
+    const sigY = bottomMargin + (row * (signatureBoxHeight + gap));
 
     console.log(`Signature position: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}, name: ${displayName}`);
 
