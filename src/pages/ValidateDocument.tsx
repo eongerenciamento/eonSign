@@ -134,30 +134,29 @@ const ValidateDocument = () => {
 
   const handleDownloadCompleteDocument = async () => {
     if (!documentId || !data) return;
-    
+
     setDownloadingDocument(true);
     try {
-      const { data: result, error: downloadError } = await supabase.functions.invoke(
-        "download-complete-document",
-        { body: { documentId } }
-      );
+      const { data: result, error: downloadError } = await supabase.functions.invoke("download-complete-document", {
+        body: { documentId },
+      });
 
       if (downloadError || result?.error) {
-        throw new Error(result?.error || downloadError?.message || 'Erro ao gerar documento completo');
+        throw new Error(result?.error || downloadError?.message || "Erro ao gerar documento completo");
       }
 
       if (!result?.pdfBytes) {
-        throw new Error('Nenhum PDF gerado');
+        throw new Error("Nenhum PDF gerado");
       }
 
       // Converter array de bytes para blob
       const uint8Array = new Uint8Array(result.pdfBytes);
-      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const blob = new Blob([uint8Array], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      
+
       // Usar nome do arquivo da resposta ou fallback
       const fileName = result.fileName || `${data.document.name}_completo.pdf`;
-      
+
       const link = window.document.createElement("a");
       link.href = url;
       link.download = fileName;
@@ -219,7 +218,7 @@ const ValidateDocument = () => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     const statusText = data.valid
-      ? "Este documento foi assinado por todos os signatários e possui validade jurídica."
+      ? "Este documento foi assinado por todos os signatários"
       : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s).`;
     doc.text(statusText, pageWidth / 2, yPos + 18, { align: "center" });
 
@@ -423,10 +422,10 @@ const ValidateDocument = () => {
                 </h1>
                 <p className={`text-[10px] ${isValid ? "text-green-700" : "text-yellow-700"}`}>
                   {isValid
-                    ? "Este documento foi assinado por todos os signatarios e possui validade juridica"
+                    ? "Este documento foi assinado por todos os signatarios"
                     : `Aguardando ${document.totalSigners - document.signedCount} assinatura(s) de ${document.totalSigners} signatario(s).`}
                 </p>
-                {isValid && <p className="text-[10px] text-green-700">Lei n. 14.063/2020 e MP 2.200-2/2001</p>}
+                {isValid && <p className="text-[10px] text-green-700">Conforme Lei n. 14.063/2020 e MP 2.200-2/2001</p>}
               </div>
             </div>
 
