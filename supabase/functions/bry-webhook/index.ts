@@ -273,7 +273,10 @@ async function finalizeEnvelope(supabase: any, envelopeUuid: string): Promise<vo
       });
       console.log("Document completed email sent");
 
-      // Enviar WhatsApp de conclusão
+      // Enviar WhatsApp de conclusão com link de validação
+      const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+      const validationUrl = `${APP_URL}/validar/${firstDocument.id}`;
+      
       for (const signer of signers) {
         if (signer.phone) {
           try {
@@ -283,7 +286,9 @@ async function finalizeEnvelope(supabase: any, envelopeUuid: string): Promise<vo
                 signerPhone: signer.phone,
                 documentName: envelopeName,
                 documentId: firstDocument.id,
-                messageType: "completed",
+                organizationName: "Eon Sign",
+                isCompleted: true,
+                validationUrl: validationUrl,
               },
             });
             console.log(`WhatsApp sent to ${signer.phone}`);
