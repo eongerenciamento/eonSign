@@ -73,6 +73,7 @@ const ValidateDocument = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DocumentValidation | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingDocument, setDownloadingDocument] = useState(false);
 
   useEffect(() => {
     const fetchValidation = async () => {
@@ -128,6 +129,49 @@ const ValidateDocument = () => {
         return "Assinatura Qualificada";
       default:
         return "Assinatura Eletronica";
+    }
+  };
+
+  const handleDownloadCompleteDocument = async () => {
+    if (!documentId || !data) return;
+    
+    setDownloadingDocument(true);
+    try {
+      const { data: result, error: downloadError } = await supabase.functions.invoke(
+        "download-complete-document",
+        { body: { documentId } }
+      );
+
+      if (downloadError || result?.error) {
+        throw new Error(result?.error || downloadError?.message || 'Erro ao gerar documento completo');
+      }
+
+      if (!result?.pdfBytes) {
+        throw new Error('Nenhum PDF gerado');
+      }
+
+      // Converter array de bytes para blob
+      const uint8Array = new Uint8Array(result.pdfBytes);
+      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Usar nome do arquivo da resposta ou fallback
+      const fileName = result.fileName || `${data.document.name}_completo.pdf`;
+      
+      const link = window.document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Documento baixado com sucesso!");
+    } catch (err: any) {
+      console.error("Error downloading complete document:", err);
+      toast.error(err.message || "Não foi possível baixar o documento.");
+    } finally {
+      setDownloadingDocument(false);
     }
   };
 
@@ -390,15 +434,18 @@ const ValidateDocument = () => {
             {isValid && (
               <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
                 <div className="flex gap-2">
-                  {document.downloadUrl && (
-                    <Button
-                      onClick={() => window.open(document.downloadUrl!, "_blank")}
-                      className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
-                    >
+                  <Button
+                    onClick={handleDownloadCompleteDocument}
+                    disabled={downloadingDocument}
+                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                  >
+                    {downloadingDocument ? (
+                      <LoadingSpinner size="sm" inline className="mr-2" />
+                    ) : (
                       <Download className="w-4 h-4 mr-2" />
-                      Baixar Documento
-                    </Button>
-                  )}
+                    )}
+                    Baixar Documento
+                  </Button>
                   <Button
                     className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
                     onClick={handleDownloadCertificate}
