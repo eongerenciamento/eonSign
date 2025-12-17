@@ -432,12 +432,13 @@ const ValidateDocument = () => {
 
             {/* Download and Share Buttons */}
             {isValid && (
-              <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
-                <div className="flex gap-2">
+              <div className="mt-4 pt-4 border-t border-green-200">
+                {/* Mobile: vertical stack */}
+                <div className="flex flex-col gap-2 sm:hidden">
                   <Button
                     onClick={handleDownloadCompleteDocument}
                     disabled={downloadingDocument}
-                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                    className="w-full bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
                   >
                     {downloadingDocument ? (
                       <LoadingSpinner size="sm" inline className="mr-2" />
@@ -447,16 +448,14 @@ const ValidateDocument = () => {
                     Baixar Documento
                   </Button>
                   <Button
-                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                    className="w-full bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
                     onClick={handleDownloadCertificate}
                   >
                     <FileDown className="w-4 h-4 mr-2" />
                     Baixar Certificado
                   </Button>
-                </div>
-                <div className="flex gap-2">
                   <Button
-                    className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none"
+                    className="w-full bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none"
                     onClick={() => {
                       navigator.clipboard.writeText(window.location.href);
                       toast.success("Link copiado para a area de transferencia!");
@@ -466,7 +465,7 @@ const ValidateDocument = () => {
                     Copiar Link
                   </Button>
                   <Button
-                    className="flex-1 bg-white text-green-600 hover:bg-green-50 border-0 shadow-none"
+                    className="w-full bg-white text-green-600 hover:bg-green-50 border-0 shadow-none"
                     onClick={() => {
                       const text = `Verifique o documento "${document.name}" assinado digitalmente: ${window.location.href}`;
                       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -476,6 +475,54 @@ const ValidateDocument = () => {
                     <Share2 className="w-4 h-4 mr-2" />
                     WhatsApp
                   </Button>
+                </div>
+
+                {/* Desktop: 2x2 layout */}
+                <div className="hidden sm:block space-y-3">
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleDownloadCompleteDocument}
+                      disabled={downloadingDocument}
+                      className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                    >
+                      {downloadingDocument ? (
+                        <LoadingSpinner size="sm" inline className="mr-2" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      Baixar Documento
+                    </Button>
+                    <Button
+                      className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none text-sm"
+                      onClick={handleDownloadCertificate}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Baixar Certificado
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 bg-white text-gray-600 hover:bg-gray-50 border-0 shadow-none"
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("Link copiado para a area de transferencia!");
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copiar Link
+                    </Button>
+                    <Button
+                      className="flex-1 bg-white text-green-600 hover:bg-green-50 border-0 shadow-none"
+                      onClick={() => {
+                        const text = `Verifique o documento "${document.name}" assinado digitalmente: ${window.location.href}`;
+                        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                        window.open(whatsappUrl, "_blank");
+                      }}
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      WhatsApp
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
