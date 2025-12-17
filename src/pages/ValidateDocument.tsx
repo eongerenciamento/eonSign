@@ -636,13 +636,14 @@ const ValidateDocument = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-semibold text-gray-900">{signer.name}</h4>
+                        {/* Badge visível apenas no desktop */}
                         {signer.status === "signed" ? (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                          <Badge className="hidden sm:inline-flex bg-green-100 text-green-700 hover:bg-green-100">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
                             Assinado
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                          <Badge variant="secondary" className="hidden sm:inline-flex bg-gray-100 text-gray-600">
                             <Clock className="w-3 h-3 mr-1" />
                             Pendente
                           </Badge>
@@ -673,17 +674,47 @@ const ValidateDocument = () => {
                             </div>
                           )}
 
+                          {/* Desktop: ID e IP em linhas separadas, alinhados */}
+                          <div className="hidden sm:block">
+                            {signer.signature_id && (
+                              <div className="text-gray-600">
+                                <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
+                              </div>
+                            )}
+                            {signer.signature_ip && (
+                              <div className="text-gray-600 mt-1">
+                                <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Mobile: ID sozinho */}
                           {signer.signature_id && (
-                            <div className="text-gray-600">
+                            <div className="sm:hidden text-gray-600">
                               <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
                             </div>
                           )}
 
-                          {signer.signature_ip && (
-                            <div className="text-gray-600">
+                          {/* Mobile: IP + Badge na mesma linha */}
+                          <div className="sm:hidden flex items-center justify-between">
+                            {signer.signature_ip && (
                               <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
-                            </div>
-                          )}
+                            )}
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              Assinado
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mobile: Badge para pendentes */}
+                      {signer.status !== "signed" && (
+                        <div className="sm:hidden mt-2">
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Pendente
+                          </Badge>
                         </div>
                       )}
                     </div>
