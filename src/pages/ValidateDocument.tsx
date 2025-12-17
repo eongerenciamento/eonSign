@@ -651,61 +651,64 @@ const ValidateDocument = () => {
                       </div>
 
                       {signer.status === "signed" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>{formatDate(signer.signed_at)}</span>
+                        <>
+                          {/* Grid com dados - Desktop mostra ID/IP, Mobile não */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Calendar className="w-4 h-4 text-gray-400" />
+                              <span>{formatDate(signer.signed_at)}</span>
+                            </div>
+
+                            {(signer.signature_city || signer.signature_state) && (
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <MapPin className="w-4 h-4 text-gray-400" />
+                                <span>
+                                  {[signer.signature_city, signer.signature_state].filter(Boolean).join(", ")}
+                                  {signer.signature_country && ` - ${signer.signature_country}`}
+                                </span>
+                              </div>
+                            )}
+
+                            {signer.cpf && (
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Shield className="w-4 h-4 text-gray-400" />
+                                <span>CPF: {signer.cpf}</span>
+                              </div>
+                            )}
+
+                            {/* Desktop: ID e IP em linhas separadas */}
+                            <div className="hidden sm:block">
+                              {signer.signature_id && (
+                                <div className="text-gray-600">
+                                  <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
+                                </div>
+                              )}
+                              {signer.signature_ip && (
+                                <div className="text-gray-600 mt-1">
+                                  <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          {(signer.signature_city || signer.signature_state) && (
-                            <div className="flex items-center gap-2 text-gray-600">
-                              <MapPin className="w-4 h-4 text-gray-400" />
-                              <span>
-                                {[signer.signature_city, signer.signature_state].filter(Boolean).join(", ")}
-                                {signer.signature_country && ` - ${signer.signature_country}`}
-                              </span>
-                            </div>
-                          )}
-
-                          {signer.cpf && (
-                            <div className="flex items-center gap-2 text-gray-600">
-                              <Shield className="w-4 h-4 text-gray-400" />
-                              <span>CPF: {signer.cpf}</span>
-                            </div>
-                          )}
-
-                          {/* Desktop: ID e IP em linhas separadas, alinhados */}
-                          <div className="hidden sm:block">
+                          {/* Mobile: ID e IP + Badge - FORA do grid */}
+                          <div className="sm:hidden mt-2 space-y-1">
                             {signer.signature_id && (
                               <div className="text-gray-600">
                                 <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
                               </div>
                             )}
-                            {signer.signature_ip && (
-                              <div className="text-gray-600 mt-1">
+                            <div className="flex items-center justify-between">
+                              {signer.signature_ip && (
                                 <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Mobile: ID sozinho */}
-                          {signer.signature_id && (
-                            <div className="sm:hidden text-gray-600">
-                              <span className="text-xs text-gray-400 break-all">ID: {signer.signature_id}</span>
+                              )}
+                              <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                Assinado
+                              </Badge>
                             </div>
-                          )}
-
-                          {/* Mobile: IP + Badge na mesma linha */}
-                          <div className="sm:hidden flex items-center justify-between">
-                            {signer.signature_ip && (
-                              <span className="text-xs text-gray-400">IP: {signer.signature_ip}</span>
-                            )}
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                              Assinado
-                            </Badge>
                           </div>
-                        </div>
+                        </>
                       )}
 
                       {/* Mobile: Badge para pendentes */}
