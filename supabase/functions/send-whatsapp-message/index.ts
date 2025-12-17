@@ -14,6 +14,7 @@ interface WhatsAppMessageRequest {
   organizationName: string;
   isCompleted?: boolean;
   brySignerLink?: string; // Link da BRy se disponível
+  validationUrl?: string; // Link de validação/download para documento completado
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { signerName, signerPhone, documentName, documentId, organizationName, isCompleted, brySignerLink }: WhatsAppMessageRequest = await req.json();
+    const { signerName, signerPhone, documentName, documentId, organizationName, isCompleted, brySignerLink, validationUrl }: WhatsAppMessageRequest = await req.json();
 
     // Initialize Supabase client for logging
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -68,14 +69,18 @@ const handler = async (req: Request): Promise<Response> => {
     let body: URLSearchParams;
 
     if (isCompleted) {
-      // Template de documento completamente assinado
+      // Template de documento completamente assinado COM LINK
+      const downloadLink = validationUrl || `${APP_URL}/validar/${documentId}`;
+      console.log(`Using download link for completed template: ${downloadLink}`);
+      
       body = new URLSearchParams({
         To: `whatsapp:+${cleanPhone}`,
         From: `whatsapp:${fromNumber}`,
         ContentSid: templateSid,
         ContentVariables: JSON.stringify({
           "1": signerName,     // {{1}} - Nome do signatário
-          "2": documentName    // {{2}} - Nome do documento
+          "2": documentName,   // {{2}} - Nome do documento
+          "3": downloadLink    // {{3}} - Link para validar/download
         }),
       });
     } else {
