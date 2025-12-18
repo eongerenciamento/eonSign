@@ -44,6 +44,7 @@ const Settings = () => {
   const [adminName, setAdminName] = useState("");
   const [adminCpf, setAdminCpf] = useState("");
   const [adminBirthDate, setAdminBirthDate] = useState("");
+  const [birthDateInput, setBirthDateInput] = useState("");
   const [phone, setPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -181,7 +182,16 @@ const Settings = () => {
           setState(companyData.state);
           setAdminName(companyData.admin_name);
           setAdminCpf(companyData.admin_cpf);
-          setAdminBirthDate((companyData as any).admin_birth_date || "");
+          const birthDate = (companyData as any).admin_birth_date || "";
+          setAdminBirthDate(birthDate);
+          if (birthDate) {
+            try {
+              const parsedDate = parse(birthDate, "yyyy-MM-dd", new Date());
+              setBirthDateInput(format(parsedDate, "dd/MM/yyyy"));
+            } catch {
+              setBirthDateInput("");
+            }
+          }
           setPhone(companyData.admin_phone);
           setCompanyEmail(companyData.admin_email);
           setIsHealthcare((companyData as any).is_healthcare || false);
@@ -544,24 +554,27 @@ const Settings = () => {
                         <Input
                           id="admin-birth-date"
                           type="text"
-                          value={adminBirthDate ? format(parse(adminBirthDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : ""}
+                          value={birthDateInput}
                           onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, "");
-                            let formatted = value;
-                            if (value.length >= 2) formatted = value.slice(0, 2) + "/" + value.slice(2);
-                            if (value.length >= 4) formatted = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4, 8);
-                            if (value.length === 8) {
-                              const day = parseInt(value.slice(0, 2));
-                              const month = parseInt(value.slice(2, 4));
-                              const year = parseInt(value.slice(4, 8));
+                            const rawValue = e.target.value.replace(/\D/g, "");
+                            let formatted = rawValue;
+                            if (rawValue.length >= 2) formatted = rawValue.slice(0, 2) + "/" + rawValue.slice(2);
+                            if (rawValue.length >= 4) formatted = rawValue.slice(0, 2) + "/" + rawValue.slice(2, 4) + "/" + rawValue.slice(4, 8);
+                            
+                            setBirthDateInput(formatted);
+                            
+                            if (rawValue.length === 8) {
+                              const day = parseInt(rawValue.slice(0, 2));
+                              const month = parseInt(rawValue.slice(2, 4));
+                              const year = parseInt(rawValue.slice(4, 8));
                               if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= new Date().getFullYear()) {
-                                setAdminBirthDate(`${year}-${value.slice(2, 4)}-${value.slice(0, 2)}`);
+                                setAdminBirthDate(`${year}-${rawValue.slice(2, 4)}-${rawValue.slice(0, 2)}`);
                               }
-                            } else if (value.length < 8) {
+                            } else {
                               setAdminBirthDate("");
                             }
                           }}
-                          placeholder="DD/MM/AAAA"
+                          placeholder="dd/mm/aaaa"
                           maxLength={10}
                           inputMode="numeric"
                           className="flex-1 border-0 bg-transparent text-foreground pr-10 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -580,7 +593,15 @@ const Settings = () => {
                             <Calendar
                               mode="single"
                               selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
-                              onSelect={(date) => setAdminBirthDate(date ? format(date, "yyyy-MM-dd") : "")}
+                              onSelect={(date) => {
+                                if (date) {
+                                  setAdminBirthDate(format(date, "yyyy-MM-dd"));
+                                  setBirthDateInput(format(date, "dd/MM/yyyy"));
+                                } else {
+                                  setAdminBirthDate("");
+                                  setBirthDateInput("");
+                                }
+                              }}
                               initialFocus
                             />
                           </PopoverContent>
