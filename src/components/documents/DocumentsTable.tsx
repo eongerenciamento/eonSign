@@ -929,15 +929,15 @@ export const DocumentsTable = ({
                         </div>
                       </div>
                       {showFolderActions && folders && folders.length > 0 && <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
-                          <SelectTrigger className="w-[180px] hover:bg-gray-50">
+                          <SelectTrigger className="w-[180px] bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70">
                             <SelectValue placeholder="Selecionar pasta" />
                           </SelectTrigger>
-                          <SelectContent className="bg-white z-50">
+                          <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
                             {hierarchicalFolders.map(({ folder, level }) => (
                               <SelectItem 
                                 key={folder.id} 
                                 value={folder.id} 
-                                className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700"
+                                className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
                                 style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                               >
                                 {level > 0 && "└─ "}{folder.name}
