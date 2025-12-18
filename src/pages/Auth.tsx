@@ -230,9 +230,9 @@ export default function Auth() {
       }}>
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold" style={{
+            <h1 style={{
             color: '#111827'
-          }}>Login</h1>
+          }} className="text-2xl font-bold text-gray-600">Login</h1>
             <p className="mt-1" style={{
             color: '#6b7280'
           }}>Bem-vindo de volta!</p>
