@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, X, FileVideo, Image as ImageIcon, Plus } from "lucide-react";
+import { Upload, X, FileVideo, Image as ImageIcon, Plus, Check } from "lucide-react";
 
 const ticketFormSchema = z.object({
   title: z.string().min(5, "O título deve ter no mínimo 5 caracteres").max(100, "O título deve ter no máximo 100 caracteres"),
@@ -163,7 +163,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
           Novo ticket
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-[540px] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <SheetContent className="w-full sm:max-w-[540px] overflow-y-auto rounded-l-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <SheetHeader>
           <SheetTitle>Abrir Novo Ticket</SheetTitle>
           <SheetDescription>
@@ -319,8 +319,8 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
             <div className="flex gap-3 pt-4">
               <Button
                 type="button"
-                variant="outline"
-                className="flex-1"
+                variant="ghost"
+                className="flex-1 rounded-full text-gray-600 hover:bg-transparent hover:text-gray-600"
                 onClick={() => {
                   setOpen(false);
                   form.reset();
@@ -329,13 +329,15 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 }}
                 disabled={isSubmitting}
               >
+                <X className="w-4 h-4 mr-2" />
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
+                className="flex-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-100 hover:text-gray-700"
                 disabled={isSubmitting}
               >
+                <Check className="w-4 h-4 mr-2" />
                 {isSubmitting ? "Criando..." : "Criar Ticket"}
               </Button>
             </div>
