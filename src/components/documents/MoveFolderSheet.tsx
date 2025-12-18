@@ -100,7 +100,7 @@ export const MoveFolderSheet = ({
       setTimeout(() => {
         setShowSuccess(false);
         onOpenChange(false);
-      }, 800);
+      }, 1200);
     }, 500);
   };
 
