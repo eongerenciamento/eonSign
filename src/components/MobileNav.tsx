@@ -50,7 +50,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-14 md:hidden border-none px-4 rounded-b-[40px] shadow-lg">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-14 md:hidden border-none px-4 shadow-lg">
         {/* Ícones de navegação centralizados */}
         <div className="flex items-center justify-center gap-2 flex-1">
           {items.map((item) => (
