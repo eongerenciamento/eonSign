@@ -155,23 +155,23 @@ export function MembersTab() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gray-100 shadow-md border-0">
+      <Card className="bg-secondary shadow-md border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-600 text-sm">Membros da Organização</CardTitle>
+          <CardTitle className="text-muted-foreground text-sm">Membros da Organização</CardTitle>
           <Button
             onClick={() => setIsDialogOpen(true)}
             size="icon"
-            className="h-8 w-8 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-200 hover:text-gray-500"
+            className="h-8 w-8 rounded-full bg-muted text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <Plus className="h-4 w-4" />
           </Button>
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Mail className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8 text-muted-foreground">
+              <Mail className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
               <p className="text-sm">Nenhum membro convidado ainda.</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Clique no botão + para convidar membros da sua equipe.
               </p>
             </div>
@@ -180,11 +180,11 @@ export function MembersTab() {
               {members.map((member, index) => (
                 <div
                   key={member.id}
-                  className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === members.length - 1 ? 'rounded-b-lg' : ''}`}
+                  className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-card' : 'bg-secondary/50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === members.length - 1 ? 'rounded-b-lg' : ''}`}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-600">{member.member_email}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-foreground">{member.member_email}</p>
+                    <p className="text-xs text-muted-foreground">
                       Convidado em {new Date(member.invited_at).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
@@ -193,7 +193,7 @@ export function MembersTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-500 hover:text-gray-500 hover:bg-transparent cursor-pointer"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent cursor-pointer"
                       onClick={() => setMemberToDelete(member)}
                     >
                       <Trash2 className="h-4 w-4" />

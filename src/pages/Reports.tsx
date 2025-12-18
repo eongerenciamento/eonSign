@@ -490,7 +490,7 @@ const Reports = () => {
         {/* Filters */}
         <div className="flex gap-4">
           <Select defaultValue="30">
-            <SelectTrigger className="w-[180px] border-none bg-gray-100">
+            <SelectTrigger className="w-[180px] border-none bg-secondary">
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
@@ -501,7 +501,7 @@ const Reports = () => {
             </SelectContent>
           </Select>
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px] border-none bg-gray-100">
+            <SelectTrigger className="w-[180px] border-none bg-secondary">
               <SelectValue placeholder="Departamento" />
             </SelectTrigger>
             <SelectContent>
@@ -515,50 +515,50 @@ const Reports = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 bg-gray-100 border-0 shadow-md">
+          <Card className="p-6 bg-secondary border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-lg bg-gray-200">
-                <TrendingUp className="w-5 h-5 text-gray-500" />
+              <div className="p-2 rounded-lg bg-muted">
+                <TrendingUp className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-blue-700">87.5%</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">87.5%</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0 shadow-md">
+          <Card className="p-6 bg-secondary border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-lg bg-gray-200">
-                <FileCheck className="w-5 h-5 text-gray-500" />
+              <div className="p-2 rounded-lg bg-muted">
+                <FileCheck className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Docs Assinados</p>
-                <p className="text-2xl font-bold text-blue-700">98</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">98</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0 shadow-md">
+          <Card className="p-6 bg-secondary border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-lg bg-gray-200">
-                <Clock className="w-5 h-5 text-gray-500" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Clock className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tempo Médio</p>
-                <p className="text-2xl font-bold text-blue-700">2.3d</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">2.3d</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0 shadow-md">
+          <Card className="p-6 bg-secondary border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-lg bg-gray-200">
-                <Users className="w-5 h-5 text-gray-500" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Users className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Signatários Ativos</p>
-                <p className="text-2xl font-bold text-blue-700">234</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">234</p>
               </div>
             </div>
           </Card>
@@ -566,8 +566,8 @@ const Reports = () => {
 
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 bg-gray-100 border-0 animate-fade-in">
-            <h3 className="font-semibold mb-4 text-base text-gray-600">Documentos por Status</h3>
+          <Card className="p-6 bg-secondary border-0 animate-fade-in">
+            <h3 className="font-semibold mb-4 text-base text-muted-foreground">Documentos por Status</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {(documentStatusData || [
                 { label: "Assinados", count: 0, percentage: 0, color: "bg-blue-500" },
@@ -577,9 +577,9 @@ const Reports = () => {
                 { label: "Cancelados", count: 0, percentage: 0, color: "bg-yellow-500" }
               ]).map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
-                  <span className="text-lg font-bold text-gray-700">{item.count}</span>
-                  <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
-                  <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
+                  <span className="text-lg font-bold text-foreground">{item.count}</span>
+                  <span className="text-xs text-muted-foreground mb-2">{item.percentage}%</span>
+                  <div className="w-full h-24 bg-muted rounded-lg relative overflow-hidden">
                     <div 
                       className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
                       style={{ 
@@ -588,22 +588,22 @@ const Reports = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs text-gray-500 mt-2 text-center">{item.label}</span>
+                  <span className="text-xs text-muted-foreground mt-2 text-center">{item.label}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
-            <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
+          <Card className="p-6 bg-secondary border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <h3 className="font-semibold mb-4 text-base text-muted-foreground">Top Signatários</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {(topSignatories && topSignatories.length > 0 ? topSignatories : [
-                { label: "Sem dados", count: 0, percentage: 0, color: "bg-gray-300" }
+                { label: "Sem dados", count: 0, percentage: 0, color: "bg-muted" }
               ]).map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
-                  <span className="text-lg font-bold text-gray-700">{item.count}</span>
-                  <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
-                  <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
+                  <span className="text-lg font-bold text-foreground">{item.count}</span>
+                  <span className="text-xs text-muted-foreground mb-2">{item.percentage}%</span>
+                  <div className="w-full h-24 bg-muted rounded-lg relative overflow-hidden">
                     <div 
                       className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
                       style={{ 
@@ -612,7 +612,7 @@ const Reports = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs text-gray-500 mt-2 text-center truncate w-full">{item.label}</span>
+                  <span className="text-xs text-muted-foreground mt-2 text-center truncate w-full">{item.label}</span>
                 </div>
               ))}
             </div>
@@ -620,8 +620,8 @@ const Reports = () => {
         </div>
 
         {/* Activity Timeline */}
-        <Card className="p-6 bg-gray-100 border-0">
-          <h3 className="font-semibold mb-4 text-gray-600 text-base">Atividade Recente</h3>
+        <Card className="p-6 bg-secondary border-0">
+          <h3 className="font-semibold mb-4 text-muted-foreground text-base">Atividade Recente</h3>
           <div className="space-y-3">
             {[{
                 doc: "Contrato - Cliente A",
@@ -674,17 +674,17 @@ const Reports = () => {
                 date: "12/12/2025",
                 status: "Enviado"
               }].map((activity, index) => (
-              <div key={index} className="flex items-center gap-4 py-3 border-b last:border-0">
+              <div key={index} className="flex items-center gap-4 py-3 border-b border-border last:border-0">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-700 text-sm truncate">{activity.doc}</p>
+                  <p className="font-medium text-foreground text-sm truncate">{activity.doc}</p>
                 </div>
                 <div className="w-32 min-w-[128px]">
                   {activity.signers.map((signer, i) => (
-                    <p key={i} className="text-gray-500 text-xs truncate">{signer}</p>
+                    <p key={i} className="text-muted-foreground text-xs truncate">{signer}</p>
                   ))}
                 </div>
                 <div className="w-24 text-right">
-                  <span className="text-gray-500 text-xs">{activity.date}</span>
+                  <span className="text-muted-foreground text-xs">{activity.date}</span>
                 </div>
                 <div className="w-20 text-right">
                   <span className={`text-xs font-medium ${
@@ -706,28 +706,28 @@ const Reports = () => {
             {/* Search and Action Buttons */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
-                <Input placeholder="Nome, CPF/CNPJ ou e-mail" value={searchInput} onChange={e => setSearchInput(e.target.value)} className="pl-10 rounded-full text-sm placeholder:text-xs border-0 bg-gray-100" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input placeholder="Nome, CPF/CNPJ ou e-mail" value={searchInput} onChange={e => setSearchInput(e.target.value)} className="pl-10 rounded-full text-sm placeholder:text-xs border-0 bg-secondary" />
               </div>
               
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <Button onClick={() => setShowFilters(!showFilters)} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
+                <Button onClick={() => setShowFilters(!showFilters)} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-transparent hover:text-foreground">
                   <SlidersHorizontal className="h-4 w-4" />
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-gray-500 hover:bg-transparent hover:text-gray-500">
+                    <Button disabled={!signatories || signatories.length === 0} variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-transparent hover:text-foreground">
                       <Download className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-gray-200/70 backdrop-blur-sm border-0">
-                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer hover:bg-transparent focus:bg-transparent">
-                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
+                  <DropdownMenuContent align="end" className="bg-popover backdrop-blur-sm border-border">
+                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer hover:bg-accent focus:bg-accent">
+                      <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
                       PDF
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer hover:bg-transparent focus:bg-transparent">
-                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
+                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer hover:bg-accent focus:bg-accent">
+                      <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
                       XLS
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -741,7 +741,7 @@ const Reports = () => {
               setDateFilter(value);
               setCurrentPage(1);
             }}>
-                  <SelectTrigger className="w-[180px] border-0 bg-gray-100">
+                  <SelectTrigger className="w-[180px] border-0 bg-secondary">
                     <SelectValue placeholder="Período" />
                   </SelectTrigger>
                   <SelectContent>
@@ -756,7 +756,7 @@ const Reports = () => {
               setStatusFilter(value);
               setCurrentPage(1);
             }}>
-                  <SelectTrigger className="w-[180px] border-0 bg-gray-100">
+                  <SelectTrigger className="w-[180px] border-0 bg-secondary">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -769,7 +769,7 @@ const Reports = () => {
               setItemsPerPage(parseInt(value));
               setCurrentPage(1);
             }}>
-                  <SelectTrigger className="w-[140px] border-0 bg-gray-100">
+                  <SelectTrigger className="w-[140px] border-0 bg-secondary">
                     <SelectValue placeholder="Por página" />
                   </SelectTrigger>
                   <SelectContent>
@@ -782,11 +782,11 @@ const Reports = () => {
               </div>}
 
             {/* Table / Cards */}
-            <Card className="p-6 bg-gray-100 border-0">
-              <h3 className="text-sm md:text-lg font-semibold mb-4 text-gray-600">Relatório de Signatários</h3>
+            <Card className="p-6 bg-secondary border-0">
+              <h3 className="text-sm md:text-lg font-semibold mb-4 text-muted-foreground">Relatório de Signatários</h3>
               {isLoading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : !signatories || signatories.length === 0 ? <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div> : isMobile ? (/* Mobile view - Cards */
             <div className="space-y-4 -mx-8">
-                  {signatories.map((signer, index) => <div key={signer.id} className={`py-4 px-8 space-y-3 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                  {signatories.map((signer, index) => <div key={signer.id} className={`py-4 px-8 space-y-3 ${index % 2 === 0 ? 'bg-secondary' : 'bg-card'}`}>
                       <div className="flex flex-col gap-1">
                         <span className="font-medium text-sm">{signer.name}</span>
                         <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
@@ -854,7 +854,7 @@ const Reports = () => {
             <div className="overflow-x-auto rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gray-200">
+                      <TableRow className="bg-muted">
                         <TableHead className="rounded-tl-lg">
                           <button onClick={() => handleSort("name")} className="flex items-center hover:text-foreground transition-colors">
                             Nome / CPF
@@ -883,7 +883,7 @@ const Reports = () => {
                       {signatories.map((signer, index) => {
                         const isLast = index === signatories.length - 1;
                         return (
-                          <TableRow key={signer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                          <TableRow key={signer.id} className={index % 2 === 0 ? "bg-card" : "bg-secondary/50"}>
                             <TableCell className={`font-medium ${isLast ? "rounded-bl-lg" : ""}`}>
                               <div className="flex flex-col">
                                 <span>{signer.name}</span>
@@ -950,10 +950,10 @@ const Reports = () => {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <div className="flex flex-col items-center px-4">
-                      <span className="text-xs font-medium text-gray-500">
+                      <span className="text-xs font-medium text-muted-foreground">
                         <span className="hidden md:inline">Página</span><span className="md:hidden">Pág.</span>
                       </span>
-                      <span className="text-xs font-medium text-gray-500">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {currentPage} de {totalPages}
                       </span>
                     </div>

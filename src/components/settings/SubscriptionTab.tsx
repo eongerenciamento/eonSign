@@ -9,6 +9,7 @@ import { Check, Loader2, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
 const SUBSCRIPTION_TIERS = [{
   name: "Grátis",
   limit: 5,
@@ -54,120 +55,142 @@ interface ComparisonTableProps {
   processingCheckout: boolean;
   onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0]) => void;
 }
+
 function ComparisonTable({
   currentPlanLimit,
   isFreeTier,
   processingCheckout,
   onUpgrade
 }: ComparisonTableProps) {
-  return <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-gray-100">
+  return (
+    <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-border">
       <Table>
         <TableHeader>
-          <TableRow className="border-0 bg-gray-100/50">
-            <TableHead className="w-[200px] font-semibold text-xs text-gray-700 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="border-0 bg-secondary/50">
+            <TableHead className="w-[200px] font-semibold text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Recurso
             </TableHead>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-gray-200/50' : 'bg-gray-100/50'}`}>
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
                   <div className="flex flex-col items-center gap-0">
-                    <span className="font-semibold text-xs text-gray-600">{tier.name}</span>
-                    <span className="text-xs text-gray-400 font-normal">
+                    <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
+                    <span className="text-xs text-muted-foreground font-normal">
                       R$ {tier.price === 0 ? "0" : tier.price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
-                </TableHead>;
-          })}
+                </TableHead>
+              );
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-card border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-card z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Documentos / Envelopes
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : ''}`}>
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
                   {tier.limit}
-                </TableCell>;
-          })}
+                </TableCell>
+              );
+            })}
           </TableRow>
-          <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-secondary/50 border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Usuários ilimitados
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : 'bg-gray-100/50'}`}>
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
-                </TableCell>;
-          })}
+                </TableCell>
+              );
+            })}
           </TableRow>
-          <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-card border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-card z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Notificações
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : ''}`}>
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
-                </TableCell>;
-          })}
+                </TableCell>
+              );
+            })}
           </TableRow>
-          <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-secondary/50 border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Geolocalização
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : 'bg-gray-100/50'}`}>
-                  {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
-                </TableCell>;
-          })}
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
+                  {tier.priceId === "free" ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>
+              );
+            })}
           </TableRow>
-          <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-card border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-card z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Eon Drive
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : ''}`}>
-                  {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
-                </TableCell>;
-          })}
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
+                  {tier.priceId === "free" ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>
+              );
+            })}
           </TableRow>
-          <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-secondary/50 border-0">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-200/50' : 'bg-gray-100/50'}`}>
-                  {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
-                </TableCell>;
-          })}
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
+                  {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>
+              );
+            })}
           </TableRow>
           {/* Action buttons row */}
-          <TableRow className="bg-white border-b border-gray-300">
-            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+          <TableRow className="bg-card border-b border-border">
+            <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-card z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-gray-200/50' : ''}`}>
-                  {isCurrentPlan ? <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
+              return (
+                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
+                  {isCurrentPlan ? (
+                    <Badge variant="outline" className="bg-secondary text-foreground/80 border-border">
                       Atual
-                    </Badge> : <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-blue-500 hover:bg-blue-600 text-white border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
+                    </Badge>
+                  ) : (
+                    <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-blue-500 hover:bg-blue-600 text-white border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
                       {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : isDowngrade ? "Downgrade" : "Upgrade"}
-                    </Button>}
-                </TableCell>;
-          })}
+                    </Button>
+                  )}
+                </TableCell>
+              );
+            })}
           </TableRow>
         </TableBody>
       </Table>
-      
-    </div>;
+    </div>
+  );
 }
 
 // FAQ Component
@@ -203,54 +226,49 @@ function FAQSection() {
     question: "Os documentos ficam armazenados com segurança?",
     answer: "Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive."
   }];
-  return <div className="space-y-6 max-w-6xl mx-auto pt-4">
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto pt-4">
       <div className="text-center">
-        <h2 className="font-bold text-base text-gray-500">Perguntas Frequentes</h2>
+        <h2 className="font-bold text-base text-muted-foreground">Perguntas Frequentes</h2>
       </div>
       <div className="rounded-lg overflow-hidden">
         <Accordion type="single" collapsible className="w-full">
-          {faqItems.map((item, index) => <AccordionItem key={`item-${index + 1}`} value={`item-${index + 1}`} className={`border-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}>
-              <AccordionTrigger className="text-left text-sm text-gray-600 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
+          {faqItems.map((item, index) => (
+            <AccordionItem key={`item-${index + 1}`} value={`item-${index + 1}`} className={`border-0 ${index % 2 === 0 ? 'bg-card' : 'bg-secondary/50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}>
+              <AccordionTrigger className="text-left text-sm text-foreground/80 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
                 {item.question}
               </AccordionTrigger>
-              <AccordionContent className="text-left px-4 text-sm text-gray-500">
+              <AccordionContent className="text-left px-4 text-sm text-muted-foreground">
                 {item.answer}
               </AccordionContent>
-            </AccordionItem>)}
+            </AccordionItem>
+          ))}
         </Accordion>
       </div>
-    </div>;
+    </div>
+  );
 }
+
 export function SubscriptionTab() {
   const [subscription, setSubscription] = useState<any>(null);
-  const [usage, setUsage] = useState<{
-    current: number;
-    limit: number;
-  } | null>(null);
+  const [usage, setUsage] = useState<{ current: number; limit: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingCheckout, setProcessingCheckout] = useState(false);
+
   useEffect(() => {
     loadSubscriptionData();
   }, []);
+
   const loadSubscriptionData = async () => {
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Load subscription
-      const {
-        data: subData
-      } = await supabase.from("user_subscriptions").select("*").eq("user_id", user.id).single();
+      const { data: subData } = await supabase.from("user_subscriptions").select("*").eq("user_id", user.id).single();
       setSubscription(subData);
 
-      // Load usage
-      const {
-        data: limitData
-      } = await supabase.functions.invoke("check-document-limit");
+      const { data: limitData } = await supabase.functions.invoke("check-document-limit");
       if (limitData) {
         setUsage({
           current: limitData.current,
@@ -263,6 +281,7 @@ export function SubscriptionTab() {
       setLoading(false);
     }
   };
+
   const handleUpgrade = async (tier: (typeof SUBSCRIPTION_TIERS)[0]) => {
     if (tier.priceId === "free") {
       toast.info("Você já está no plano gratuito");
@@ -270,22 +289,12 @@ export function SubscriptionTab() {
     }
     setProcessingCheckout(true);
     try {
-      // Get user email and organization name
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) {
         throw new Error("Email do usuário não encontrado");
       }
-      const {
-        data: companyData
-      } = await supabase.from("company_settings").select("company_name").eq("user_id", user.id).single();
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke("create-stripe-checkout", {
+      const { data: companyData } = await supabase.from("company_settings").select("company_name").eq("user_id", user.id).single();
+      const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
           priceId: tier.priceId,
           tierName: tier.name,
@@ -306,12 +315,10 @@ export function SubscriptionTab() {
       setProcessingCheckout(false);
     }
   };
+
   const handleManageSubscription = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke("create-stripe-portal");
+      const { data, error } = await supabase.functions.invoke("create-stripe-portal");
       if (error) throw error;
       if (data.url) {
         window.open(data.url, "_blank");
@@ -321,34 +328,18 @@ export function SubscriptionTab() {
       toast.error(error.message || "Erro ao abrir portal de gerenciamento");
     }
   };
+
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, {
-      variant: "default" | "secondary" | "destructive";
-      label: string;
-    }> = {
-      active: {
-        variant: "default",
-        label: "Ativo"
-      },
-      trialing: {
-        variant: "secondary",
-        label: "Teste"
-      },
-      past_due: {
-        variant: "destructive",
-        label: "Vencido"
-      },
-      canceled: {
-        variant: "destructive",
-        label: "Cancelado"
-      }
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; label: string }> = {
+      active: { variant: "default", label: "Ativo" },
+      trialing: { variant: "secondary", label: "Teste" },
+      past_due: { variant: "destructive", label: "Vencido" },
+      canceled: { variant: "destructive", label: "Cancelado" }
     };
-    const config = variants[status] || {
-      variant: "secondary",
-      label: status
-    };
+    const config = variants[status] || { variant: "secondary", label: status };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -356,56 +347,57 @@ export function SubscriptionTab() {
   // User has active tier
   if (subscription && subscription.status === "active") {
     const usagePercent = usage ? usage.current / subscription.document_limit * 100 : 0;
-    return <div className="space-y-10">
+    return (
+      <div className="space-y-10">
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {/* Card 1: Plano Atual */}
-          <Card className="bg-gray-100 border-0">
+          <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Plano Atual</p>
+                <p className="text-sm text-muted-foreground">Plano Atual</p>
                 {getStatusBadge(subscription.status)}
               </div>
-              <p className="text-xl font-bold text-gray-900 mb-1">{subscription.plan_name}</p>
-              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
+              <p className="text-xl font-bold text-foreground mb-1">{subscription.plan_name}</p>
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground">
                 Extrato de Pagamentos
               </Button>
             </CardContent>
           </Card>
 
           {/* Card 2: Valor */}
-          <Card className="bg-gray-100 border-0">
+          <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-600 mb-2">Valor</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-sm text-muted-foreground mb-2">Valor</p>
+              <p className="text-xl font-bold text-foreground">
                 {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace(".", ",")}` : "R$ 0,00"}
               </p>
-              <p className="text-xs text-gray-500 mt-1">por mês</p>
+              <p className="text-xs text-muted-foreground mt-1">por mês</p>
             </CardContent>
           </Card>
 
           {/* Card 3: Data de Renovação */}
-          <Card className="bg-gray-100 border-0">
+          <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-600 mb-2">Renovação</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-sm text-muted-foreground mb-2">Renovação</p>
+              <p className="text-xl font-bold text-foreground">
                 {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-              }) : "-"}
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric"
+                }) : "-"}
               </p>
             </CardContent>
           </Card>
 
           {/* Card 4: Consumo */}
-          <Card className="bg-gray-100 border-0">
+          <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-600 mb-2">Consumo</p>
-              <p className="text-xl font-bold text-gray-900 mb-3">
+              <p className="text-sm text-muted-foreground mb-2">Consumo</p>
+              <p className="text-xl font-bold text-foreground mb-3">
                 {usage?.current || 0} / {subscription.document_limit}
               </p>
-              <Progress value={usagePercent} className="h-2 bg-gray-300" />
+              <Progress value={usagePercent} className="h-2 bg-muted" />
               {usagePercent >= 80 && <p className="text-xs text-yellow-600 font-medium mt-2">Próximo do limite</p>}
             </CardContent>
           </Card>
@@ -418,23 +410,25 @@ export function SubscriptionTab() {
 
         {/* FAQ */}
         <FAQSection />
-      </div>;
+      </div>
+    );
   }
 
   // User on free tier - show all paid tiers
-  return <div className="space-y-10">
+  return (
+    <div className="space-y-10">
       {/* Grid com 4 cards de informação */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {/* Card 1: Plano Atual */}
-        <Card className="bg-gray-100 border-0">
+        <Card className="bg-secondary border-0">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600">Plano Atual</p>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
+              <p className="text-sm text-muted-foreground">Plano Atual</p>
+              <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                 Ativo
               </Badge>
             </div>
-            <p className="text-xl font-bold mb-1 text-gray-600">Grátis</p>
+            <p className="text-xl font-bold mb-1 text-foreground">Grátis</p>
             <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-primary">
               Extrato de Pagamentos
             </Button>
@@ -442,29 +436,29 @@ export function SubscriptionTab() {
         </Card>
 
         {/* Card 2: Valor */}
-        <Card className="bg-gray-100 border-0">
+        <Card className="bg-secondary border-0">
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Valor</p>
-            <p className="text-xl font-bold text-gray-600">R$ 0,00</p>
-            <p className="text-xs text-gray-500 mt-1">por mês</p>
+            <p className="text-sm text-muted-foreground mb-2">Valor</p>
+            <p className="text-xl font-bold text-foreground">R$ 0,00</p>
+            <p className="text-xs text-muted-foreground mt-1">por mês</p>
           </CardContent>
         </Card>
 
         {/* Card 3: Data de Renovação */}
-        <Card className="bg-gray-100 border-0">
+        <Card className="bg-secondary border-0">
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Renovação</p>
-            <p className="text-xl font-bold text-gray-600">-</p>
-            <p className="text-xs text-gray-500 mt-1">Plano gratuito</p>
+            <p className="text-sm text-muted-foreground mb-2">Renovação</p>
+            <p className="text-xl font-bold text-foreground">-</p>
+            <p className="text-xs text-muted-foreground mt-1">Plano gratuito</p>
           </CardContent>
         </Card>
 
         {/* Card 4: Consumo */}
-        <Card className="bg-gray-100 border-0">
+        <Card className="bg-secondary border-0">
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600 mb-2">Consumo</p>
-            <p className="text-xl font-bold mb-3 text-gray-600">{usage?.current || 0} / 5</p>
-            <Progress value={(usage?.current || 0) / 5 * 100} className="h-2 bg-gray-300" />
+            <p className="text-sm text-muted-foreground mb-2">Consumo</p>
+            <p className="text-xl font-bold mb-3 text-foreground">{usage?.current || 0} / 5</p>
+            <Progress value={(usage?.current || 0) / 5 * 100} className="h-2 bg-muted" />
             {(usage?.current || 0) >= 4 && <p className="text-xs text-yellow-600 font-medium mt-2">Próximo do limite</p>}
           </CardContent>
         </Card>
@@ -479,9 +473,10 @@ export function SubscriptionTab() {
       {/* Footer Logo */}
       <div className="flex flex-col items-center pt-0 pb-4">
         <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
-        <p className="text-xs text-gray-500 -mt-4">
+        <p className="text-xs text-muted-foreground -mt-4">
           © {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.
         </p>
       </div>
-    </div>;
+    </div>
+  );
 }
