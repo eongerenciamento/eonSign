@@ -379,13 +379,6 @@ const Drive = () => {
         variant: "destructive",
       });
     } else {
-      const targetFolderName = targetFolderId 
-        ? allFolders.find(f => f.id === targetFolderId)?.name || "pasta selecionada"
-        : "eonDrive";
-      toast({
-        title: "✓ Pasta movida com sucesso",
-        description: `Movida para ${targetFolderName}`,
-      });
       loadFolders();
       loadAllFolders();
     }

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronRight, ChevronDown, Folder, Check } from "lucide-react";
+import { ChevronRight, ChevronDown, Folder, Check, Loader2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -34,14 +34,14 @@ export const MoveFolderSheet = ({
   onMove,
 }: MoveFolderSheetProps) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [selectedId, setSelectedId] = useState<string | null | undefined>(undefined);
+  const [isMoving, setIsMoving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Build folder tree structure
   const folderTree = useMemo(() => {
     const folderMap = new Map<string, FolderNode>();
     const rootFolders: FolderNode[] = [];
 
-    // Filter out the folder being moved and its descendants
     const getDescendantIds = (folderId: string): Set<string> => {
       const descendants = new Set<string>();
       const queue = [folderId];
@@ -60,12 +60,10 @@ export const MoveFolderSheet = ({
     const excludedIds = getDescendantIds(currentFolderId);
     const availableFolders = folders.filter(f => !excludedIds.has(f.id));
 
-    // Create nodes
     availableFolders.forEach(folder => {
       folderMap.set(folder.id, { ...folder, children: [] });
     });
 
-    // Build tree
     availableFolders.forEach(folder => {
       const node = folderMap.get(folder.id)!;
       if (folder.parent_folder_id && folderMap.has(folder.parent_folder_id)) {
@@ -92,25 +90,28 @@ export const MoveFolderSheet = ({
   };
 
   const handleMove = (folderId: string | null) => {
-    setSelectedId(folderId);
+    setIsMoving(true);
+    
     setTimeout(() => {
+      setIsMoving(false);
+      setShowSuccess(true);
       onMove(folderId);
-      onOpenChange(false);
-      setSelectedId(undefined);
-    }, 300);
+      
+      setTimeout(() => {
+        setShowSuccess(false);
+        onOpenChange(false);
+      }, 600);
+    }, 400);
   };
 
   const renderFolder = (folder: FolderNode, level: number = 0) => {
     const hasChildren = folder.children.length > 0;
     const isExpanded = expandedFolders.has(folder.id);
-    const isSelected = selectedId === folder.id;
 
     return (
       <div key={folder.id}>
         <div
-          className={`flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-all duration-300 ${
-            isSelected ? "bg-green-100 scale-[1.02]" : ""
-          }`}
+          className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
           style={{ paddingLeft: `${level * 16 + 12}px` }}
           onClick={() => handleMove(folder.id)}
         >
@@ -131,9 +132,9 @@ export const MoveFolderSheet = ({
             )}
           </button>
           
-          <Folder className={`w-5 h-5 transition-colors duration-300 ${isSelected ? "text-green-600" : "text-gray-500"}`} strokeWidth={1.5} />
-          <span className={`text-sm flex-1 transition-colors duration-300 ${isSelected ? "text-green-700 font-medium" : "text-gray-700"}`}>{folder.name}</span>
-          <Check className={`w-4 h-4 transition-all duration-300 ${isSelected ? "text-green-600 scale-125" : "text-gray-400"}`} />
+          <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
+          <span className="text-sm text-gray-700 flex-1">{folder.name}</span>
+          <Check className="w-4 h-4 text-gray-400" />
         </div>
 
         {hasChildren && isExpanded && (
@@ -145,11 +146,24 @@ export const MoveFolderSheet = ({
     );
   };
 
-  const isRootSelected = selectedId === null;
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[400px] sm:w-[450px]">
+        {/* Loading/Success Overlay */}
+        {(isMoving || showSuccess) && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            {isMoving ? (
+              <Loader2 className="w-12 h-12 text-blue-700 animate-spin" />
+            ) : (
+              <div className="animate-scale-in">
+                <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center">
+                  <Check className="w-8 h-8 text-white" strokeWidth={3} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <SheetHeader>
           <SheetTitle className="text-gray-700">Mover para</SheetTitle>
         </SheetHeader>
@@ -157,15 +171,13 @@ export const MoveFolderSheet = ({
         <ScrollArea className="h-[calc(100vh-120px)] mt-4">
           {/* Root option - eonDrive */}
           <div
-            className={`flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-all duration-300 ${
-              isRootSelected ? "bg-green-100 scale-[1.02]" : ""
-            }`}
+            className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
             onClick={() => handleMove(null)}
           >
             <span className="w-5" />
-            <Folder className={`w-5 h-5 transition-colors duration-300 ${isRootSelected ? "text-green-600" : "text-gray-500"}`} strokeWidth={1.5} />
-            <span className={`text-sm flex-1 transition-colors duration-300 ${isRootSelected ? "text-green-700 font-medium" : "text-gray-700"}`}>eonDrive</span>
-            <Check className={`w-4 h-4 transition-all duration-300 ${isRootSelected ? "text-green-600 scale-125" : "text-gray-400"}`} />
+            <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
+            <span className="text-sm text-gray-700 flex-1">eonDrive</span>
+            <Check className="w-4 h-4 text-gray-400" />
           </div>
 
           {/* Folder tree */}
