@@ -414,9 +414,6 @@ const Settings = () => {
                   <Moon className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
-              <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
-                Certificado A1 R$109.90
-              </Button>
             </div>
           </div>
 
