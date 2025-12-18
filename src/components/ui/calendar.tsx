@@ -245,7 +245,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <SelectedDaysContext.Provider value={selectedDays}>
       <div className={cn(
-        "rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl",
+        "rounded-2xl bg-gray-500/10 dark:bg-gray-500/10 backdrop-blur-xl",
         "border border-white/20 dark:border-white/10 shadow-2xl p-4 pointer-events-auto",
         className
       )}>

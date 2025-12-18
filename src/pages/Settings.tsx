@@ -10,7 +10,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock, Sun, Moon, LogOut } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock, Sun, Moon, LogOut, CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, parse } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
@@ -535,7 +540,28 @@ const Settings = () => {
 
                     <div className="grid gap-2">
                       <Label htmlFor="admin-birth-date">Data de Nascimento</Label>
-                      <Input id="admin-birth-date" type="date" value={adminBirthDate} onChange={e => setAdminBirthDate(e.target.value)} className="text-foreground border-0 bg-muted dark:bg-secondary" />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal border-0 bg-muted dark:bg-secondary",
+                              !adminBirthDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {adminBirthDate ? format(parse(adminBirthDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione a data</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
+                            onSelect={(date) => setAdminBirthDate(date ? format(date, "yyyy-MM-dd") : "")}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
 
