@@ -869,10 +869,10 @@ export const DocumentsTable = ({
       <div className="hidden md:block rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-none bg-white hover:bg-white">
-              <TableHead>Nome do Documento</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Assinaturas</TableHead>
+            <TableRow className="border-none bg-card hover:bg-card">
+              <TableHead className="text-foreground/70">Nome do Documento</TableHead>
+              <TableHead className="text-foreground/70">Status</TableHead>
+              <TableHead className="text-foreground/70">Assinaturas</TableHead>
               <TableHead className="w-[200px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -880,33 +880,33 @@ export const DocumentsTable = ({
             {documents.map((doc, index) => {
             const statusInfo = statusConfig[doc.status];
             const progressPercentage = doc.signedBy / doc.signers * 100;
-            const prescriptionBg = isPrescription(doc) ? 'bg-purple-50' : '';
-            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-white' : 'bg-gray-100')} hover:opacity-80`}>
+            const prescriptionBg = isPrescription(doc) ? 'bg-purple-50 dark:bg-purple-900/20' : '';
+            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-card' : 'bg-secondary/50')} hover:opacity-80`}>
                   <TableCell>
                     <div 
                       className={`flex items-center gap-2 ${doc.isEnvelope ? 'cursor-pointer hover:opacity-70' : ''}`}
                       onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
                     >
                       {doc.isEnvelope ? (
-                        <FolderOpen className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+                        <FolderOpen className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                       ) : (
-                        <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+                        <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                       )}
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-600">{doc.name}</span>
+                          <span className="font-medium text-foreground/80">{doc.name}</span>
                           {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                            <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                            <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
                               {doc.documentCount} docs
                             </span>
                           )}
                         </div>
                         {/* Patient name for prescriptions */}
                         {isPrescription(doc) && doc.patientName && (
-                          <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
+                          <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
                         )}
                         <div className="flex items-center gap-2">
-                          <p className="text-xs text-gray-500">{doc.createdAt}</p>
+                          <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
                           {/* For prescriptions, show prescription doc type instead of signature mode */}
                           {isPrescription(doc) && doc.prescriptionDocType ? (
                             <Badge variant="outline" className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
@@ -955,12 +955,12 @@ export const DocumentsTable = ({
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 flex items-center justify-center">
                           <svg className="w-12 h-12 transform -rotate-90 absolute inset-0">
-                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" className="text-gray-200" />
-                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={`${2 * Math.PI * 20}`} strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`} className={doc.status === "expired" ? "text-red-700" : "text-blue-700"} strokeLinecap="round" style={{
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" className="text-muted/50" />
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={`${2 * Math.PI * 20}`} strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`} className={doc.status === "expired" ? "text-red-500" : "text-blue-500"} strokeLinecap="round" style={{
                           transition: 'stroke-dashoffset 1s ease-in-out'
                         }} />
                           </svg>
-                          <span className="text-[11px] font-bold relative z-10 text-blue-700">
+                          <span className="text-[11px] font-bold relative z-10 text-foreground">
                             {doc.signedBy}/{doc.signers}
                           </span>
                         </div>
@@ -973,7 +973,7 @@ export const DocumentsTable = ({
                           <PopoverTrigger asChild>
                             <Button 
                               variant="ghost" 
-                              className="w-[180px] justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700 hover:text-gray-700"
+                              className="w-[180px] justify-between bg-secondary/50 backdrop-blur-sm border-none hover:bg-secondary text-muted-foreground hover:text-foreground"
                             >
                               <span className="flex items-center gap-2">
                                 <Folder className="w-4 h-4" />
@@ -982,17 +982,17 @@ export const DocumentsTable = ({
                               <ChevronDown className="w-4 h-4 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[200px] p-1 bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                          <PopoverContent className="w-[200px] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
                             {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
                               <div 
                                 key={folder.id}
-                                className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-300/50"
+                                className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
                                 style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                               >
                                 {hasChildren ? (
                                   <span 
                                     onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                    className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                                    className="cursor-pointer hover:bg-accent rounded p-0.5"
                                   >
                                     {expandedFolders.has(folder.id) ? (
                                       <ChevronDown className="w-3 h-3" />
@@ -1003,14 +1003,14 @@ export const DocumentsTable = ({
                                 ) : (
                                   <span className="w-4" />
                                 )}
-                                {level > 0 && <span className="text-gray-400 mr-1">└─</span>}
+                                {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
                                 <span className="flex-1 cursor-default">{folder.name}</span>
                                 <span 
                                   onClick={() => handleFolderSelect(doc.id, folder.id)}
-                                  className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                                  className="cursor-pointer hover:bg-accent rounded p-0.5"
                                   title="Mover para esta pasta"
                                 >
-                                  <Check className="w-3 h-3 text-gray-500" />
+                                  <Check className="w-3 h-3 text-muted-foreground" />
                                 </span>
                               </div>
                             ))}
@@ -1029,7 +1029,7 @@ export const DocumentsTable = ({
                           onClick={() => handleSignDocument(doc.id, doc.name)}
                           title="Assinar documento"
                         >
-                          <PenTool className="w-4 h-4 text-gray-500" />
+                          <PenTool className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       <Button 
@@ -1039,7 +1039,7 @@ export const DocumentsTable = ({
                         onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
                         title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
                       >
-                        <Eye className="w-4 h-4 text-gray-500" />
+                        <Eye className="w-4 h-4 text-muted-foreground" />
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -1048,7 +1048,7 @@ export const DocumentsTable = ({
                         onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
                         title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
                       >
-                        <Download className="w-4 h-4 text-gray-500" />
+                        <Download className="w-4 h-4 text-muted-foreground" />
                       </Button>
                       {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
                         <Button 
@@ -1060,9 +1060,9 @@ export const DocumentsTable = ({
                           disabled={downloadingCertificateId === doc.id}
                         >
                           {downloadingCertificateId === doc.id ? (
-                            <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                           ) : (
-                            <FileDown className="w-4 h-4 text-gray-500" />
+                            <FileDown className="w-4 h-4 text-muted-foreground" />
                           )}
                         </Button>
                       )}
@@ -1074,7 +1074,7 @@ export const DocumentsTable = ({
                           onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
                           title="Baixar PDF com evidências das assinaturas coletadas"
                         >
-                          <FileCheck className="w-4 h-4 text-gray-500" />
+                          <FileCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       {doc.bryEnvelopeUuid && (
@@ -1085,7 +1085,7 @@ export const DocumentsTable = ({
                           onClick={() => handleOpenValidation(doc.id)}
                           title="Validar assinaturas no portal BRy"
                         >
-                          <ShieldCheck className="w-4 h-4 text-gray-500" />
+                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
@@ -1096,7 +1096,7 @@ export const DocumentsTable = ({
                           onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
                           title="Visualizar certificado de validação"
                         >
-                          <ShieldCheck className="w-4 h-4 text-gray-500" />
+                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       {doc.status !== 'signed' && (
@@ -1107,12 +1107,12 @@ export const DocumentsTable = ({
                           onClick={() => handleResendNotifications(doc.id)}
                           title="Reenviar e-mail e WhatsApp para signatários pendentes"
                         >
-                          <Mail className="w-4 h-4 text-gray-500" />
+                          <Mail className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       {doc.signedBy === 0 && (
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
-                          <Trash2 className="w-4 h-4 text-gray-500" />
+                          <Trash2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                     </div>
@@ -1127,12 +1127,12 @@ export const DocumentsTable = ({
       <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
-        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100' : 'bg-gray-100';
+        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100 dark:bg-purple-900/20' : 'bg-secondary';
         return <div key={doc.id} className={`${prescriptionBg} rounded-lg p-4 space-y-3`} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
                 {/* Date and Action Buttons on same line - ABOVE document name */}
                 <div className="flex items-center justify-between">
-                  <p className="text-gray-500 text-sm">{doc.createdAt}</p>
+                  <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
                   <div className="flex gap-1">
                     {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
                       <Button 
@@ -1142,7 +1142,7 @@ export const DocumentsTable = ({
                         onClick={() => handleSignDocument(doc.id, doc.name)}
                         title="Assinar documento"
                       >
-                        <PenTool className="w-4 h-4 text-gray-500" />
+                        <PenTool className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                     <Button 
@@ -1152,7 +1152,7 @@ export const DocumentsTable = ({
                       onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
                       title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
                     >
-                      <Eye className="w-4 h-4 text-gray-500" />
+                      <Eye className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -1161,7 +1161,7 @@ export const DocumentsTable = ({
                       onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
                       title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
                     >
-                      <Download className="w-4 h-4 text-gray-500" />
+                      <Download className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
                       <Button 
@@ -1173,9 +1173,9 @@ export const DocumentsTable = ({
                         disabled={downloadingCertificateId === doc.id}
                       >
                         {downloadingCertificateId === doc.id ? (
-                          <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+                          <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                         ) : (
-                          <FileDown className="w-4 h-4 text-gray-500" />
+                          <FileDown className="w-4 h-4 text-muted-foreground" />
                         )}
                       </Button>
                     )}
@@ -1187,7 +1187,7 @@ export const DocumentsTable = ({
                         onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
                         title="Baixar PDF com evidências das assinaturas coletadas"
                       >
-                        <FileCheck className="w-4 h-4 text-gray-500" />
+                        <FileCheck className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                     {doc.bryEnvelopeUuid && (
@@ -1198,7 +1198,7 @@ export const DocumentsTable = ({
                         onClick={() => handleOpenValidation(doc.id)}
                         title="Validar assinaturas no portal BRy"
                       >
-                        <ShieldCheck className="w-4 h-4 text-gray-500" />
+                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                     {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
@@ -1209,7 +1209,7 @@ export const DocumentsTable = ({
                         onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
                         title="Visualizar certificado de validação"
                       >
-                        <ShieldCheck className="w-4 h-4 text-gray-500" />
+                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                     {doc.status !== 'signed' && (
@@ -1220,12 +1220,12 @@ export const DocumentsTable = ({
                         onClick={() => handleResendNotifications(doc.id)}
                         title="Reenviar e-mail e WhatsApp para signatários pendentes"
                       >
-                        <Mail className="w-4 h-4 text-gray-500" />
+                        <Mail className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                     {doc.signedBy === 0 && (
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
-                        <Trash2 className="w-4 h-4 text-gray-500" />
+                        <Trash2 className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
                   </div>
@@ -1238,20 +1238,20 @@ export const DocumentsTable = ({
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     {doc.isEnvelope ? (
-                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+                      <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                     ) : (
-                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+                      <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                     )}
-                    <p className="font-medium">{doc.name}</p>
+                    <p className="font-medium text-foreground">{doc.name}</p>
                     {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                      <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                         {doc.documentCount} docs
                       </span>
                     )}
                   </div>
                   {/* Patient name for prescriptions */}
                   {isPrescription(doc) && doc.patientName && (
-                    <p className="text-xs text-gray-500">Paciente: {doc.patientName}</p>
+                    <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
                   )}
                   {/* For prescriptions, show prescription doc type instead of signature mode */}
                   {isPrescription(doc) && doc.prescriptionDocType ? (
@@ -1303,7 +1303,7 @@ export const DocumentsTable = ({
                     <PopoverTrigger asChild>
                       <Button 
                         variant="ghost" 
-                        className="w-full justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700 hover:text-gray-700"
+                        className="w-full justify-between bg-muted/50 backdrop-blur-sm border-none hover:bg-muted text-muted-foreground hover:text-foreground"
                       >
                         <span className="flex items-center gap-2">
                           <Folder className="w-4 h-4" />
@@ -1312,17 +1312,17 @@ export const DocumentsTable = ({
                         <ChevronDown className="w-4 h-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-1 bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                    <PopoverContent className="w-[200px] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
                       {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
                         <div 
                           key={folder.id}
-                          className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-300/50"
+                          className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
                           style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                         >
                           {hasChildren ? (
                             <span 
                               onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                              className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                              className="cursor-pointer hover:bg-accent rounded p-0.5"
                             >
                               {expandedFolders.has(folder.id) ? (
                                 <ChevronDown className="w-3 h-3" />
@@ -1333,17 +1333,17 @@ export const DocumentsTable = ({
                           ) : (
                             <span className="w-4" />
                           )}
-                          {level > 0 && <span className="text-gray-400 mr-1">└─</span>}
+                          {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
                           <span className="flex-1 cursor-default">{folder.name}</span>
                           <span 
                             onClick={() => {
                               handleFolderSelect(doc.id, folder.id);
                               setOpenFolderPopovers(prev => ({ ...prev, [`mobile-${doc.id}`]: false }));
                             }}
-                            className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                            className="cursor-pointer hover:bg-accent rounded p-0.5"
                             title="Mover para esta pasta"
                           >
-                            <Check className="w-3 h-3 text-gray-500" />
+                            <Check className="w-3 h-3 text-muted-foreground" />
                           </span>
                         </div>
                       ))}

@@ -59,25 +59,25 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 0 0% 12%;
+    --background: 0 0% 18%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 16%;
+    --card: 0 0% 22%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 16%;
+    --popover: 0 0% 20%;
     --popover-foreground: 0 0% 95%;
 
     --primary: 214 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 20%;
+    --secondary: 0 0% 26%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 24%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 0 0% 22%;
+    --accent: 0 0% 28%;
     --accent-foreground: 0 0% 95%;
 
     --success: 152 70% 50%;
@@ -89,22 +89,22 @@ All colors MUST be HSL.
     --destructive: 0 85% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 20%;
+    --border: 0 0% 30%;
+    --input: 0 0% 24%;
     --ring: 214 95% 55%;
 
-    --sidebar-background: 0 0% 8%;
+    --sidebar-background: 0 0% 14%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 214 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent: 0 0% 20%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 18%;
+    --sidebar-border: 0 0% 22%;
     --sidebar-ring: 214 95% 55%;
 
     /* Layout gradient colors - dark mode with charcoal tones */
-    --layout-gradient-from: 0 0% 8%;
-    --layout-gradient-to: 0 0% 6%;
+    --layout-gradient-from: 0 0% 14%;
+    --layout-gradient-to: 0 0% 12%;
   }
 }
 
