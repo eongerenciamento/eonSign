@@ -181,7 +181,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           {/* Action buttons row */}
-          <TableRow className="bg-white border-0">
+          <TableRow className="bg-white border-0 border-b border-gray-200/50">
             <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
@@ -273,9 +273,8 @@ function FAQSection() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pt-4">
-      <div className="text-center space-y-2">
+      <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
-        <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
       </div>
       <div className="rounded-lg overflow-hidden">
         <Accordion type="single" collapsible className="w-full">
