@@ -893,7 +893,7 @@ export const DocumentsTable = ({
                           const status = doc.signerStatuses?.[idx] || 'pending';
                           const email = doc.signerEmails?.[idx] || '';
                           const phone = doc.signerPhones?.[idx] || '';
-                          const bgColor = status === 'signed' ? 'bg-green-700' : status === 'rejected' ? 'bg-red-700' : 'bg-yellow-700';
+                          const bgColor = status === 'signed' ? 'bg-blue-700' : status === 'rejected' ? 'bg-red-700' : 'bg-gray-400';
                           return (
                             <Tooltip key={idx}>
                               <TooltipTrigger asChild>
@@ -1203,7 +1203,7 @@ export const DocumentsTable = ({
                           return (
                             <Tooltip key={idx}>
                               <TooltipTrigger asChild>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-green-700" : status === "pending" ? "bg-yellow-700" : "bg-red-700"}`}>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}>
                                   {name ? getInitials(name) : idx + 1}
                                 </div>
                               </TooltipTrigger>
