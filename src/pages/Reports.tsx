@@ -721,12 +721,12 @@ const Reports = () => {
                       <Download className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-white">
-                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                  <DropdownMenuContent align="end" className="bg-gray-200/70 backdrop-blur-sm border-0">
+                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer hover:bg-transparent focus:bg-transparent">
                       <FileText className="h-4 w-4 mr-2 text-gray-500" />
                       PDF
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
+                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer hover:bg-transparent focus:bg-transparent">
                       <FileText className="h-4 w-4 mr-2 text-gray-500" />
                       XLS
                     </DropdownMenuItem>
