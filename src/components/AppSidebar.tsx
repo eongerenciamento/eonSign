@@ -165,16 +165,16 @@ export function AppSidebar() {
     window.open('https://certifica.eonhub.com.br', '_blank');
   };
 
-  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-layout-gradient`} collapsible="icon">
+  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-sidebar-background`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
-        <SidebarTrigger className="bg-sidebar-background text-sidebar-foreground hover:bg-white/10">
+        <SidebarTrigger className="text-sidebar-foreground hover:bg-sidebar-accent">
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
             <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
-              <img alt="Éon Sign" className="h-13 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
+              <img alt="Éon Sign" className="h-13 w-auto object-contain cursor-pointer dark:opacity-80" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
             </a>
           </div>}
       </div>
@@ -188,7 +188,7 @@ export function AppSidebar() {
                 const showBadge = item.title === "Documentos" && pendingDocuments > 0 || item.title === "Configurações" && supportTickets > 0;
                 const badgeCount = item.title === "Documentos" ? pendingDocuments : supportTickets;
                 const menuButton = <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                      <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-white/10 text-sidebar-foreground data-[active=true]:bg-white/20">
+                      <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-sidebar-accent text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground">
                         <item.icon className="w-5 h-5" />
                         {!collapsed && <span className="flex items-center gap-2 flex-1 font-sans font-light text-sm">
                             {item.title}

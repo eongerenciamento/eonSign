@@ -59,25 +59,25 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 215 60% 6%;
-    --foreground: 210 20% 95%;
+    --background: 0 0% 13%;
+    --foreground: 0 0% 90%;
 
-    --card: 215 40% 13%;
-    --card-foreground: 210 20% 95%;
+    --card: 0 0% 18%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 215 40% 13%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 0 0% 20%;
+    --popover-foreground: 0 0% 90%;
 
     --primary: 214 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 35% 18%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 0 0% 22%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 215 35% 16%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 0 0% 25%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 152 70% 50%;
+    --accent: 0 0% 28%;
     --accent-foreground: 0 0% 100%;
 
     --success: 152 70% 50%;
@@ -89,22 +89,22 @@ All colors MUST be HSL.
     --destructive: 0 85% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 30% 22%;
-    --input: 215 30% 20%;
+    --border: 0 0% 25%;
+    --input: 0 0% 22%;
     --ring: 214 95% 55%;
 
-    --sidebar-background: 215 50% 10%;
-    --sidebar-foreground: 210 20% 95%;
+    --sidebar-background: 0 0% 18%;
+    --sidebar-foreground: 0 0% 65%;
     --sidebar-primary: 214 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 40% 15%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 35% 18%;
+    --sidebar-accent: 0 0% 25%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 0 0% 25%;
     --sidebar-ring: 214 95% 55%;
 
-    /* Layout gradient colors - dark mode */
-    --layout-gradient-from: 215 50% 10%;
-    --layout-gradient-to: 215 60% 6%;
+    /* Layout gradient colors - dark mode (solid gray) */
+    --layout-gradient-from: 0 0% 13%;
+    --layout-gradient-to: 0 0% 13%;
   }
 }
 
@@ -113,8 +113,12 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    @apply transition-colors duration-300;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
   }
 
   /* Hide scrollbar for horizontal scroll */
