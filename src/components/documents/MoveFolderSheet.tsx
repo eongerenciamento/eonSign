@@ -1,12 +1,10 @@
 import { useState, useMemo } from "react";
 import { ChevronRight, ChevronDown, Folder, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -36,7 +34,6 @@ export const MoveFolderSheet = ({
   onMove,
 }: MoveFolderSheetProps) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
   // Build folder tree structure
   const folderTree = useMemo(() => {
@@ -80,7 +77,8 @@ export const MoveFolderSheet = ({
     return rootFolders;
   }, [folders, currentFolderId]);
 
-  const toggleExpanded = (folderId: string) => {
+  const toggleExpanded = (folderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpandedFolders(prev => {
       const newSet = new Set(prev);
       if (newSet.has(folderId)) {
@@ -92,33 +90,25 @@ export const MoveFolderSheet = ({
     });
   };
 
-  const handleSelect = (folderId: string | null) => {
-    setSelectedFolderId(folderId);
-  };
-
-  const handleConfirm = () => {
-    onMove(selectedFolderId);
+  const handleMove = (folderId: string | null) => {
+    onMove(folderId);
     onOpenChange(false);
-    setSelectedFolderId(null);
   };
 
   const renderFolder = (folder: FolderNode, level: number = 0) => {
     const hasChildren = folder.children.length > 0;
     const isExpanded = expandedFolders.has(folder.id);
-    const isSelected = selectedFolderId === folder.id;
 
     return (
       <div key={folder.id}>
         <div
-          className={`flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors ${
-            isSelected ? "bg-gray-200" : ""
-          }`}
+          className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
           style={{ paddingLeft: `${level * 16 + 12}px` }}
+          onClick={() => handleMove(folder.id)}
         >
           <button
             onClick={(e) => {
-              e.stopPropagation();
-              if (hasChildren) toggleExpanded(folder.id);
+              if (hasChildren) toggleExpanded(folder.id, e);
             }}
             className="w-5 h-5 flex items-center justify-center"
           >
@@ -133,24 +123,9 @@ export const MoveFolderSheet = ({
             )}
           </button>
           
-          <div
-            className="flex items-center gap-2 flex-1"
-            onClick={() => handleSelect(folder.id)}
-          >
-            <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
-            <span className="text-sm text-gray-700 flex-1">{folder.name}</span>
-          </div>
-
-          <button
-            onClick={() => handleSelect(folder.id)}
-            className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-              isSelected
-                ? "bg-[#273d60] border-[#273d60]"
-                : "border-gray-300 hover:border-gray-400"
-            }`}
-          >
-            {isSelected && <Check className="w-3 h-3 text-white" />}
-          </button>
+          <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
+          <span className="text-sm text-gray-700 flex-1">{folder.name}</span>
+          <Check className="w-4 h-4 text-gray-400" />
         </div>
 
         {hasChildren && isExpanded && (
@@ -169,48 +144,21 @@ export const MoveFolderSheet = ({
           <SheetTitle className="text-gray-700">Mover para</SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-          {/* Root option */}
+        <ScrollArea className="h-[calc(100vh-120px)] mt-4">
+          {/* Root option - eonDrive */}
           <div
-            className={`flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors ${
-              selectedFolderId === null ? "bg-gray-200" : ""
-            }`}
-            onClick={() => handleSelect(null)}
+            className="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={() => handleMove(null)}
           >
             <span className="w-5" />
             <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
-            <span className="text-sm text-gray-700 flex-1">Raiz (Sem pasta)</span>
-            <button
-              onClick={() => handleSelect(null)}
-              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                selectedFolderId === null
-                  ? "bg-[#273d60] border-[#273d60]"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              {selectedFolderId === null && <Check className="w-3 h-3 text-white" />}
-            </button>
+            <span className="text-sm text-gray-700 flex-1">eonDrive</span>
+            <Check className="w-4 h-4 text-gray-400" />
           </div>
 
           {/* Folder tree */}
           {folderTree.map(folder => renderFolder(folder))}
         </ScrollArea>
-
-        <SheetFooter className="mt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            className="flex-1 bg-[#273d60] hover:bg-[#1e3050] text-white"
-          >
-            Mover
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
