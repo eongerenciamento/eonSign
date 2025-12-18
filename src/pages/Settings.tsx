@@ -409,7 +409,7 @@ const Settings = () => {
                   <Switch
                     checked={isDark}
                     onCheckedChange={toggleTheme}
-                    className="data-[state=checked]:bg-slate-700"
+                    className="data-[state=checked]:bg-muted-foreground"
                   />
                   <Moon className="h-4 w-4 text-muted-foreground" />
                 </div>
