@@ -13,6 +13,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
+import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { CertificateUpload } from "@/components/settings/CertificateUpload";
 import { useQuery } from "@tanstack/react-query";
@@ -59,6 +60,18 @@ const Settings = () => {
     certificate_serial_number: string | null;
     certificate_uploaded_at: string | null;
   } | null>(null);
+
+  // Selected ticket for chat
+  const [selectedTicket, setSelectedTicket] = useState<{
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    ticket_number: string;
+    created_at: string;
+    user_id: string;
+  } | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -675,7 +688,14 @@ const Settings = () => {
                         const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
                         const category = categoryMatch ? categoryMatch[1] : '-';
                         const priority = priorityMatch ? priorityMatch[1] : '-';
-                        return <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                        return <tr 
+                          key={ticket.id} 
+                          className={`hover:bg-gray-50 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}
+                          onClick={() => {
+                            setSelectedTicket(ticket);
+                            setChatOpen(true);
+                          }}
+                        >
                               <td className="p-4 text-sm">{ticket.title}</td>
                               <td className="p-4 text-sm text-gray-600">
                                 {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
@@ -704,7 +724,14 @@ const Settings = () => {
                     const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
                     const category = categoryMatch ? categoryMatch[1] : '-';
                     const priority = priorityMatch ? priorityMatch[1] : '-';
-                    return <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                    return <div 
+                      key={ticket.id} 
+                      className={`p-4 space-y-3 rounded-lg cursor-pointer ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setChatOpen(true);
+                      }}
+                    >
                         <div>
                           <p className="text-xs text-gray-500">Título</p>
                           <p className="text-sm font-medium">{ticket.title}</p>
@@ -758,6 +785,14 @@ const Settings = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Ticket Chat Sheet */}
+      <TicketChatSheet
+        ticket={selectedTicket}
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        onTicketUpdated={() => refetchTickets()}
+      />
       
     </Layout>;
 };
