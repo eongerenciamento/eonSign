@@ -235,11 +235,19 @@ export const EnvelopeDocumentsDialog = ({
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-700 truncate">{doc.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {doc.signed_by}/{doc.signers} assinaturas
-                  </p>
+                </div>
+                <div className="relative w-8 h-8 flex items-center justify-center mr-2">
+                  <svg className="w-8 h-8 transform -rotate-90 absolute inset-0">
+                    <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" className="text-gray-200" />
+                    <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray={`${2 * Math.PI * 12}`} strokeDashoffset={`${2 * Math.PI * 12 * (1 - (doc.signers > 0 ? doc.signed_by / doc.signers : 0))}`} className={doc.signed_by === doc.signers ? "text-green-700" : "text-blue-700"} strokeLinecap="round" style={{
+                      transition: 'stroke-dashoffset 1s ease-in-out'
+                    }} />
+                  </svg>
+                  <span className={`text-[8px] font-bold relative z-10 ${doc.signed_by === doc.signers ? "text-green-700" : "text-blue-700"}`}>
+                    {doc.signed_by}/{doc.signers}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
