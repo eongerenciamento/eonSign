@@ -237,7 +237,7 @@ export default function Auth() {
         </Button>
 
         {/* Links */}
-        <div className="flex flex-col items-center gap-1 pt-2">
+        <div className="flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2">
           <button
             type="button"
             onClick={handleForgotPassword}
@@ -247,6 +247,7 @@ export default function Auth() {
             {resettingPassword && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
             Esqueci a senha
           </button>
+          <span className="text-gray-300">·</span>
           <a
             href="https://eonhub.com.br/sign"
             target="_blank"
@@ -255,6 +256,7 @@ export default function Auth() {
           >
             Criar nova conta
           </a>
+          <span className="text-gray-300">·</span>
           <button
             type="button"
             onClick={() => navigate("/install")}
@@ -262,15 +264,15 @@ export default function Auth() {
           >
             Instale o App
           </button>
-          <a
-            href="https://certifica.eonhub.com.br"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="md:hidden mt-3 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition-colors"
-          >
-            Certificado Digital <span className="text-xs">R$</span>109.90
-          </a>
         </div>
+        <a
+          href="https://certifica.eonhub.com.br"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="md:hidden mt-3 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition-colors block mx-auto w-fit"
+        >
+          Certificado Digital <span className="text-xs">R$</span>109.90
+        </a>
       </form>
     </Form>
   );
