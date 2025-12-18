@@ -83,19 +83,19 @@ const statusConfig = {
 const signatureModeConfig = {
   SIMPLE: {
     label: "Simples",
-    className: "bg-white border border-blue-700 text-blue-700"
+    className: "bg-transparent border border-blue-700 text-blue-700"
   },
   ADVANCED: {
     label: "Avançada",
-    className: "bg-white border border-green-600 text-green-600"
+    className: "bg-transparent border border-green-600 text-green-600"
   },
   QUALIFIED: {
     label: "ICP-Brasil",
-    className: "bg-white border border-green-600 text-green-600"
+    className: "bg-transparent border border-green-600 text-green-600"
   },
   PRESCRIPTION: {
     label: "Prescrição",
-    className: "bg-white border border-pink-500 text-pink-500"
+    className: "bg-transparent border border-pink-500 text-pink-500"
   }
 };
 
