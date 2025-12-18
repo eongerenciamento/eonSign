@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import useEmblaCarousel from "embla-carousel-react";
 const SUBSCRIPTION_TIERS = [
   {
     name: "Grátis",
@@ -54,6 +55,175 @@ const SUBSCRIPTION_TIERS = [
     description: "Documentos ilimitados",
   },
 ];
+
+// Plans Carousel Component with dots navigation
+interface PlansCarouselProps {
+  tiers: typeof SUBSCRIPTION_TIERS;
+  currentPlanLimit?: number;
+  isFreeTier?: boolean;
+  processingCheckout: boolean;
+  onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0]) => void;
+}
+
+function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout, onUpgrade }: PlansCarouselProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on("select", onSelect);
+    onSelect();
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (emblaApi) emblaApi.scrollTo(index);
+  }, [emblaApi]);
+
+  return (
+    <div className="pt-4">
+      <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
+      <div className="overflow-hidden max-w-6xl mx-auto" ref={emblaRef}>
+        <div className="flex gap-4">
+          {tiers.map((tier) => {
+            const isCurrentPlan = isFreeTier 
+              ? tier.priceId === "free" 
+              : tier.limit === currentPlanLimit;
+            const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
+
+            return (
+              <div key={tier.name} className="flex-shrink-0 w-[320px]">
+                <Card
+                  className={`relative pt-8 h-full ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}
+                >
+                  {isCurrentPlan && (
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-lg text-gray-600">{tier.name}</CardTitle>
+                    <CardDescription>{tier.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="font-bold text-gray-500 text-2xl">
+                        {tier.price === 0 ? (
+                          "Grátis"
+                        ) : (
+                          <>
+                            R$ {tier.price.toFixed(2).replace(".", ",")}{" "}
+                            <span className="font-normal text-muted-foreground text-base">/ mês</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>
+                          {tier.limit >= 1000 ? (
+                            "Documentos / envelopes ilimitados"
+                          ) : (
+                            <>
+                              Até <strong>{tier.limit}</strong> documentos / envelopes
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>
+                          Usuários <strong>ilimitados</strong>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>Assinatura digital ICP-Brasil</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>Notificações por email/WhatsApp</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" ? (
+                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        ) : (
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        )}
+                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
+                          Geolocalização da assinatura
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" ? (
+                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        ) : (
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        )}
+                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Eon Drive</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {tier.priceId === "free" || tier.name === "Básico" ? (
+                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        ) : (
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        )}
+                        <span
+                          className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}
+                        >
+                          Biometria facial
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => onUpgrade(tier)}
+                      disabled={processingCheckout || isCurrentPlan}
+                      className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
+                      variant={isCurrentPlan ? "outline" : undefined}
+                    >
+                      {processingCheckout ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isCurrentPlan ? (
+                        "Plano Atual"
+                      ) : isDowngrade ? (
+                        "Downgrade"
+                      ) : (
+                        "Fazer Upgrade"
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {/* Dots navigation */}
+      <div className="flex justify-center gap-2 mt-6">
+        {scrollSnaps.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => scrollTo(index)}
+            className={`w-2 h-2 rounded-full transition-colors ${
+              index === selectedIndex ? "bg-gray-600" : "bg-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SubscriptionTab() {
   const [subscription, setSubscription] = useState<any>(null);
   const [usage, setUsage] = useState<{
@@ -248,123 +418,12 @@ export function SubscriptionTab() {
         </div>
 
         {/* Show all plans */}
-        <div className="pt-4">
-          <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
-          <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = tier.limit === subscription.document_limit;
-              const isDowngrade = tier.limit < subscription.document_limit;
-              const isUpgrade = tier.limit > subscription.document_limit;
-
-              return (
-                <Card
-                  key={tier.name}
-                  className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}
-                >
-                  {isCurrentPlan && (
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-                      <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-lg">{tier.name}</CardTitle>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-3xl font-bold">
-                        {tier.price === 0 ? (
-                          "Grátis"
-                        ) : (
-                          <>
-                            R$ {tier.price.toFixed(2).replace(".", ",")}{" "}
-                            <span className="text-lg font-normal text-muted-foreground">/ mês</span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>
-                          {tier.limit >= 1000 ? (
-                            "Documentos / envelopes ilimitados"
-                          ) : (
-                            <>
-                              Até <strong>{tier.limit}</strong> documentos / envelopes
-                            </>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>
-                          Usuários <strong>ilimitados</strong>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>Assinatura digital ICP-Brasil</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>Notificações por email/WhatsApp</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
-                          Geolocalização da assinatura
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Eon Drive</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" || tier.name === "Básico" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span
-                          className={
-                            tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""
-                          }
-                        >
-                          Biometria facial
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => handleUpgrade(tier)}
-                      disabled={processingCheckout || isCurrentPlan}
-                      className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
-                      variant={isCurrentPlan ? "outline" : undefined}
-                    >
-                      {processingCheckout ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isCurrentPlan ? (
-                        "Plano Atual"
-                      ) : isDowngrade ? (
-                        "Downgrade"
-                      ) : (
-                        "Fazer Upgrade"
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+        <PlansCarousel 
+          tiers={SUBSCRIPTION_TIERS}
+          currentPlanLimit={subscription.document_limit}
+          processingCheckout={processingCheckout}
+          onUpgrade={handleUpgrade}
+        />
 
         {/* Comparison Table */}
         <div className="space-y-4 pt-4">
@@ -676,114 +735,12 @@ export function SubscriptionTab() {
         <h2 className="text-xl font-semibold text-gray-600">Faça o Upgrade do seu Plano</h2>
       </div>
 
-      <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory max-w-6xl mx-auto">
-        {SUBSCRIPTION_TIERS.map((tier) => {
-          const isCurrentPlan = tier.priceId === "free";
-
-          return (
-            <Card
-              key={tier.name}
-              className={`relative flex-shrink-0 w-[320px] snap-start pt-8 ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}
-            >
-              {isCurrentPlan && (
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-                  <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-600">{tier.name}</CardTitle>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="font-bold text-gray-600 text-xl">
-                    {tier.price === 0 ? (
-                      "Grátis"
-                    ) : (
-                      <>
-                        R$ {tier.price.toFixed(2).replace(".", ",")}{" "}
-                        <span className="font-normal text-muted-foreground text-base">/ mês</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>
-                      {tier.limit >= 1000 ? (
-                        "Documentos / envelopes ilimitados"
-                      ) : (
-                        <>
-                          Até <strong>{tier.limit}</strong> documentos / envelopes
-                        </>
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>
-                      Usuários <strong>ilimitados</strong>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>Assinatura digital ICP-Brasil</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>Notificações por email/WhatsApp</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    {tier.priceId === "free" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
-                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
-                      Geolocalização da assinatura
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    {tier.priceId === "free" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
-                    <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Eon Drive</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    {tier.priceId === "free" || tier.name === "Básico" ? (
-                      <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    ) : (
-                      <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    )}
-                    <span
-                      className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}
-                    >
-                      Biometria facial
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => handleUpgrade(tier)}
-                  disabled={processingCheckout || isCurrentPlan}
-                  className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
-                  variant={isCurrentPlan ? "outline" : undefined}
-                >
-                  {processingCheckout ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isCurrentPlan ? (
-                    "Plano Atual"
-                  ) : (
-                    "Fazer Upgrade"
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <PlansCarousel 
+        tiers={SUBSCRIPTION_TIERS}
+        isFreeTier={true}
+        processingCheckout={processingCheckout}
+        onUpgrade={handleUpgrade}
+      />
 
       {/* Comparison Table */}
       <div className="space-y-4 pt-4">
