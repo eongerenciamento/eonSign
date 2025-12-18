@@ -155,13 +155,13 @@ export function MembersTab() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-gray-100 shadow-md border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-600 text-base">Membros da Organização</CardTitle>
+          <CardTitle className="text-gray-600 text-sm">Membros da Organização</CardTitle>
           <Button
             onClick={() => setIsDialogOpen(true)}
             size="icon"
-            className="h-8 w-8 rounded-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
+            className="h-8 w-8 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-200 hover:text-gray-500"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -176,14 +176,14 @@ export function MembersTab() {
               </p>
             </div>
           ) : (
-            <div className="divide-y-0">
+            <div className="divide-y-0 rounded-lg overflow-hidden">
               {members.map((member, index) => (
                 <div
                   key={member.id}
-                  className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                  className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === members.length - 1 ? 'rounded-b-lg' : ''}`}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-700">{member.member_email}</p>
+                    <p className="text-sm text-gray-600">{member.member_email}</p>
                     <p className="text-xs text-gray-500">
                       Convidado em {new Date(member.invited_at).toLocaleDateString('pt-BR')}
                     </p>

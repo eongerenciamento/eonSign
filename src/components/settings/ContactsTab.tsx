@@ -125,13 +125,13 @@ export function ContactsTab() {
     loadContacts();
   };
   return <div className="space-y-6 mt-6">
-      <Card>
+      <Card className="bg-gray-100 shadow-md border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-600 text-base">Contatos Salvos</CardTitle>
+          <CardTitle className="text-gray-600 text-sm">Contatos Salvos</CardTitle>
           <Button onClick={() => {
           resetForm();
           setShowAddForm(true);
-        }} className="bg-[#273d60] hover:bg-[#273d60]/90 gap-2" size="sm">
+        }} className="rounded-full bg-gray-200 text-gray-500 hover:bg-gray-200 hover:text-gray-500 gap-2" size="sm">
             <Plus className="w-4 h-4" />
             Novo Contato
           </Button>
@@ -140,7 +140,7 @@ export function ContactsTab() {
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar por nome, e-mail ou telefone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+            <Input placeholder="Buscar por nome, e-mail ou telefone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 border-0 bg-gray-200" />
           </div>
 
           {/* Add/Edit Form */}
@@ -174,10 +174,10 @@ export function ContactsTab() {
           {/* Contacts List */}
           {loading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : filteredContacts.length === 0 ? <div className="text-center py-8 text-muted-foreground">
               {search ? "Nenhum contato encontrado" : "Nenhum contato salvo"}
-            </div> : <div className="divide-y-0">
-              {filteredContacts.map((contact, index) => <div key={contact.id} className={`flex items-center px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+            </div> : <div className="divide-y-0 rounded-lg overflow-hidden">
+              {filteredContacts.map((contact, index) => <div key={contact.id} className={`flex items-center px-4 py-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === filteredContacts.length - 1 ? 'rounded-b-lg' : ''}`}>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-700 truncate text-sm">{contact.name}</p>
+                    <p className="text-gray-600 truncate text-sm">{contact.name}</p>
                   </div>
                   <div className="flex-1 text-center">
                     <span className="text-muted-foreground text-xs">{contact.phone || '-'}</span>

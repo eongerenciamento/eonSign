@@ -225,12 +225,12 @@ export function SignerGroupsTab() {
 
   return (
     <div className="space-y-6 mt-6">
-      <Card>
+      <Card className="bg-gray-100 shadow-md border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-600 text-base">Grupos de Signatários</CardTitle>
+          <CardTitle className="text-gray-600 text-sm">Grupos de Signatários</CardTitle>
           <Button 
             onClick={() => { resetForm(); setShowAddForm(true); }}
-            className="bg-[#273d60] hover:bg-[#273d60]/90 gap-2"
+            className="rounded-full bg-gray-200 text-gray-500 hover:bg-gray-200 hover:text-gray-500 gap-2"
             size="sm"
           >
             <Plus className="w-4 h-4" />
@@ -245,7 +245,7 @@ export function SignerGroupsTab() {
               placeholder="Buscar grupos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 border-0 bg-gray-200"
             />
           </div>
 
@@ -311,7 +311,7 @@ export function SignerGroupsTab() {
               {search ? "Nenhum grupo encontrado" : "Nenhum grupo criado"}
             </div>
           ) : (
-            <div className="divide-y-0">
+            <div className="divide-y-0 rounded-lg overflow-hidden">
               {filteredGroups.map((group, index) => (
                 <Collapsible 
                   key={group.id}
@@ -319,11 +319,11 @@ export function SignerGroupsTab() {
                   onOpenChange={() => toggleExpanded(group.id)}
                 >
                   <div className="overflow-hidden">
-                    <div className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                    <div className={`flex items-center justify-between px-4 py-3 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === filteredGroups.length - 1 && !expandedGroups.has(group.id) ? 'rounded-b-lg' : ''}`}>
                       <CollapsibleTrigger className="flex items-center gap-3 flex-1">
                         <Users className="w-4 h-4 text-gray-500" />
                         <div className="flex-1 text-left">
-                          <p className="font-medium text-gray-700">{group.name}</p>
+                          <p className="text-gray-600 text-sm">{group.name}</p>
                         </div>
                         <div className="flex-1 text-center">
                           <p className="text-sm text-muted-foreground">
@@ -356,13 +356,13 @@ export function SignerGroupsTab() {
                       </div>
                     </div>
                     <CollapsibleContent>
-                      <div className="px-4 py-2 bg-muted/30">
+                      <div className={`px-4 py-2 bg-muted/30 ${index === filteredGroups.length - 1 ? 'rounded-b-lg' : ''}`}>
                         {group.members.map((member, memberIndex) => (
                           <div 
                             key={member.id} 
                             className={`flex items-center px-4 py-2 ${memberIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
                           >
-                            <span className="flex-1 font-medium text-gray-600 text-sm">{member.name}</span>
+                            <span className="flex-1 text-gray-600 text-sm">{member.name}</span>
                             <span className="flex-1 text-center text-muted-foreground text-sm">{member.phone || '-'}</span>
                             <span className="flex-1 text-right text-muted-foreground text-sm">{member.email || '-'}</span>
                           </div>
