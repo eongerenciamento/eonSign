@@ -851,11 +851,11 @@ const Reports = () => {
                       </div>
                     </div>)}
                 </div>) : (/* Desktop view - Table */
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>
+                      <TableRow className="bg-gray-200">
+                        <TableHead className="rounded-tl-lg">
                           <button onClick={() => handleSort("name")} className="flex items-center hover:text-foreground transition-colors">
                             Nome / CPF
                             <SortIcon field="name" />
@@ -871,7 +871,7 @@ const Reports = () => {
                           </button>
                         </TableHead>
                         <TableHead className="text-center">Localização</TableHead>
-                        <TableHead className="text-center">
+                        <TableHead className="text-center rounded-tr-lg">
                           <button onClick={() => handleSort("status")} className="flex items-center justify-center hover:text-foreground transition-colors w-full">
                             Status
                             <SortIcon field="status" />
@@ -880,52 +880,57 @@ const Reports = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {signatories.map((signer, index) => <TableRow key={signer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                          <TableCell className="font-medium">
-                            <div className="flex flex-col">
-                              <span>{signer.name}</span>
-                              <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {signer.birth_date ? format(new Date(signer.birth_date), "dd/MM/yyyy", {
-                        locale: ptBR
-                      }) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="text-sm">{signer.email}</span>
-                              <span className="text-xs text-muted-foreground">{signer.phone}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{signer.documents?.name || "-"}</TableCell>
-                          <TableCell className="text-center">
-                            {signer.signed_at ? <div className="flex flex-col items-center">
-                                <span>{format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", {
-                            locale: ptBR
-                          })}</span>
-                                {signer.signature_ip && <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>}
-                              </div> : "-"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {signer.signature_city && signer.signature_state ? <a href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
-                              </a> : "-"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge className={
-                              signer.status === "signed" 
-                                ? "bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent" 
-                                : signer.status === "rejected"
-                                ? "bg-transparent border border-red-600 text-red-600 hover:bg-transparent"
-                                : signer.status === "cancelled"
-                                ? "bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent"
-                                : "bg-transparent border border-gray-500 text-gray-500 hover:bg-transparent"
-                            }>
-                              {signer.status === "signed" ? "Assinado" : signer.status === "rejected" ? "Rejeitado" : signer.status === "cancelled" ? "Cancelado" : "Pendente"}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>)}
+                      {signatories.map((signer, index) => {
+                        const isLast = index === signatories.length - 1;
+                        return (
+                          <TableRow key={signer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <TableCell className={`font-medium ${isLast ? "rounded-bl-lg" : ""}`}>
+                              <div className="flex flex-col">
+                                <span>{signer.name}</span>
+                                <span className="text-xs text-muted-foreground">{signer.cpf || "CPF não informado"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {signer.birth_date ? format(new Date(signer.birth_date), "dd/MM/yyyy", {
+                          locale: ptBR
+                        }) : "-"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="text-sm">{signer.email}</span>
+                                <span className="text-xs text-muted-foreground">{signer.phone}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{signer.documents?.name || "-"}</TableCell>
+                            <TableCell className="text-center">
+                              {signer.signed_at ? <div className="flex flex-col items-center">
+                                  <span>{format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", {
+                              locale: ptBR
+                            })}</span>
+                                  {signer.signature_ip && <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>}
+                                </div> : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {signer.signature_city && signer.signature_state ? <a href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
+                                </a> : "-"}
+                            </TableCell>
+                            <TableCell className={`text-center ${isLast ? "rounded-br-lg" : ""}`}>
+                              <Badge className={
+                                signer.status === "signed" 
+                                  ? "bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent" 
+                                  : signer.status === "rejected"
+                                  ? "bg-transparent border border-red-600 text-red-600 hover:bg-transparent"
+                                  : signer.status === "cancelled"
+                                  ? "bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent"
+                                  : "bg-transparent border border-gray-500 text-gray-500 hover:bg-transparent"
+                              }>
+                                {signer.status === "signed" ? "Assinado" : signer.status === "rejected" ? "Rejeitado" : signer.status === "cancelled" ? "Cancelado" : "Pendente"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>)}
