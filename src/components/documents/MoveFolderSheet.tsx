@@ -100,8 +100,8 @@ export const MoveFolderSheet = ({
       setTimeout(() => {
         setShowSuccess(false);
         onOpenChange(false);
-      }, 350);
-    }, 300);
+      }, 800);
+    }, 500);
   };
 
   const renderFolder = (folder: FolderNode, level: number = 0) => {
@@ -155,10 +155,11 @@ export const MoveFolderSheet = ({
             {isMoving ? (
               <Loader2 className="w-12 h-12 text-blue-700 animate-spin" />
             ) : (
-              <div className="animate-scale-in">
-                <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center">
-                  <Check className="w-8 h-8 text-white" strokeWidth={3} />
-                </div>
+              <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center animate-scale-in">
+                <Check 
+                  className="w-8 h-8 text-white animate-[fade-in_0.3s_ease-out_0.2s_forwards] opacity-0" 
+                  strokeWidth={3} 
+                />
               </div>
             )}
           </div>
