@@ -265,22 +265,18 @@ const Documents = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-secondary rounded-2xl p-2 h-auto">
-            <TabsTrigger value="signed" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
-              <CheckCircle className="w-4 h-4 md:mr-2" />
-              <span className="hidden md:inline">Assinados</span>
+          <TabsList className="grid w-full grid-cols-4 bg-secondary rounded-xl p-1 h-10 border-none">
+            <TabsTrigger value="signed" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+              <CheckCircle className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400 data-[state=active]:shadow-sm text-muted-foreground">
-              <User className="w-4 h-4 md:mr-2" />
-              <span className="hidden md:inline">Pendente Interno</span>
+            <TabsTrigger value="pending-internal" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+              <User className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 data-[state=active]:shadow-sm text-muted-foreground">
-              <Users className="w-4 h-4 md:mr-2" />
-              <span className="hidden md:inline">Pendente Externo</span>
+            <TabsTrigger value="pending-external" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+              <Users className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="all" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
-              <span className="hidden md:inline">Todos</span>
-              <span className="md:hidden">📋</span>
+            <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+              <SlidersHorizontal className="w-4 h-4" />
             </TabsTrigger>
           </TabsList>
 
