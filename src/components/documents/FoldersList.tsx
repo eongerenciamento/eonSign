@@ -140,7 +140,7 @@ export const FoldersList = ({
           >
             <div className="flex items-center justify-between gap-3 flex-1">
               <div className="flex items-center gap-3">
-                <Folder className="w-5 h-5 text-gray-500" />
+                <Folder className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
                 {editingFolderId === folder.id ? (
                   <Input
                     ref={inputRef}
@@ -234,13 +234,13 @@ export const FoldersList = ({
           onDragOver={(e) => handleDragOver(e, folder.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, folder.id)}
-          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative ${
+          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative border-none ${
             dragOverId === folder.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""
           }`}
           onClick={() => onFolderClick(folder.id)}
         >
           <div className="flex flex-col items-center space-y-2">
-            <Folder className="w-12 h-12 text-primary" />
+            <Folder className="w-12 h-12 text-primary" strokeWidth={1.5} />
             {editingFolderId === folder.id ? (
               <Input
                 ref={inputRef}
