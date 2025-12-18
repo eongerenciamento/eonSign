@@ -953,16 +953,16 @@ export const DocumentsTable = ({
                   <TableCell>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-3">
-                        <span className={doc.signedBy === doc.signers ? "text-green-700 font-medium" : "font-medium"}>
-                          {doc.signedBy}/{doc.signers}
-                        </span>
-                        <div className="relative w-10 h-10">
-                          <svg className="w-10 h-10 transform -rotate-90">
+                        <div className="relative w-10 h-10 flex items-center justify-center">
+                          <svg className="w-10 h-10 transform -rotate-90 absolute inset-0">
                             <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="none" className="text-gray-200" />
                             <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - progressPercentage / 100)}`} className={doc.status === "expired" ? "text-red-700" : "text-blue-700"} strokeLinecap="round" style={{
                           transition: 'stroke-dashoffset 1s ease-in-out'
                         }} />
                           </svg>
+                          <span className={`text-[10px] font-bold relative z-10 ${doc.signedBy === doc.signers ? "text-green-700" : "text-blue-700"}`}>
+                            {doc.signedBy}/{doc.signers}
+                          </span>
                         </div>
                       </div>
                       {showFolderActions && folders && folders.length > 0 && (
