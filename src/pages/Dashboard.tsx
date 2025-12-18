@@ -164,7 +164,7 @@ const Dashboard = () => {
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-white border border-gray-200 cursor-pointer hover:shadow-md transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-gray-100 border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-gray-700 text-base">
                 Pendentes
@@ -172,11 +172,11 @@ const Dashboard = () => {
               <p className="text-gray-500 text-xs">Sua Assinatura</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-[#273d60]">{pendingByOwner}</p>
+              <p className="text-3xl font-bold text-blue-700">{pendingByOwner}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 cursor-pointer hover:shadow-md transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-gray-100 border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-gray-700 text-base">
                 Pendentes
@@ -184,7 +184,7 @@ const Dashboard = () => {
               <p className="text-gray-500 text-xs">Signatários Externos</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-[#273d60]">{pendingByExternal}</p>
+              <p className="text-3xl font-bold text-blue-700">{pendingByExternal}</p>
             </CardContent>
           </Card>
         </div>

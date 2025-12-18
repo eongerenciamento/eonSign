@@ -165,7 +165,7 @@ export function AppSidebar() {
     window.open('https://certifica.eonhub.com.br', '_blank');
   };
 
-  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
+  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#0a1628]`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
         <SidebarTrigger className={`bg-[#273d60] text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
