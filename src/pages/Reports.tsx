@@ -566,65 +566,82 @@ const Reports = () => {
         {/* Activity Timeline */}
         <Card className="p-6 bg-gray-100 border-0">
           <h3 className="font-semibold mb-4 text-gray-600 text-base">Atividade Recente</h3>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[{
-                action: "Documento assinado",
                 doc: "Contrato - Cliente A",
-                time: "Há 2 horas",
-                status: "success"
+                signers: ["João Silva", "Maria Santos"],
+                date: "18/12/2025",
+                status: "Assinado"
               }, {
-                action: "Documento enviado",
                 doc: "Proposta Comercial",
-                time: "Há 5 horas",
-                status: "default"
+                signers: ["Pedro Costa"],
+                date: "17/12/2025",
+                status: "Pendente"
               }, {
-                action: "Documento assinado",
                 doc: "NDA - Parceiro B",
-                time: "Há 1 dia",
-                status: "success"
+                signers: ["Ana Oliveira", "Carlos Lima"],
+                date: "16/12/2025",
+                status: "Assinado"
               }, {
-                action: "Documento expirado",
                 doc: "Termo de Adesão",
-                time: "Há 2 dias",
-                status: "warning"
+                signers: ["Roberto Souza"],
+                date: "15/12/2025",
+                status: "Expirado"
               }, {
-                action: "Documento assinado",
                 doc: "Contrato de Serviços",
-                time: "Há 3 dias",
-                status: "success"
+                signers: ["Fernanda Reis", "Lucas Martins"],
+                date: "14/12/2025",
+                status: "Assinado"
               }, {
-                action: "Documento enviado",
                 doc: "Acordo de Parceria",
-                time: "Há 3 dias",
-                status: "default"
+                signers: ["Juliana Alves"],
+                date: "14/12/2025",
+                status: "Pendente"
               }, {
-                action: "Documento assinado",
                 doc: "Proposta Técnica",
-                time: "Há 4 dias",
-                status: "success"
+                signers: ["Marcos Pereira", "Camila Rocha"],
+                date: "13/12/2025",
+                status: "Assinado"
               }, {
-                action: "Documento pendente",
                 doc: "Termo de Confidencialidade",
-                time: "Há 4 dias",
-                status: "warning"
+                signers: ["Ricardo Gomes"],
+                date: "13/12/2025",
+                status: "Pendente"
               }, {
-                action: "Documento assinado",
                 doc: "Contrato de Trabalho",
-                time: "Há 5 dias",
-                status: "success"
+                signers: ["Patrícia Dias", "Bruno Fernandes"],
+                date: "12/12/2025",
+                status: "Assinado"
               }, {
-                action: "Documento enviado",
                 doc: "Aditivo Contratual",
-                time: "Há 5 dias",
-                status: "default"
-              }].map((activity, index) => <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0">
-                <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success" ? "bg-success" : activity.status === "warning" ? "bg-warning" : "bg-primary"}`} />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-600 text-sm">{activity.action}</p>
-                  <p className="text-gray-500 text-xs">{activity.doc}</p>
+                signers: ["Sandra Costa"],
+                date: "12/12/2025",
+                status: "Enviado"
+              }].map((activity, index) => (
+              <div key={index} className="flex items-center gap-4 py-3 border-b last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-700 text-sm truncate">{activity.doc}</p>
                 </div>
-                <span className="text-muted-foreground text-xs">{activity.time}</span>
-              </div>)}
+                <div className="w-32 min-w-[128px]">
+                  {activity.signers.map((signer, i) => (
+                    <p key={i} className="text-gray-500 text-xs truncate">{signer}</p>
+                  ))}
+                </div>
+                <div className="w-24 text-right">
+                  <span className="text-gray-500 text-xs">{activity.date}</span>
+                </div>
+                <div className="w-20 text-right">
+                  <span className={`text-xs font-medium ${
+                    activity.status === "Assinado" ? "text-green-600" : 
+                    activity.status === "Pendente" ? "text-yellow-600" : 
+                    activity.status === "Expirado" ? "text-red-600" : 
+                    "text-blue-600"
+                  }`}>
+                    {activity.status}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
           </TabsContent>
