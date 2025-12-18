@@ -359,10 +359,12 @@ const ValidateDocument = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="lg" inline className="mx-auto mb-4" />
-          <p className="text-gray-600">Verificando documento...</p>
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)' }}>
+          <div className="text-center">
+            <LoadingSpinner size="lg" inline className="mx-auto mb-4" />
+            <p style={{ color: '#4b5563' }}>Verificando documento...</p>
+          </div>
         </div>
       </div>
     );
@@ -370,18 +372,20 @@ const ValidateDocument = () => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <XCircle className="w-10 h-10 text-red-600" />
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)' }}>
+          <Card className="max-w-md w-full" style={{ backgroundColor: '#ffffff' }}>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#fee2e2' }}>
+                  <XCircle className="w-10 h-10" style={{ color: '#dc2626' }} />
+                </div>
+                <h1 className="text-xl font-bold mb-2" style={{ color: '#111827' }}>Documento Nao Encontrado</h1>
+                <p style={{ color: '#4b5563' }}>{error || "O documento solicitado nao foi encontrado ou nao existe."}</p>
               </div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Documento Nao Encontrado</h1>
-              <p className="text-gray-600">{error || "O documento solicitado nao foi encontrado ou nao existe."}</p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -390,15 +394,16 @@ const ValidateDocument = () => {
   const isValid = data.valid;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-center">
-            <img src={logoEon} alt="eonSign" className="h-12" />
+    <div className="light" style={{ colorScheme: 'light' }}>
+      <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)' }}>
+        {/* Header */}
+        <div style={{ background: 'linear-gradient(to right, #273d60, #001a4d)' }}>
+          <div className="max-w-4xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-center">
+              <img src={logoEon} alt="eonSign" className="h-12" />
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Validation Status Card */}
@@ -753,6 +758,7 @@ const ValidateDocument = () => {
               eonhub
             </a>
           </p>
+          </div>
         </div>
       </div>
     </div>
