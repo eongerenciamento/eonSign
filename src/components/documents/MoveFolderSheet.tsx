@@ -36,6 +36,7 @@ export const MoveFolderSheet = ({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [isMoving, setIsMoving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   // Build folder tree structure
   const folderTree = useMemo(() => {
@@ -98,9 +99,14 @@ export const MoveFolderSheet = ({
       onMove(folderId);
       
       setTimeout(() => {
-        setShowSuccess(false);
-        onOpenChange(false);
-      }, 1200);
+        setIsFadingOut(true);
+        
+        setTimeout(() => {
+          setShowSuccess(false);
+          setIsFadingOut(false);
+          onOpenChange(false);
+        }, 300);
+      }, 1000);
     }, 500);
   };
 
@@ -151,11 +157,11 @@ export const MoveFolderSheet = ({
       <SheetContent className="w-[400px] sm:w-[450px]">
         {/* Loading/Success Overlay */}
         {(isMoving || showSuccess) && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className={`absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity duration-300 ${isFadingOut ? 'opacity-0' : 'opacity-100'}`}>
             {isMoving ? (
               <Loader2 className="w-12 h-12 text-blue-700 animate-spin" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center animate-scale-in">
+              <div className={`w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center animate-scale-in transition-transform duration-300 ${isFadingOut ? 'scale-75' : 'scale-100'}`}>
                 <Check 
                   className="w-8 h-8 text-white animate-[fade-in_0.3s_ease-out_0.2s_forwards] opacity-0" 
                   strokeWidth={3} 
