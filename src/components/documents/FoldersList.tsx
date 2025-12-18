@@ -179,7 +179,7 @@ export const FoldersList = ({
                 </DropdownMenuItem>
                 {onMoveFolder && (
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50">
+                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700 hover:text-gray-700 data-[state=open]:bg-gray-300/50 data-[state=open]:text-gray-700">
                       <Move className="w-4 h-4 mr-2" />
                       Mover
                     </DropdownMenuSubTrigger>
@@ -279,7 +279,7 @@ export const FoldersList = ({
                 </DropdownMenuItem>
                 {onMoveFolder && (
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50">
+                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700 hover:text-gray-700 data-[state=open]:bg-gray-300/50 data-[state=open]:text-gray-700">
                       <Move className="w-4 h-4 mr-2" />
                       Mover
                     </DropdownMenuSubTrigger>
