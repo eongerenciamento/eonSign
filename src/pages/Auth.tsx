@@ -213,14 +213,15 @@ export default function Auth() {
       backgroundColor: '#ffffff'
     }}>
         {/* Blue gradient header */}
-        <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-36" style={{
-        background: "linear-gradient(to bottom, #273D60, #1a2847)"
+        <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-36 flex items-center justify-center" style={{
+        background: "linear-gradient(to bottom, #273D60, #1a2847)",
+        minHeight: '200px'
       }}>
           <RadialGlow />
           
           {/* Logo */}
-          <div className="relative z-20 flex justify-center pt-20">
-            <img src={LOGO_URL} alt="Logo" className="h-16 w-auto" />
+          <div className="relative z-20 flex justify-center">
+            <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
           </div>
         </div>
 
