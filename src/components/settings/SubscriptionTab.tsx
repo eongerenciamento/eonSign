@@ -69,7 +69,7 @@ function ComparisonTable({
             </TableHead>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-gray-100' : 'bg-gray-100/50'}`}>
+            return <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <div className="flex flex-col items-center gap-0">
                     <span className="font-semibold text-xs text-gray-600">{tier.name}</span>
                     <span className="text-xs text-gray-400 font-normal">
@@ -87,7 +87,7 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : ''}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   {tier.limit}
                 </TableCell>;
           })}
@@ -98,7 +98,7 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : 'bg-gray-100/50'}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>;
           })}
@@ -109,7 +109,7 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : ''}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>;
           })}
@@ -120,7 +120,7 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : 'bg-gray-100/50'}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
                 </TableCell>;
           })}
@@ -131,7 +131,7 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : ''}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
                 </TableCell>;
           })}
@@ -142,23 +142,23 @@ function ComparisonTable({
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-gray-100' : 'bg-gray-100/50'}`}>
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
                 </TableCell>;
           })}
           </TableRow>
           {/* Action buttons row */}
-          <TableRow className="bg-white border-b border-gray-200/50">
+          <TableRow className="bg-white border-b border-gray-300">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
             const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
             const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
-            return <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-gray-100' : ''}`}>
-                  {isCurrentPlan ? <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-300">
+            return <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                  {isCurrentPlan ? <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
                       Atual
-                    </Badge> : <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-white hover:bg-blue-50 text-blue-600 border border-blue-600" : "bg-blue-600 hover:bg-blue-700 text-white"}>
+                    </Badge> : <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-blue-500 hover:bg-blue-600 text-white border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
                       {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : isDowngrade ? "Downgrade" : "Upgrade"}
                     </Button>}
                 </TableCell>;
