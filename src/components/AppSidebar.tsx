@@ -165,10 +165,10 @@ export function AppSidebar() {
     window.open('https://certifica.eonhub.com.br', '_blank');
   };
 
-  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#0a1628]`} collapsible="icon">
+  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-layout-gradient`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
-        <SidebarTrigger className={`bg-[#273d60] text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
+        <SidebarTrigger className="bg-sidebar-background text-sidebar-foreground hover:bg-white/10">
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
         
@@ -188,7 +188,7 @@ export function AppSidebar() {
                 const showBadge = item.title === "Documentos" && pendingDocuments > 0 || item.title === "Configurações" && supportTickets > 0;
                 const badgeCount = item.title === "Documentos" ? pendingDocuments : supportTickets;
                 const menuButton = <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                      <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-white/10 text-white data-[active=true]:bg-white/20">
+                      <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3 hover:bg-white/10 text-sidebar-foreground data-[active=true]:bg-white/20">
                         <item.icon className="w-5 h-5" />
                         {!collapsed && <span className="flex items-center gap-2 flex-1 font-sans font-light text-sm">
                             {item.title}
@@ -206,7 +206,7 @@ export function AppSidebar() {
                           <TooltipTrigger asChild>
                             {menuButton}
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-transparent text-white border-none shadow-none">
+                          <TooltipContent side="right" className="bg-transparent text-sidebar-foreground border-none shadow-none">
                             {item.title}
                           </TooltipContent>
                         </Tooltip> : menuButton}
@@ -220,32 +220,32 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto">
-        {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-medium">
+        {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-sidebar-foreground text-xs bg-muted-foreground font-medium">
             Certificado Digital A1 R$109.90    
           </button>}
         
-        {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white">
+        {!collapsed ? <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground">
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-white/20 text-white">
+              <AvatarFallback className="bg-white/20 text-sidebar-foreground">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">
                 {name || user?.email || "Usuário"}
               </p>
-              <p className="text-xs text-white/60 truncate">
+              <p className="text-xs text-sidebar-foreground/60 truncate">
                 {organization || "Organização"}
               </p>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-sidebar-foreground/40">
                 Administrador
               </p>
             </div>
-          </button> : <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center justify-center p-2 rounded-lg text-white" title="Perfil">
+          </button> : <button onClick={() => setProfileSheetOpen(true)} className="w-full flex items-center justify-center p-2 rounded-lg text-sidebar-foreground" title="Perfil">
             <Avatar className="h-10 w-10">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-white/20 text-white">
+              <AvatarFallback className="bg-white/20 text-sidebar-foreground">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>

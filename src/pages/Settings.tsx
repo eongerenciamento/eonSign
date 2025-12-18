@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock, Sun, Moon } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
@@ -22,7 +22,9 @@ import { AdminTicketsTab } from "@/components/settings/AdminTicketsTab";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useThemePreference } from "@/hooks/useThemePreference";
 const Settings = () => {
+  const { isDark, toggleTheme, mounted } = useThemePreference();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
@@ -398,10 +400,24 @@ const Settings = () => {
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
         <div className="w-full mx-auto max-w-5xl">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
-            <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
-              Certificado A1 R$109.90
-            </Button>
+            <h1 className="text-sm font-bold text-muted-foreground">Configurações</h1>
+            <div className="flex items-center gap-4">
+              {/* Theme Switch */}
+              {mounted && (
+                <div className="flex items-center gap-2">
+                  <Sun className={`h-4 w-4 ${isDark ? 'text-muted-foreground' : 'text-yellow-500'}`} />
+                  <Switch
+                    checked={isDark}
+                    onCheckedChange={toggleTheme}
+                    className="data-[state=checked]:bg-slate-700"
+                  />
+                  <Moon className={`h-4 w-4 ${isDark ? 'text-blue-400' : 'text-muted-foreground'}`} />
+                </div>
+              )}
+              <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
+                Certificado A1 R$109.90
+              </Button>
+            </div>
           </div>
 
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">

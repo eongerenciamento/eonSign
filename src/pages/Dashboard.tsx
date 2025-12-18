@@ -151,40 +151,40 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-sm font-bold text-gray-600">Dashboard</h1>
-            <p className="text-xs text-gray-500 mt-1">
+            <h1 className="text-sm font-bold text-muted-foreground">Dashboard</h1>
+            <p className="text-xs text-muted-foreground/70 mt-1">
               {subtitle}
             </p>
           </div>
-          <Button onClick={() => navigate("/novo-documento")} className="bg-gray-200 hover:bg-gray-300 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full">
-            <Upload className="w-5 h-5 md:mr-2 text-gray-600" />
-            <span className="hidden md:inline text-gray-600">Documento</span>
+          <Button onClick={() => navigate("/novo-documento")} className="bg-secondary hover:bg-secondary/80 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full">
+            <Upload className="w-5 h-5 md:mr-2 text-muted-foreground" />
+            <span className="hidden md:inline text-muted-foreground">Documento</span>
           </Button>
         </div>
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-gray-100 border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-secondary border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-gray-700 text-base">
+              <CardTitle className="text-card-foreground text-base">
                 Pendentes
               </CardTitle>
-              <p className="text-gray-500 text-xs">Sua Assinatura</p>
+              <p className="text-muted-foreground text-xs">Sua Assinatura</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-blue-700">{pendingByOwner}</p>
+              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{pendingByOwner}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-100 border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-secondary border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-gray-700 text-base">
+              <CardTitle className="text-card-foreground text-base">
                 Pendentes
               </CardTitle>
-              <p className="text-gray-500 text-xs">Signatários Externos</p>
+              <p className="text-muted-foreground text-xs">Signatários Externos</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-blue-700">{pendingByExternal}</p>
+              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{pendingByExternal}</p>
             </CardContent>
           </Card>
         </div>
@@ -192,7 +192,7 @@ const Dashboard = () => {
         {/* Recent Documents */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm text-gray-600">
+            <h2 className="text-sm text-muted-foreground">
               Documentos Recentes
             </h2>
           </div>
