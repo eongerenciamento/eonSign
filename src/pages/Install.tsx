@@ -43,7 +43,7 @@ const Install = () => {
         <CardContent className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
             <Smartphone className="h-5 w-5 mt-0.5 text-gray-700" />
-            <div className="bg-primary-foreground">
+            <div>
               <h3 className="font-semibold mb-1">Acesso Rápido</h3>
               <p className="text-sm text-muted-foreground">Adicione à tela inicial para acesso instantâneo</p>
             </div>
