@@ -973,7 +973,7 @@ export const DocumentsTable = ({
                           <PopoverTrigger asChild>
                             <Button 
                               variant="ghost" 
-                              className="w-[180px] justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700"
+                              className="w-[180px] justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700 hover:text-gray-700"
                             >
                               <span className="flex items-center gap-2">
                                 <Folder className="w-4 h-4" />
@@ -1303,7 +1303,7 @@ export const DocumentsTable = ({
                     <PopoverTrigger asChild>
                       <Button 
                         variant="ghost" 
-                        className="w-full justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700"
+                        className="w-full justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700 hover:text-gray-700"
                       >
                         <span className="flex items-center gap-2">
                           <Folder className="w-4 h-4" />
