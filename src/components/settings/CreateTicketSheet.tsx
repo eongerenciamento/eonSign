@@ -13,10 +13,16 @@ import { toast } from "sonner";
 import { Upload, X, FileVideo, Image as ImageIcon, Plus, Check } from "lucide-react";
 
 const ticketFormSchema = z.object({
-  title: z.string().min(5, "O título deve ter no mínimo 5 caracteres").max(100, "O título deve ter no máximo 100 caracteres"),
+  title: z
+    .string()
+    .min(5, "O título deve ter no mínimo 5 caracteres")
+    .max(100, "O título deve ter no máximo 100 caracteres"),
   category: z.string().min(1, "Selecione uma categoria"),
   priority: z.string().min(1, "Selecione uma prioridade"),
-  description: z.string().min(20, "A descrição deve ter no mínimo 20 caracteres").max(1000, "A descrição deve ter no máximo 1000 caracteres"),
+  description: z
+    .string()
+    .min(20, "A descrição deve ter no mínimo 20 caracteres")
+    .max(1000, "A descrição deve ter no máximo 1000 caracteres"),
 });
 
 type TicketFormValues = z.infer<typeof ticketFormSchema>;
@@ -49,9 +55,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => {
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
+    const validFiles = files.filter((file) => {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
       const isUnder20MB = file.size <= 20 * 1024 * 1024; // 20MB limit
 
       if (!isImage && !isVideo) {
@@ -70,37 +76,35 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       return;
     }
 
-    setUploadedFiles(prev => [...prev, ...validFiles]);
+    setUploadedFiles((prev) => [...prev, ...validFiles]);
 
     // Generate preview URLs
-    validFiles.forEach(file => {
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrls(prev => [...prev, reader.result as string]);
+        setPreviewUrls((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
     });
   };
 
   const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const uploadFilesToStorage = async (userId: string, ticketNumber: string) => {
     const uploadedPaths: string[] = [];
 
     for (const file of uploadedFiles) {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${ticketNumber}-${Date.now()}.${fileExt}`;
       const filePath = `${userId}/${fileName}`;
 
-      const { error } = await supabase.storage
-        .from('support-attachments')
-        .upload(filePath, file);
+      const { error } = await supabase.storage.from("support-attachments").upload(filePath, file);
 
       if (error) {
-        console.error('Error uploading file:', error);
+        console.error("Error uploading file:", error);
         toast.error(`Erro ao enviar ${file.name}`);
       } else {
         uploadedPaths.push(filePath);
@@ -113,8 +117,10 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
   const onSubmit = async (values: TicketFormValues) => {
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         toast.error("Você precisa estar autenticado para abrir um ticket");
         return;
@@ -126,18 +132,16 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       const attachmentPaths = await uploadFilesToStorage(user.id, ticketNumber);
 
       const fullDescription = `Categoria: ${values.category}\nPrioridade: ${values.priority}\n\n${values.description}${
-        attachmentPaths.length > 0 ? `\n\nAnexos: ${attachmentPaths.length}` : ''
+        attachmentPaths.length > 0 ? `\n\nAnexos: ${attachmentPaths.length}` : ""
       }`;
 
-      const { error } = await supabase
-        .from('support_tickets')
-        .insert({
-          user_id: user.id,
-          title: values.title,
-          description: fullDescription,
-          ticket_number: ticketNumber,
-          status: 'aberto',
-        });
+      const { error } = await supabase.from("support_tickets").insert({
+        user_id: user.id,
+        title: values.title,
+        description: fullDescription,
+        ticket_number: ticketNumber,
+        status: "aberto",
+      });
 
       if (error) throw error;
 
@@ -163,14 +167,17 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
           Novo ticket
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-[540px] overflow-y-auto rounded-l-2xl" onInteractOutside={(e) => e.preventDefault()}>
+      <SheetContent
+        className="w-full sm:max-w-[540px] overflow-y-auto rounded-l-2xl"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <SheetHeader>
           <SheetTitle>Abrir Novo Ticket</SheetTitle>
           <SheetDescription>
-            Preencha o formulário abaixo para abrir um ticket de suporte. Nossa equipe responderá em breve.
+            Preencha o formulário para novo chamado. Nossa equipe responderá em breve.
           </SheetDescription>
         </SheetHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
             <FormField
@@ -245,7 +252,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Descreva o problema em detalhes..."
                       className="min-h-[150px] resize-none"
                       {...field}
@@ -270,12 +277,8 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 />
                 <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
                   <Upload className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para selecionar arquivos
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Máximo 10 arquivos, 20MB cada
-                  </p>
+                  <p className="text-sm text-muted-foreground">Clique para selecionar arquivos</p>
+                  <p className="text-xs text-muted-foreground">Máximo 10 arquivos, 20MB cada</p>
                 </label>
               </div>
 
@@ -284,13 +287,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   {uploadedFiles.map((file, index) => (
                     <div key={index} className="relative group rounded-lg overflow-hidden border border-border">
-                      {file.type.startsWith('image/') ? (
+                      {file.type.startsWith("image/") ? (
                         <div className="relative aspect-video bg-muted">
-                          <img
-                            src={previewUrls[index]}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={previewUrls[index]} alt={file.name} className="w-full h-full object-cover" />
                           <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                             <ImageIcon className="w-3 h-3" />
                             Imagem
