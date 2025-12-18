@@ -68,8 +68,8 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
     <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
       <Table>
         <TableHeader>
-          <TableRow className="border-0 bg-gray-50">
-            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+          <TableRow className="border-0 bg-gray-100/50">
+            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Recurso
             </TableHead>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -77,7 +77,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
                 ? tier.priceId === "free"
                 : tier.limit === currentPlanLimit;
               return (
-                <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <div className="flex flex-col items-center gap-0">
                     <span className="font-semibold text-gray-600">{tier.name}</span>
                     <span className="text-sm text-gray-400 font-normal">
@@ -91,7 +91,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
         </TableHeader>
         <TableBody>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Documentos / Envelopes
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -103,21 +103,21 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
               );
             })}
           </TableRow>
-          <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+          <TableRow className="bg-gray-100/50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Usuários ilimitados
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <Check className="h-5 w-5 text-green-500 mx-auto" />
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Notificações
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -129,14 +129,14 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
               );
             })}
           </TableRow>
-          <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+          <TableRow className="bg-gray-100/50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Geolocalização
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" ? (
                     <X className="h-5 w-5 text-gray-400 mx-auto" />
                   ) : (
@@ -147,7 +147,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Eon Drive
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -163,14 +163,14 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
               );
             })}
           </TableRow>
-          <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+          <TableRow className="bg-gray-100/50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" || index === 1 ? (
                     <X className="h-5 w-5 text-gray-400 mx-auto" />
                   ) : (
@@ -182,7 +182,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
           </TableRow>
           {/* Action buttons row */}
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
