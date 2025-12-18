@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Check, X } from "lucide-react";
+import { Send, Check, X, RotateCcw } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -133,6 +133,25 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     }
   };
 
+  const handleReopenTicket = async () => {
+    if (!ticket) return;
+    
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({ status: 'aberto' })
+        .eq('id', ticket.id);
+
+      if (error) throw error;
+      
+      toast.success("Ticket reaberto");
+      onTicketUpdated?.();
+    } catch (error) {
+      console.error("Erro ao reabrir ticket:", error);
+      toast.error("Erro ao reabrir ticket");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { border: string; text: string; label: string }> = {
       aberto: { border: 'border-red-500', text: 'text-red-500', label: 'Aberto' },
@@ -165,6 +184,7 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
   };
 
   const isTicketClosed = ticket?.status === 'resolvido' || ticket?.status === 'fechado';
+  const canReopen = ticket?.status === 'fechado';
 
   return (
     <>
@@ -185,6 +205,17 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                 >
                   <Check className="w-4 h-4 mr-1" />
                   Encerrar chamado
+                </Button>
+              )}
+              {canReopen && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReopenTicket}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  <RotateCcw className="w-4 h-4 mr-1" />
+                  Reabrir ticket
                 </Button>
               )}
             </div>
