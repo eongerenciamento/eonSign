@@ -8,6 +8,7 @@ import { Lock, Upload, LogOut, Check, Eye, EyeOff, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileSheetProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function UserProfileSheet({
 }: UserProfileSheetProps) {
   const navigate = useNavigate();
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const { toast: shadcnToast } = useToast();
   const [name, setName] = useState(userName);
   const [role, setRole] = useState("Administrador");
   const [email, setEmail] = useState(userEmail);
@@ -202,8 +204,12 @@ export function UserProfileSheet({
     if (error) {
       toast.error("Erro ao sair");
     } else {
-      toast.success("Logout realizado");
-      navigate("/auth");
+      shadcnToast({
+        description: <LogOut className="h-5 w-5 mx-auto animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />,
+        className: "bg-gray-500 text-white border-none justify-center p-2 min-h-0 w-10 h-10 rounded-full",
+        duration: 1500
+      });
+      setTimeout(() => navigate("/auth"), 800);
     }
   };
 
