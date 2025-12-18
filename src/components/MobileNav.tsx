@@ -134,7 +134,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-layout-gradient flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-sidebar-background flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
 
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
@@ -144,11 +144,11 @@ export function MobileNav() {
             to={item.url}
             end={item.url === "/"}
             className={`flex items-center justify-center h-full px-3 py-2 rounded-lg transition-colors ${
-              isActive(item.url) ? "bg-white/20" : ""
+              isActive(item.url) ? "bg-sidebar-accent" : ""
             }`}
           >
             <item.icon
-              className="w-5 h-5 text-white"
+              className="w-5 h-5 text-sidebar-foreground"
               strokeWidth={1.5}
             />
           </NavLink>
@@ -159,9 +159,9 @@ export function MobileNav() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger asChild>
           <button className="flex-shrink-0">
-            <Avatar className="h-8 w-8 border-2 border-white/20">
+            <Avatar className="h-8 w-8 border-2 border-sidebar-accent">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-white/50 text-sidebar-background">
+              <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
