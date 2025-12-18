@@ -19,27 +19,15 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 // Animated radial glow with smooth motion
-const RadialGlow = () => (
-  <motion.div 
-    className="absolute inset-0"
-    animate={{
-      background: [
-        "radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)",
-        "radial-gradient(ellipse at 60% 60%, rgba(100, 150, 255, 0.4) 0%, transparent 70%)",
-        "radial-gradient(ellipse at 50% 45%, rgba(120, 170, 255, 0.35) 0%, transparent 70%)",
-        "radial-gradient(ellipse at 40% 55%, rgba(100, 150, 255, 0.38) 0%, transparent 70%)",
-        "radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)",
-      ],
-    }}
-    transition={{
-      duration: 8,
-      repeat: Infinity,
-      ease: "easeInOut",
-    }}
-    style={{ filter: "blur(40px)" }}
-  />
-);
-
+const RadialGlow = () => <motion.div className="absolute inset-0" animate={{
+  background: ["radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)", "radial-gradient(ellipse at 60% 60%, rgba(100, 150, 255, 0.4) 0%, transparent 70%)", "radial-gradient(ellipse at 50% 45%, rgba(120, 170, 255, 0.35) 0%, transparent 70%)", "radial-gradient(ellipse at 40% 55%, rgba(100, 150, 255, 0.38) 0%, transparent 70%)", "radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)"]
+}} transition={{
+  duration: 8,
+  repeat: Infinity,
+  ease: "easeInOut"
+}} style={{
+  filter: "blur(40px)"
+}} />;
 const PoweredBy = () => <div className="text-center space-y-3">
     <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" style={{
     backgroundColor: "rgba(255, 255, 255, 0.1)"
@@ -217,10 +205,13 @@ export default function Auth() {
         </div>
       </form>
     </Form>;
-  return (
-    <div className="light" style={{ colorScheme: 'light' }}>
+  return <div className="light" style={{
+    colorScheme: 'light'
+  }}>
       {/* Mobile Layout */}
-      <div className="md:hidden min-h-screen flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+      <div className="md:hidden min-h-screen flex flex-col" style={{
+      backgroundColor: '#ffffff'
+    }}>
         {/* Blue gradient header */}
         <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-24" style={{
         background: "linear-gradient(to bottom, #273D60, #1a2847)"
@@ -234,18 +225,27 @@ export default function Auth() {
         </div>
 
         {/* White card with form */}
-        <div className="flex-1 rounded-t-3xl -mt-8 px-6 py-8 relative z-30 flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+        <div className="flex-1 rounded-t-3xl -mt-8 px-6 py-8 relative z-30 flex flex-col" style={{
+        backgroundColor: '#ffffff'
+      }}>
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold" style={{ color: '#111827' }}>Login</h1>
-            <p className="mt-1" style={{ color: '#6b7280' }}>Bem-vindo de volta!</p>
+            <h1 className="text-2xl font-bold" style={{
+            color: '#111827'
+          }}>Login</h1>
+            <p className="mt-1" style={{
+            color: '#6b7280'
+          }}>Bem-vindo de volta!</p>
           </div>
 
           {formContent}
 
           {/* Certificado Digital - centered between form and footer */}
           <div className="flex-1 flex items-center justify-center py-4">
-            <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-full text-sm transition-colors" style={{ backgroundColor: '#f3f4f6', color: '#4b5563' }}>
+            <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-full text-sm transition-colors" style={{
+            backgroundColor: '#f3f4f6',
+            color: '#4b5563'
+          }}>
               Certificado Digital <span className="text-xs">R$</span>109.90
             </a>
           </div>
@@ -277,18 +277,23 @@ export default function Auth() {
         </div>
 
         {/* Right side - White form (60%) */}
-        <div className="w-[60%] flex flex-col items-center justify-center p-8" style={{ backgroundColor: '#ffffff' }}>
+        <div className="w-[60%] flex flex-col items-center justify-center p-8" style={{
+        backgroundColor: '#ffffff'
+      }}>
           <div className="w-full max-w-md">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold" style={{ color: '#4b5563' }}>Login</h1>
-              <p className="mt-1" style={{ color: '#6b7280' }}>Bem-vindo de volta!</p>
+              <h1 style={{
+              color: '#4b5563'
+            }} className="text-2xl font-bold text-gray-600">Login</h1>
+              <p className="mt-1" style={{
+              color: '#6b7280'
+            }}>Bem-vindo de volta!</p>
             </div>
 
             {formContent}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
