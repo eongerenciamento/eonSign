@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FolderPlus } from "lucide-react";
+import { FolderPlus, X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -105,10 +105,12 @@ export const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDia
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="cancel" onClick={() => setOpen(false)}>
+            <X className="w-4 h-4 mr-1" />
             Cancelar
           </Button>
-          <Button onClick={handleCreateFolder} disabled={loading}>
+          <Button variant="confirm" onClick={handleCreateFolder} disabled={loading}>
+            <Check className="w-4 h-4 mr-1" />
             {loading ? "Criando..." : "Criar Pasta"}
           </Button>
         </DialogFooter>

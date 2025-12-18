@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Loader2, Trash2, Mail } from "lucide-react";
+import { Plus, Loader2, Trash2, Mail, X, Check } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Dialog,
@@ -230,15 +230,16 @@ export function MembersTab() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="hover:bg-background hover:text-foreground">
+            <Button variant="cancel" onClick={() => setIsDialogOpen(false)}>
+              <X className="h-4 w-4 mr-1" />
               Cancelar
             </Button>
             <Button
+              variant="confirm"
               onClick={handleInviteMember}
               disabled={isInviting}
-              className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white"
             >
-              {isInviting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enviar Convite"}
+              {isInviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="h-4 w-4 mr-1" />Enviar Convite</>}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -255,13 +256,16 @@ export function MembersTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="hover:bg-background hover:text-foreground">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="bg-transparent text-gray-600 hover:bg-transparent hover:text-gray-600 border-0 rounded-full">
+              <X className="h-4 w-4 mr-1" />
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteMember}
               disabled={isDeleting}
               className="bg-red-500 hover:bg-red-600"
             >
-              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remover"}
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-1" />Remover</>}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

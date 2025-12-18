@@ -1727,11 +1727,11 @@ const NewDocument = () => {
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <Button className="flex-1 gap-2 bg-[#273d60] text-white border-none hover:bg-[#273d60]/90" onClick={() => navigate("/documentos")}>
+            <Button variant="cancel" className="flex-1 gap-2" onClick={() => navigate("/documentos")}>
               <X className="w-4 h-4" />
               Cancelar
             </Button>
-            <Button className="flex-1 gap-2 bg-[#273d60] text-white hover:bg-[#273d60]/90" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
+            <Button variant="confirm" className="flex-1 gap-2" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
               <AnimatePresence mode="wait" initial={false}>
                 {isSubmitting ? (
                   <motion.div
@@ -1778,10 +1778,11 @@ const NewDocument = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button variant="outline" onClick={() => navigate("/documentos")}>
+            <Button variant="cancel" onClick={() => navigate("/documentos")}>
+              <X className="w-4 h-4 mr-1" />
               Voltar
             </Button>
-            <Button onClick={() => navigate("/configuracoes?tab=subscription")} className="bg-gradient-to-r from-[#273d60] to-[#001f3f]">
+            <Button onClick={() => navigate("/configuracoes?tab=subscription")} className="bg-gradient-to-r from-[#273d60] to-[#001f3f] rounded-full">
               Fazer Upgrade
             </Button>
           </AlertDialogFooter>
@@ -1904,8 +1905,9 @@ const NewDocument = () => {
 
           <SheetFooter className="mt-6">
             <Button 
+              variant="confirm"
               onClick={() => setShowPrescriptionSheet(false)}
-              className="w-full bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90"
+              className="w-full"
             >
               <Check className="w-4 h-4 mr-2" />
               Confirmar

@@ -639,7 +639,7 @@ const Settings = () => {
                   </div>
 
                   <div className="flex gap-3 justify-end pt-6">
-                    <Button variant="ghost" className="bg-transparent text-gray-500 border-0 hover:bg-transparent hover:text-gray-500 gap-2 w-28" onClick={() => {
+                    <Button variant="cancel" className="gap-2 w-28" onClick={() => {
                       setLogo(null);
                       setCompanyName("");
                       setCnpj("");
@@ -656,7 +656,7 @@ const Settings = () => {
                       <X className="w-4 h-4" />
                       Cancelar
                     </Button>
-                    <Button className="bg-muted dark:bg-secondary text-foreground hover:bg-muted/80 dark:hover:bg-secondary/80 gap-2 w-28 rounded-lg" onClick={handleSaveCompany}>
+                    <Button variant="confirm" className="gap-2 w-28" onClick={handleSaveCompany}>
                       <Check className="w-4 h-4" />
                       Salvar
                     </Button>
