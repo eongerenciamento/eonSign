@@ -69,7 +69,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
       <Table>
         <TableHeader>
           <TableRow className="border-0 bg-gray-50">
-            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static border-0">
+            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Recurso
             </TableHead>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -91,7 +91,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
         </TableHeader>
         <TableBody>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Documentos / Envelopes
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -104,7 +104,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Usuários ilimitados
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -117,7 +117,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Notificações
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -130,7 +130,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Geolocalização
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -147,7 +147,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Eon Drive
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -164,7 +164,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             })}
           </TableRow>
           <TableRow className="bg-gray-50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
@@ -182,7 +182,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
           </TableRow>
           {/* Action buttons row */}
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]">
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
