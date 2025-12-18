@@ -25,16 +25,8 @@ function MonthYearPicker({
 }) {
   const [selectedMonth, setSelectedMonth] = React.useState(displayMonth.getMonth());
   const [selectedYear, setSelectedYear] = React.useState(displayMonth.getFullYear());
-  
-  // Generate year range (current year - 100 to current year + 10)
-  const currentYear = new Date().getFullYear();
-  const years = React.useMemo(() => {
-    const yearList = [];
-    for (let y = currentYear - 100; y <= currentYear + 10; y++) {
-      yearList.push(y);
-    }
-    return yearList;
-  }, [currentYear]);
+  const [monthInput, setMonthInput] = React.useState(String(displayMonth.getMonth() + 1).padStart(2, '0'));
+  const [yearInput, setYearInput] = React.useState(String(displayMonth.getFullYear()));
 
   // Update parent when values change
   React.useEffect(() => {
@@ -42,45 +34,63 @@ function MonthYearPicker({
     onChange(newDate);
   }, [selectedMonth, selectedYear]);
 
-  return (
-    <div className="flex items-center justify-center gap-4 py-3 px-4 border-b border-gray-300/30 dark:border-white/10">
-      {/* Month Select */}
-      <select
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(Number(e.target.value))}
-        className="bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-0 appearance-none text-center px-2 py-1 rounded-lg hover:bg-white/20 dark:hover:bg-white/10"
-        style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'right 4px center',
-          paddingRight: '20px'
-        }}
-      >
-        {months.map((month, index) => (
-          <option key={month} value={index} className="bg-background text-foreground">
-            {month}
-          </option>
-        ))}
-      </select>
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 2);
+    setMonthInput(value);
+    
+    const num = parseInt(value, 10);
+    if (num >= 1 && num <= 12) {
+      setSelectedMonth(num - 1);
+    }
+  };
 
-      {/* Year Select */}
-      <select
-        value={selectedYear}
-        onChange={(e) => setSelectedYear(Number(e.target.value))}
-        className="bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-0 appearance-none text-center px-2 py-1 rounded-lg hover:bg-white/20 dark:hover:bg-white/10"
-        style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'right 4px center',
-          paddingRight: '20px'
-        }}
-      >
-        {years.map((year) => (
-          <option key={year} value={year} className="bg-background text-foreground">
-            {year}
-          </option>
-        ))}
-      </select>
+  const handleMonthBlur = () => {
+    // Format to 2 digits on blur
+    setMonthInput(String(selectedMonth + 1).padStart(2, '0'));
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setYearInput(value);
+    
+    const num = parseInt(value, 10);
+    if (num >= 1900 && num <= 2100) {
+      setSelectedYear(num);
+    }
+  };
+
+  const handleYearBlur = () => {
+    // Ensure valid year on blur
+    if (selectedYear < 1900) setSelectedYear(1900);
+    if (selectedYear > 2100) setSelectedYear(2100);
+    setYearInput(String(selectedYear));
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 py-3 px-4 border-b border-gray-300/30 dark:border-white/10">
+      {/* Month Input */}
+      <input
+        type="text"
+        inputMode="numeric"
+        value={monthInput}
+        onChange={handleMonthChange}
+        onBlur={handleMonthBlur}
+        onFocus={(e) => e.target.select()}
+        className="w-8 bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm text-center focus:outline-none focus:ring-0 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 py-1"
+        maxLength={2}
+      />
+      <span className="text-gray-400 dark:text-gray-500">/</span>
+      {/* Year Input */}
+      <input
+        type="text"
+        inputMode="numeric"
+        value={yearInput}
+        onChange={handleYearChange}
+        onBlur={handleYearBlur}
+        onFocus={(e) => e.target.select()}
+        className="w-12 bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm text-center focus:outline-none focus:ring-0 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 py-1"
+        maxLength={4}
+      />
     </div>
   );
 }
