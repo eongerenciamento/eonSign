@@ -69,7 +69,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
       <Table>
         <TableHeader>
           <TableRow className="border-0 bg-gray-100/50">
-            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableHead className="w-[200px] font-semibold text-xs text-gray-700 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Recurso
             </TableHead>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -79,8 +79,8 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
               return (
                 <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <div className="flex flex-col items-center gap-0">
-                    <span className="font-semibold text-gray-600">{tier.name}</span>
-                    <span className="text-sm text-gray-400 font-normal">
+                    <span className="font-semibold text-xs text-gray-600">{tier.name}</span>
+                    <span className="text-xs text-gray-400 font-normal">
                       R$ {tier.price === 0 ? "0" : tier.price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
@@ -91,90 +91,90 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
         </TableHeader>
         <TableBody>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Documentos / Envelopes
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   {tier.limit}
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Usuários ilimitados
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
-                  <Check className="h-5 w-5 text-green-500 mx-auto" />
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+                  <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Notificações
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
-                  <Check className="h-5 w-5 text-green-500 mx-auto" />
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                  <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Geolocalização
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" ? (
-                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                    <X className="h-4 w-4 text-gray-400 mx-auto" />
                   ) : (
-                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                    <Check className="h-4 w-4 text-green-500 mx-auto" />
                   )}
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-white border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Eon Drive
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   {tier.priceId === "free" ? (
-                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                    <X className="h-4 w-4 text-gray-400 mx-auto" />
                   ) : (
-                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                    <Check className="h-4 w-4 text-green-500 mx-auto" />
                   )}
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
               const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
               return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   {tier.priceId === "free" || index === 1 ? (
-                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                    <X className="h-4 w-4 text-gray-400 mx-auto" />
                   ) : (
-                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                    <Check className="h-4 w-4 text-green-500 mx-auto" />
                   )}
                 </TableCell>
               );
@@ -182,7 +182,7 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
           </TableRow>
           {/* Action buttons row */}
           <TableRow className="bg-white border-0 border-b border-gray-200/50">
-            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+            <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier) => {
@@ -284,10 +284,10 @@ function FAQSection() {
               value={`item-${index + 1}`} 
               className={`border-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}
             >
-              <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
+              <AccordionTrigger className="text-left text-sm text-gray-600 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
                 {item.question}
               </AccordionTrigger>
-              <AccordionContent className="text-left px-4 text-gray-500">
+              <AccordionContent className="text-left px-4 text-sm text-gray-500">
                 {item.answer}
               </AccordionContent>
             </AccordionItem>
