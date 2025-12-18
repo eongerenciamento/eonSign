@@ -5,16 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronsUpDown, Check } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { EnvelopeDocumentsDialog } from "./EnvelopeDocumentsDialog";
 import { BrySigningDialog } from "./BrySigningDialog";
 import JSZip from "jszip";
-import { cn } from "@/lib/utils";
 
 export interface EnvelopeDocument {
   id: string;
@@ -152,9 +149,6 @@ export const DocumentsTable = ({
   
   // Loading state for certificate download
   const [downloadingCertificateId, setDownloadingCertificateId] = useState<string | null>(null);
-  
-  // Folder combobox state
-  const [openFolderPopover, setOpenFolderPopover] = useState<string | null>(null);
 
   const handleOpenEnvelopeDialog = (doc: Document) => {
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
@@ -934,53 +928,23 @@ export const DocumentsTable = ({
                           </svg>
                         </div>
                       </div>
-                      {showFolderActions && folders && folders.length > 0 && (
-                        <Popover open={openFolderPopover === doc.id} onOpenChange={(open) => setOpenFolderPopover(open ? doc.id : null)}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openFolderPopover === doc.id}
-                              className="w-[180px] justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70"
-                            >
-                              {doc.folderId
-                                ? hierarchicalFolders.find(({ folder }) => folder.id === doc.folderId)?.folder.name || "Selecionar pasta"
-                                : "Selecionar pasta"}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[200px] p-0 bg-gray-200/70 backdrop-blur-sm border-none z-50">
-                            <Command className="bg-transparent">
-                              <CommandInput placeholder="Buscar pasta..." className="border-none focus:ring-0" />
-                              <CommandList>
-                                <CommandEmpty>Nenhuma pasta encontrada.</CommandEmpty>
-                                <CommandGroup>
-                                  {hierarchicalFolders.map(({ folder, level }) => (
-                                    <CommandItem
-                                      key={folder.id}
-                                      value={folder.name}
-                                      onSelect={() => {
-                                        handleMoveToFolder(doc.id, folder.id);
-                                        setOpenFolderPopover(null);
-                                      }}
-                                      className="hover:bg-gray-300/50 text-gray-700"
-                                      style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          doc.folderId === folder.id ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                      {level > 0 && "└─ "}{folder.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      {showFolderActions && folders && folders.length > 0 && <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
+                          <SelectTrigger className="w-[180px] bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70">
+                            <SelectValue placeholder="Selecionar pasta" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                            {hierarchicalFolders.map(({ folder, level }) => (
+                              <SelectItem 
+                                key={folder.id} 
+                                value={folder.id} 
+                                className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
+                                style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                              >
+                                {level > 0 && "└─ "}{folder.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>}
                     </div>
                   </TableCell>
                   <TableCell>
