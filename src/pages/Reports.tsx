@@ -518,30 +518,45 @@ const Reports = () => {
 
           <Card className="p-6 bg-gray-100 border-0">
             <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
-            <div className="space-y-4">
+            <div className="flex items-end justify-between gap-4 pt-4">
               {[{
-                  name: "João Silva",
-                  docs: 24,
-                  email: "joao.silva@empresa.com"
+                  label: "Assinados",
+                  count: 24,
+                  percentage: 71,
+                  color: "bg-blue-500"
                 }, {
-                  name: "Maria Santos",
-                  docs: 19,
-                  email: "maria.santos@empresa.com"
+                  label: "Pendentes",
+                  count: 8,
+                  percentage: 29,
+                  color: "bg-blue-300"
                 }, {
-                  name: "Pedro Costa",
-                  docs: 15,
-                  email: "pedro.costa@empresa.com"
+                  label: "Rejeitados",
+                  count: 0,
+                  percentage: 0,
+                  color: "bg-gray-300"
                 }, {
-                  name: "Ana Oliveira",
-                  docs: 12,
-                  email: "ana.oliveira@empresa.com"
-                }].map(signer => <div key={signer.email} className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-600 text-sm">{signer.name}</p>
-                    <p className="text-muted-foreground text-xs">{signer.email}</p>
+                  label: "Expirados",
+                  count: 0,
+                  percentage: 0,
+                  color: "bg-gray-300"
+                }, {
+                  label: "Cancelados",
+                  count: 0,
+                  percentage: 0,
+                  color: "bg-gray-300"
+                }].map(item => (
+                <div key={item.label} className="flex flex-col items-center flex-1">
+                  <span className="text-lg font-bold text-gray-700">{item.count}</span>
+                  <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
+                  <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
+                    <div 
+                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
+                      style={{ height: `${Math.max(item.percentage, 0)}%` }}
+                    />
                   </div>
-                  <Badge variant="secondary" className="text-gray-600">{signer.docs} docs</Badge>
-                </div>)}
+                  <span className="text-xs text-gray-500 mt-2 text-center">{item.label}</span>
+                </div>
+              ))}
             </div>
           </Card>
         </div>
@@ -570,6 +585,36 @@ const Reports = () => {
                 doc: "Termo de Adesão",
                 time: "Há 2 dias",
                 status: "warning"
+              }, {
+                action: "Documento assinado",
+                doc: "Contrato de Serviços",
+                time: "Há 3 dias",
+                status: "success"
+              }, {
+                action: "Documento enviado",
+                doc: "Acordo de Parceria",
+                time: "Há 3 dias",
+                status: "default"
+              }, {
+                action: "Documento assinado",
+                doc: "Proposta Técnica",
+                time: "Há 4 dias",
+                status: "success"
+              }, {
+                action: "Documento pendente",
+                doc: "Termo de Confidencialidade",
+                time: "Há 4 dias",
+                status: "warning"
+              }, {
+                action: "Documento assinado",
+                doc: "Contrato de Trabalho",
+                time: "Há 5 dias",
+                status: "success"
+              }, {
+                action: "Documento enviado",
+                doc: "Aditivo Contratual",
+                time: "Há 5 dias",
+                status: "default"
               }].map((activity, index) => <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0">
                 <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success" ? "bg-success" : activity.status === "warning" ? "bg-warning" : "bg-primary"}`} />
                 <div className="flex-1">
