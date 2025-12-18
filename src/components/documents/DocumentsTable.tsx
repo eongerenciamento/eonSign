@@ -829,7 +829,7 @@ export const DocumentsTable = ({
   };
   return <>
       {/* Desktop Table View */}
-      <div className="hidden md:block rounded-lg overflow-hidden">
+      <div className="hidden md:block rounded-xl overflow-hidden border border-gray-200">
         <Table>
           <TableHeader>
             <TableRow className="border-none bg-white hover:bg-white">
@@ -1052,7 +1052,7 @@ export const DocumentsTable = ({
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
         const prescriptionBg = isPrescription(doc) ? 'bg-purple-100' : 'bg-gray-100';
