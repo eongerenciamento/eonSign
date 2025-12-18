@@ -517,7 +517,7 @@ const Reports = () => {
           </Card>
 
           <Card className="p-6 bg-gray-100 border-0">
-            <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
+            <h3 className="font-semibold mb-4 text-base text-gray-600">Documentos por Status</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {[{
                   label: "Assinados",
@@ -533,17 +533,17 @@ const Reports = () => {
                   label: "Rejeitados",
                   count: 0,
                   percentage: 0,
-                  color: "bg-gray-300"
+                  color: "bg-red-500"
                 }, {
                   label: "Expirados",
                   count: 0,
                   percentage: 0,
-                  color: "bg-gray-300"
+                  color: "bg-purple-500"
                 }, {
                   label: "Cancelados",
                   count: 0,
                   percentage: 0,
-                  color: "bg-gray-300"
+                  color: "bg-yellow-500"
                 }].map(item => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
                   <span className="text-lg font-bold text-gray-700">{item.count}</span>
@@ -560,6 +560,51 @@ const Reports = () => {
             </div>
           </Card>
         </div>
+
+        {/* Top Signatários Chart */}
+        <Card className="p-6 bg-gray-100 border-0">
+          <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
+          <div className="flex items-end justify-between gap-4 pt-4">
+            {[{
+                label: "João Silva",
+                count: 24,
+                percentage: 100,
+                color: "bg-blue-500"
+              }, {
+                label: "Maria Santos",
+                count: 19,
+                percentage: 79,
+                color: "bg-blue-400"
+              }, {
+                label: "Pedro Costa",
+                count: 15,
+                percentage: 63,
+                color: "bg-blue-300"
+              }, {
+                label: "Ana Oliveira",
+                count: 12,
+                percentage: 50,
+                color: "bg-blue-200"
+              }, {
+                label: "Carlos Lima",
+                count: 8,
+                percentage: 33,
+                color: "bg-blue-100"
+              }].map(item => (
+              <div key={item.label} className="flex flex-col items-center flex-1">
+                <span className="text-lg font-bold text-gray-700">{item.count}</span>
+                <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
+                <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
+                  <div 
+                    className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
+                    style={{ height: `${Math.max(item.percentage, 0)}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-500 mt-2 text-center truncate w-full">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {/* Activity Timeline */}
         <Card className="p-6 bg-gray-100 border-0">
