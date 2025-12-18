@@ -148,7 +148,7 @@ function ComparisonTable({
           })}
           </TableRow>
           {/* Action buttons row */}
-          <TableRow className="bg-white border-0 border-b border-gray-200/50">
+          <TableRow className="bg-white border-b border-gray-200/50">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
