@@ -829,7 +829,7 @@ export const DocumentsTable = ({
   };
   return <>
       {/* Desktop Table View */}
-      <div className="hidden md:block rounded-xl overflow-hidden border border-gray-200">
+      <div className="hidden md:block rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-none bg-white hover:bg-white">
@@ -851,9 +851,9 @@ export const DocumentsTable = ({
                       onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
                     >
                       {doc.isEnvelope ? (
-                        <FolderOpen className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                        <FolderOpen className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
                       ) : (
-                        <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                        <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
                       )}
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
@@ -1166,9 +1166,9 @@ export const DocumentsTable = ({
                 >
                   <div className="flex items-center gap-2 flex-wrap">
                     {doc.isEnvelope ? (
-                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
                     ) : (
-                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
                     )}
                     <p className="font-medium">{doc.name}</p>
                     {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
