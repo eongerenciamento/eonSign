@@ -1,444 +1,429 @@
-import { useState, useRef, useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { formatTelefone } from "@/lib/masks";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Upload, LogOut, Check, Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, Upload, LogOut, Check, Eye, EyeOff } from "lucide-react";
 
 interface UserProfileSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userName: string;
-  userEmail: string;
-  userAvatar: string | null;
-  organization: string;
-  onAvatarChange: (url: string) => void;
-  onProfileUpdate?: () => void;
 }
 
-export function UserProfileSheet({
-  open,
-  onOpenChange,
-  userName,
-  userEmail,
-  userAvatar,
-  organization,
-  onAvatarChange,
-  onProfileUpdate,
-}: UserProfileSheetProps) {
+export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) {
   const navigate = useNavigate();
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState(userName);
-  const [role, setRole] = useState("Administrador");
-  const [email, setEmail] = useState(userEmail);
-  const [phone, setPhone] = useState("");
-  const [avatar, setAvatar] = useState(userAvatar);
-  const [organizationName, setOrganizationName] = useState(organization);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [uploading, setUploading] = useState(false);
+  const [localPhotoUrl, setLocalPhotoUrl] = useState<string | null>(null);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [formData, setFormData] = useState({
+    nome_completo: "",
+    email: "",
+    telefone: "",
+    cargo: "",
+    organizacao: "",
+  });
 
-  // Sincronizar estados quando as props mudarem
-  useEffect(() => {
-    setName(userName);
-    setEmail(userEmail);
-    setAvatar(userAvatar);
-    setOrganizationName(organization);
-  }, [userName, userEmail, userAvatar, organization, open]);
-
-  // Carregar telefone do company_settings
-  useEffect(() => {
-    const loadPhone = async () => {
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('company_settings')
-          .select('admin_phone')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (data?.admin_phone) {
-          setPhone(data.admin_phone);
-        }
-      }
-    };
-    if (open) {
-      loadPhone();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        nome_completo: profile.nome_completo || "",
+        email: profile.email || "",
+        telefone: profile.telefone || "",
+        cargo: profile.cargo || "",
+        organizacao: profile.organizacao || "",
+      });
     }
-  }, [open]);
+  }, [profile]);
 
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 2) return numbers;
-    if (numbers.length <= 7)
-      return `(${numbers.slice(0, 2)})${numbers.slice(2)}`;
-    return `(${numbers.slice(0, 2)})${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  };
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      if (!profile?.id) throw new Error("Usuário não encontrado");
 
-  const handlePhoneChange = (value: string) => {
-    setPhone(formatPhone(value));
-  };
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          nome_completo: data.nome_completo,
+          telefone: data.telefone,
+          cargo: data.cargo,
+          organizacao: data.organizacao,
+        })
+        .eq("id", profile.id);
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram salvas com sucesso",
+      });
+      onOpenChange(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar perfil",
+        description: error.message,
+      });
+    },
+  });
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!profile?.id) return;
+    
+    const file = event.target.files?.[0];
     if (!file) return;
 
+    setUploading(true);
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+      console.log("Uploading photo for user:", profile.id);
       
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file);
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${profile.id}/${Date.now()}.${fileExt}`;
 
-      if (uploadError) throw uploadError;
+      const { error: uploadError } = await supabase.storage
+        .from("profile-photos")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from("profile-photos")
         .getPublicUrl(fileName);
 
-      setAvatar(publicUrl);
-      onAvatarChange(publicUrl);
-      toast.success("Avatar atualizado!");
-    } catch (error) {
-      toast.error("Erro ao fazer upload do avatar");
+      // Add cache-busting timestamp to prevent browser caching
+      const publicUrlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      
+      console.log("Upload successful, updating profile with URL:", publicUrlWithCacheBust);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ foto_url: publicUrl })
+        .eq("id", profile.id);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      // Update local state immediately for instant UI feedback
+      setLocalPhotoUrl(publicUrlWithCacheBust);
+
+      // Force immediate refetch of profile data
+      await queryClient.refetchQueries({ queryKey: ["profile"] });
+      
+      console.log("Photo update complete");
+      
+      toast({
+        title: "Foto atualizada",
+        description: "Sua foto de perfil foi atualizada com sucesso",
+      });
+    } catch (error: any) {
+      console.error("Photo upload error:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer upload",
+        description: error.message,
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleSave = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) return;
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "As senhas não coincidem",
+      });
+      return;
+    }
 
-    // Se estiver alterando senha, validar e atualizar
-    if (showPasswordFields) {
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        toast.error("Preencha todos os campos de senha");
-        return;
-      }
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres",
+      });
+      return;
+    }
 
-      if (newPassword !== confirmPassword) {
-        toast.error("A nova senha e a confirmação não coincidem");
-        return;
-      }
-
-      if (newPassword.length < 6) {
-        toast.error("A nova senha deve ter no mínimo 6 caracteres");
-        return;
-      }
-
-      // Atualizar senha
-      const { error: passwordError } = await supabase.auth.updateUser({
-        password: newPassword,
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
       });
 
-      if (passwordError) {
-        toast.error("Erro ao alterar senha: " + passwordError.message);
-        return;
-      }
+      if (error) throw error;
 
-      toast.success("Senha alterada com sucesso!");
+      toast({
+        title: "Senha alterada",
+        description: "Sua senha foi atualizada com sucesso",
+      });
+
       setShowPasswordFields(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      setPasswordData({ newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao alterar senha",
+        description: error.message,
+      });
     }
-
-    // Atualizar dados do perfil no user_metadata
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        name,
-        avatar_url: avatar,
-        organization: organizationName,
-      },
-    });
-
-    if (error) {
-      toast.error("Erro ao salvar alterações");
-      return;
-    }
-
-    // Atualizar company_settings (avatar_url para o avatar do usuário)
-    const { error: companyError } = await supabase
-      .from('company_settings')
-      .update({
-        admin_name: name,
-        admin_phone: phone,
-        admin_email: email,
-        avatar_url: avatar,
-      })
-      .eq('user_id', user.id);
-
-    if (companyError) {
-      toast.error("Erro ao atualizar configurações da empresa");
-      return;
-    }
-
-    // Atualizar callback com nova URL do avatar
-    if (avatar) {
-      onAvatarChange(avatar);
-    }
-    
-    // Notificar o parent para atualizar dados
-    if (onProfileUpdate) {
-      onProfileUpdate();
-    }
-
-    toast.success("Alterações salvas com sucesso!");
-    onOpenChange(false);
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Erro ao sair");
-    } else {
-      toast.custom(() => (
-        <div className="flex items-center justify-start">
-          <LogOut
-            className="h-6 w-6 text-muted-foreground animate-[slide-out-right_0.8s_ease-in-out_forwards]"
-            strokeWidth={2.5}
-          />
-        </div>
-      ), {
-        duration: 1500,
-        position: "top-left",
-        unstyled: true,
-        className: "!bg-transparent !border-0 !shadow-none !p-0",
+    try {
+      await supabase.auth.signOut();
+      toast({
+        description: <LogOut className="h-5 w-5 mx-auto animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />,
+        className: "bg-gray-500 text-white border-none justify-center p-2 min-h-0 w-10 h-10 rounded-full",
+        duration: 1500
       });
-      setTimeout(() => navigate("/auth"), 800);
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao sair",
+        description: error.message,
+      });
     }
   };
 
-  const getUserInitials = () => {
-    if (name) return name.charAt(0).toUpperCase();
-    if (email) return email.charAt(0).toUpperCase();
-    return "U";
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(formData);
+  };
+
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatTelefone(e.target.value);
+    setFormData({ ...formData, telefone: formatted });
   };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-        <SheetHeader className="mb-8">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-sm text-gray-600 text-left">
-              Perfil do Usuário
-            </SheetTitle>
-            <div className="relative">
-              <Avatar className="h-12 w-12">
-                {avatar && <AvatarImage src={avatar} />}
-                <AvatarFallback className={avatar ? "bg-[#273D60] text-white text-base" : "bg-gray-200 text-gray-600 text-base"}>
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <button
-                onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#273D60] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto sm:rounded-l-2xl border-l">
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-sm text-muted-foreground">Perfil do Usuário</span>
+          <div className="relative">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={localPhotoUrl || profile?.foto_url || ""} />
+              <AvatarFallback 
+                className="text-lg font-medium bg-gray-200 text-gray-600"
               >
-                <Upload className="w-3 h-3" />
-              </button>
-              <input
-                ref={avatarInputRef}
+                {profile?.nome_completo?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+            
+            <Label 
+              htmlFor="photo-upload" 
+              className="absolute -bottom-1 -right-1 cursor-pointer rounded-full p-1.5 hover:opacity-90 transition-opacity bg-transparent"
+            >
+              {uploading ? (
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+              ) : (
+                <Upload className="h-3 w-3 text-muted-foreground" />
+              )}
+              <Input
+                id="photo-upload"
                 type="file"
                 accept="image/*"
-                onChange={handleAvatarChange}
                 className="hidden"
+                onChange={handlePhotoUpload}
+                disabled={uploading}
               />
-            </div>
-          </div>
-        </SheetHeader>
-
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-gray-600">
-              Nome
             </Label>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          <div className="space-y-2">
+            <Label htmlFor="nome_completo">Nome</Label>
             <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="text-base bg-gray-100 border-none"
-              placeholder="Digite seu nome"
+              id="nome_completo"
+              value={formData.nome_completo}
+              onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
+              required
+              className="bg-muted border-0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-600">
-              E-mail
-            </Label>
+            <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="text-base bg-gray-100 border-none"
-              placeholder="Digite seu e-mail"
+              value={formData.email}
+              disabled
+              className="bg-muted border-0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-gray-600">
-              Telefone
-            </Label>
+            <Label htmlFor="telefone">Telefone</Label>
             <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              className="text-base bg-gray-100 border-none"
+              id="telefone"
+              value={formData.telefone}
+              onChange={handleTelefoneChange}
               placeholder="(00)00000-0000"
-              maxLength={14}
+              inputMode="numeric"
+              className="bg-muted border-0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-gray-600">
-              Cargo
-            </Label>
+            <Label htmlFor="cargo">Cargo</Label>
             <Input
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="text-base bg-gray-100 border-none"
+              id="cargo"
+              value={formData.cargo}
+              onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
               placeholder="Ex: Gerente de Projetos"
+              className="bg-muted border-0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="organization" className="text-gray-600">
-              Organização
-            </Label>
+            <Label htmlFor="organizacao">Organização</Label>
             <Input
-              id="organization"
-              value={organizationName}
-              onChange={(e) => setOrganizationName(e.target.value)}
-              className="text-base bg-gray-100 border-none"
+              id="organizacao"
+              value={formData.organizacao}
+              onChange={(e) => setFormData({ ...formData, organizacao: e.target.value })}
               placeholder="Ex: Empresa XYZ"
+              className="bg-muted border-0"
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowPasswordFields(!showPasswordFields)}
-            className="text-gray-600 text-sm hover:text-gray-800 transition-colors"
-          >
-            Alterar Senha
-          </button>
-
-          {showPasswordFields && (
-            <div className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="current-password" className="text-gray-600">
-                  Senha Atual
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="current-password"
-                    type={showCurrentPassword ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="text-base pr-10 bg-gray-100 border-none"
-                    placeholder="Digite sua senha atual"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  >
-                    {showCurrentPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+          <div className="space-y-3">
+            <button
+              type="button"
+              className="w-full text-left text-sm text-muted-foreground bg-transparent border-0 p-0 cursor-pointer hover:text-foreground transition-colors"
+              onClick={() => setShowPasswordFields(!showPasswordFields)}
+            >
+              Alterar Senha
+            </button>
+            
+            {showPasswordFields && (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Nova Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                      }
+                      placeholder="Digite a nova senha"
+                      className="bg-muted border-0 pr-10"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="new-password" className="text-gray-600">
-                  Nova Senha
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="new-password"
-                    type={showNewPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="text-base pr-10 bg-gray-100 border-none"
-                    placeholder="Digite sua nova senha"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  >
-                    {showNewPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                      }
+                      placeholder="Confirme a nova senha"
+                      className="bg-muted border-0 pr-10"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-gray-600">
-                  Confirmação de Senha
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="confirm-password"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="text-base pr-10 bg-gray-100 border-none"
-                    placeholder="Confirme sua nova senha"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
+                <Button
+                  type="button"
+                  onClick={handlePasswordChange}
+                  className="w-full rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Confirmar Alteração
+                </Button>
               </div>
+            )}
+            
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex-1 rounded-full text-gray-600 hover:bg-transparent hover:text-gray-600"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
+                disabled={updateProfileMutation.isPending}
+              >
+                {updateProfileMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                Salvar
+              </Button>
             </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-center gap-8 mt-8">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair
-          </button>
-          
-          <Button
-            onClick={handleSave}
-            className="bg-gray-200 text-gray-600 hover:bg-gray-300 px-8"
-          >
-            <Check className="w-4 h-4 mr-2" />
-            Salvar
-          </Button>
-        </div>
+          </div>
+        </form>
       </SheetContent>
     </Sheet>
   );

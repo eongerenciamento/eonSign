@@ -254,6 +254,6 @@ export function AppSidebar() {
           </button>}
       </div>
 
-      <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} userName={name} userEmail={user?.email || ""} userAvatar={avatarUrl} organization={organization} onAvatarChange={setAvatarUrl} onProfileUpdate={handleProfileUpdate} />
+      <UserProfileSheet open={profileSheetOpen} onOpenChange={setProfileSheetOpen} />
     </Sidebar>;
 }
