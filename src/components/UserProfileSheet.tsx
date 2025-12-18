@@ -46,11 +46,45 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data } = await supabase
+      // Tentar buscar o perfil existente
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
+      
+      // Se o perfil não existir, criar um novo automaticamente
+      if (error && error.code === 'PGRST116') {
+        const newProfile = {
+          id: user.id,
+          email: user.email || "",
+          nome_completo: user.user_metadata?.nome_completo || user.user_metadata?.name || "",
+        };
+        
+        const { data: createdProfile, error: insertError } = await supabase
+          .from("profiles")
+          .insert(newProfile)
+          .select()
+          .single();
+        
+        if (insertError) {
+          console.error("Erro ao criar perfil:", insertError);
+          // Retornar um perfil mínimo com dados do auth
+          return { 
+            id: user.id, 
+            email: user.email || "", 
+            nome_completo: "",
+            telefone: null,
+            cargo: null,
+            organizacao: null,
+            foto_url: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+        
+        return createdProfile;
+      }
       
       return data;
     },
