@@ -28,6 +28,15 @@ const Reports = () => {
   const [sortField, setSortField] = useState<"name" | "signed_at" | "status">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showFilters, setShowFilters] = useState(false);
+  const [animateBars, setAnimateBars] = useState(false);
+
+  // Animate bars on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimateBars(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Debounce para busca
   useEffect(() => {
@@ -474,7 +483,7 @@ const Reports = () => {
 
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 animate-fade-in">
             <h3 className="font-semibold mb-4 text-base text-gray-600">Documentos por Status</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {[{
@@ -502,14 +511,17 @@ const Reports = () => {
                   count: 0,
                   percentage: 0,
                   color: "bg-yellow-500"
-                }].map(item => (
+                }].map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
                   <span className="text-lg font-bold text-gray-700">{item.count}</span>
                   <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
                   <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
                     <div 
-                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
-                      style={{ height: `${Math.max(item.percentage, 0)}%` }}
+                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
+                      style={{ 
+                        height: animateBars ? `${Math.max(item.percentage, 0)}%` : '0%',
+                        transitionDelay: `${index * 100}ms`
+                      }}
                     />
                   </div>
                   <span className="text-xs text-gray-500 mt-2 text-center">{item.label}</span>
@@ -518,7 +530,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
             <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {[{
@@ -546,14 +558,17 @@ const Reports = () => {
                   count: 8,
                   percentage: 33,
                   color: "bg-blue-100"
-                }].map(item => (
+                }].map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
                   <span className="text-lg font-bold text-gray-700">{item.count}</span>
                   <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
                   <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
                     <div 
-                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
-                      style={{ height: `${Math.max(item.percentage, 0)}%` }}
+                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
+                      style={{ 
+                        height: animateBars ? `${Math.max(item.percentage, 0)}%` : '0%',
+                        transitionDelay: `${(index * 100) + 200}ms`
+                      }}
                     />
                   </div>
                   <span className="text-xs text-gray-500 mt-2 text-center truncate w-full">{item.label}</span>
