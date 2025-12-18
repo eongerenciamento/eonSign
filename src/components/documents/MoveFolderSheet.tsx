@@ -100,8 +100,8 @@ export const MoveFolderSheet = ({
       setTimeout(() => {
         setShowSuccess(false);
         onOpenChange(false);
-      }, 600);
-    }, 400);
+      }, 350);
+    }, 300);
   };
 
   const renderFolder = (folder: FolderNode, level: number = 0) => {
