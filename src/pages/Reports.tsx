@@ -864,23 +864,23 @@ const Reports = () => {
                         <TableHead>Nascimento</TableHead>
                         <TableHead>Email / Telefone</TableHead>
                         <TableHead>Documento</TableHead>
-                        <TableHead>
-                          <button onClick={() => handleSort("status")} className="flex items-center hover:text-foreground transition-colors">
-                            Status
-                            <SortIcon field="status" />
-                          </button>
-                        </TableHead>
-                        <TableHead>
-                          <button onClick={() => handleSort("signed_at")} className="flex items-center hover:text-foreground transition-colors">
+                        <TableHead className="text-center">
+                          <button onClick={() => handleSort("signed_at")} className="flex items-center justify-center hover:text-foreground transition-colors w-full">
                             Data Assinatura
                             <SortIcon field="signed_at" />
                           </button>
                         </TableHead>
-                        <TableHead>Localização</TableHead>
+                        <TableHead className="text-center">Localização</TableHead>
+                        <TableHead className="text-center">
+                          <button onClick={() => handleSort("status")} className="flex items-center justify-center hover:text-foreground transition-colors w-full">
+                            Status
+                            <SortIcon field="status" />
+                          </button>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {signatories.map(signer => <TableRow key={signer.id}>
+                      {signatories.map((signer, index) => <TableRow key={signer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <TableCell className="font-medium">
                             <div className="flex flex-col">
                               <span>{signer.name}</span>
@@ -899,7 +899,20 @@ const Reports = () => {
                             </div>
                           </TableCell>
                           <TableCell>{signer.documents?.name || "-"}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
+                            {signer.signed_at ? <div className="flex flex-col items-center">
+                                <span>{format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", {
+                            locale: ptBR
+                          })}</span>
+                                {signer.signature_ip && <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>}
+                              </div> : "-"}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {signer.signature_city && signer.signature_state ? <a href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
+                              </a> : "-"}
+                          </TableCell>
+                          <TableCell className="text-center">
                             <Badge className={
                               signer.status === "signed" 
                                 ? "bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent" 
@@ -911,19 +924,6 @@ const Reports = () => {
                             }>
                               {signer.status === "signed" ? "Assinado" : signer.status === "rejected" ? "Rejeitado" : signer.status === "cancelled" ? "Cancelado" : "Pendente"}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {signer.signed_at ? <div className="flex flex-col">
-                                <span>{format(new Date(signer.signed_at), "dd/MM/yyyy HH:mm", {
-                            locale: ptBR
-                          })}</span>
-                                {signer.signature_ip && <span className="text-xs text-muted-foreground">IP: {signer.signature_ip}</span>}
-                              </div> : "-"}
-                          </TableCell>
-                          <TableCell>
-                            {signer.signature_city && signer.signature_state ? <a href={`https://www.google.com/maps?q=${signer.signature_latitude},${signer.signature_longitude}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                {signer.signature_city}, {signer.signature_state} - {signer.signature_country || "Brasil"}
-                              </a> : "-"}
                           </TableCell>
                         </TableRow>)}
                     </TableBody>
