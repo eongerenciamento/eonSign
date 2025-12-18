@@ -265,18 +265,22 @@ const Documents = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 border-none bg-transparent">
-            <TabsTrigger value="signed" className="data-[state=active]:text-card-foreground text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <CheckCircle className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-card-foreground" />
+          <TabsList className="grid w-full grid-cols-4 bg-secondary rounded-2xl p-2 h-auto">
+            <TabsTrigger value="signed" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+              <CheckCircle className="w-4 h-4 md:mr-2" />
               <span className="hidden md:inline">Assinados</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400 text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <User className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400" />
+            <TabsTrigger value="pending-internal" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400 data-[state=active]:shadow-sm text-muted-foreground">
+              <User className="w-4 h-4 md:mr-2" />
               <span className="hidden md:inline">Pendente Interno</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <Users className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400" />
+            <TabsTrigger value="pending-external" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 data-[state=active]:shadow-sm text-muted-foreground">
+              <Users className="w-4 h-4 md:mr-2" />
               <span className="hidden md:inline">Pendente Externo</span>
+            </TabsTrigger>
+            <TabsTrigger value="all" className="rounded-xl py-3 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+              <span className="hidden md:inline">Todos</span>
+              <span className="md:hidden">📋</span>
             </TabsTrigger>
           </TabsList>
 
