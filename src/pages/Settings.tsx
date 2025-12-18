@@ -688,15 +688,36 @@ const Settings = () => {
               />
             )}
 
+            {/* Footer */}
+            <div className="flex flex-col items-center pt-8 pb-4">
+              <p className="text-sm text-gray-500">eonSign</p>
+              <p className="text-xs text-gray-400">
+                Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
+              </p>
+            </div>
           </TabsContent>
 
           <TabsContent value="cadastros">
             <CadastrosTab isAdmin={isAdmin} />
+            {/* Footer */}
+            <div className="flex flex-col items-center pt-8 pb-4">
+              <p className="text-sm text-gray-500">eonSign</p>
+              <p className="text-xs text-gray-400">
+                Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
+              </p>
+            </div>
           </TabsContent>
 
           {isAdmin && (
             <TabsContent value="subscription" className="space-y-6 mt-6">
               <SubscriptionTab />
+              {/* Footer */}
+              <div className="flex flex-col items-center pt-8 pb-4">
+                <p className="text-sm text-gray-500">eonSign</p>
+                <p className="text-xs text-gray-400">
+                  Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
+                </p>
+              </div>
             </TabsContent>
           )}
 
@@ -799,10 +820,12 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            {/* Footer Logo */}
-            <div className="flex flex-col items-center pt-0 pb-4">
-              <img src="/lovable-uploads/Eon_Tecnologia-4.png" alt="Eon" className="h-36" />
-              <p className="text-xs text-gray-500 -mt-4">© {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.</p>
+            {/* Footer */}
+            <div className="flex flex-col items-center pt-8 pb-4">
+              <p className="text-sm text-gray-500">eonSign</p>
+              <p className="text-xs text-gray-400">
+                Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
+              </p>
             </div>
           </TabsContent>
         </Tabs>
