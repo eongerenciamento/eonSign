@@ -146,7 +146,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-layout-gradient flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
+    <nav className="fixed top-2 left-2 right-2 z-50 bg-[#273d60] flex items-center justify-center h-14 md:hidden border-none px-3 rounded-2xl">
 
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
