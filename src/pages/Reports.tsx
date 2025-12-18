@@ -47,6 +47,89 @@ const Reports = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Buscar contagem de documentos por status
+  const { data: documentStatusData } = useQuery({
+    queryKey: ["document-status-counts"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { data: documents, error } = await supabase
+        .from("documents")
+        .select("status")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      const counts = {
+        signed: 0,
+        pending: 0,
+        rejected: 0,
+        expired: 0,
+        cancelled: 0
+      };
+
+      documents?.forEach(doc => {
+        if (doc.status === "signed" || doc.status === "completed") counts.signed++;
+        else if (doc.status === "pending") counts.pending++;
+        else if (doc.status === "rejected") counts.rejected++;
+        else if (doc.status === "expired") counts.expired++;
+        else if (doc.status === "cancelled") counts.cancelled++;
+      });
+
+      const total = documents?.length || 1;
+      return [
+        { label: "Assinados", count: counts.signed, percentage: Math.round((counts.signed / total) * 100), color: "bg-blue-500" },
+        { label: "Pendentes", count: counts.pending, percentage: Math.round((counts.pending / total) * 100), color: "bg-blue-300" },
+        { label: "Rejeitados", count: counts.rejected, percentage: Math.round((counts.rejected / total) * 100), color: "bg-red-500" },
+        { label: "Expirados", count: counts.expired, percentage: Math.round((counts.expired / total) * 100), color: "bg-purple-500" },
+        { label: "Cancelados", count: counts.cancelled, percentage: Math.round((counts.cancelled / total) * 100), color: "bg-yellow-500" }
+      ];
+    }
+  });
+
+  // Buscar top signatários
+  const { data: topSignatories } = useQuery({
+    queryKey: ["top-signatories"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { data: signers, error } = await supabase
+        .from("document_signers")
+        .select(`
+          name,
+          status,
+          documents!inner(user_id)
+        `)
+        .eq("documents.user_id", user.id)
+        .eq("status", "signed");
+
+      if (error) throw error;
+
+      // Contar assinaturas por signatário
+      const signerCounts: Record<string, number> = {};
+      signers?.forEach(signer => {
+        signerCounts[signer.name] = (signerCounts[signer.name] || 0) + 1;
+      });
+
+      // Ordenar e pegar top 5
+      const sorted = Object.entries(signerCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5);
+
+      const maxCount = sorted[0]?.[1] || 1;
+      const colors = ["bg-blue-500", "bg-blue-400", "bg-blue-300", "bg-blue-200", "bg-blue-100"];
+
+      return sorted.map(([name, count], index) => ({
+        label: name,
+        count,
+        percentage: Math.round((count / maxCount) * 100),
+        color: colors[index] || "bg-blue-100"
+      }));
+    }
+  });
+
   // Contar total de signatários
   const {
     data: totalCount
@@ -486,32 +569,13 @@ const Reports = () => {
           <Card className="p-6 bg-gray-100 border-0 animate-fade-in">
             <h3 className="font-semibold mb-4 text-base text-gray-600">Documentos por Status</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
-              {[{
-                  label: "Assinados",
-                  count: 24,
-                  percentage: 71,
-                  color: "bg-blue-500"
-                }, {
-                  label: "Pendentes",
-                  count: 8,
-                  percentage: 29,
-                  color: "bg-blue-300"
-                }, {
-                  label: "Rejeitados",
-                  count: 0,
-                  percentage: 0,
-                  color: "bg-red-500"
-                }, {
-                  label: "Expirados",
-                  count: 0,
-                  percentage: 0,
-                  color: "bg-purple-500"
-                }, {
-                  label: "Cancelados",
-                  count: 0,
-                  percentage: 0,
-                  color: "bg-yellow-500"
-                }].map((item, index) => (
+              {(documentStatusData || [
+                { label: "Assinados", count: 0, percentage: 0, color: "bg-blue-500" },
+                { label: "Pendentes", count: 0, percentage: 0, color: "bg-blue-300" },
+                { label: "Rejeitados", count: 0, percentage: 0, color: "bg-red-500" },
+                { label: "Expirados", count: 0, percentage: 0, color: "bg-purple-500" },
+                { label: "Cancelados", count: 0, percentage: 0, color: "bg-yellow-500" }
+              ]).map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
                   <span className="text-lg font-bold text-gray-700">{item.count}</span>
                   <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
@@ -533,32 +597,9 @@ const Reports = () => {
           <Card className="p-6 bg-gray-100 border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
             <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
-              {[{
-                  label: "João Silva",
-                  count: 24,
-                  percentage: 100,
-                  color: "bg-blue-500"
-                }, {
-                  label: "Maria Santos",
-                  count: 19,
-                  percentage: 79,
-                  color: "bg-blue-400"
-                }, {
-                  label: "Pedro Costa",
-                  count: 15,
-                  percentage: 63,
-                  color: "bg-blue-300"
-                }, {
-                  label: "Ana Oliveira",
-                  count: 12,
-                  percentage: 50,
-                  color: "bg-blue-200"
-                }, {
-                  label: "Carlos Lima",
-                  count: 8,
-                  percentage: 33,
-                  color: "bg-blue-100"
-                }].map((item, index) => (
+              {(topSignatories && topSignatories.length > 0 ? topSignatories : [
+                { label: "Sem dados", count: 0, percentage: 0, color: "bg-gray-300" }
+              ]).map((item, index) => (
                 <div key={item.label} className="flex flex-col items-center flex-1">
                   <span className="text-lg font-bold text-gray-700">{item.count}</span>
                   <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
