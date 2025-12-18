@@ -445,9 +445,9 @@ const Settings = () => {
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
-            <Card className="bg-gray-100 shadow-md border-0">
+            <Card className="bg-secondary dark:bg-card shadow-md border-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-gray-600 text-base">Informações da Empresa</CardTitle>
+                <CardTitle className="text-foreground text-base">Informações da Empresa</CardTitle>
                 
                 {/* Logo Upload */}
                 <div className="relative">
@@ -467,41 +467,41 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-name">Nome da Empresa</Label>
-                      <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="company-name" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Digite o nome da empresa" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="cnpj">CNPJ</Label>
-                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} inputMode="numeric" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="cnpj" value={cnpj} onChange={e => handleCnpjChange(e.target.value)} placeholder="00.000.000/0000-00" maxLength={18} inputMode="numeric" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="street">Endereço</Label>
-                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600 border-0 bg-gray-200" />
+                    <Input id="street" value={street} onChange={e => setStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-foreground border-0 bg-muted dark:bg-secondary" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cep">CEP</Label>
-                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="cep" value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="neighborhood">Bairro</Label>
-                      <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="neighborhood" value={neighborhood} onChange={e => setNeighborhood(e.target.value)} placeholder="Bairro" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="city">Cidade</Label>
-                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Cidade" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Cidade" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="state">Estado</Label>
-                      <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="UF" maxLength={2} className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="state" value={state} onChange={e => setState(e.target.value)} placeholder="UF" maxLength={2} className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
@@ -510,36 +510,36 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="admin-name">Nome do Sócio Administrador</Label>
-                      <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="admin-name" value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Nome completo" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="user-id">ID do Usuário</Label>
-                      <Input id="user-id" value={user?.id || ""} disabled className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="user-id" value={user?.id || ""} disabled className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="admin-cpf">CPF do Sócio Administrador</Label>
-                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="admin-cpf" value={adminCpf} onChange={e => handleCpfChange(e.target.value)} placeholder="000.000.000-00" maxLength={14} inputMode="numeric" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="admin-birth-date">Data de Nascimento</Label>
-                      <Input id="admin-birth-date" type="date" value={adminBirthDate} onChange={e => setAdminBirthDate(e.target.value)} className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="admin-birth-date" type="date" value={adminBirthDate} onChange={e => setAdminBirthDate(e.target.value)} className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-phone">Telefone</Label>
-                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">
                       <Label htmlFor="company-email">E-mail</Label>
-                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" className="text-gray-600 border-0 bg-gray-200" />
+                      <Input id="company-email" type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="contato@empresa.com" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
                   </div>
 
@@ -559,24 +559,24 @@ const Settings = () => {
                           <div className="grid gap-2">
                             <Label htmlFor="council-type">Conselho de Classe</Label>
                             <Select value={professionalCouncil} onValueChange={setProfessionalCouncil}>
-                              <SelectTrigger className="text-gray-600 border-0 bg-gray-200">
-                                <SelectValue placeholder="Selecione" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {['CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'].map(council => <SelectItem key={council} value={council}>{council}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
+                            <SelectTrigger className="text-foreground border-0 bg-muted dark:bg-secondary">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'].map(council => <SelectItem key={council} value={council}>{council}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
                           </div>
 
                           <div className="grid gap-2">
                             <Label htmlFor="registration-number">Número do Registro</Label>
-                            <Input id="registration-number" value={registrationNumber} onChange={e => setRegistrationNumber(e.target.value)} placeholder="Ex: 12345" className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="registration-number" value={registrationNumber} onChange={e => setRegistrationNumber(e.target.value)} placeholder="Ex: 12345" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>
 
                           <div className="grid gap-2">
                             <Label htmlFor="registration-state">Estado</Label>
                             <Select value={registrationState} onValueChange={setRegistrationState}>
-                              <SelectTrigger className="text-gray-600 border-0 bg-gray-200">
+                              <SelectTrigger className="text-foreground border-0 bg-muted dark:bg-secondary">
                                 <SelectValue placeholder="UF" />
                               </SelectTrigger>
                               <SelectContent>
@@ -589,37 +589,37 @@ const Settings = () => {
                         {/* Medical Specialty - Only for CRM and CRO */}
                         {['CRM', 'CRO'].includes(professionalCouncil) && <div className="grid gap-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                             <Label htmlFor="medical-specialty">Especialidade</Label>
-                            <Input id="medical-specialty" value={medicalSpecialty} onChange={e => setMedicalSpecialty(e.target.value)} placeholder={professionalCouncil === 'CRM' ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'} className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="medical-specialty" value={medicalSpecialty} onChange={e => setMedicalSpecialty(e.target.value)} placeholder={professionalCouncil === 'CRM' ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'} className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>}
 
                         {/* Healthcare Professional Address */}
                         <Separator className="my-4" />
-                        <p className="text-sm font-medium text-gray-600">Endereço do Consultório</p>
+                        <p className="text-sm font-medium text-muted-foreground">Endereço do Consultório</p>
                         
                         <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-cep">CEP</Label>
-                            <Input id="healthcare-cep" value={healthcareCep} onChange={e => handleHealthcareCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="healthcare-cep" value={healthcareCep} onChange={e => handleHealthcareCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-street">Endereço</Label>
-                            <Input id="healthcare-street" value={healthcareStreet} onChange={e => setHealthcareStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="healthcare-street" value={healthcareStreet} onChange={e => setHealthcareStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-neighborhood">Bairro</Label>
-                            <Input id="healthcare-neighborhood" value={healthcareNeighborhood} onChange={e => setHealthcareNeighborhood(e.target.value)} placeholder="Bairro" className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="healthcare-neighborhood" value={healthcareNeighborhood} onChange={e => setHealthcareNeighborhood(e.target.value)} placeholder="Bairro" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-city">Cidade</Label>
-                            <Input id="healthcare-city" value={healthcareCity} onChange={e => setHealthcareCity(e.target.value)} placeholder="Cidade" className="text-gray-600 border-0 bg-gray-200" />
+                            <Input id="healthcare-city" value={healthcareCity} onChange={e => setHealthcareCity(e.target.value)} placeholder="Cidade" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-state">Estado</Label>
                             <Select value={healthcareState} onValueChange={setHealthcareState}>
-                              <SelectTrigger className="text-gray-600 border-0 bg-gray-200">
+                              <SelectTrigger className="text-foreground border-0 bg-muted dark:bg-secondary">
                                 <SelectValue placeholder="UF" />
                               </SelectTrigger>
                               <SelectContent>
@@ -649,7 +649,7 @@ const Settings = () => {
                       <X className="w-4 h-4" />
                       Cancelar
                     </Button>
-                    <Button className="bg-gray-200 text-[#273d60] hover:bg-gray-200 hover:text-[#273d60] gap-2 w-28 rounded-full" onClick={handleSaveCompany}>
+                    <Button className="bg-muted dark:bg-secondary text-foreground hover:bg-muted/80 dark:hover:bg-secondary/80 gap-2 w-28 rounded-lg" onClick={handleSaveCompany}>
                       <Check className="w-4 h-4" />
                       Salvar
                     </Button>
