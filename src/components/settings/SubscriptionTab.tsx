@@ -1,16 +1,15 @@
-import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, Crown, Loader2, X, ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Check, Loader2, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import useEmblaCarousel from "embla-carousel-react";
+
 const SUBSCRIPTION_TIERS = [
   {
     name: "Grátis",
@@ -56,227 +55,232 @@ const SUBSCRIPTION_TIERS = [
   },
 ];
 
-// Plans Carousel Component with dots navigation
-interface PlansCarouselProps {
-  tiers: typeof SUBSCRIPTION_TIERS;
+// Comparison Table Component
+interface ComparisonTableProps {
   currentPlanLimit?: number;
   isFreeTier?: boolean;
   processingCheckout: boolean;
   onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0]) => void;
 }
 
-function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout, onUpgrade }: PlansCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    align: "center", 
-    slidesToScroll: 1, 
-    containScroll: "trimSnaps",
-    dragFree: true 
-  });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-  const [scrollProgress, setScrollProgress] = useState<number[]>([]);
+function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onUpgrade }: ComparisonTableProps) {
+  return (
+    <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-0">
+            <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-white z-10 md:static">
+              Recurso
+            </TableHead>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableHead key={tier.name} className="text-center border-0">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="font-bold text-[#273d60]">{tier.name}</span>
+                  <span className="text-sm text-gray-500 font-normal">
+                    {tier.price === 0 ? "Grátis" : tier.price.toFixed(2).replace(".", ",")}
+                  </span>
+                </div>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow className="bg-white border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+              Documentos / Envelopes
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                {tier.limit}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-gray-50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+              Usuários <strong>ilimitados</strong>
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                <Check className="h-4 w-4 text-green-600 mx-auto" />
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-white border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+              Assinatura digital
+              <br className="md:hidden" />
+              ICP-Brasil
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                <Check className="h-4 w-4 text-green-600 mx-auto" />
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-gray-50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+              Notificação por
+              <br className="md:hidden" />
+              E-mail / WhatsApp
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                <Check className="h-4 w-4 text-green-600 mx-auto" />
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-white border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+              Geolocalização
+              <br className="md:hidden" />
+              da assinatura
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                {tier.priceId === "free" ? (
+                  <X className="h-4 w-4 text-gray-400 mx-auto" />
+                ) : (
+                  <Check className="h-4 w-4 text-green-600 mx-auto" />
+                )}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-gray-50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+              Eon Drive
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                {tier.priceId === "free" ? (
+                  <X className="h-4 w-4 text-gray-400 mx-auto" />
+                ) : (
+                  <Check className="h-4 w-4 text-green-600 mx-auto" />
+                )}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow className="bg-white border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static border-0">
+              Biometria facial
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier, index) => (
+              <TableCell key={tier.name} className="text-center border-0">
+                {tier.priceId === "free" || index === 1 ? (
+                  <X className="h-4 w-4 text-gray-400 mx-auto" />
+                ) : (
+                  <Check className="h-4 w-4 text-green-600 mx-auto" />
+                )}
+              </TableCell>
+            ))}
+          </TableRow>
+          {/* Action buttons row */}
+          <TableRow className="bg-gray-50 border-0">
+            <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static border-0">
+              
+            </TableCell>
+            {SUBSCRIPTION_TIERS.map((tier) => {
+              const isCurrentPlan = isFreeTier
+                ? tier.priceId === "free"
+                : tier.limit === currentPlanLimit;
+              const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
 
-  // Find current plan index
-  const currentPlanIndex = tiers.findIndex(tier => 
-    isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit
+              return (
+                <TableCell key={tier.name} className="text-center border-0">
+                  <Button
+                    onClick={() => onUpgrade(tier)}
+                    disabled={processingCheckout || isCurrentPlan}
+                    size="sm"
+                    className={isCurrentPlan ? "bg-gray-300 text-gray-600" : "bg-blue-700 hover:bg-blue-800 text-white"}
+                    variant={isCurrentPlan ? "outline" : undefined}
+                  >
+                    {processingCheckout ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isCurrentPlan ? (
+                      "Atual"
+                    ) : isDowngrade ? (
+                      "Downgrade"
+                    ) : (
+                      "Upgrade"
+                    )}
+                  </Button>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   );
+}
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  // Calculate scale for each slide based on distance from center
-  const updateScrollProgress = useCallback(() => {
-    if (!emblaApi) return;
-    const scrollSnaps = emblaApi.scrollSnapList();
-    const scrollProgress = emblaApi.scrollProgress();
-    const progress = scrollSnaps.map((snap, index) => {
-      const distance = Math.abs(scrollProgress - snap);
-      return Math.max(0, 1 - distance * 2);
-    });
-    setScrollProgress(progress);
-  }, [emblaApi]);
-
-  // Handle mouse wheel scroll
-  useEffect(() => {
-    if (!emblaApi) return;
-    
-    const container = emblaApi.rootNode();
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.deltaX !== 0 || e.deltaY !== 0) {
-        emblaApi.scrollTo(emblaApi.selectedScrollSnap() + (e.deltaX > 0 || e.deltaY > 0 ? 1 : -1));
-      }
-    };
-    
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onSelect);
-    emblaApi.on("scroll", updateScrollProgress);
-    onSelect();
-    updateScrollProgress();
-    
-    // Scroll to current plan on init
-    if (currentPlanIndex >= 0) {
-      emblaApi.scrollTo(currentPlanIndex, true);
+// FAQ Component
+function FAQSection() {
+  const faqItems = [
+    {
+      question: "Quais tipos de assinatura o eonSign permite?",
+      answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
+    },
+    {
+      question: "Sou obrigado a ter certificado digital?",
+      answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela eonSign."
+    },
+    {
+      question: "Como funciona a contagem de documentos?",
+      answer: "Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano."
+    },
+    {
+      question: "Posso mudar de plano depois?",
+      answer: "Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês."
+    },
+    {
+      question: "As assinaturas digitais têm validade jurídica?",
+      answer: "Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança."
+    },
+    {
+      question: "Posso cancelar minha assinatura?",
+      answer: "Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo."
+    },
+    {
+      question: "Como funcionam as notificações por WhatsApp?",
+      answer: "Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida."
+    },
+    {
+      question: "Existe período de teste gratuito?",
+      answer: "Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago."
+    },
+    {
+      question: "Posso ter múltiplos usuários na minha conta?",
+      answer: "Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações > Membros. Os membros convidados utilizam a assinatura da organização, sem necessidade de assinatura individual."
+    },
+    {
+      question: "Os documentos ficam armazenados com segurança?",
+      answer: "Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive."
     }
-    
-    return () => {
-      emblaApi.off("select", onSelect);
-      emblaApi.off("scroll", updateScrollProgress);
-    };
-  }, [emblaApi, onSelect, currentPlanIndex, updateScrollProgress]);
-
-  const scrollTo = useCallback((index: number) => {
-    if (emblaApi) emblaApi.scrollTo(index);
-  }, [emblaApi]);
+  ];
 
   return (
-    <div className="pt-4">
-      <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
-      <div className="overflow-hidden max-w-6xl mx-auto" ref={emblaRef}>
-        <div className="flex gap-4">
-          {tiers.map((tier, index) => {
-            const isCurrentPlan = isFreeTier 
-              ? tier.priceId === "free" 
-              : tier.limit === currentPlanLimit;
-            const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
-            const isCentered = index === selectedIndex;
-            const scale = 0.9 + (scrollProgress[index] || 0) * 0.1;
-            const opacity = 0.6 + (scrollProgress[index] || 0) * 0.4;
-
-            return (
-              <div 
-                key={tier.name} 
-                className="flex-shrink-0 w-[320px] transition-all duration-300 ease-out"
-                style={{ 
-                  transform: `scale(${scale})`,
-                  opacity: opacity
-                }}
-              >
-                <Card
-                  className={`relative pt-8 h-full transition-shadow duration-300 ${isCurrentPlan ? "border-primary shadow-lg" : ""} ${isCentered ? "shadow-xl" : ""}`}
-                >
-                  {isCurrentPlan && (
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-                      <Badge className="bg-primary whitespace-nowrap">Plano Atual</Badge>
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-lg text-gray-600">{tier.name}</CardTitle>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="font-bold text-gray-500 text-2xl">
-                        {tier.price === 0 ? (
-                          "Grátis"
-                        ) : (
-                          <>
-                            R$ {tier.price.toFixed(2).replace(".", ",")}{" "}
-                            <span className="font-normal text-muted-foreground text-base">/ mês</span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>
-                          {tier.limit >= 1000 ? (
-                            "Documentos / envelopes ilimitados"
-                          ) : (
-                            <>
-                              Até <strong>{tier.limit}</strong> documentos / envelopes
-                            </>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>
-                          Usuários <strong>ilimitados</strong>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>Assinatura digital ICP-Brasil</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span>Notificações por email/WhatsApp</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>
-                          Geolocalização da assinatura
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span className={tier.priceId === "free" ? "text-gray-400 line-through" : ""}>Eon Drive</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        {tier.priceId === "free" || tier.name === "Básico" ? (
-                          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        )}
-                        <span
-                          className={tier.priceId === "free" || tier.name === "Básico" ? "text-gray-400 line-through" : ""}
-                        >
-                          Biometria facial
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => onUpgrade(tier)}
-                      disabled={processingCheckout || isCurrentPlan}
-                      className={isCurrentPlan ? "w-full" : "w-full bg-blue-700 hover:bg-blue-700 text-white"}
-                      variant={isCurrentPlan ? "outline" : undefined}
-                    >
-                      {processingCheckout ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isCurrentPlan ? (
-                        "Plano Atual"
-                      ) : isDowngrade ? (
-                        "Downgrade"
-                      ) : (
-                        "Fazer Upgrade"
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            );
-          })}
-        </div>
+    <div className="space-y-6 max-w-6xl mx-auto pt-4">
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
+        <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
       </div>
-      {/* Dots navigation */}
-      <div className="flex justify-center gap-2 mt-6">
-        {tiers.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollTo(index)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === selectedIndex ? "bg-blue-700 w-4" : "bg-gray-300 w-2"
-            }`}
-          />
-        ))}
+      <div className="rounded-lg overflow-hidden">
+        <Accordion type="single" collapsible className="w-full">
+          {faqItems.map((item, index) => (
+            <AccordionItem 
+              key={`item-${index + 1}`} 
+              value={`item-${index + 1}`} 
+              className={`border-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}
+            >
+              <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-left px-4 text-gray-500">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </div>
   );
@@ -290,10 +294,11 @@ export function SubscriptionTab() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingCheckout, setProcessingCheckout] = useState(false);
-  const [isComparisonOpen, setIsComparisonOpen] = useState(true);
+
   useEffect(() => {
     loadSubscriptionData();
   }, []);
+
   const loadSubscriptionData = async () => {
     try {
       const {
@@ -319,6 +324,7 @@ export function SubscriptionTab() {
       setLoading(false);
     }
   };
+
   const handleUpgrade = async (tier: (typeof SUBSCRIPTION_TIERS)[0]) => {
     if (tier.priceId === "free") {
       toast.info("Você já está no plano gratuito");
@@ -359,6 +365,7 @@ export function SubscriptionTab() {
       setProcessingCheckout(false);
     }
   };
+
   const handleManageSubscription = async () => {
     try {
       const { data, error } = await supabase.functions.invoke("create-stripe-portal");
@@ -371,6 +378,7 @@ export function SubscriptionTab() {
       toast.error(error.message || "Erro ao abrir portal de gerenciamento");
     }
   };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<
       string,
@@ -402,6 +410,7 @@ export function SubscriptionTab() {
     };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -475,263 +484,18 @@ export function SubscriptionTab() {
           </Card>
         </div>
 
-        {/* Show all plans */}
-        <PlansCarousel 
-          tiers={SUBSCRIPTION_TIERS}
-          currentPlanLimit={subscription.document_limit}
-          processingCheckout={processingCheckout}
-          onUpgrade={handleUpgrade}
-        />
-
         {/* Comparison Table */}
         <div className="space-y-4 pt-4">
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-              className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent"
-            >
-              {isComparisonOpen ? (
-                <>
-                  <ChevronUp className="h-4 w-4 mr-2" />
-                  Ocultar Tabela Comparativa
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4 mr-2" />
-                  Mostrar Tabela Comparativa
-                </>
-              )}
-            </Button>
-          </div>
-
-          <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
-            <CollapsibleContent>
-              <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-gray-200">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50 border-0">
-                      <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Recurso
-                      </TableHead>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableHead key={tier.name} className="text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="font-bold text-[#273d60]">{tier.name}</span>
-                            <span className="text-sm text-gray-500 font-normal">
-                              {tier.price === 0 ? "Grátis" : tier.price.toFixed(2).replace(".", ",")}
-                            </span>
-                          </div>
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Documentos / Envelopes
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.limit}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Usuários <strong>ilimitados</strong>
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Assinatura digital
-                        <br className="md:hidden" />
-                        ICP-Brasil
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Notificação por
-                        <br className="md:hidden" />
-                        E-mail / WhatsApp
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Geolocalização
-                        <br className="md:hidden" />
-                        da assinatura
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-white border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Eon Drive
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier) => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    <TableRow className="bg-gray-50 border-0">
-                      <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                        Biometria facial
-                      </TableCell>
-                      {SUBSCRIPTION_TIERS.map((tier, index) => (
-                        <TableCell key={tier.name} className="text-center">
-                          {tier.priceId === "free" || index === 1 ? (
-                            <X className="h-4 w-4 text-gray-400 mx-auto" />
-                          ) : (
-                            <Check className="h-4 w-4 text-green-600 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <h3 className="text-lg font-semibold text-center">Planos Disponíveis</h3>
+          <ComparisonTable
+            currentPlanLimit={subscription.document_limit}
+            processingCheckout={processingCheckout}
+            onUpgrade={handleUpgrade}
+          />
         </div>
 
         {/* FAQ */}
-        <div className="space-y-6 max-w-6xl mx-auto pt-4">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
-            <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
-          </div>
-          <Card className="border">
-            <CardContent className="p-6">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Quais tipos de assinatura o eonSign permite?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em
-                    observância à legislação brasileira.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-2" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Sou obrigado a ter certificado digital?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre
-                    particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de
-                    certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela eonSign.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-3" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Como funciona a contagem de documentos?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é
-                    resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-4" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Posso mudar de plano depois?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos
-                    será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-5" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    As assinaturas digitais têm validade jurídica?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem
-                    plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada
-                    com timestamp, IP e geolocalização para máxima segurança.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-6" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Posso cancelar minha assinatura?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O
-                    acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado
-                    no próximo ciclo.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-7" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Como funcionam as notificações por WhatsApp?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é
-                    enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja
-                    perdida.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-8" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Existe período de teste gratuito?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade
-                    de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano
-                    pago.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-9" className="border-b">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Posso ter múltiplos usuários na minha conta?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros
-                    membros da equipe através das Configurações &gt; Membros. Os membros convidados utilizam a
-                    assinatura da organização, sem necessidade de assinatura individual.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-10">
-                  <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                    Os documentos ficam armazenados com segurança?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-left">
-                    Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros.
-                    Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam
-                    disponíveis permanentemente no Eon Drive.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-        </div>
+        <FAQSection />
       </div>
     );
   }
@@ -793,262 +557,15 @@ export function SubscriptionTab() {
         <h2 className="text-xl font-semibold text-gray-600">Faça o Upgrade do seu Plano</h2>
       </div>
 
-      <PlansCarousel 
-        tiers={SUBSCRIPTION_TIERS}
+      {/* Comparison Table */}
+      <ComparisonTable
         isFreeTier={true}
         processingCheckout={processingCheckout}
         onUpgrade={handleUpgrade}
       />
 
-      {/* Comparison Table */}
-      <div className="space-y-4 pt-4">
-        <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-            className="text-sm text-gray-600 hover:text-gray-900 hover:bg-transparent"
-          >
-            {isComparisonOpen ? (
-              <>
-                <ChevronUp className="h-4 w-4 mr-2" />
-                Ocultar Tabela Comparativa
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4 mr-2" />
-                Mostrar Tabela Comparativa
-              </>
-            )}
-          </Button>
-        </div>
-
-        <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
-          <CollapsibleContent>
-            <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-gray-200">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 border-0">
-                    <TableHead className="w-[200px] font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Recurso
-                    </TableHead>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableHead key={tier.name} className="text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="font-bold text-[#273d60]">{tier.name}</span>
-                          <span className="text-sm text-gray-500 font-normal">
-                            {tier.price === 0 ? "Grátis" : tier.price.toFixed(2).replace(".", ",")}
-                          </span>
-                        </div>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Documentos / Envelopes
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.limit}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Usuários <strong>ilimitados</strong>
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        <Check className="h-4 w-4 text-green-600 mx-auto" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Assinatura digital
-                      <br className="md:hidden" />
-                      ICP-Brasil
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        <Check className="h-4 w-4 text-green-600 mx-auto" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Notificação por
-                      <br className="md:hidden" />
-                      E-mail / WhatsApp
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        <Check className="h-4 w-4 text-green-600 mx-auto" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Geolocalização
-                      <br className="md:hidden" />
-                      da assinatura
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-white border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-white z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Eon Drive
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier) => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow className="bg-gray-50 border-0">
-                    <TableCell className="font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 md:static shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
-                      Biometria facial
-                    </TableCell>
-                    {SUBSCRIPTION_TIERS.map((tier, index) => (
-                      <TableCell key={tier.name} className="text-center">
-                        {tier.priceId === "free" || index === 1 ? (
-                          <X className="h-4 w-4 text-gray-400 mx-auto" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600 mx-auto" />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-
       {/* FAQ */}
-      <div className="space-y-6 max-w-6xl mx-auto pt-4">
-        <div className="text-center space-y-2">
-          <h2 className="font-bold text-gray-700 text-xl">Perguntas Frequentes</h2>
-          <p className="text-gray-500">Tire suas dúvidas sobre nossos planos e funcionalidades</p>
-        </div>
-        <Card className="border">
-          <CardContent className="p-6">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Quais tipos de assinatura o eonSign permite?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em
-                  observância à legislação brasileira.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Sou obrigado a ter certificado digital?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre
-                  particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de
-                  certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela eonSign.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Como funciona a contagem de documentos?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é
-                  resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Posso mudar de plano depois?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos
-                  será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-5" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  As assinaturas digitais têm validade jurídica?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem
-                  plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com
-                  timestamp, IP e geolocalização para máxima segurança.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-6" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Posso cancelar minha assinatura?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso
-                  aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no
-                  próximo ciclo.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-7" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Como funcionam as notificações por WhatsApp?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é
-                  enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja
-                  perdida.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-8" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Existe período de teste gratuito?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade
-                  de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano
-                  pago.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-9" className="border-b">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Posso ter múltiplos usuários na minha conta?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros
-                  membros da equipe através das Configurações &gt; Membros. Os membros convidados utilizam a assinatura
-                  da organização, sem necessidade de assinatura individual.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-10">
-                <AccordionTrigger className="text-left text-xs md:text-base text-gray-600 justify-start [&>svg]:ml-auto">
-                  Os documentos ficam armazenados com segurança?
-                </AccordionTrigger>
-                <AccordionContent className="text-left">
-                  Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros.
-                  Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam
-                  disponíveis permanentemente no Eon Drive.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
-      </div>
+      <FAQSection />
 
       {/* Footer Logo */}
       <div className="flex flex-col items-center pt-0 pb-4">
