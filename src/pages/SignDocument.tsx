@@ -461,345 +461,359 @@ const SignDocument = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#273d60] to-[#001a4d]">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#ffffff' }} />
+        </div>
       </div>
     );
   }
 
   if (linkExpired || !document) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
-        <Card className="p-8 text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <FileText className="h-8 w-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Link Expirado</h2>
-          <p className="text-muted-foreground">
-            Este documento não está mais disponível para assinatura. O link pode ter expirado ou o documento foi
-            removido pelo remetente.
-          </p>
-        </Card>
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
+          <Card className="p-8 text-center max-w-md" style={{ backgroundColor: '#ffffff' }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#fee2e2' }}>
+              <FileText className="h-8 w-8" style={{ color: '#dc2626' }} />
+            </div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: '#111827' }}>Link Expirado</h2>
+            <p style={{ color: '#6b7280' }}>
+              Este documento não está mais disponível para assinatura. O link pode ter expirado ou o documento foi
+              removido pelo remetente.
+            </p>
+          </Card>
+        </div>
       </div>
     );
   }
 
   if (signatureComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
-        <div className="max-w-2xl mx-auto pt-8">
-          <div className="text-center mb-8">
-            <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen p-4" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
+          <div className="max-w-2xl mx-auto pt-8">
+            <div className="text-center mb-8">
+              <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
+            </div>
+
+            <Card className="p-8 text-center" style={{ backgroundColor: '#ffffff' }}>
+              <CheckCircle className="h-16 w-16 mx-auto mb-4" style={{ color: '#15803d' }} />
+              <h1 className="text-2xl font-bold mb-4" style={{ color: '#111827' }}>Assinatura Concluída!</h1>
+              <p className="mb-6" style={{ color: '#6b7280' }}>
+                Sua assinatura foi registrada com sucesso no documento "{document.name}".
+              </p>
+              <p className="text-sm mb-6" style={{ color: '#6b7280' }}>
+                {document.signed_by === document.signers
+                  ? "Todas as assinaturas foram coletadas. O documento está finalizado."
+                  : "Aguardando assinatura dos demais signatários."}
+              </p>
+
+              {currentSigner?.is_company_signer && (
+                <Button
+                  onClick={() => navigate("/dashboard")}
+                  style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
+                >
+                  Ir para Dashboard
+                </Button>
+              )}
+            </Card>
           </div>
-
-          <Card className="p-8 text-center">
-            <CheckCircle className="h-16 w-16 text-green-700 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-4">Assinatura Concluída!</h1>
-            <p className="text-muted-foreground mb-6">
-              Sua assinatura foi registrada com sucesso no documento "{document.name}".
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              {document.signed_by === document.signers
-                ? "Todas as assinaturas foram coletadas. O documento está finalizado."
-                : "Aguardando assinatura dos demais signatários."}
-            </p>
-
-            {currentSigner?.is_company_signer && (
-              <Button
-                onClick={() => navigate("/dashboard")}
-                className="bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
-              >
-                Ir para Dashboard
-              </Button>
-            )}
-          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#273d60] to-[#001a4d] p-4">
-      <div className="max-w-4xl mx-auto pt-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Assinatura de Documento</h1>
-        </div>
+    <div className="light" style={{ colorScheme: 'light' }}>
+      <div className="min-h-screen p-4" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
+        <div className="max-w-4xl mx-auto pt-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <img src={logo} alt="eonSign" className="h-16 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2" style={{ color: '#ffffff' }}>Assinatura de Documento</h1>
+          </div>
 
-        {/* Identificação */}
-        {!isIdentified && (
-          <Card className="p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Identificação</h2>
-            <p className="text-sm text-muted-foreground mb-4">Por favor, informe seu e-mail para acessar o documento</p>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={handleEmailChange}
-                  placeholder="seu@email.com"
-                  maxLength={255}
-                  className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
-                />
-                {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
-              </div>
-              <Button
-                onClick={handleIdentify}
-                disabled={isLoading || !email || !!emailError}
-                className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Identificando...
-                  </>
-                ) : (
-                  "Identificar"
-                )}
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* Documento Info e Assinatura */}
-        {isIdentified && (
-          <>
-            {/* PDF Viewer */}
-            <Card className="p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Visualizar Documento</h3>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8" title="Diminuir zoom">
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
-                    {Math.round(pdfScale * 100)}%
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8" title="Aumentar zoom">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleDownload}
-                    className="h-8 w-8"
-                    title="Baixar documento"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {document.file_url ? (
-                <div
-                  ref={pdfContainerRef}
-                  className="relative overflow-auto border rounded-md bg-gray-100"
-                  style={{ height: "calc(100vh - 380px)", minHeight: "400px" }}
-                >
-                  <iframe
-                    src={`${document.file_url}#view=Fit&zoom=page-fit`}
-                    className="w-full h-full border-0"
-                    title="Document Preview"
+          {/* Identificação */}
+          {!isIdentified && (
+            <Card className="p-6 mb-6" style={{ backgroundColor: '#ffffff' }}>
+              <h2 className="text-lg font-semibold mb-4" style={{ color: '#111827' }}>Identificação</h2>
+              <p className="text-sm mb-4" style={{ color: '#6b7280' }}>Por favor, informe seu e-mail para acessar o documento</p>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="email" style={{ color: '#374151' }}>E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={handleEmailChange}
+                    placeholder="seu@email.com"
+                    maxLength={255}
+                    className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
+                    style={{ backgroundColor: '#ffffff', color: '#111827' }}
                   />
+                  {emailError && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{emailError}</p>}
                 </div>
-              ) : (
-                <p className="text-muted-foreground">Documento não disponível para visualização</p>
-              )}
+                <Button
+                  onClick={handleIdentify}
+                  disabled={isLoading || !email || !!emailError}
+                  className="w-full"
+                  style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Identificando...
+                    </>
+                  ) : (
+                    "Identificar"
+                  )}
+                </Button>
+              </div>
             </Card>
+          )}
 
-            <Card className="p-6 mb-6">
-              <div className="flex items-start gap-4">
-                <FileText className="h-8 w-8 text-primary flex-shrink-0" />
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-2">{document.name}</h2>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Status: {getStatusBadge(document.status)}</span>
-                    <span>•</span>
-                    <span>
-                      Assinaturas: {document.signed_by}/{document.signers}
+          {/* Documento Info e Assinatura */}
+          {isIdentified && (
+            <>
+              {/* PDF Viewer */}
+              <Card className="p-6 mb-6" style={{ backgroundColor: '#ffffff' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>Visualizar Documento</h3>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8" title="Diminuir zoom">
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm min-w-[3rem] text-center" style={{ color: '#6b7280' }}>
+                      {Math.round(pdfScale * 100)}%
                     </span>
-                    {isSimpleSignature && (
-                      <>
-                        <span>•</span>
-                        <Badge variant="secondary">Assinatura Eletrônica</Badge>
-                      </>
-                    )}
+                    <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8" title="Aumentar zoom">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleDownload}
+                      className="h-8 w-8"
+                      title="Baixar documento"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              </div>
-            </Card>
-
-            {/* Signatários */}
-            <Card className="p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Signatários</h3>
-              <div className="space-y-3">
-                {signers.map((signer) => (
-                  <div key={signer.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                    <div>
-                      <p className="font-medium">{signer.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {signer.email}
-                        {signer.is_company_signer && " (Empresa)"}
-                        {currentSigner?.id === signer.id && " (Você)"}
-                      </p>
-                    </div>
-                    {getStatusBadge(signer.status)}
+                {document.file_url ? (
+                  <div
+                    ref={pdfContainerRef}
+                    className="relative overflow-auto border rounded-md"
+                    style={{ height: "calc(100vh - 380px)", minHeight: "400px", backgroundColor: '#f3f4f6' }}
+                  >
+                    <iframe
+                      src={`${document.file_url}#view=Fit&zoom=page-fit`}
+                      className="w-full h-full border-0"
+                      title="Document Preview"
+                    />
                   </div>
-                ))}
-              </div>
-            </Card>
+                ) : (
+                  <p style={{ color: '#6b7280' }}>Documento não disponível para visualização</p>
+                )}
+              </Card>
 
-            {/* Formulário de Assinatura */}
-            {currentSigner && currentSigner.status === "pending" && (
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Assinar Documento</h3>
-                <div className="space-y-4">
-                  {/* Certificate info for ADVANCED/QUALIFIED modes */}
-                  {!isSimpleSignature && (
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <ShieldCheck className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-blue-900 mb-1">
-                            {document.signature_mode === "QUALIFIED"
-                              ? "Assinatura Qualificada (ICP-Brasil)"
-                              : "Assinatura Avançada"}
-                          </h4>
-                          <p className="text-sm text-blue-700 mb-3">
-                            {document.signature_mode === "QUALIFIED"
-                              ? "Este documento requer um certificado digital ICP-Brasil para assinatura com validade jurídica máxima."
-                              : "Este documento requer um certificado digital em nuvem para assinatura avançada."}
-                          </p>
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open("https://certifica.eonhub.com.br", "_blank")}
-                              className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                            >
-                              <Award className="h-4 w-4 mr-2" />
-                              Adquirir Certificado Digital
-                            </Button>
+              <Card className="p-6 mb-6" style={{ backgroundColor: '#ffffff' }}>
+                <div className="flex items-start gap-4">
+                  <FileText className="h-8 w-8 flex-shrink-0" style={{ color: '#273d60' }} />
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold mb-2" style={{ color: '#111827' }}>{document.name}</h2>
+                    <div className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
+                      <span>Status: {getStatusBadge(document.status)}</span>
+                      <span>•</span>
+                      <span>
+                        Assinaturas: {document.signed_by}/{document.signers}
+                      </span>
+                      {isSimpleSignature && (
+                        <>
+                          <span>•</span>
+                          <Badge variant="secondary" style={{ backgroundColor: '#f3f4f6', color: '#4b5563' }}>Assinatura Eletrônica</Badge>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Signatários */}
+              <Card className="p-6 mb-6" style={{ backgroundColor: '#ffffff' }}>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: '#111827' }}>Signatários</h3>
+                <div className="space-y-3">
+                  {signers.map((signer) => (
+                    <div key={signer.id} className="flex items-center justify-between p-3 rounded-md" style={{ backgroundColor: '#f3f4f6' }}>
+                      <div>
+                        <p className="font-medium" style={{ color: '#111827' }}>{signer.name}</p>
+                        <p className="text-sm" style={{ color: '#6b7280' }}>
+                          {signer.email}
+                          {signer.is_company_signer && " (Empresa)"}
+                          {currentSigner?.id === signer.id && " (Você)"}
+                        </p>
+                      </div>
+                      {getStatusBadge(signer.status)}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Formulário de Assinatura */}
+              {currentSigner && currentSigner.status === "pending" && (
+                <Card className="p-6" style={{ backgroundColor: '#ffffff' }}>
+                  <h3 className="text-lg font-semibold mb-4" style={{ color: '#111827' }}>Assinar Documento</h3>
+                  <div className="space-y-4">
+                    {/* Certificate info for ADVANCED/QUALIFIED modes */}
+                    {!isSimpleSignature && (
+                      <div className="p-4 border rounded-lg" style={{ background: 'linear-gradient(to right, #eff6ff, #eef2ff)', borderColor: '#bfdbfe' }}>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg" style={{ backgroundColor: '#dbeafe' }}>
+                            <ShieldCheck className="h-5 w-5" style={{ color: '#2563eb' }} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-1" style={{ color: '#1e3a8a' }}>
+                              {document.signature_mode === "QUALIFIED"
+                                ? "Assinatura Qualificada (ICP-Brasil)"
+                                : "Assinatura Avançada"}
+                            </h4>
+                            <p className="text-sm mb-3" style={{ color: '#1d4ed8' }}>
+                              {document.signature_mode === "QUALIFIED"
+                                ? "Este documento requer um certificado digital ICP-Brasil para assinatura com validade jurídica máxima."
+                                : "Este documento requer um certificado digital em nuvem para assinatura avançada."}
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open("https://certifica.eonhub.com.br", "_blank")}
+                                style={{ borderColor: '#93c5fd', color: '#1d4ed8' }}
+                              >
+                                <Award className="h-4 w-4 mr-2" />
+                                Adquirir Certificado Digital
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Typed Signature for Simple Mode */}
-                  {isSimpleSignature && (
+                    {/* Typed Signature for Simple Mode */}
+                    {isSimpleSignature && (
+                      <div>
+                        <Label htmlFor="typedSignature" className="flex items-center gap-2" style={{ color: '#374151' }}>
+                          <PenLine className="h-4 w-4" />
+                          Digite sua assinatura
+                        </Label>
+                        <Input
+                          id="typedSignature"
+                          value={typedSignature}
+                          onChange={(e) => setTypedSignature(e.target.value)}
+                          placeholder="Seu nome completo"
+                          className="mt-1"
+                          style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                        />
+                      </div>
+                    )}
+
                     <div>
-                      <Label htmlFor="typedSignature" className="flex items-center gap-2">
-                        <PenLine className="h-4 w-4" />
-                        Digite sua assinatura
-                      </Label>
-                      <Input
-                        id="typedSignature"
-                        value={typedSignature}
-                        onChange={(e) => setTypedSignature(e.target.value)}
-                        placeholder="Seu nome completo"
-                        className="mt-1"
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <Label htmlFor="cpf">CPF/CNPJ</Label>
-                    <div className="relative">
-                      <Input
-                        id="cpf"
-                        value={cpf}
-                        onChange={handleCpfChange}
-                        placeholder="000.000.000-00"
-                        maxLength={18}
-                        className={
-                          cpfValid === false
-                            ? "border-red-500 focus-visible:ring-red-500"
-                            : cpfValid === true
-                              ? "border-green-500 focus-visible:ring-green-500"
-                              : ""
-                        }
-                      />
-                      {cpfValid === false && <p className="text-xs text-red-500 mt-1">CPF/CNPJ inválido</p>}
-                      {cpfValid === true && <p className="text-xs text-green-600 mt-1">✓ CPF/CNPJ válido</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="birthDate">Data de Nascimento</Label>
-                    <Input
-                      id="birthDate"
-                      type="date"
-                      value={birthDate}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setBirthDate(value);
-                        if (value) {
-                          try {
-                            birthDateSchema.parse(value);
-                            setBirthDateError(null);
-                          } catch (error) {
-                            if (error instanceof z.ZodError) {
-                              setBirthDateError(error.errors[0].message);
-                            }
+                      <Label htmlFor="cpf" style={{ color: '#374151' }}>CPF/CNPJ</Label>
+                      <div className="relative">
+                        <Input
+                          id="cpf"
+                          value={cpf}
+                          onChange={handleCpfChange}
+                          placeholder="000.000.000-00"
+                          maxLength={18}
+                          className={
+                            cpfValid === false
+                              ? "border-red-500 focus-visible:ring-red-500"
+                              : cpfValid === true
+                                ? "border-green-500 focus-visible:ring-green-500"
+                                : ""
                           }
-                        } else {
-                          setBirthDateError(null);
-                        }
-                      }}
-                      max={(() => {
-                        const today = new Date();
-                        today.setFullYear(today.getFullYear() - 18);
-                        return today.toISOString().split("T")[0];
-                      })()}
-                      className={birthDateError ? "border-red-500 focus-visible:ring-red-500" : ""}
-                    />
-                    {birthDateError ? (
-                      <p className="text-xs text-red-500 mt-1">{birthDateError}</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground mt-1">Você deve ter pelo menos 18 anos</p>
-                    )}
+                          style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                        />
+                        {cpfValid === false && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>CPF/CNPJ inválido</p>}
+                        {cpfValid === true && <p className="text-xs mt-1" style={{ color: '#16a34a' }}>✓ CPF/CNPJ válido</p>}
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="birthDate" style={{ color: '#374151' }}>Data de Nascimento</Label>
+                      <Input
+                        id="birthDate"
+                        type="date"
+                        value={birthDate}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setBirthDate(value);
+                          if (value) {
+                            try {
+                              birthDateSchema.parse(value);
+                              setBirthDateError(null);
+                            } catch (error) {
+                              if (error instanceof z.ZodError) {
+                                setBirthDateError(error.errors[0].message);
+                              }
+                            }
+                          } else {
+                            setBirthDateError(null);
+                          }
+                        }}
+                        max={(() => {
+                          const today = new Date();
+                          today.setFullYear(today.getFullYear() - 18);
+                          return today.toISOString().split("T")[0];
+                        })()}
+                        className={birthDateError ? "border-red-500 focus-visible:ring-red-500" : ""}
+                        style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                      />
+                      {birthDateError ? (
+                        <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{birthDateError}</p>
+                      ) : (
+                        <p className="text-xs mt-1" style={{ color: '#6b7280' }}>Você deve ter pelo menos 18 anos</p>
+                      )}
+                    </div>
+                    <Button
+                      onClick={handleSign}
+                      disabled={
+                        isSigning ||
+                        !cpf ||
+                        !birthDate ||
+                        cpfValid === false ||
+                        !!birthDateError ||
+                        (isSimpleSignature && !typedSignature.trim())
+                      }
+                      className="w-full"
+                      style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
+                    >
+                      {isSigning ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        "Assinar Documento"
+                      )}
+                    </Button>
                   </div>
-                  <Button
-                    onClick={handleSign}
-                    disabled={
-                      isSigning ||
-                      !cpf ||
-                      !birthDate ||
-                      cpfValid === false ||
-                      !!birthDateError ||
-                      (isSimpleSignature && !typedSignature.trim())
-                    }
-                    className="w-full bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white"
-                  >
-                    {isSigning ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processando...
-                      </>
-                    ) : (
-                      "Assinar Documento"
-                    )}
-                  </Button>
-                </div>
-              </Card>
-            )}
+                </Card>
+              )}
 
-            {currentSigner && currentSigner.status === "signed" && (
-              <Card className="p-6 text-center">
-                <CheckCircle className="h-12 w-12 text-green-700 mx-auto mb-4" />
-                <p className="text-lg font-medium">Você já assinou este documento</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Assinado em {new Date(currentSigner.signed_at!).toLocaleString("pt-BR")}
-                </p>
-              </Card>
-            )}
-          </>
-        )}
+              {currentSigner && currentSigner.status === "signed" && (
+                <Card className="p-6 text-center" style={{ backgroundColor: '#ffffff' }}>
+                  <CheckCircle className="h-12 w-12 mx-auto mb-4" style={{ color: '#15803d' }} />
+                  <p className="text-lg font-medium" style={{ color: '#111827' }}>Você já assinou este documento</p>
+                  <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
+                    Assinado em {new Date(currentSigner.signed_at!).toLocaleString("pt-BR")}
+                  </p>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
