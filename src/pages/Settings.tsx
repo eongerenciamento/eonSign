@@ -405,13 +405,13 @@ const Settings = () => {
               {/* Theme Switch */}
               {mounted && (
                 <div className="flex items-center gap-2">
-                  <Sun className={`h-4 w-4 ${isDark ? 'text-muted-foreground' : 'text-yellow-500'}`} />
+                  <Sun className="h-4 w-4 text-muted-foreground" />
                   <Switch
                     checked={isDark}
                     onCheckedChange={toggleTheme}
                     className="data-[state=checked]:bg-slate-700"
                   />
-                  <Moon className={`h-4 w-4 ${isDark ? 'text-blue-400' : 'text-muted-foreground'}`} />
+                  <Moon className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
               <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
