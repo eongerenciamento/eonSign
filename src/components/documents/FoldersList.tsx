@@ -162,32 +162,34 @@ export const FoldersList = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent text-gray-500 hover:text-gray-500">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white z-50">
+              <DropdownMenuContent align="end" className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameFolder(folder);
                   }}
+                  className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                 >
                   <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50">
                       <Move className="w-4 h-4 mr-2" />
                       Mover
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-white z-50">
+                    <DropdownMenuSubContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
                           onMoveFolder(folder.id, null);
                         }}
+                        className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                       >
                         📁 Raiz
                       </DropdownMenuItem>
@@ -198,6 +200,7 @@ export const FoldersList = ({
                             e.stopPropagation();
                             onMoveFolder(folder.id, targetFolder.id);
                           }}
+                          className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                         >
                           📁 {targetFolder.name}
                         </DropdownMenuItem>
@@ -206,7 +209,7 @@ export const FoldersList = ({
                   </DropdownMenuSub>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive"
+                  className="text-destructive hover:bg-gray-300/50 focus:bg-gray-300/50"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
@@ -259,32 +262,34 @@ export const FoldersList = ({
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent text-gray-500 hover:text-gray-500">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white z-50">
+              <DropdownMenuContent align="end" className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameFolder(folder);
                   }}
+                  className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                 >
                   <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50">
                       <Move className="w-4 h-4 mr-2" />
                       Mover
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-white z-50">
+                    <DropdownMenuSubContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
                           onMoveFolder(folder.id, null);
                         }}
+                        className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                       >
                         📁 Raiz
                       </DropdownMenuItem>
@@ -295,6 +300,7 @@ export const FoldersList = ({
                             e.stopPropagation();
                             onMoveFolder(folder.id, targetFolder.id);
                           }}
+                          className="hover:bg-gray-300/50 focus:bg-gray-300/50"
                         >
                           📁 {targetFolder.name}
                         </DropdownMenuItem>
@@ -303,7 +309,7 @@ export const FoldersList = ({
                   </DropdownMenuSub>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive"
+                  className="text-destructive hover:bg-gray-300/50 focus:bg-gray-300/50"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
