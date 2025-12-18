@@ -2,22 +2,20 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { MobileNav } from "./MobileNav";
 import { useWhatsAppFailureNotifications } from "@/hooks/useWhatsAppFailureNotifications";
-
 interface LayoutProps {
   children: React.ReactNode;
 }
-
-export const Layout = ({ children }: LayoutProps) => {
+export const Layout = ({
+  children
+}: LayoutProps) => {
   // Monitor WhatsApp failures in real-time
   useWhatsAppFailureNotifications();
-
-  return (
-    <>
+  return <>
       {/* Fundo contrastante para mostrar bordas arredondadas do menu mobile */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-card z-40 md:hidden" />
       
       {/* Mobile Navigation */}
-      <MobileNav />
+      <MobileNav className="rounded-2xl" />
 
       {/* Desktop Layout with Sidebar */}
       <SidebarProvider defaultOpen={false}>
@@ -38,6 +36,5 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         </div>
       </SidebarProvider>
-    </>
-  );
+    </>;
 };
