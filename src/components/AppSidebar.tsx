@@ -167,10 +167,12 @@ export function AppSidebar() {
 
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-layout-gradient`} collapsible="icon">
       {/* Header com Toggle */}
-      <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
-        <SidebarTrigger className="bg-sidebar-background text-sidebar-foreground hover:bg-white/10">
-          <Menu className="w-5 h-5" />
-        </SidebarTrigger>
+      <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col`}>
+        <div className={`flex ${collapsed ? "justify-center" : "justify-end"} w-full`}>
+          <SidebarTrigger className="bg-sidebar-background text-sidebar-foreground hover:bg-white/10">
+            <Menu className="w-5 h-5" />
+          </SidebarTrigger>
+        </div>
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
             <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
