@@ -71,15 +71,15 @@ export function MobileNav() {
       toast.error("Erro ao sair");
     } else {
       toast.custom(() => (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-start">
           <LogOut
-            className="h-6 w-6 text-muted-foreground animate-[scale-in_0.3s_ease-out]"
+            className="h-6 w-6 text-muted-foreground animate-[slide-out-right_0.8s_ease-in-out_forwards]"
             strokeWidth={2.5}
           />
         </div>
       ), {
         duration: 1500,
-        position: "top-center",
+        position: "top-left",
         unstyled: true,
         className: "!bg-transparent !border-0 !shadow-none !p-0",
       });
