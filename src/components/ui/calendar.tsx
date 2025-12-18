@@ -210,7 +210,7 @@ function CustomCaption({ displayMonth }: CaptionProps) {
       {showPicker && (
         <div 
           ref={pickerRef} 
-          className="absolute top-full mt-2 z-50 bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-2"
+          className="absolute bottom-full mb-2 z-50 bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-2"
         >
           <MonthYearPicker displayMonth={displayMonth} onChange={handleChange} />
         </div>
@@ -220,7 +220,7 @@ function CustomCaption({ displayMonth }: CaptionProps) {
         <div className="flex items-center">
           <span 
             onClick={() => setShowPicker(!showPicker)}
-            className="text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors cursor-pointer capitalize"
+            className="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer capitalize"
           >
             {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
           </span>

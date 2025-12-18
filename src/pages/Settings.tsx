@@ -551,6 +551,33 @@ const Settings = () => {
                     <div className="grid gap-2">
                       <Label htmlFor="admin-birth-date">Data de Nascimento</Label>
                       <div className="relative flex items-center w-full bg-muted dark:bg-secondary rounded-md h-10">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="h-full px-3 hover:bg-transparent"
+                            >
+                              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
+                              onSelect={(date) => {
+                                if (date) {
+                                  setAdminBirthDate(format(date, "yyyy-MM-dd"));
+                                  setBirthDateInput(format(date, "dd/MM/yyyy"));
+                                } else {
+                                  setAdminBirthDate("");
+                                  setBirthDateInput("");
+                                }
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <Input
                           id="admin-birth-date"
                           type="text"
@@ -577,35 +604,8 @@ const Settings = () => {
                           placeholder="dd/mm/aaaa"
                           maxLength={10}
                           inputMode="numeric"
-                          className="flex-1 border-0 bg-transparent text-foreground pr-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                          className="flex-1 border-0 bg-transparent text-foreground pl-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         />
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="absolute right-0 h-full px-3 hover:bg-transparent"
-                            >
-                              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="end">
-                            <Calendar
-                              mode="single"
-                              selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
-                              onSelect={(date) => {
-                                if (date) {
-                                  setAdminBirthDate(format(date, "yyyy-MM-dd"));
-                                  setBirthDateInput(format(date, "dd/MM/yyyy"));
-                                } else {
-                                  setAdminBirthDate("");
-                                  setBirthDateInput("");
-                                }
-                              }}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
                       </div>
                     </div>
                   </div>
