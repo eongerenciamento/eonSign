@@ -672,13 +672,13 @@ const Settings = () => {
                 <div className="overflow-x-auto hidden md:block">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Título</th>
+                      <tr className="bg-gray-100">
+                        <th className="text-left p-4 font-semibold text-sm text-gray-700 rounded-tl-lg rounded-bl-lg">Título</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Abertura</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Categoria</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Prioridade</th>
                         <th className="text-left p-4 font-semibold text-sm text-gray-700">Ticket</th>
-                        <th className="text-right p-4 font-semibold text-sm text-gray-700">Status</th>
+                        <th className="text-right p-4 font-semibold text-sm text-gray-700 rounded-tr-lg rounded-br-lg">Status</th>
                       </tr>
                     </thead>
                     <tbody>

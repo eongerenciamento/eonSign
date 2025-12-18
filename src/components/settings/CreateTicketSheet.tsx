@@ -169,7 +169,6 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       </SheetTrigger>
       <SheetContent
         className="w-full sm:max-w-[540px] overflow-y-auto rounded-l-2xl"
-        onInteractOutside={(e) => e.preventDefault()}
       >
         <SheetHeader>
           <SheetTitle className="text-gray-600">Abrir Novo Ticket</SheetTitle>
