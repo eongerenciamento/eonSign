@@ -803,13 +803,11 @@ const Reports = () => {
                         </div>
                         
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Email:</span>
-                          <span className="font-medium text-xs break-all">{signer.email}</span>
-                        </div>
-                        
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Telefone:</span>
-                          <span className="font-medium">{signer.phone}</span>
+                          <span className="text-muted-foreground">Email / Telefone:</span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-medium text-xs break-all">{signer.email}</span>
+                            <span className="font-medium text-xs text-muted-foreground">{signer.phone}</span>
+                          </div>
                         </div>
                         
                         <div className="flex justify-between">
@@ -819,8 +817,16 @@ const Reports = () => {
                         
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">Status:</span>
-                          <Badge className={signer.status === "signed" ? "bg-green-700 text-white hover:bg-green-700" : "bg-yellow-700 text-white hover:bg-yellow-700"}>
-                            {signer.status === "signed" ? "Assinado" : "Pendente"}
+                          <Badge className={
+                            signer.status === "signed" 
+                              ? "bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent" 
+                              : signer.status === "rejected"
+                              ? "bg-transparent border border-red-600 text-red-600 hover:bg-transparent"
+                              : signer.status === "cancelled"
+                              ? "bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent"
+                              : "bg-transparent border border-gray-500 text-gray-500 hover:bg-transparent"
+                          }>
+                            {signer.status === "signed" ? "Assinado" : signer.status === "rejected" ? "Rejeitado" : signer.status === "cancelled" ? "Cancelado" : "Pendente"}
                           </Badge>
                         </div>
                         
@@ -856,8 +862,7 @@ const Reports = () => {
                           </button>
                         </TableHead>
                         <TableHead>Nascimento</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Telefone</TableHead>
+                        <TableHead>Email / Telefone</TableHead>
                         <TableHead>Documento</TableHead>
                         <TableHead>
                           <button onClick={() => handleSort("status")} className="flex items-center hover:text-foreground transition-colors">
@@ -887,12 +892,24 @@ const Reports = () => {
                         locale: ptBR
                       }) : "-"}
                           </TableCell>
-                          <TableCell>{signer.email}</TableCell>
-                          <TableCell>{signer.phone}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-sm">{signer.email}</span>
+                              <span className="text-xs text-muted-foreground">{signer.phone}</span>
+                            </div>
+                          </TableCell>
                           <TableCell>{signer.documents?.name || "-"}</TableCell>
                           <TableCell>
-                            <Badge className={signer.status === "signed" ? "bg-green-700 text-white hover:bg-green-700" : "bg-yellow-700 text-white hover:bg-yellow-700"}>
-                              {signer.status === "signed" ? "Assinado" : "Pendente"}
+                            <Badge className={
+                              signer.status === "signed" 
+                                ? "bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent" 
+                                : signer.status === "rejected"
+                                ? "bg-transparent border border-red-600 text-red-600 hover:bg-transparent"
+                                : signer.status === "cancelled"
+                                ? "bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent"
+                                : "bg-transparent border border-gray-500 text-gray-500 hover:bg-transparent"
+                            }>
+                              {signer.status === "signed" ? "Assinado" : signer.status === "rejected" ? "Rejeitado" : signer.status === "cancelled" ? "Cancelado" : "Pendente"}
                             </Badge>
                           </TableCell>
                           <TableCell>
