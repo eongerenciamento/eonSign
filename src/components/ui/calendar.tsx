@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, CaptionProps, useNavigation, DateRange } from "react-day-picker";
 import { format, setMonth, setYear, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,13 +26,15 @@ function MonthYearPicker({
   const [selectedMonth, setSelectedMonth] = React.useState(displayMonth.getMonth());
   const [selectedYear, setSelectedYear] = React.useState(displayMonth.getFullYear());
   
-  // Touch handling
-  const monthTouchRef = React.useRef<{ startY: number; startMonth: number } | null>(null);
-  const yearTouchRef = React.useRef<{ startY: number; startYear: number } | null>(null);
-  
-  // Throttle for smooth scrolling
-  const wheelThrottleRef = React.useRef<boolean>(false);
-  const wheelIntervalMs = 120;
+  // Generate year range (current year - 100 to current year + 10)
+  const currentYear = new Date().getFullYear();
+  const years = React.useMemo(() => {
+    const yearList = [];
+    for (let y = currentYear - 100; y <= currentYear + 10; y++) {
+      yearList.push(y);
+    }
+    return yearList;
+  }, [currentYear]);
 
   // Update parent when values change
   React.useEffect(() => {
@@ -40,143 +42,45 @@ function MonthYearPicker({
     onChange(newDate);
   }, [selectedMonth, selectedYear]);
 
-  const handleMonthUp = () => {
-    setSelectedMonth(prev => (prev + 1) % 12);
-  };
-
-  const handleMonthDown = () => {
-    setSelectedMonth(prev => (prev - 1 + 12) % 12);
-  };
-
-  const handleYearUp = () => {
-    setSelectedYear(prev => prev + 1);
-  };
-
-  const handleYearDown = () => {
-    setSelectedYear(prev => prev - 1);
-  };
-
-  // Month touch handlers
-  const handleMonthTouchStart = (e: React.TouchEvent) => {
-    monthTouchRef.current = {
-      startY: e.touches[0].clientY,
-      startMonth: selectedMonth
-    };
-  };
-
-  const handleMonthTouchMove = (e: React.TouchEvent) => {
-    if (!monthTouchRef.current) return;
-    const deltaY = monthTouchRef.current.startY - e.touches[0].clientY;
-    const steps = Math.round(deltaY / 30);
-    const newMonth = (monthTouchRef.current.startMonth + steps + 120) % 12;
-    setSelectedMonth(newMonth);
-  };
-
-  const handleMonthTouchEnd = () => {
-    monthTouchRef.current = null;
-  };
-
-  // Year touch handlers
-  const handleYearTouchStart = (e: React.TouchEvent) => {
-    yearTouchRef.current = {
-      startY: e.touches[0].clientY,
-      startYear: selectedYear
-    };
-  };
-
-  const handleYearTouchMove = (e: React.TouchEvent) => {
-    if (!yearTouchRef.current) return;
-    const deltaY = yearTouchRef.current.startY - e.touches[0].clientY;
-    const steps = Math.round(deltaY / 30);
-    setSelectedYear(yearTouchRef.current.startYear + steps);
-  };
-
-  const handleYearTouchEnd = () => {
-    yearTouchRef.current = null;
-  };
-
-  // Wheel handlers for desktop with throttling
-  const handleMonthWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    if (wheelThrottleRef.current) return;
-    
-    if (e.deltaY < 0) handleMonthUp();
-    else handleMonthDown();
-    
-    wheelThrottleRef.current = true;
-    setTimeout(() => {
-      wheelThrottleRef.current = false;
-    }, wheelIntervalMs);
-  };
-
-  const handleYearWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    if (wheelThrottleRef.current) return;
-    
-    if (e.deltaY < 0) handleYearUp();
-    else handleYearDown();
-    
-    wheelThrottleRef.current = true;
-    setTimeout(() => {
-      wheelThrottleRef.current = false;
-    }, wheelIntervalMs);
-  };
-
   return (
-    <div className="flex items-center justify-center gap-6 py-3 px-4 border-b border-gray-300/30 dark:border-white/10">
-      {/* Month Spinner - Horizontal */}
-      <div 
-        className="flex items-center gap-2"
-        onTouchStart={handleMonthTouchStart}
-        onTouchMove={handleMonthTouchMove}
-        onTouchEnd={handleMonthTouchEnd}
-        onWheel={handleMonthWheel}
+    <div className="flex items-center justify-center gap-4 py-3 px-4 border-b border-gray-300/30 dark:border-white/10">
+      {/* Month Select */}
+      <select
+        value={selectedMonth}
+        onChange={(e) => setSelectedMonth(Number(e.target.value))}
+        className="bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-0 appearance-none text-center px-2 py-1 rounded-lg hover:bg-white/20 dark:hover:bg-white/10"
+        style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 4px center',
+          paddingRight: '20px'
+        }}
       >
-        <button 
-          type="button"
-          onClick={handleMonthDown} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-        <span className="w-24 text-center font-semibold text-gray-600 dark:text-gray-400 select-none capitalize">
-          {months[selectedMonth]}
-        </span>
-        <button 
-          type="button"
-          onClick={handleMonthUp} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </button>
-      </div>
+        {months.map((month, index) => (
+          <option key={month} value={index} className="bg-background text-foreground">
+            {month}
+          </option>
+        ))}
+      </select>
 
-      {/* Year Spinner - Horizontal */}
-      <div 
-        className="flex items-center gap-2"
-        onTouchStart={handleYearTouchStart}
-        onTouchMove={handleYearTouchMove}
-        onTouchEnd={handleYearTouchEnd}
-        onWheel={handleYearWheel}
+      {/* Year Select */}
+      <select
+        value={selectedYear}
+        onChange={(e) => setSelectedYear(Number(e.target.value))}
+        className="bg-transparent text-gray-600 dark:text-gray-400 font-semibold text-sm cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-0 appearance-none text-center px-2 py-1 rounded-lg hover:bg-white/20 dark:hover:bg-white/10"
+        style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 4px center',
+          paddingRight: '20px'
+        }}
       >
-        <button 
-          type="button"
-          onClick={handleYearDown} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-        <span className="w-14 text-center font-semibold text-gray-600 dark:text-gray-400 select-none">
-          {selectedYear}
-        </span>
-        <button 
-          type="button"
-          onClick={handleYearUp} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </button>
-      </div>
+        {years.map((year) => (
+          <option key={year} value={year} className="bg-background text-foreground">
+            {year}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
