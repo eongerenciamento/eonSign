@@ -459,7 +459,7 @@ const Drive = () => {
                 onClick={handleCreateFolderInline}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
-                <Plus className="w-5 h-5 text-gray-600" />
+                <Plus className="w-5 h-5 text-muted-foreground" />
               </Button>
               <Button
                 variant="ghost"
@@ -467,7 +467,7 @@ const Drive = () => {
                 onClick={() => setShowFilters(!showFilters)}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
-                <SlidersHorizontal className="w-5 h-5 text-gray-600" />
+                <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
               </Button>
               <Button
                 variant="ghost"
@@ -476,9 +476,9 @@ const Drive = () => {
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
                 {viewMode === "grid" ? (
-                  <List className="w-5 h-5 text-gray-600" />
+                  <List className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <LayoutGrid className="w-5 h-5 text-gray-600" />
+                  <LayoutGrid className="w-5 h-5 text-muted-foreground" />
                 )}
               </Button>
             </div>
