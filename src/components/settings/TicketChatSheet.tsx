@@ -198,10 +198,9 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
               </SheetTitle>
               {!isTicketClosed && (
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={() => setShowCloseDialog(true)}
-                  className="text-gray-600 border-gray-300"
+                  className="rounded-full bg-gray-100 text-gray-700 hover:bg-gray-100 hover:text-gray-700"
                 >
                   <Check className="w-4 h-4 mr-1" />
                   Encerrar chamado
