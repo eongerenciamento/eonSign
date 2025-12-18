@@ -381,14 +381,15 @@ const Settings = () => {
   }, [user]);
   return <Layout>
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
-        <div className="flex items-center justify-between">
-          <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
-          <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
-            Certificado A1 R$109.90
-          </Button>
-        </div>
+        <div className="w-full mx-auto max-w-5xl">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-sm font-bold text-gray-600">Configurações</h1>
+            <Button onClick={() => window.open('https://certifica.eonhub.com.br', '_blank')} className="md:hidden bg-[#283d60] text-white font-light hover:bg-[#283d60]/90 text-xs px-3 py-1 h-auto">
+              Certificado A1 R$109.90
+            </Button>
+          </div>
 
-        <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full mx-auto max-w-6xl">
+          <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
@@ -828,7 +829,8 @@ const Settings = () => {
               </p>
             </div>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
       
     </Layout>;
