@@ -219,8 +219,8 @@ export default function Auth() {
           <RadialGlow />
           
           {/* Logo */}
-          <div className="relative z-20 flex justify-center pt-20">
-            <img src={LOGO_URL} alt="Logo" className="h-16 w-auto" />
+          <div className="relative z-20 flex justify-center pt-24">
+            <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
           </div>
         </div>
 
