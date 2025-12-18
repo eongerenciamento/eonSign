@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock, Sun, Moon } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock, Sun, Moon, LogOut } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
@@ -206,14 +206,19 @@ const Settings = () => {
     loadData();
   }, []);
   const handleLogout = async () => {
-    const {
-      error
-    } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error("Erro ao sair");
     } else {
-      toast.success("Logout realizado");
-      navigate("/auth");
+      toast.custom(() => (
+        <div className="bg-gray-500 text-white border-none flex items-center justify-center p-2 w-10 h-10 rounded-full">
+          <LogOut className="h-5 w-5 animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />
+        </div>
+      ), {
+        duration: 1500,
+        position: "bottom-right"
+      });
+      setTimeout(() => navigate("/auth"), 800);
     }
   };
   const formatPhone = (value: string) => {
