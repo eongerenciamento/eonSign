@@ -172,7 +172,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <SheetHeader>
-          <SheetTitle>Abrir Novo Ticket</SheetTitle>
+          <SheetTitle className="text-gray-600">Abrir Novo Ticket</SheetTitle>
           <SheetDescription>Preencha o formulário para abrir um ticket de suporte.</SheetDescription>
         </SheetHeader>
 
@@ -185,7 +185,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 <FormItem>
                   <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descreva brevemente o problema" {...field} />
+                    <Input placeholder="Descreva brevemente o problema" className="bg-gray-100 border-0" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -201,7 +201,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                     <FormLabel>Categoria</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-gray-100 border-0">
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
@@ -226,7 +226,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                     <FormLabel>Prioridade</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-gray-100 border-0">
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
@@ -252,7 +252,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Descreva o problema em detalhes..."
-                      className="min-h-[150px] resize-none"
+                      className="min-h-[150px] resize-none bg-gray-100 border-0"
                       {...field}
                     />
                   </FormControl>
