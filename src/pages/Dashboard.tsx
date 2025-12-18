@@ -164,27 +164,27 @@ const Dashboard = () => {
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-[#273d60] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-white border border-gray-200 cursor-pointer hover:shadow-md transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-white text-base">
+              <CardTitle className="text-gray-700 text-base">
                 Pendentes
               </CardTitle>
-              <p className="text-gray-200 text-xs">Sua Assinatura</p>
+              <p className="text-gray-500 text-xs">Sua Assinatura</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-white">{pendingByOwner}</p>
+              <p className="text-3xl font-bold text-[#273d60]">{pendingByOwner}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#273d60] border-none cursor-pointer hover:opacity-90 transition-opacity rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-white border border-gray-200 cursor-pointer hover:shadow-md transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-white text-base">
+              <CardTitle className="text-gray-700 text-base">
                 Pendentes
               </CardTitle>
-              <p className="text-gray-200 text-xs">Signatários Externos</p>
+              <p className="text-gray-500 text-xs">Signatários Externos</p>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-              <p className="text-3xl font-bold text-white">{pendingByExternal}</p>
+              <p className="text-3xl font-bold text-[#273d60]">{pendingByExternal}</p>
             </CardContent>
           </Card>
         </div>

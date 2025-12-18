@@ -167,7 +167,7 @@ export function AppSidebar() {
 
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-[#273d60] to-[#001a4d]`} collapsible="icon">
       {/* Header com Toggle */}
-      <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center bg-[#273d60]`}>
+      <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col items-center`}>
         <SidebarTrigger className={`bg-[#273d60] text-white hover:bg-white/10 ${collapsed ? "mx-auto" : "self-end"}`}>
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
@@ -179,7 +179,7 @@ export function AppSidebar() {
           </div>}
       </div>
 
-      <SidebarContent className="bg-[#273d60]">
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <TooltipProvider>
@@ -219,7 +219,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <div className="p-4 mt-auto bg-[#273d60]">
+      <div className="p-4 mt-auto">
         {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 rounded-lg bg-0 text-white text-xs bg-muted-foreground font-medium">
             Certificado Digital A1 R$109.90    
           </button>}
