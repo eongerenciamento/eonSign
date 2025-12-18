@@ -50,7 +50,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed top-2 left-2 right-2 z-50 bg-[#273d60] flex items-center justify-center h-14 md:hidden border-none px-3 rounded-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-14 md:hidden border-none px-4 rounded-b-2xl">
         {/* Ícones de navegação centralizados */}
         <div className="flex items-center justify-center gap-2 flex-1">
           {items.map((item) => (
@@ -70,14 +70,14 @@ export function MobileNav() {
           ))}
         </div>
 
-        {/* Avatar para abrir o UserProfileSheet */}
+        {/* Avatar para abrir o UserProfileSheet - flutuando para fora do menu */}
         <button 
-          className="flex-shrink-0"
+          className="absolute right-4 top-8"
           onClick={() => setProfileSheetOpen(true)}
         >
-          <Avatar className="h-8 w-8 border-2 border-white/20">
+          <Avatar className="h-12 w-12 border-[3px] border-white shadow-lg">
             {profile?.foto_url && <AvatarImage src={profile.foto_url} />}
-            <AvatarFallback className="bg-gray-200 text-gray-600">
+            <AvatarFallback className="bg-gray-200 text-gray-600 text-lg">
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
