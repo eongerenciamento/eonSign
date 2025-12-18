@@ -70,8 +70,15 @@ export function MobileNav() {
     if (error) {
       toast.error("Erro ao sair");
     } else {
-      toast.success("Logout realizado");
-      navigate("/auth");
+      toast.custom(() => (
+        <div className="bg-gray-500 text-white border-none flex items-center justify-center p-2 w-10 h-10 rounded-full">
+          <LogOut className="h-5 w-5 animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />
+        </div>
+      ), {
+        duration: 1500,
+        position: "bottom-right"
+      });
+      setTimeout(() => navigate("/auth"), 800);
     }
   };
 
