@@ -13,6 +13,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <>
+      {/* Fundo contrastante para mostrar bordas arredondadas do menu mobile */}
+      <div className="fixed top-0 left-0 right-0 h-16 bg-card -z-10 md:hidden" />
+      
       {/* Mobile Navigation */}
       <MobileNav />
 
