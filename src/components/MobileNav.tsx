@@ -70,14 +70,14 @@ export function MobileNav() {
           ))}
         </div>
 
-        {/* Avatar para abrir o UserProfileSheet - flutuando para fora do menu */}
+        {/* Avatar para abrir o UserProfileSheet - centralizado verticalmente */}
         <button 
-          className="absolute right-4 top-8"
+          className="flex-shrink-0"
           onClick={() => setProfileSheetOpen(true)}
         >
-          <Avatar className="h-12 w-12 border-[3px] border-white shadow-lg">
+          <Avatar className="h-8 w-8 border-2 border-white/20">
             {profile?.foto_url && <AvatarImage src={profile.foto_url} />}
-            <AvatarFallback className="bg-gray-200 text-gray-600 text-lg">
+            <AvatarFallback className="bg-gray-200 text-gray-600">
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
