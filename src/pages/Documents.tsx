@@ -248,7 +248,7 @@ const Documents = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-sm font-bold text-gray-600">Documentos</h1>
+            <h1 className="text-sm font-bold text-muted-foreground">Documentos</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -257,7 +257,7 @@ const Documents = () => {
               onClick={() => setShowFilters(!showFilters)}
               className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
             >
-              <SlidersHorizontal className="w-5 h-5 text-gray-600" />
+              <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
             </Button>
             <UploadDialog />
           </div>
@@ -266,16 +266,16 @@ const Documents = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 border-none bg-transparent">
-            <TabsTrigger value="signed" className="data-[state=active]:text-gray-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <CheckCircle className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-gray-700" />
+            <TabsTrigger value="signed" className="data-[state=active]:text-card-foreground text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <CheckCircle className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-card-foreground" />
               <span className="hidden md:inline">Assinados</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <User className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-yellow-700" />
+            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400 text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <User className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-yellow-600 dark:data-[state=active]:text-yellow-400" />
               <span className="hidden md:inline">Pendente Interno</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
-              <Users className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-red-700" />
+            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 text-muted-foreground hover:bg-transparent hover:text-muted-foreground border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <Users className="w-4 h-4 md:mr-2 text-muted-foreground data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400" />
               <span className="hidden md:inline">Pendente Externo</span>
             </TabsTrigger>
           </TabsList>
@@ -288,7 +288,7 @@ const Documents = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar documentos..."
-                    className="pl-10 border-none bg-gray-100"
+                    className="pl-10 border-none bg-secondary"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />

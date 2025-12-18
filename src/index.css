@@ -52,26 +52,30 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 20% 98%;
     --sidebar-border: 215 25% 22%;
     --sidebar-ring: 214 95% 45%;
+
+    /* Layout gradient colors - light mode uses visible gradient */
+    --layout-gradient-from: 215 35% 27%;
+    --layout-gradient-to: 215 60% 10%;
   }
 
   .dark {
-    --background: 215 30% 8%;
-    --foreground: 210 20% 98%;
+    --background: 215 60% 6%;
+    --foreground: 210 20% 95%;
 
-    --card: 215 25% 12%;
-    --card-foreground: 210 20% 98%;
+    --card: 215 40% 13%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 215 25% 12%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 215 40% 13%;
+    --popover-foreground: 210 20% 95%;
 
     --primary: 214 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 215 35% 18%;
+    --secondary-foreground: 210 20% 95%;
 
-    --muted: 215 25% 16%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 215 35% 16%;
+    --muted-foreground: 215 15% 60%;
 
     --accent: 152 70% 50%;
     --accent-foreground: 0 0% 100%;
@@ -85,18 +89,22 @@ All colors MUST be HSL.
     --destructive: 0 85% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
+    --border: 215 30% 22%;
+    --input: 215 30% 20%;
     --ring: 214 95% 55%;
 
-    --sidebar-background: 215 30% 10%;
-    --sidebar-foreground: 210 20% 98%;
+    --sidebar-background: 215 50% 10%;
+    --sidebar-foreground: 210 20% 95%;
     --sidebar-primary: 214 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 15%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 25% 18%;
+    --sidebar-accent: 215 40% 15%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 35% 18%;
     --sidebar-ring: 214 95% 55%;
+
+    /* Layout gradient colors - dark mode */
+    --layout-gradient-from: 215 50% 10%;
+    --layout-gradient-to: 215 60% 6%;
   }
 }
 
@@ -117,5 +125,12 @@ All colors MUST be HSL.
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Custom utility for layout gradient */
+@layer utilities {
+  .bg-layout-gradient {
+    background: linear-gradient(to bottom, hsl(var(--layout-gradient-from)), hsl(var(--layout-gradient-to)));
   }
 }

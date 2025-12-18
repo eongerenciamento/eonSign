@@ -134,7 +134,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#273d60] flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-layout-gradient flex items-center justify-center h-16 pt-safe md:hidden border-none px-3">
 
       {/* Ícones de navegação centralizados */}
       <div className="flex items-center justify-center gap-2 flex-1">
@@ -161,15 +161,15 @@ export function MobileNav() {
           <button className="flex-shrink-0">
             <Avatar className="h-8 w-8 border-2 border-white/20">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback className="bg-white/50 text-[#273d60]">
+              <AvatarFallback className="bg-white/50 text-sidebar-background">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
           </button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[320px] overflow-y-auto">
+        <SheetContent side="right" className="w-[320px] overflow-y-auto bg-card">
           <SheetHeader className="mb-6">
-            <SheetTitle>Perfil do Usuário</SheetTitle>
+            <SheetTitle className="text-card-foreground">Perfil do Usuário</SheetTitle>
           </SheetHeader>
           
           <div className="space-y-6">
@@ -178,12 +178,12 @@ export function MobileNav() {
               <div className="relative">
                 <Avatar className="h-24 w-24">
                   {avatarUrl && <AvatarImage src={avatarUrl} />}
-                  <AvatarFallback className="bg-white/50 text-[#273d60] text-2xl">
+                  <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-[#273d60] p-2 rounded-full cursor-pointer hover:bg-[#1e2f4d] transition-colors">
-                  <Camera className="h-4 w-4 text-white" />
+                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-primary p-2 rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
+                  <Camera className="h-4 w-4 text-primary-foreground" />
                   <input
                     id="avatar-upload"
                     type="file"
@@ -198,43 +198,46 @@ export function MobileNav() {
             {/* Campos do formulário */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
+                <Label htmlFor="name" className="text-card-foreground">Nome</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Seu nome"
+                  className="bg-input border-border text-card-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
+                <Label htmlFor="email" className="text-card-foreground">E-mail</Label>
                 <Input
                   id="email"
                   value={email}
                   disabled
-                  className="bg-muted"
+                  className="bg-muted text-muted-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="organization">Organização</Label>
+                <Label htmlFor="organization" className="text-card-foreground">Organização</Label>
                 <Input
                   id="organization"
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
                   placeholder="Nome da organização"
+                  className="bg-input border-border text-card-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Alterar Senha</Label>
+                <Label htmlFor="password" className="text-card-foreground">Alterar Senha</Label>
                 <Input
                   id="password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Nova senha (opcional)"
+                  className="bg-input border-border text-card-foreground"
                 />
               </div>
             </div>
@@ -260,7 +263,7 @@ export function MobileNav() {
                 </Button>
                 <Button
                   onClick={handleSaveProfile}
-                  className="flex-1 bg-gradient-to-r from-[#273d60] to-[#001a4d] text-white hover:opacity-90"
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   Salvar
                 </Button>
