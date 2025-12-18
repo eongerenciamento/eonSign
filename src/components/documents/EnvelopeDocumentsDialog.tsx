@@ -238,14 +238,14 @@ export const EnvelopeDocumentsDialog = ({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-700 truncate">{doc.name}</p>
                 </div>
-                <div className="relative w-8 h-8 flex items-center justify-center mr-2">
-                  <svg className="w-8 h-8 transform -rotate-90 absolute inset-0">
-                    <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" className="text-gray-200" />
-                    <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray={`${2 * Math.PI * 12}`} strokeDashoffset={`${2 * Math.PI * 12 * (1 - (doc.signers > 0 ? doc.signed_by / doc.signers : 0))}`} className={doc.signed_by === doc.signers ? "text-green-700" : "text-blue-700"} strokeLinecap="round" style={{
+                <div className="relative w-10 h-10 flex items-center justify-center mr-2">
+                  <svg className="w-10 h-10 transform -rotate-90 absolute inset-0">
+                    <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" fill="none" className="text-gray-200" />
+                    <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray={`${2 * Math.PI * 16}`} strokeDashoffset={`${2 * Math.PI * 16 * (1 - (doc.signers > 0 ? doc.signed_by / doc.signers : 0))}`} className="text-blue-700" strokeLinecap="round" style={{
                       transition: 'stroke-dashoffset 1s ease-in-out'
                     }} />
                   </svg>
-                  <span className={`text-[8px] font-bold relative z-10 ${doc.signed_by === doc.signers ? "text-green-700" : "text-blue-700"}`}>
+                  <span className="text-[9px] font-bold relative z-10 text-blue-700">
                     {doc.signed_by}/{doc.signers}
                   </span>
                 </div>
