@@ -192,7 +192,7 @@ function CustomCaption({ displayMonth }: CaptionProps) {
       {showPicker && (
         <div 
           ref={pickerRef} 
-          className="absolute top-full mt-2 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-2"
+          className="absolute top-full mt-2 z-50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-2xl rounded-xl shadow-xl border border-white/20 p-2"
         >
           <MonthYearPicker displayMonth={displayMonth} onChange={handleChange} />
         </div>
@@ -245,13 +245,14 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <SelectedDaysContext.Provider value={selectedDays}>
       <div className={cn(
-        "rounded-2xl bg-gray-500/10 dark:bg-gray-500/10 backdrop-blur-xl",
+        "rounded-2xl bg-white/30 dark:bg-gray-800/30 backdrop-blur-2xl",
         "border border-white/20 dark:border-white/10 shadow-2xl p-4 pointer-events-auto",
         className
       )}>
         <DayPicker
           locale={ptBR}
           showOutsideDays={showOutsideDays}
+          weekStartsOn={1}
           modifiers={{
             weekend: (date) => isWeekend(date),
           }}
@@ -271,11 +272,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             nav_button_next: "absolute right-1",
             table: "w-full border-collapse space-y-1",
             head_row: "flex",
-            head_cell: "text-blue-500 rounded-md w-10 font-medium text-[0.75rem] uppercase [&:nth-child(6)]:text-red-500 [&:nth-child(7)]:text-red-500",
+            head_cell: "text-gray-500 rounded-md w-10 font-medium text-[0.75rem] uppercase [&:nth-child(6)]:text-red-500 [&:nth-child(7)]:text-red-500",
             row: "flex w-full mt-2",
             cell: "h-10 w-10 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
             day: cn(
-              "h-10 w-10 p-0 font-normal rounded-full transition-all hover:bg-white/20 dark:hover:bg-white/10 text-foreground",
+              "h-10 w-10 p-0 font-normal rounded-full transition-all hover:bg-white/20 dark:hover:bg-white/10 text-gray-500",
             ),
             day_range_start: "day-range-start bg-blue-700 !text-white rounded-full hover:bg-blue-700",
             day_range_end: "day-range-end bg-blue-700 !text-white rounded-full hover:bg-blue-700",
