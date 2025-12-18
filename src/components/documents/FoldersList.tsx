@@ -5,14 +5,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Document } from "./DocumentsTable";
 import { useEffect, useRef, useState } from "react";
+import { MoveFolderSheet } from "./MoveFolderSheet";
 
 export interface Folder {
   id: string;
@@ -54,6 +52,8 @@ export const FoldersList = ({
 }: FoldersListProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [moveFolderSheetOpen, setMoveFolderSheetOpen] = useState(false);
+  const [folderToMove, setFolderToMove] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingFolderId && inputRef.current) {
@@ -116,10 +116,17 @@ export const FoldersList = ({
     }
   };
 
-  const availableFolders = allFolders.filter(f => 
-    f.id !== currentFolderId && 
-    (!currentFolderId || f.parent_folder_id !== currentFolderId)
-  );
+  const handleOpenMoveSheet = (folderId: string) => {
+    setFolderToMove(folderId);
+    setMoveFolderSheetOpen(true);
+  };
+
+  const handleMoveFolder = (targetFolderId: string | null) => {
+    if (folderToMove && onMoveFolder) {
+      onMoveFolder(folderToMove, targetFolderId);
+    }
+    setFolderToMove(null);
+  };
 
   if (viewMode === "list") {
     return (
@@ -178,35 +185,16 @@ export const FoldersList = ({
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700 hover:text-gray-700 data-[state=open]:bg-gray-300/50 data-[state=open]:text-gray-700">
-                      <Move className="w-4 h-4 mr-2" />
-                      Mover
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onMoveFolder(folder.id, null);
-                        }}
-                        className="hover:bg-gray-300/50 focus:bg-gray-300/50"
-                      >
-                        📁 Raiz
-                      </DropdownMenuItem>
-                      {availableFolders.map((targetFolder) => (
-                        <DropdownMenuItem
-                          key={targetFolder.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMoveFolder(folder.id, targetFolder.id);
-                          }}
-                          className="hover:bg-gray-300/50 focus:bg-gray-300/50"
-                        >
-                          📁 {targetFolder.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMoveSheet(folder.id);
+                    }}
+                    className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
+                  >
+                    <Move className="w-4 h-4 mr-2" />
+                    Mover
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
                   className="text-destructive hover:bg-gray-300/50 focus:bg-gray-300/50"
@@ -222,6 +210,16 @@ export const FoldersList = ({
             </DropdownMenu>
           </div>
         ))}
+
+        {folderToMove && (
+          <MoveFolderSheet
+            open={moveFolderSheetOpen}
+            onOpenChange={setMoveFolderSheetOpen}
+            folders={allFolders}
+            currentFolderId={folderToMove}
+            onMove={handleMoveFolder}
+          />
+        )}
       </div>
     );
   }
@@ -278,35 +276,16 @@ export const FoldersList = ({
                   Renomear
                 </DropdownMenuItem>
                 {onMoveFolder && (
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700 hover:text-gray-700 data-[state=open]:bg-gray-300/50 data-[state=open]:text-gray-700">
-                      <Move className="w-4 h-4 mr-2" />
-                      Mover
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onMoveFolder(folder.id, null);
-                        }}
-                        className="hover:bg-gray-300/50 focus:bg-gray-300/50"
-                      >
-                        📁 Raiz
-                      </DropdownMenuItem>
-                      {availableFolders.map((targetFolder) => (
-                        <DropdownMenuItem
-                          key={targetFolder.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMoveFolder(folder.id, targetFolder.id);
-                          }}
-                          className="hover:bg-gray-300/50 focus:bg-gray-300/50"
-                        >
-                          📁 {targetFolder.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMoveSheet(folder.id);
+                    }}
+                    className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
+                  >
+                    <Move className="w-4 h-4 mr-2" />
+                    Mover
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
                   className="text-destructive hover:bg-gray-300/50 focus:bg-gray-300/50"
@@ -323,6 +302,16 @@ export const FoldersList = ({
           </div>
         </Card>
       ))}
+
+      {folderToMove && (
+        <MoveFolderSheet
+          open={moveFolderSheetOpen}
+          onOpenChange={setMoveFolderSheetOpen}
+          folders={allFolders}
+          currentFolderId={folderToMove}
+          onMove={handleMoveFolder}
+        />
+      )}
     </div>
   );
 };
