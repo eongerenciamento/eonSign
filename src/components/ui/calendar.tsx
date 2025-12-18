@@ -29,6 +29,10 @@ function MonthYearPicker({
   // Touch handling
   const monthTouchRef = React.useRef<{ startY: number; startMonth: number } | null>(null);
   const yearTouchRef = React.useRef<{ startY: number; startYear: number } | null>(null);
+  
+  // Throttle for smooth scrolling
+  const wheelThrottleRef = React.useRef<boolean>(false);
+  const wheelIntervalMs = 120;
 
   // Update parent when values change
   React.useEffect(() => {
@@ -91,17 +95,31 @@ function MonthYearPicker({
     yearTouchRef.current = null;
   };
 
-  // Wheel handlers for desktop
+  // Wheel handlers for desktop with throttling
   const handleMonthWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    if (wheelThrottleRef.current) return;
+    
     if (e.deltaY < 0) handleMonthUp();
     else handleMonthDown();
+    
+    wheelThrottleRef.current = true;
+    setTimeout(() => {
+      wheelThrottleRef.current = false;
+    }, wheelIntervalMs);
   };
 
   const handleYearWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    if (wheelThrottleRef.current) return;
+    
     if (e.deltaY < 0) handleYearUp();
     else handleYearDown();
+    
+    wheelThrottleRef.current = true;
+    setTimeout(() => {
+      wheelThrottleRef.current = false;
+    }, wheelIntervalMs);
   };
 
   return (

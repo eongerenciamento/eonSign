@@ -99,6 +99,7 @@ export const AdvancedFiltersDialog = ({ onApplyFilters }: AdvancedFiltersDialogP
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
+                    "hover:bg-muted hover:text-muted-foreground",
                     !dateFrom && "text-muted-foreground"
                   )}
                 >
@@ -125,6 +126,7 @@ export const AdvancedFiltersDialog = ({ onApplyFilters }: AdvancedFiltersDialogP
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
+                    "hover:bg-muted hover:text-muted-foreground",
                     !dateTo && "text-muted-foreground"
                   )}
                 >

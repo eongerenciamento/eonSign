@@ -540,28 +540,52 @@ const Settings = () => {
 
                     <div className="grid gap-2">
                       <Label htmlFor="admin-birth-date">Data de Nascimento</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal border-0 bg-muted dark:bg-secondary",
-                              !adminBirthDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {adminBirthDate ? format(parse(adminBirthDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione a data</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
-                            onSelect={(date) => setAdminBirthDate(date ? format(date, "yyyy-MM-dd") : "")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <div className="relative flex items-center w-full bg-muted dark:bg-secondary rounded-md h-10">
+                        <Input
+                          id="admin-birth-date"
+                          type="text"
+                          value={adminBirthDate ? format(parse(adminBirthDate, "yyyy-MM-dd", new Date()), "dd/MM/yyyy") : ""}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            let formatted = value;
+                            if (value.length >= 2) formatted = value.slice(0, 2) + "/" + value.slice(2);
+                            if (value.length >= 4) formatted = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4, 8);
+                            if (value.length === 8) {
+                              const day = parseInt(value.slice(0, 2));
+                              const month = parseInt(value.slice(2, 4));
+                              const year = parseInt(value.slice(4, 8));
+                              if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= new Date().getFullYear()) {
+                                setAdminBirthDate(`${year}-${value.slice(2, 4)}-${value.slice(0, 2)}`);
+                              }
+                            } else if (value.length < 8) {
+                              setAdminBirthDate("");
+                            }
+                          }}
+                          placeholder="DD/MM/AAAA"
+                          maxLength={10}
+                          inputMode="numeric"
+                          className="flex-1 border-0 bg-transparent text-foreground pr-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="absolute right-0 h-full px-3 hover:bg-transparent"
+                            >
+                              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                              mode="single"
+                              selected={adminBirthDate ? parse(adminBirthDate, "yyyy-MM-dd", new Date()) : undefined}
+                              onSelect={(date) => setAdminBirthDate(date ? format(date, "yyyy-MM-dd") : "")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     </div>
                   </div>
 
