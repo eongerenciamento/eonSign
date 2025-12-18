@@ -386,6 +386,7 @@ const Settings = () => {
       }
     }
     toast.success("Dados da empresa salvos com sucesso!");
+    navigate("/");
   };
   const handleCertificateChange = useCallback(async () => {
     if (!user) return;
@@ -859,7 +860,7 @@ const Settings = () => {
                         toast.error("Senha incorreta");
                       }
                     }}
-                    className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"
+                    className="w-full rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
                   >
                     Acessar
                   </Button>

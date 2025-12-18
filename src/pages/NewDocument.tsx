@@ -1524,7 +1524,7 @@ const NewDocument = () => {
                   Arraste e solte seu documento
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">ou</p>
-                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-[#273d60] text-primary-foreground hover:bg-[#273d60] hover:text-primary-foreground">
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 rounded-full shadow-none border-transparent bg-blue-700 text-white hover:bg-blue-700 hover:text-white">
                   Selecionar Arquivo
                 </Button>
                 <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif" multiple onChange={handleFileChange} className="hidden" />
