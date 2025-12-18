@@ -123,10 +123,10 @@ function MonthYearPicker({
   };
 
   return (
-    <div className="flex items-center justify-center gap-8 p-4">
-      {/* Month Spinner */}
+    <div className="flex items-center justify-center gap-6 py-3 px-4 border-b border-gray-300/30 dark:border-white/10">
+      {/* Month Spinner - Horizontal */}
       <div 
-        className="flex flex-col items-center gap-1"
+        className="flex items-center gap-2"
         onTouchStart={handleMonthTouchStart}
         onTouchMove={handleMonthTouchMove}
         onTouchEnd={handleMonthTouchEnd}
@@ -134,26 +134,26 @@ function MonthYearPicker({
       >
         <button 
           type="button"
-          onClick={handleMonthUp} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-muted-foreground hover:text-foreground"
+          onClick={handleMonthDown} 
+          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
         >
-          <ChevronUp className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </button>
-        <span className="w-24 text-center font-semibold text-foreground select-none">
+        <span className="w-24 text-center font-semibold text-gray-600 dark:text-gray-400 select-none capitalize">
           {months[selectedMonth]}
         </span>
         <button 
           type="button"
-          onClick={handleMonthDown} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-muted-foreground hover:text-foreground"
+          onClick={handleMonthUp} 
+          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
         >
-          <ChevronDown className="h-4 w-4" />
+          <ChevronUp className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Year Spinner */}
+      {/* Year Spinner - Horizontal */}
       <div 
-        className="flex flex-col items-center gap-1"
+        className="flex items-center gap-2"
         onTouchStart={handleYearTouchStart}
         onTouchMove={handleYearTouchMove}
         onTouchEnd={handleYearTouchEnd}
@@ -161,20 +161,20 @@ function MonthYearPicker({
       >
         <button 
           type="button"
-          onClick={handleYearUp} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-muted-foreground hover:text-foreground"
+          onClick={handleYearDown} 
+          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
         >
-          <ChevronUp className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </button>
-        <span className="w-16 text-center font-semibold text-foreground select-none">
+        <span className="w-14 text-center font-semibold text-gray-600 dark:text-gray-400 select-none">
           {selectedYear}
         </span>
         <button 
           type="button"
-          onClick={handleYearDown} 
-          className="p-1 hover:bg-white/20 rounded-full transition-colors text-muted-foreground hover:text-foreground"
+          onClick={handleYearUp} 
+          className="p-1 hover:bg-white/20 rounded-full transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
         >
-          <ChevronDown className="h-4 w-4" />
+          <ChevronUp className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -206,33 +206,28 @@ function CustomCaption({ displayMonth }: CaptionProps) {
   }, [showPicker]);
 
   return (
-    <div className="relative flex justify-center items-center">
+    <div className="flex flex-col items-center" ref={pickerRef}>
+      {/* Integrated Month/Year Picker - Above title when open */}
       {showPicker && (
-        <div 
-          ref={pickerRef} 
-          className="absolute bottom-full mb-2 z-50 bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-2"
-        >
+        <div className="w-full -mx-4 -mt-4 mb-2">
           <MonthYearPicker displayMonth={displayMonth} onChange={handleChange} />
         </div>
       )}
       
+      {/* Month/Year Title - Clickable */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center">
-          <span 
-            onClick={() => setShowPicker(!showPicker)}
-            className="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer capitalize"
-          >
-            {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
-          </span>
-        </div>
+        <span 
+          onClick={() => setShowPicker(!showPicker)}
+          className="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer capitalize"
+        >
+          {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
+        </span>
         
-        <div className="flex items-center">
-          {selectedDays > 0 && (
-            <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
-              {selectedDays} {selectedDays === 1 ? 'dia' : 'dias'}
-            </span>
-          )}
-        </div>
+        {selectedDays > 0 && (
+          <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+            {selectedDays} {selectedDays === 1 ? 'dia' : 'dias'}
+          </span>
+        )}
       </div>
     </div>
   );
