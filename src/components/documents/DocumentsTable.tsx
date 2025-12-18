@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2 } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -160,17 +160,45 @@ export const DocumentsTable = ({
     }
   };
 
-  // Organize folders hierarchically
+  // State for expanded folders in dropdown
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+  // Toggle folder expansion
+  const toggleFolderExpansion = (folderId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if folder has children
+  const folderHasChildren = (folderId: string) => {
+    return folders.some(f => f.parent_folder_id === folderId);
+  };
+
+  // Organize folders hierarchically with visibility based on expanded state
   const organizeHierarchicalFolders = () => {
     const parentFolders = folders.filter(f => !f.parent_folder_id);
-    const result: Array<{ folder: Folder; level: number }> = [];
+    const result: Array<{ folder: Folder; level: number; hasChildren: boolean; isVisible: boolean }> = [];
     
     parentFolders.forEach(parent => {
-      result.push({ folder: parent, level: 0 });
-      const children = folders.filter(f => f.parent_folder_id === parent.id);
-      children.forEach(child => {
-        result.push({ folder: child, level: 1 });
-      });
+      const hasChildren = folderHasChildren(parent.id);
+      result.push({ folder: parent, level: 0, hasChildren, isVisible: true });
+      
+      // Only add children if parent is expanded
+      if (expandedFolders.has(parent.id)) {
+        const children = folders.filter(f => f.parent_folder_id === parent.id);
+        children.forEach(child => {
+          result.push({ folder: child, level: 1, hasChildren: false, isVisible: true });
+        });
+      }
     });
     
     return result;
@@ -933,14 +961,30 @@ export const DocumentsTable = ({
                             <SelectValue placeholder="Selecionar pasta" />
                           </SelectTrigger>
                           <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
-                            {hierarchicalFolders.map(({ folder, level }) => (
+                            {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
                               <SelectItem 
                                 key={folder.id} 
                                 value={folder.id} 
                                 className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
                                 style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                               >
-                                {level > 0 && "└─ "}{folder.name}
+                                <div className="flex items-center gap-1">
+                                  {hasChildren && (
+                                    <span 
+                                      onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                                      className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                                    >
+                                      {expandedFolders.has(folder.id) ? (
+                                        <ChevronDown className="w-3 h-3" />
+                                      ) : (
+                                        <ChevronRight className="w-3 h-3" />
+                                      )}
+                                    </span>
+                                  )}
+                                  {!hasChildren && level === 0 && <span className="w-4" />}
+                                  {level > 0 && "└─ "}
+                                  {folder.name}
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1228,15 +1272,31 @@ export const DocumentsTable = ({
                     <SelectTrigger className="w-full hover:bg-gray-50">
                       <SelectValue placeholder="Selecionar pasta" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white z-50">
-                      {hierarchicalFolders.map(({ folder, level }) => (
+                    <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                      {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
                         <SelectItem 
                           key={folder.id} 
                           value={folder.id} 
-                          className="hover:bg-gray-50 focus:bg-gray-50 text-gray-700"
+                          className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
                           style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                         >
-                          {level > 0 && "└─ "}{folder.name}
+                          <div className="flex items-center gap-1">
+                            {hasChildren && (
+                              <span 
+                                onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                                className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                              >
+                                {expandedFolders.has(folder.id) ? (
+                                  <ChevronDown className="w-3 h-3" />
+                                ) : (
+                                  <ChevronRight className="w-3 h-3" />
+                                )}
+                              </span>
+                            )}
+                            {!hasChildren && level === 0 && <span className="w-4" />}
+                            {level > 0 && "└─ "}
+                            {folder.name}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
