@@ -304,6 +304,12 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
       {/* Close Ticket Dialog */}
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
         <DialogContent className="sm:max-w-[400px]">
+          <button
+            onClick={() => setShowCloseDialog(false)}
+            className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 focus:outline-none"
+          >
+            <X className="h-4 w-4 text-gray-500" />
+          </button>
           <DialogHeader>
             <DialogTitle>Encerrar chamado</DialogTitle>
             <DialogDescription>
@@ -312,9 +318,9 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:gap-0">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => handleCloseTicket(false)}
-              className="flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none bg-red-100 text-red-600 border-0 hover:bg-red-100 hover:text-red-600"
             >
               <X className="w-4 h-4 mr-2" />
               Não foi resolvido
