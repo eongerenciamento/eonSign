@@ -9,51 +9,43 @@ import { Check, Loader2, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
-const SUBSCRIPTION_TIERS = [
-  {
-    name: "Grátis",
-    limit: 5,
-    price: 0,
-    priceId: "free",
-    description: "Ideal para testes",
-  },
-  {
-    name: "Básico",
-    limit: 20,
-    price: 54.9,
-    priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj",
-    description: "Para pequenas empresas",
-  },
-  {
-    name: "Profissional",
-    limit: 50,
-    price: 89.9,
-    priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0",
-    description: "Para empresas em crescimento",
-  },
-  {
-    name: "Empresarial",
-    limit: 100,
-    price: 159.9,
-    priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
-    description: "Para empresas estabelecidas",
-  },
-  {
-    name: "Premium",
-    limit: 150,
-    price: 209.9,
-    priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
-    description: "Para grandes volumes",
-  },
-  {
-    name: "Enterprise",
-    limit: 200,
-    price: 289.9,
-    priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
-    description: "Documentos ilimitados",
-  },
-];
+const SUBSCRIPTION_TIERS = [{
+  name: "Grátis",
+  limit: 5,
+  price: 0,
+  priceId: "free",
+  description: "Ideal para testes"
+}, {
+  name: "Básico",
+  limit: 20,
+  price: 54.9,
+  priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj",
+  description: "Para pequenas empresas"
+}, {
+  name: "Profissional",
+  limit: 50,
+  price: 89.9,
+  priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0",
+  description: "Para empresas em crescimento"
+}, {
+  name: "Empresarial",
+  limit: 100,
+  price: 159.9,
+  priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
+  description: "Para empresas estabelecidas"
+}, {
+  name: "Premium",
+  limit: 150,
+  price: 209.9,
+  priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
+  description: "Para grandes volumes"
+}, {
+  name: "Enterprise",
+  limit: 200,
+  price: 289.9,
+  priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
+  description: "Documentos ilimitados"
+}];
 
 // Comparison Table Component
 interface ComparisonTableProps {
@@ -62,31 +54,30 @@ interface ComparisonTableProps {
   processingCheckout: boolean;
   onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0]) => void;
 }
-
-function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onUpgrade }: ComparisonTableProps) {
-  return (
-    <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
+function ComparisonTable({
+  currentPlanLimit,
+  isFreeTier,
+  processingCheckout,
+  onUpgrade
+}: ComparisonTableProps) {
+  return <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
       <Table>
         <TableHeader>
           <TableRow className="border-0 bg-gray-100/50">
             <TableHead className="w-[200px] font-semibold text-xs text-gray-700 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Recurso
             </TableHead>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier
-                ? tier.priceId === "free"
-                : tier.limit === currentPlanLimit;
-              return (
-                <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <div className="flex flex-col items-center gap-0">
                     <span className="font-semibold text-xs text-gray-600">{tier.name}</span>
                     <span className="text-xs text-gray-400 font-normal">
                       R$ {tier.price === 0 ? "0" : tier.price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
-                </TableHead>
-              );
-            })}
+                </TableHead>;
+          })}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -94,210 +85,141 @@ function ComparisonTable({ currentPlanLimit, isFreeTier, processingCheckout, onU
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Documentos / Envelopes
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   {tier.limit}
-                </TableCell>
-              );
-            })}
+                </TableCell>;
+          })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Usuários ilimitados
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
-                </TableCell>
-              );
-            })}
+                </TableCell>;
+          })}
           </TableRow>
           <TableRow className="bg-white border-0">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Notificações
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
-                </TableCell>
-              );
-            })}
+                </TableCell>;
+          })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Geolocalização
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
-                  {tier.priceId === "free" ? (
-                    <X className="h-4 w-4 text-gray-400 mx-auto" />
-                  ) : (
-                    <Check className="h-4 w-4 text-green-500 mx-auto" />
-                  )}
-                </TableCell>
-              );
-            })}
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+                  {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>;
+          })}
           </TableRow>
           <TableRow className="bg-white border-0">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Eon Drive
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
-                  {tier.priceId === "free" ? (
-                    <X className="h-4 w-4 text-gray-400 mx-auto" />
-                  ) : (
-                    <Check className="h-4 w-4 text-green-500 mx-auto" />
-                  )}
-                </TableCell>
-              );
-            })}
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                  {tier.priceId === "free" ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>;
+          })}
           </TableRow>
           <TableRow className="bg-gray-100/50 border-0">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-gray-100/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              return (
-                <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
-                  {tier.priceId === "free" || index === 1 ? (
-                    <X className="h-4 w-4 text-gray-400 mx-auto" />
-                  ) : (
-                    <Check className="h-4 w-4 text-green-500 mx-auto" />
-                  )}
-                </TableCell>
-              );
-            })}
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-blue-50' : 'bg-gray-100/50'}`}>
+                  {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-gray-400 mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                </TableCell>;
+          })}
           </TableRow>
           {/* Action buttons row */}
           <TableRow className="bg-white border-0 border-b border-gray-200/50">
             <TableCell className="font-medium text-xs text-gray-600 sticky left-0 bg-white z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
               
             </TableCell>
-            {SUBSCRIPTION_TIERS.map((tier) => {
-              const isCurrentPlan = isFreeTier
-                ? tier.priceId === "free"
-                : tier.limit === currentPlanLimit;
-              const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
-
-              return (
-                <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
-                  {isCurrentPlan ? (
-                    <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+            {SUBSCRIPTION_TIERS.map(tier => {
+            const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+            const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
+            return <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-blue-50' : ''}`}>
+                  {isCurrentPlan ? <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
                       Atual
-                    </Badge>
-                  ) : (
-                    <Button
-                      onClick={() => onUpgrade(tier)}
-                      disabled={processingCheckout}
-                      size="sm"
-                      className={isDowngrade 
-                        ? "bg-gray-200 hover:bg-gray-300 text-gray-600 border-0" 
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
-                      }
-                    >
-                      {processingCheckout ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isDowngrade ? (
-                        "Downgrade"
-                      ) : (
-                        "Upgrade"
-                      )}
-                    </Button>
-                  )}
-                </TableCell>
-              );
-            })}
+                    </Badge> : <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-gray-200 hover:bg-gray-300 text-gray-600 border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
+                      {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : isDowngrade ? "Downgrade" : "Upgrade"}
+                    </Button>}
+                </TableCell>;
+          })}
           </TableRow>
         </TableBody>
       </Table>
-    </div>
-  );
+    </div>;
 }
 
 // FAQ Component
 function FAQSection() {
-  const faqItems = [
-    {
-      question: "Quais tipos de assinatura o eonSign permite?",
-      answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
-    },
-    {
-      question: "Sou obrigado a ter certificado digital?",
-      answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela eonSign."
-    },
-    {
-      question: "Como funciona a contagem de documentos?",
-      answer: "Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano."
-    },
-    {
-      question: "Posso mudar de plano depois?",
-      answer: "Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês."
-    },
-    {
-      question: "As assinaturas digitais têm validade jurídica?",
-      answer: "Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança."
-    },
-    {
-      question: "Posso cancelar minha assinatura?",
-      answer: "Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo."
-    },
-    {
-      question: "Como funcionam as notificações por WhatsApp?",
-      answer: "Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida."
-    },
-    {
-      question: "Existe período de teste gratuito?",
-      answer: "Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago."
-    },
-    {
-      question: "Posso ter múltiplos usuários na minha conta?",
-      answer: "Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações > Membros. Os membros convidados utilizam a assinatura da organização, sem necessidade de assinatura individual."
-    },
-    {
-      question: "Os documentos ficam armazenados com segurança?",
-      answer: "Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive."
-    }
-  ];
-
-  return (
-    <div className="space-y-6 max-w-6xl mx-auto pt-4">
+  const faqItems = [{
+    question: "Quais tipos de assinatura o eonSign permite?",
+    answer: "O sistema disponibiliza as assinaturas Simples, Avançada, Qualificada e Prescrição Médica, todas em observância à legislação brasileira."
+  }, {
+    question: "Sou obrigado a ter certificado digital?",
+    answer: "Não. A Lei n. 14.063/2020 prevê a assinatura eletrônica simples, que pode ser utilizada entre particulares em diversas ocasiões. No entanto, alguns negócios jurídicos específicos necessitam de certificado digital válido integrante da cadeia ICP-Brasil, que é comercializado pela eonSign."
+  }, {
+    question: "Como funciona a contagem de documentos?",
+    answer: "Cada documento enviado para assinatura conta como 1 documento no seu plano mensal. O contador é resetado no início de cada mês, permitindo que você utilize novamente todo o limite do seu plano."
+  }, {
+    question: "Posso mudar de plano depois?",
+    answer: "Sim, você pode fazer upgrade para um plano superior a qualquer momento. O novo limite de documentos será aplicado imediatamente e você será cobrado proporcionalmente pelo período restante do mês."
+  }, {
+    question: "As assinaturas digitais têm validade jurídica?",
+    answer: "Sim, todas as assinaturas realizadas através do eonSign utilizam certificação ICP-Brasil e possuem plena validade jurídica conforme a MP 2.200-2/2001 e Lei 14.063/2020. Cada assinatura é registrada com timestamp, IP e geolocalização para máxima segurança."
+  }, {
+    question: "Posso cancelar minha assinatura?",
+    answer: "Sim, você pode cancelar sua assinatura a qualquer momento através do portal de gerenciamento. O acesso aos recursos pagos permanecerá ativo até o final do período já pago, e você não será cobrado no próximo ciclo."
+  }, {
+    question: "Como funcionam as notificações por WhatsApp?",
+    answer: "Todos os signatários recebem notificações automáticas por WhatsApp e e-mail quando um documento é enviado para assinatura e quando o processo é concluído. Isso garante que nenhuma assinatura seja perdida."
+  }, {
+    question: "Existe período de teste gratuito?",
+    answer: "Sim, o plano Grátis permite que você teste a plataforma com até 5 documentos por mês sem necessidade de cartão de crédito. É perfeito para conhecer todas as funcionalidades antes de escolher um plano pago."
+  }, {
+    question: "Posso ter múltiplos usuários na minha conta?",
+    answer: "Sim! Todos os planos incluem usuários ilimitados. O administrador da conta pode convidar outros membros da equipe através das Configurações > Membros. Os membros convidados utilizam a assinatura da organização, sem necessidade de assinatura individual."
+  }, {
+    question: "Os documentos ficam armazenados com segurança?",
+    answer: "Sim, todos os documentos são armazenados com criptografia de ponta a ponta em servidores seguros. Apenas você e os signatários autorizados têm acesso aos documentos. Os documentos assinados ficam disponíveis permanentemente no Eon Drive."
+  }];
+  return <div className="space-y-6 max-w-6xl mx-auto pt-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-700">Perguntas Frequentes</h2>
+        <h2 className="font-bold text-base text-gray-500">Perguntas Frequentes</h2>
       </div>
       <div className="rounded-lg overflow-hidden">
         <Accordion type="single" collapsible className="w-full">
-          {faqItems.map((item, index) => (
-            <AccordionItem 
-              key={`item-${index + 1}`} 
-              value={`item-${index + 1}`} 
-              className={`border-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}
-            >
+          {faqItems.map((item, index) => <AccordionItem key={`item-${index + 1}`} value={`item-${index + 1}`} className={`border-0 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${index === 0 ? 'rounded-t-lg' : ''} ${index === faqItems.length - 1 ? 'rounded-b-lg' : ''}`}>
               <AccordionTrigger className="text-left text-sm text-gray-600 justify-start [&>svg]:ml-auto px-4 hover:no-underline">
                 {item.question}
               </AccordionTrigger>
               <AccordionContent className="text-left px-4 text-sm text-gray-500">
                 {item.answer}
               </AccordionContent>
-            </AccordionItem>
-          ))}
+            </AccordionItem>)}
         </Accordion>
       </div>
-    </div>
-  );
+    </div>;
 }
-
 export function SubscriptionTab() {
   const [subscription, setSubscription] = useState<any>(null);
   const [usage, setUsage] = useState<{
@@ -306,28 +228,32 @@ export function SubscriptionTab() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingCheckout, setProcessingCheckout] = useState(false);
-
   useEffect(() => {
     loadSubscriptionData();
   }, []);
-
   const loadSubscriptionData = async () => {
     try {
       const {
-        data: { user },
+        data: {
+          user
+        }
       } = await supabase.auth.getUser();
       if (!user) return;
 
       // Load subscription
-      const { data: subData } = await supabase.from("user_subscriptions").select("*").eq("user_id", user.id).single();
+      const {
+        data: subData
+      } = await supabase.from("user_subscriptions").select("*").eq("user_id", user.id).single();
       setSubscription(subData);
 
       // Load usage
-      const { data: limitData } = await supabase.functions.invoke("check-document-limit");
+      const {
+        data: limitData
+      } = await supabase.functions.invoke("check-document-limit");
       if (limitData) {
         setUsage({
           current: limitData.current,
-          limit: limitData.limit,
+          limit: limitData.limit
         });
       }
     } catch (error) {
@@ -336,7 +262,6 @@ export function SubscriptionTab() {
       setLoading(false);
     }
   };
-
   const handleUpgrade = async (tier: (typeof SUBSCRIPTION_TIERS)[0]) => {
     if (tier.priceId === "free") {
       toast.info("Você já está no plano gratuito");
@@ -346,25 +271,28 @@ export function SubscriptionTab() {
     try {
       // Get user email and organization name
       const {
-        data: { user },
+        data: {
+          user
+        }
       } = await supabase.auth.getUser();
       if (!user?.email) {
         throw new Error("Email do usuário não encontrado");
       }
-      const { data: companyData } = await supabase
-        .from("company_settings")
-        .select("company_name")
-        .eq("user_id", user.id)
-        .single();
-      const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
+      const {
+        data: companyData
+      } = await supabase.from("company_settings").select("company_name").eq("user_id", user.id).single();
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
           priceId: tier.priceId,
           tierName: tier.name,
           documentLimit: tier.limit,
           email: user.email,
           organizationName: companyData?.company_name || "Organização",
-          userId: user.id,
-        },
+          userId: user.id
+        }
       });
       if (error) throw error;
       if (data.url) {
@@ -377,10 +305,12 @@ export function SubscriptionTab() {
       setProcessingCheckout(false);
     }
   };
-
   const handleManageSubscription = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke("create-stripe-portal");
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("create-stripe-portal");
       if (error) throw error;
       if (data.url) {
         window.open(data.url, "_blank");
@@ -390,48 +320,42 @@ export function SubscriptionTab() {
       toast.error(error.message || "Erro ao abrir portal de gerenciamento");
     }
   };
-
   const getStatusBadge = (status: string) => {
-    const variants: Record<
-      string,
-      {
-        variant: "default" | "secondary" | "destructive";
-        label: string;
-      }
-    > = {
+    const variants: Record<string, {
+      variant: "default" | "secondary" | "destructive";
+      label: string;
+    }> = {
       active: {
         variant: "default",
-        label: "Ativo",
+        label: "Ativo"
       },
       trialing: {
         variant: "secondary",
-        label: "Teste",
+        label: "Teste"
       },
       past_due: {
         variant: "destructive",
-        label: "Vencido",
+        label: "Vencido"
       },
       canceled: {
         variant: "destructive",
-        label: "Cancelado",
-      },
+        label: "Cancelado"
+      }
     };
     const config = variants[status] || {
       variant: "secondary",
-      label: status,
+      label: status
     };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
-
   if (loading) {
     return <LoadingSpinner />;
   }
 
   // User has active tier
   if (subscription && subscription.status === "active") {
-    const usagePercent = usage ? (usage.current / subscription.document_limit) * 100 : 0;
-    return (
-      <div className="space-y-10">
+    const usagePercent = usage ? usage.current / subscription.document_limit * 100 : 0;
+    return <div className="space-y-10">
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {/* Card 1: Plano Atual */}
@@ -442,11 +366,7 @@ export function SubscriptionTab() {
                 {getStatusBadge(subscription.status)}
               </div>
               <p className="text-xl font-bold text-gray-900 mb-1">{subscription.plan_name}</p>
-              <Button
-                onClick={handleManageSubscription}
-                variant="link"
-                className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900"
-              >
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-gray-600 hover:text-gray-900">
                 Extrato de Pagamentos
               </Button>
             </CardContent>
@@ -457,11 +377,7 @@ export function SubscriptionTab() {
             <CardContent className="pt-6">
               <p className="text-sm text-gray-600 mb-2">Valor</p>
               <p className="text-xl font-bold text-gray-900">
-                {SUBSCRIPTION_TIERS.find((t) => t.name === subscription?.plan_name)?.price
-                  ? `R$ ${SUBSCRIPTION_TIERS.find((t) => t.name === subscription?.plan_name)
-                      ?.price.toFixed(2)
-                      .replace(".", ",")}`
-                  : "R$ 0,00"}
+                {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace(".", ",")}` : "R$ 0,00"}
               </p>
               <p className="text-xs text-gray-500 mt-1">por mês</p>
             </CardContent>
@@ -472,13 +388,11 @@ export function SubscriptionTab() {
             <CardContent className="pt-6">
               <p className="text-sm text-gray-600 mb-2">Renovação</p>
               <p className="text-xl font-bold text-gray-900">
-                {subscription?.current_period_end
-                  ? new Date(subscription.current_period_end).toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })
-                  : "-"}
+                {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+              }) : "-"}
               </p>
             </CardContent>
           </Card>
@@ -498,22 +412,16 @@ export function SubscriptionTab() {
 
         {/* Comparison Table */}
         <div className="pt-4">
-          <ComparisonTable
-            currentPlanLimit={subscription.document_limit}
-            processingCheckout={processingCheckout}
-            onUpgrade={handleUpgrade}
-          />
+          <ComparisonTable currentPlanLimit={subscription.document_limit} processingCheckout={processingCheckout} onUpgrade={handleUpgrade} />
         </div>
 
         {/* FAQ */}
         <FAQSection />
-      </div>
-    );
+      </div>;
   }
 
   // User on free tier - show all paid tiers
-  return (
-    <div className="space-y-10">
+  return <div className="space-y-10">
       {/* Grid com 4 cards de informação */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {/* Card 1: Plano Atual */}
@@ -555,20 +463,14 @@ export function SubscriptionTab() {
           <CardContent className="pt-6">
             <p className="text-sm text-gray-600 mb-2">Consumo</p>
             <p className="text-xl font-bold mb-3 text-gray-600">{usage?.current || 0} / 5</p>
-            <Progress value={((usage?.current || 0) / 5) * 100} className="h-2 bg-gray-300" />
-            {(usage?.current || 0) >= 4 && (
-              <p className="text-xs text-yellow-600 font-medium mt-2">Próximo do limite</p>
-            )}
+            <Progress value={(usage?.current || 0) / 5 * 100} className="h-2 bg-gray-300" />
+            {(usage?.current || 0) >= 4 && <p className="text-xs text-yellow-600 font-medium mt-2">Próximo do limite</p>}
           </CardContent>
         </Card>
       </div>
 
       {/* Comparison Table */}
-      <ComparisonTable
-        isFreeTier={true}
-        processingCheckout={processingCheckout}
-        onUpgrade={handleUpgrade}
-      />
+      <ComparisonTable isFreeTier={true} processingCheckout={processingCheckout} onUpgrade={handleUpgrade} />
 
       {/* FAQ */}
       <FAQSection />
@@ -580,6 +482,5 @@ export function SubscriptionTab() {
           © {new Date().getFullYear()} Eon Tecnologia. Todos os direitos reservados.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 }
