@@ -7,10 +7,10 @@ export const UploadDialog = () => {
   return (
     <Button 
       onClick={() => navigate("/novo-documento")} 
-      className="bg-gray-200 hover:bg-gray-300 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full"
+      className="bg-secondary hover:bg-secondary/80 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full"
     >
-      <Upload className="w-5 h-5 md:mr-2 text-gray-600" />
-      <span className="hidden md:inline text-gray-600">Documento</span>
+      <Upload className="w-5 h-5 md:mr-2 text-muted-foreground" />
+      <span className="hidden md:inline text-muted-foreground">Documento</span>
     </Button>
   );
 };
