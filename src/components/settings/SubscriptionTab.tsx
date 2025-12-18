@@ -66,13 +66,39 @@ interface PlansCarouselProps {
 }
 
 function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout, onUpgrade }: PlansCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    align: "center", 
+    slidesToScroll: 1, 
+    containScroll: "trimSnaps",
+    dragFree: true 
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  // Find current plan index
+  const currentPlanIndex = tiers.findIndex(tier => 
+    isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit
+  );
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  // Handle mouse wheel scroll
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    const container = emblaApi.rootNode();
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaX !== 0 || e.deltaY !== 0) {
+        emblaApi.scrollTo(emblaApi.selectedScrollSnap() + (e.deltaX > 0 || e.deltaY > 0 ? 1 : -1));
+      }
+    };
+    
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
   }, [emblaApi]);
 
   useEffect(() => {
@@ -80,10 +106,16 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
     setScrollSnaps(emblaApi.scrollSnapList());
     emblaApi.on("select", onSelect);
     onSelect();
+    
+    // Scroll to current plan on init
+    if (currentPlanIndex >= 0) {
+      emblaApi.scrollTo(currentPlanIndex, true);
+    }
+    
     return () => {
       emblaApi.off("select", onSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, onSelect, currentPlanIndex]);
 
   const scrollTo = useCallback((index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
@@ -188,7 +220,7 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
                     <Button
                       onClick={() => onUpgrade(tier)}
                       disabled={processingCheckout || isCurrentPlan}
-                      className={isCurrentPlan ? "w-full" : "w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"}
+                      className={isCurrentPlan ? "w-full" : "w-full bg-blue-700 hover:bg-blue-700 text-white"}
                       variant={isCurrentPlan ? "outline" : undefined}
                     >
                       {processingCheckout ? (
