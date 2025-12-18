@@ -876,7 +876,7 @@ export const DocumentsTable = ({
                               {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                             </Badge>
                           ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                            <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
+                            <Badge variant="outline" className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
                               {signatureModeConfig[doc.signatureMode].label}
                             </Badge>
                           ) : null}
@@ -1187,7 +1187,7 @@ export const DocumentsTable = ({
                       {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                     </Badge>
                   ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                    <Badge className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
+                    <Badge variant="outline" className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
                       {signatureModeConfig[doc.signatureMode].label}
                     </Badge>
                   ) : null}
