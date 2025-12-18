@@ -242,12 +242,12 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
       </div>
       {/* Dots navigation */}
       <div className="flex justify-center gap-2 mt-6">
-        {scrollSnaps.map((_, index) => (
+        {tiers.map((_, index) => (
           <button
             key={index}
             onClick={() => scrollTo(index)}
-            className={`w-2 h-2 rounded-full transition-colors ${
-              index === selectedIndex ? "bg-gray-600" : "bg-gray-300"
+            className={`h-2 rounded-full transition-all duration-300 ${
+              index === selectedIndex ? "bg-blue-700 w-4" : "bg-gray-300 w-2"
             }`}
           />
         ))}
