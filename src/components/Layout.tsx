@@ -11,11 +11,8 @@ export const Layout = ({
   // Monitor WhatsApp failures in real-time
   useWhatsAppFailureNotifications();
   return <>
-      {/* Fundo contrastante para mostrar bordas arredondadas do menu mobile */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-card z-40 md:hidden" />
-      
       {/* Mobile Navigation */}
-      <MobileNav className="rounded-2xl" />
+      <MobileNav />
 
       {/* Desktop Layout with Sidebar */}
       <SidebarProvider defaultOpen={false}>
