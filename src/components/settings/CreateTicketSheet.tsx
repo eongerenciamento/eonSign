@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, X, FileVideo, Image as ImageIcon } from "lucide-react";
+import { Upload, X, FileVideo, Image as ImageIcon, Plus } from "lucide-react";
 
 const ticketFormSchema = z.object({
   title: z.string().min(5, "O título deve ter no mínimo 5 caracteres").max(100, "O título deve ter no máximo 100 caracteres"),
@@ -158,8 +158,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="bg-gradient-to-r from-[#273d60] to-[#001f3f] text-white hover:opacity-90 font-normal rounded-full">
-          Abrir Novo Ticket
+        <Button className="bg-gray-100 text-gray-700 hover:bg-gray-100 hover:text-gray-700 font-normal rounded-full">
+          <Plus className="w-4 h-4 mr-2" />
+          Novo ticket
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-[540px] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
