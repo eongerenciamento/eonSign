@@ -173,9 +173,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       >
         <SheetHeader>
           <SheetTitle>Abrir Novo Ticket</SheetTitle>
-          <SheetDescription>
-            Preencha o formulário para novo chamado. Nossa equipe responderá em breve.
-          </SheetDescription>
+          <SheetDescription>Preencha o formulário para novo chamado.</SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
