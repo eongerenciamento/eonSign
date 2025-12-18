@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Lock, Upload, LogOut, Check, Eye, EyeOff, X } from "lucide-react";
+import { Upload, LogOut, Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ export function UserProfileSheet({
   const [email, setEmail] = useState(userEmail);
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState(userAvatar);
+  const [organizationName, setOrganizationName] = useState(organization);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -50,7 +51,8 @@ export function UserProfileSheet({
     setName(userName);
     setEmail(userEmail);
     setAvatar(userAvatar);
-  }, [userName, userEmail, userAvatar, open]);
+    setOrganizationName(organization);
+  }, [userName, userEmail, userAvatar, organization, open]);
 
   // Carregar telefone do company_settings
   useEffect(() => {
@@ -158,7 +160,7 @@ export function UserProfileSheet({
       data: {
         name,
         avatar_url: avatar,
-        organization,
+        organization: organizationName,
       },
     });
 
@@ -236,13 +238,13 @@ export function UserProfileSheet({
             <div className="relative">
               <Avatar className="h-12 w-12">
                 {avatar && <AvatarImage src={avatar} />}
-                <AvatarFallback className="bg-gradient-to-br from-[#274d60] to-[#001a4d] text-white text-base">
+                <AvatarFallback className={avatar ? "bg-[#273D60] text-white text-base" : "bg-gray-200 text-gray-600 text-base"}>
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <button
                 onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#274d60] to-[#001a4d] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#273D60] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
               >
                 <Upload className="w-3 h-3" />
               </button>
@@ -268,19 +270,6 @@ export function UserProfileSheet({
               onChange={(e) => setName(e.target.value)}
               className="text-base bg-gray-100 border-none"
               placeholder="Digite seu nome"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-gray-600">
-              Cargo
-            </Label>
-            <Input
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="text-base bg-gray-100 border-none"
-              placeholder="Digite seu cargo"
             />
           </div>
 
@@ -312,14 +301,39 @@ export function UserProfileSheet({
             />
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full justify-start text-gray-600 border-gray-300 hover:bg-gray-100 hover:text-gray-600"
+          <div className="space-y-2">
+            <Label htmlFor="role" className="text-gray-600">
+              Cargo
+            </Label>
+            <Input
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="text-base bg-gray-100 border-none"
+              placeholder="Ex: Gerente de Projetos"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="organization" className="text-gray-600">
+              Organização
+            </Label>
+            <Input
+              id="organization"
+              value={organizationName}
+              onChange={(e) => setOrganizationName(e.target.value)}
+              className="text-base bg-gray-100 border-none"
+              placeholder="Ex: Empresa XYZ"
+            />
+          </div>
+
+          <button
+            type="button"
             onClick={() => setShowPasswordFields(!showPasswordFields)}
+            className="text-gray-600 text-sm hover:text-gray-800 transition-colors"
           >
-            <Lock className="w-4 h-4 mr-2" />
-            Alterar senha
-          </Button>
+            Alterar Senha
+          </button>
 
           {showPasswordFields && (
             <div className="space-y-4 pt-2">
@@ -407,24 +421,19 @@ export function UserProfileSheet({
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          <Button
-            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
+        <div className="flex items-center justify-center gap-8 mt-8">
+          <button
+            type="button"
             onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
           >
-            <LogOut className="w-4 h-4 mr-2" />
+            <LogOut className="w-4 h-4" />
             Sair
-          </Button>
+          </button>
+          
           <Button
-            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button
-            className="bg-[#273d60] text-white hover:bg-[#273d60]/90"
             onClick={handleSave}
+            className="bg-gray-200 text-gray-600 hover:bg-gray-300 px-8"
           >
             <Check className="w-4 h-4 mr-2" />
             Salvar
