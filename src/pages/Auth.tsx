@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -17,10 +18,28 @@ const loginSchema = z.object({
 });
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Static components moved outside Auth to prevent re-creation on every render
-const RadialGlow = () => <div className="absolute inset-0" style={{
-  background: "radial-gradient(ellipse at center, rgba(100, 150, 255, 0.3) 0%, transparent 70%)"
-}} />;
+// Animated radial glow with smooth motion
+const RadialGlow = () => (
+  <motion.div 
+    className="absolute inset-0"
+    animate={{
+      background: [
+        "radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)",
+        "radial-gradient(ellipse at 60% 60%, rgba(100, 150, 255, 0.4) 0%, transparent 70%)",
+        "radial-gradient(ellipse at 50% 45%, rgba(120, 170, 255, 0.35) 0%, transparent 70%)",
+        "radial-gradient(ellipse at 40% 55%, rgba(100, 150, 255, 0.38) 0%, transparent 70%)",
+        "radial-gradient(ellipse at 40% 40%, rgba(100, 150, 255, 0.35) 0%, transparent 70%)",
+      ],
+    }}
+    transition={{
+      duration: 8,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+    style={{ filter: "blur(40px)" }}
+  />
+);
+
 const PoweredBy = () => <div className="text-center space-y-3">
     <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" style={{
     backgroundColor: "rgba(255, 255, 255, 0.1)"
