@@ -213,19 +213,19 @@ export default function Auth() {
       backgroundColor: '#ffffff'
     }}>
         {/* Blue gradient header */}
-        <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-28" style={{
+        <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-36" style={{
         background: "linear-gradient(to bottom, #273D60, #1a2847)"
       }}>
           <RadialGlow />
           
           {/* Logo */}
-          <div className="relative z-20 flex justify-center pt-14">
+          <div className="relative z-20 flex justify-center pt-20">
             <img src={LOGO_URL} alt="Logo" className="h-16 w-auto" />
           </div>
         </div>
 
         {/* White card with form */}
-        <div className="flex-1 rounded-t-3xl -mt-6 px-6 py-5 relative z-30 flex flex-col" style={{
+        <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col" style={{
         backgroundColor: '#ffffff'
       }}>
           {/* Header */}
