@@ -129,7 +129,7 @@ export const AdminCouponsTab = () => {
                   value={newCoupon.name}
                   onChange={(e) => setNewCoupon({ ...newCoupon, name: e.target.value })}
                   placeholder="Ex: DESCONTO20"
-                  className="bg-gray-100 border-0"
+                  className="bg-secondary border-0"
                 />
               </div>
 
@@ -139,7 +139,7 @@ export const AdminCouponsTab = () => {
                   value={newCoupon.discountType}
                   onValueChange={(v) => setNewCoupon({ ...newCoupon, discountType: v })}
                 >
-                  <SelectTrigger className="bg-gray-100 border-0">
+                  <SelectTrigger className="bg-secondary border-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,7 +159,7 @@ export const AdminCouponsTab = () => {
                     value={newCoupon.percentOff}
                     onChange={(e) => setNewCoupon({ ...newCoupon, percentOff: e.target.value })}
                     placeholder="Ex: 20"
-                    className="bg-gray-100 border-0"
+                    className="bg-secondary border-0"
                   />
                 </div>
               ) : (
@@ -171,7 +171,7 @@ export const AdminCouponsTab = () => {
                     value={newCoupon.amountOff}
                     onChange={(e) => setNewCoupon({ ...newCoupon, amountOff: e.target.value })}
                     placeholder="Ex: 5000 (R$ 50,00)"
-                    className="bg-gray-100 border-0"
+                    className="bg-secondary border-0"
                   />
                 </div>
               )}
@@ -182,7 +182,7 @@ export const AdminCouponsTab = () => {
                   value={newCoupon.duration}
                   onValueChange={(v) => setNewCoupon({ ...newCoupon, duration: v })}
                 >
-                  <SelectTrigger className="bg-gray-100 border-0">
+                  <SelectTrigger className="bg-secondary border-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -202,7 +202,7 @@ export const AdminCouponsTab = () => {
                     value={newCoupon.durationInMonths}
                     onChange={(e) => setNewCoupon({ ...newCoupon, durationInMonths: e.target.value })}
                     placeholder="Ex: 3"
-                    className="bg-gray-100 border-0"
+                    className="bg-secondary border-0"
                   />
                 </div>
               )}
@@ -219,9 +219,9 @@ export const AdminCouponsTab = () => {
         </Dialog>
       </div>
 
-      <Card className="bg-white shadow-md border-0">
+      <Card className="bg-card shadow-md border-border">
         <CardHeader>
-          <CardTitle className="text-gray-700 text-base">Cupons Ativos</CardTitle>
+          <CardTitle className="text-foreground text-base">Cupons Ativos</CardTitle>
         </CardHeader>
         <CardContent>
           {coupons && coupons.length > 0 ? (
@@ -229,19 +229,19 @@ export const AdminCouponsTab = () => {
               {coupons.map((coupon) => (
                 <div
                   key={coupon.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-full ${coupon.valid ? "bg-green-100" : "bg-gray-200"}`}>
+                    <div className={`p-2 rounded-full ${coupon.valid ? "bg-green-500/20" : "bg-muted"}`}>
                       {coupon.percent_off ? (
-                        <Percent className={`w-5 h-5 ${coupon.valid ? "text-green-600" : "text-gray-500"}`} />
+                        <Percent className={`w-5 h-5 ${coupon.valid ? "text-green-400" : "text-muted-foreground"}`} />
                       ) : (
-                        <DollarSign className={`w-5 h-5 ${coupon.valid ? "text-green-600" : "text-gray-500"}`} />
+                        <DollarSign className={`w-5 h-5 ${coupon.valid ? "text-green-400" : "text-muted-foreground"}`} />
                       )}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">{coupon.name}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <p className="font-semibold text-foreground">{coupon.name}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         {coupon.percent_off ? (
                           <span>{coupon.percent_off}% de desconto</span>
                         ) : (
@@ -265,7 +265,7 @@ export const AdminCouponsTab = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyCoupon(coupon.id)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -273,7 +273,7 @@ export const AdminCouponsTab = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">Nenhum cupom encontrado</p>
+            <p className="text-muted-foreground text-center py-8">Nenhum cupom encontrado</p>
           )}
         </CardContent>
       </Card>

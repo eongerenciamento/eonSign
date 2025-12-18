@@ -817,12 +817,12 @@ const Settings = () => {
           {/* Admin Tab - Only for system admin */}
           {isSystemAdmin && <TabsContent value="admin" className="space-y-6 mt-6">
             {!adminUnlocked ? (
-              <Card className="bg-gray-100 shadow-md border-0 max-w-md mx-auto">
+              <Card className="bg-card shadow-md border-border max-w-md mx-auto">
                 <CardHeader className="text-center">
                   <div className="mx-auto w-12 h-12 bg-[#273d60] rounded-full flex items-center justify-center mb-4">
                     <Lock className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-gray-700">Área Restrita</CardTitle>
+                  <CardTitle className="text-foreground">Área Restrita</CardTitle>
                   <CardDescription>Digite a senha para acessar o painel administrativo</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -831,7 +831,7 @@ const Settings = () => {
                     placeholder="Senha de acesso"
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
-                    className="bg-gray-200 border-0"
+                    className="bg-secondary border-0"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         if (adminPassword === ADMIN_PASSWORD) {

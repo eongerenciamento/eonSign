@@ -99,10 +99,10 @@ export const AdminTicketsTab = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-      aberto: { bg: "bg-blue-100", text: "text-blue-800", label: "Aberto" },
-      em_andamento: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Em Andamento" },
-      resolvido: { bg: "bg-green-100", text: "text-green-800", label: "Resolvido" },
-      fechado: { bg: "bg-gray-100", text: "text-gray-800", label: "Fechado" },
+      aberto: { bg: "bg-blue-500/20", text: "text-blue-400", label: "Aberto" },
+      em_andamento: { bg: "bg-yellow-500/20", text: "text-yellow-400", label: "Em Andamento" },
+      resolvido: { bg: "bg-green-500/20", text: "text-green-400", label: "Resolvido" },
+      fechado: { bg: "bg-muted", text: "text-muted-foreground", label: "Fechado" },
     };
     const config = statusConfig[status] || statusConfig.aberto;
     return (
@@ -137,16 +137,16 @@ export const AdminTicketsTab = () => {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por título, email, empresa ou número..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-gray-100 border-0"
+            className="pl-10 bg-secondary border-0"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-48 bg-gray-100 border-0">
+          <SelectTrigger className="w-full md:w-48 bg-secondary border-0">
             <SelectValue placeholder="Filtrar por status" />
           </SelectTrigger>
           <SelectContent>
@@ -160,19 +160,19 @@ export const AdminTicketsTab = () => {
       </div>
 
       {/* Tickets Table */}
-      <Card className="bg-white shadow-md border-0">
+      <Card className="bg-card shadow-md border-border">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700 rounded-tl-lg">Usuário</th>
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700">Empresa</th>
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700">Título</th>
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700">Ticket</th>
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700">Data</th>
-                  <th className="text-left p-4 font-semibold text-sm text-gray-700">Status</th>
-                  <th className="text-right p-4 font-semibold text-sm text-gray-700 rounded-tr-lg">Ações</th>
+                <tr className="bg-secondary/50">
+                  <th className="text-left p-4 font-semibold text-sm text-foreground rounded-tl-lg">Usuário</th>
+                  <th className="text-left p-4 font-semibold text-sm text-foreground">Empresa</th>
+                  <th className="text-left p-4 font-semibold text-sm text-foreground">Título</th>
+                  <th className="text-left p-4 font-semibold text-sm text-foreground">Ticket</th>
+                  <th className="text-left p-4 font-semibold text-sm text-foreground">Data</th>
+                  <th className="text-left p-4 font-semibold text-sm text-foreground">Status</th>
+                  <th className="text-right p-4 font-semibold text-sm text-foreground rounded-tr-lg">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,26 +180,26 @@ export const AdminTicketsTab = () => {
                   filteredTickets.map((ticket, index) => (
                     <tr
                       key={ticket.id}
-                      className={`hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                      className={`hover:bg-secondary/30 ${index % 2 === 0 ? "bg-card" : "bg-secondary/50"}`}
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-gray-400" />
+                          <User className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-sm font-medium">{ticket.user_name}</p>
-                            <p className="text-xs text-gray-500">{ticket.user_email}</p>
+                            <p className="text-sm font-medium text-foreground">{ticket.user_name}</p>
+                            <p className="text-xs text-muted-foreground">{ticket.user_email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{ticket.company_name}</span>
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">{ticket.company_name}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-sm">{ticket.title}</td>
-                      <td className="p-4 text-sm text-gray-600">{ticket.ticket_number}</td>
-                      <td className="p-4 text-sm text-gray-600">
+                      <td className="p-4 text-sm text-foreground">{ticket.title}</td>
+                      <td className="p-4 text-sm text-muted-foreground">{ticket.ticket_number}</td>
+                      <td className="p-4 text-sm text-muted-foreground">
                         {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
                       </td>
                       <td className="p-4">
@@ -223,7 +223,7 @@ export const AdminTicketsTab = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedTicket(ticket)}
-                          className="text-gray-500 hover:text-gray-700"
+                          className="text-muted-foreground hover:text-foreground"
                         >
                           <MessageCircle className="w-4 h-4" />
                         </Button>
@@ -232,7 +232,7 @@ export const AdminTicketsTab = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-500">
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
                       Nenhum ticket encontrado
                     </td>
                   </tr>
@@ -253,7 +253,7 @@ export const AdminTicketsTab = () => {
                 <X className="w-4 h-4" />
               </Button>
             </SheetTitle>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               <p>{selectedTicket?.user_name} • {selectedTicket?.user_email}</p>
               <p>{selectedTicket?.company_name} • #{selectedTicket?.ticket_number}</p>
             </div>
@@ -265,9 +265,9 @@ export const AdminTicketsTab = () => {
               <div className="space-y-4">
                 {/* Initial description */}
                 <div className="flex justify-start">
-                  <div className="max-w-[80%] p-3 rounded-lg bg-gray-100 text-gray-800">
+                  <div className="max-w-[80%] p-3 rounded-lg bg-secondary text-foreground">
                     <p className="text-sm whitespace-pre-wrap">{selectedTicket?.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {selectedTicket && new Date(selectedTicket.created_at).toLocaleString("pt-BR")}
                     </p>
                   </div>
@@ -280,14 +280,14 @@ export const AdminTicketsTab = () => {
                       className={`max-w-[80%] p-3 rounded-lg ${
                         msg.is_admin
                           ? "bg-[#273d60] text-white"
-                          : "bg-gray-100 text-gray-800"
+                          : "bg-secondary text-foreground"
                       }`}
                     >
                       {msg.is_admin && (
                         <p className="text-xs font-medium text-blue-200 mb-1">Admin</p>
                       )}
                       <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                      <p className={`text-xs mt-1 ${msg.is_admin ? "text-blue-200" : "text-gray-500"}`}>
+                      <p className={`text-xs mt-1 ${msg.is_admin ? "text-blue-200" : "text-muted-foreground"}`}>
                         {new Date(msg.created_at).toLocaleString("pt-BR")}
                       </p>
                     </div>
@@ -297,12 +297,12 @@ export const AdminTicketsTab = () => {
             </ScrollArea>
 
             {/* Input */}
-            <div className="flex gap-2 mt-4 pt-4 border-t">
+            <div className="flex gap-2 mt-4 pt-4 border-t border-border">
               <Textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Responder como administrador..."
-                className="resize-none bg-gray-100 border-0"
+                className="resize-none bg-secondary border-0"
                 rows={2}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {

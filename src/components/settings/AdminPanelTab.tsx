@@ -46,65 +46,65 @@ export const AdminPanelTab = () => {
       title: "Total de Usuários",
       value: metrics?.totalUsers || 0,
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/20",
     },
     {
       title: "Organizações",
       value: metrics?.organizations || 0,
       icon: Building2,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      color: "text-purple-400",
+      bgColor: "bg-purple-500/20",
     },
     {
       title: "Assinaturas Ativas",
       value: metrics?.activeSubscriptions || 0,
       icon: CreditCard,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      color: "text-green-400",
+      bgColor: "bg-green-500/20",
     },
     {
       title: "Documentos Total",
       value: metrics?.totalDocuments || 0,
       icon: FileText,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      color: "text-orange-400",
+      bgColor: "bg-orange-500/20",
     },
     {
       title: "Documentos Assinados",
       value: metrics?.signedDocuments || 0,
       icon: FileCheck,
-      color: "text-teal-600",
-      bgColor: "bg-teal-100",
+      color: "text-teal-400",
+      bgColor: "bg-teal-500/20",
     },
     {
       title: "Documentos Este Mês",
       value: metrics?.documentsThisMonth || 0,
       icon: TrendingUp,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-100",
+      color: "text-indigo-400",
+      bgColor: "bg-indigo-500/20",
     },
     {
       title: "Tickets Abertos",
       value: metrics?.openTickets || 0,
       subtitle: `de ${metrics?.totalTickets || 0} total`,
       icon: Ticket,
-      color: "text-red-600",
-      bgColor: "bg-red-100",
+      color: "text-red-400",
+      bgColor: "bg-red-500/20",
     },
     {
       title: "Receita Total",
       value: `R$ ${(metrics?.totalRevenue || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
       icon: DollarSign,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-100",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/20",
     },
     {
       title: "Receita Mensal",
       value: `R$ ${(metrics?.monthlyRevenue || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
       icon: TrendingUp,
-      color: "text-cyan-600",
-      bgColor: "bg-cyan-100",
+      color: "text-cyan-400",
+      bgColor: "bg-cyan-500/20",
     },
   ];
 
@@ -112,14 +112,14 @@ export const AdminPanelTab = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((stat, index) => (
-          <Card key={index} className="bg-white shadow-md border-0">
+          <Card key={index} className="bg-card shadow-md border-border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                   {stat.subtitle && (
-                    <p className="text-xs text-gray-400">{stat.subtitle}</p>
+                    <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
                   )}
                 </div>
                 <div className={`p-3 rounded-full ${stat.bgColor}`}>
@@ -132,21 +132,21 @@ export const AdminPanelTab = () => {
       </div>
 
       {/* Subscriptions by Plan */}
-      <Card className="bg-white shadow-md border-0">
+      <Card className="bg-card shadow-md border-border">
         <CardHeader>
-          <CardTitle className="text-gray-700 text-base">Assinaturas por Plano</CardTitle>
+          <CardTitle className="text-foreground text-base">Assinaturas por Plano</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {metrics?.subscriptionsByPlan && Object.entries(metrics.subscriptionsByPlan).length > 0 ? (
               Object.entries(metrics.subscriptionsByPlan).map(([plan, count]) => (
-                <div key={plan} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium text-gray-700">{plan}</span>
-                  <span className="text-lg font-bold text-gray-800">{count}</span>
+                <div key={plan} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                  <span className="font-medium text-foreground">{plan}</span>
+                  <span className="text-lg font-bold text-foreground">{count}</span>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-center py-4">Nenhuma assinatura ativa</p>
+              <p className="text-muted-foreground text-center py-4">Nenhuma assinatura ativa</p>
             )}
           </div>
         </CardContent>
