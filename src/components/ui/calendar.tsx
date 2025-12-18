@@ -162,8 +162,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <SelectedDaysContext.Provider value={selectedDays}>
       <div className={cn(
-        "rounded-2xl bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-sm",
-        "border border-white/20 dark:border-white/10 shadow-2xl p-4 pointer-events-auto",
+        "rounded-2xl bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-sm p-4 pointer-events-auto",
         className
       )}>
         <DayPicker
@@ -189,7 +188,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             nav_button_next: "absolute right-1",
             table: "w-full border-collapse space-y-1",
             head_row: "flex",
-            head_cell: "text-gray-500 rounded-md w-10 font-medium text-[0.75rem] uppercase [&:nth-child(6)]:text-red-500 [&:nth-child(7)]:text-red-500",
+            head_cell: "text-blue-700 rounded-md w-10 font-medium text-[0.75rem] uppercase [&:nth-child(6)]:text-red-500 [&:nth-child(7)]:text-red-500",
             row: "flex w-full mt-2",
             cell: "h-10 w-10 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
             day: cn(
