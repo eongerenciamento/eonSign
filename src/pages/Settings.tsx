@@ -10,12 +10,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Shield, Lock } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { CertificateUpload } from "@/components/settings/CertificateUpload";
+import { AdminPanelTab } from "@/components/settings/AdminPanelTab";
+import { AdminCouponsTab } from "@/components/settings/AdminCouponsTab";
+import { AdminTicketsTab } from "@/components/settings/AdminTicketsTab";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,6 +75,14 @@ const Settings = () => {
     user_id: string;
   } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+
+  // Admin states
+  const SYSTEM_ADMIN_EMAIL = "marcus@mav.eng.br";
+  const ADMIN_PASSWORD = "230502";
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminSubTab, setAdminSubTab] = useState("panel");
+  const isSystemAdmin = user?.email === SYSTEM_ADMIN_EMAIL;
 
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
@@ -394,7 +405,7 @@ const Settings = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isSystemAdmin ? 'grid-cols-5' : isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="company" className="gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden md:inline">Empresa</span>
@@ -411,6 +422,10 @@ const Settings = () => {
               <MessageCircle className="h-4 w-4" />
               <span className="hidden md:inline">Suporte</span>
             </TabsTrigger>
+            {isSystemAdmin && <TabsTrigger value="admin" className="gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden md:inline">Admin</span>
+              </TabsTrigger>}
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
@@ -782,6 +797,79 @@ const Settings = () => {
               </p>
             </div>
           </TabsContent>
+
+          {/* Admin Tab - Only for system admin */}
+          {isSystemAdmin && <TabsContent value="admin" className="space-y-6 mt-6">
+            {!adminUnlocked ? (
+              <Card className="bg-gray-100 shadow-md border-0 max-w-md mx-auto">
+                <CardHeader className="text-center">
+                  <div className="mx-auto w-12 h-12 bg-[#273d60] rounded-full flex items-center justify-center mb-4">
+                    <Lock className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-gray-700">Área Restrita</CardTitle>
+                  <CardDescription>Digite a senha para acessar o painel administrativo</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input
+                    type="password"
+                    placeholder="Senha de acesso"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    className="bg-gray-200 border-0"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (adminPassword === ADMIN_PASSWORD) {
+                          setAdminUnlocked(true);
+                          toast.success("Acesso liberado!");
+                        } else {
+                          toast.error("Senha incorreta");
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (adminPassword === ADMIN_PASSWORD) {
+                        setAdminUnlocked(true);
+                        toast.success("Acesso liberado!");
+                      } else {
+                        toast.error("Senha incorreta");
+                      }
+                    }}
+                    className="w-full bg-[#273d60] hover:bg-[#273d60]/90 text-white"
+                  >
+                    Acessar
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                <Tabs value={adminSubTab} onValueChange={setAdminSubTab}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="panel">Painel</TabsTrigger>
+                    <TabsTrigger value="coupons">Cupons</TabsTrigger>
+                    <TabsTrigger value="tickets">Tickets</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="panel" className="mt-6">
+                    <AdminPanelTab />
+                  </TabsContent>
+                  <TabsContent value="coupons" className="mt-6">
+                    <AdminCouponsTab />
+                  </TabsContent>
+                  <TabsContent value="tickets" className="mt-6">
+                    <AdminTicketsTab />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+            {/* Footer */}
+            <div className="flex flex-col items-center pt-8 pb-4">
+              <p className="text-sm text-gray-500">eonSign</p>
+              <p className="text-xs text-gray-400">
+                Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
+              </p>
+            </div>
+          </TabsContent>}
           </Tabs>
         </div>
       </div>
