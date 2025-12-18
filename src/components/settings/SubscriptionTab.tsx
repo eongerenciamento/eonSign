@@ -74,6 +74,7 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [scrollProgress, setScrollProgress] = useState<number[]>([]);
 
   // Find current plan index
   const currentPlanIndex = tiers.findIndex(tier => 
@@ -83,6 +84,18 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  // Calculate scale for each slide based on distance from center
+  const updateScrollProgress = useCallback(() => {
+    if (!emblaApi) return;
+    const scrollSnaps = emblaApi.scrollSnapList();
+    const scrollProgress = emblaApi.scrollProgress();
+    const progress = scrollSnaps.map((snap, index) => {
+      const distance = Math.abs(scrollProgress - snap);
+      return Math.max(0, 1 - distance * 2);
+    });
+    setScrollProgress(progress);
   }, [emblaApi]);
 
   // Handle mouse wheel scroll
@@ -105,7 +118,9 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
     if (!emblaApi) return;
     setScrollSnaps(emblaApi.scrollSnapList());
     emblaApi.on("select", onSelect);
+    emblaApi.on("scroll", updateScrollProgress);
     onSelect();
+    updateScrollProgress();
     
     // Scroll to current plan on init
     if (currentPlanIndex >= 0) {
@@ -114,8 +129,9 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
     
     return () => {
       emblaApi.off("select", onSelect);
+      emblaApi.off("scroll", updateScrollProgress);
     };
-  }, [emblaApi, onSelect, currentPlanIndex]);
+  }, [emblaApi, onSelect, currentPlanIndex, updateScrollProgress]);
 
   const scrollTo = useCallback((index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
@@ -126,16 +142,26 @@ function PlansCarousel({ tiers, currentPlanLimit, isFreeTier, processingCheckout
       <h3 className="text-lg font-semibold mb-6">Planos Disponíveis</h3>
       <div className="overflow-hidden max-w-6xl mx-auto" ref={emblaRef}>
         <div className="flex gap-4">
-          {tiers.map((tier) => {
+          {tiers.map((tier, index) => {
             const isCurrentPlan = isFreeTier 
               ? tier.priceId === "free" 
               : tier.limit === currentPlanLimit;
             const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
+            const isCentered = index === selectedIndex;
+            const scale = 0.9 + (scrollProgress[index] || 0) * 0.1;
+            const opacity = 0.6 + (scrollProgress[index] || 0) * 0.4;
 
             return (
-              <div key={tier.name} className="flex-shrink-0 w-[320px]">
+              <div 
+                key={tier.name} 
+                className="flex-shrink-0 w-[320px] transition-all duration-300 ease-out"
+                style={{ 
+                  transform: `scale(${scale})`,
+                  opacity: opacity
+                }}
+              >
                 <Card
-                  className={`relative pt-8 h-full ${isCurrentPlan ? "border-primary shadow-lg" : ""}`}
+                  className={`relative pt-8 h-full transition-shadow duration-300 ${isCurrentPlan ? "border-primary shadow-lg" : ""} ${isCentered ? "shadow-xl" : ""}`}
                 >
                   {isCurrentPlan && (
                     <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
