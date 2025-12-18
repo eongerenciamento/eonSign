@@ -475,48 +475,6 @@ const Reports = () => {
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="p-6 bg-gray-100 border-0">
-            <h3 className="font-semibold mb-4 text-gray-600 text-base">Documentos por Status</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-transparent border border-green-700 text-green-700 hover:bg-transparent">Assinados</Badge>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">62.8%</span>
-                  <span className="text-sm text-gray-600 font-semibold">98</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent">Em Andamento</Badge>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">28.8%</span>
-                  <span className="text-sm text-gray-600 font-semibold">45</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent">Pendente</Badge>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">15.2%</span>
-                  <span className="text-sm text-gray-600 font-semibold">24</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-transparent border border-red-700 text-red-700 hover:bg-transparent">Expirados</Badge>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">8.4%</span>
-                  <span className="text-sm text-gray-600 font-semibold">13</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-gray-100 border-0">
             <h3 className="font-semibold mb-4 text-base text-gray-600">Documentos por Status</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {[{
@@ -559,52 +517,51 @@ const Reports = () => {
               ))}
             </div>
           </Card>
-        </div>
 
-        {/* Top Signatários Chart */}
-        <Card className="p-6 bg-gray-100 border-0">
-          <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
-          <div className="flex items-end justify-between gap-4 pt-4">
-            {[{
-                label: "João Silva",
-                count: 24,
-                percentage: 100,
-                color: "bg-blue-500"
-              }, {
-                label: "Maria Santos",
-                count: 19,
-                percentage: 79,
-                color: "bg-blue-400"
-              }, {
-                label: "Pedro Costa",
-                count: 15,
-                percentage: 63,
-                color: "bg-blue-300"
-              }, {
-                label: "Ana Oliveira",
-                count: 12,
-                percentage: 50,
-                color: "bg-blue-200"
-              }, {
-                label: "Carlos Lima",
-                count: 8,
-                percentage: 33,
-                color: "bg-blue-100"
-              }].map(item => (
-              <div key={item.label} className="flex flex-col items-center flex-1">
-                <span className="text-lg font-bold text-gray-700">{item.count}</span>
-                <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
-                <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
-                  <div 
-                    className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
-                    style={{ height: `${Math.max(item.percentage, 0)}%` }}
-                  />
+          <Card className="p-6 bg-gray-100 border-0">
+            <h3 className="font-semibold mb-4 text-base text-gray-600">Top Signatários</h3>
+            <div className="flex items-end justify-between gap-4 pt-4">
+              {[{
+                  label: "João Silva",
+                  count: 24,
+                  percentage: 100,
+                  color: "bg-blue-500"
+                }, {
+                  label: "Maria Santos",
+                  count: 19,
+                  percentage: 79,
+                  color: "bg-blue-400"
+                }, {
+                  label: "Pedro Costa",
+                  count: 15,
+                  percentage: 63,
+                  color: "bg-blue-300"
+                }, {
+                  label: "Ana Oliveira",
+                  count: 12,
+                  percentage: 50,
+                  color: "bg-blue-200"
+                }, {
+                  label: "Carlos Lima",
+                  count: 8,
+                  percentage: 33,
+                  color: "bg-blue-100"
+                }].map(item => (
+                <div key={item.label} className="flex flex-col items-center flex-1">
+                  <span className="text-lg font-bold text-gray-700">{item.count}</span>
+                  <span className="text-xs text-gray-500 mb-2">{item.percentage}%</span>
+                  <div className="w-full h-24 bg-gray-200 rounded-lg relative overflow-hidden">
+                    <div 
+                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-300`}
+                      style={{ height: `${Math.max(item.percentage, 0)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 mt-2 text-center truncate w-full">{item.label}</span>
                 </div>
-                <span className="text-xs text-gray-500 mt-2 text-center truncate w-full">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
 
         {/* Activity Timeline */}
         <Card className="p-6 bg-gray-100 border-0">
