@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown } from "lucide-react";
+import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown, Check, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -162,6 +162,9 @@ export const DocumentsTable = ({
 
   // State for expanded folders in dropdown
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  
+  // State for open folder popovers (keyed by document id)
+  const [openFolderPopovers, setOpenFolderPopovers] = useState<Record<string, boolean>>({});
 
   // Toggle folder expansion
   const toggleFolderExpansion = (folderId: string, e: React.MouseEvent) => {
@@ -176,6 +179,12 @@ export const DocumentsTable = ({
       }
       return newSet;
     });
+  };
+
+  // Handle folder selection (move document to folder)
+  const handleFolderSelect = (documentId: string, folderId: string) => {
+    handleMoveToFolder(documentId, folderId);
+    setOpenFolderPopovers(prev => ({ ...prev, [documentId]: false }));
   };
 
   // Check if folder has children
@@ -956,39 +965,58 @@ export const DocumentsTable = ({
                           </svg>
                         </div>
                       </div>
-                      {showFolderActions && folders && folders.length > 0 && <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
-                          <SelectTrigger className="w-[180px] bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70">
-                            <SelectValue placeholder="Selecionar pasta" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                      {showFolderActions && folders && folders.length > 0 && (
+                        <Popover 
+                          open={openFolderPopovers[doc.id] || false} 
+                          onOpenChange={(open) => setOpenFolderPopovers(prev => ({ ...prev, [doc.id]: open }))}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              className="w-[180px] justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700"
+                            >
+                              <span className="flex items-center gap-2">
+                                <Folder className="w-4 h-4" />
+                                Selecionar pasta
+                              </span>
+                              <ChevronDown className="w-4 h-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[200px] p-1 bg-gray-200/70 backdrop-blur-sm border-none z-50">
                             {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                              <SelectItem 
-                                key={folder.id} 
-                                value={folder.id} 
-                                className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
+                              <div 
+                                key={folder.id}
+                                className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-300/50"
                                 style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                               >
-                                <div className="flex items-center gap-1">
-                                  {hasChildren && (
-                                    <span 
-                                      onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                      className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
-                                    >
-                                      {expandedFolders.has(folder.id) ? (
-                                        <ChevronDown className="w-3 h-3" />
-                                      ) : (
-                                        <ChevronRight className="w-3 h-3" />
-                                      )}
-                                    </span>
-                                  )}
-                                  {!hasChildren && level === 0 && <span className="w-4" />}
-                                  {level > 0 && "└─ "}
-                                  {folder.name}
-                                </div>
-                              </SelectItem>
+                                {hasChildren ? (
+                                  <span 
+                                    onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                                    className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                                  >
+                                    {expandedFolders.has(folder.id) ? (
+                                      <ChevronDown className="w-3 h-3" />
+                                    ) : (
+                                      <ChevronRight className="w-3 h-3" />
+                                    )}
+                                  </span>
+                                ) : (
+                                  <span className="w-4" />
+                                )}
+                                {level > 0 && <span className="text-gray-400 mr-1">└─</span>}
+                                <span className="flex-1 cursor-default">{folder.name}</span>
+                                <span 
+                                  onClick={() => handleFolderSelect(doc.id, folder.id)}
+                                  className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                                  title="Mover para esta pasta"
+                                >
+                                  <Check className="w-3 h-3 text-gray-500" />
+                                </span>
+                              </div>
                             ))}
-                          </SelectContent>
-                        </Select>}
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -1268,39 +1296,59 @@ export const DocumentsTable = ({
               {/* Folder selection */}
               {showFolderActions && folders && folders.length > 0 && (
                 <div className="pt-2">
-                  <Select value={doc.folderId || ""} onValueChange={value => handleMoveToFolder(doc.id, value)}>
-                    <SelectTrigger className="w-full hover:bg-gray-50">
-                      <SelectValue placeholder="Selecionar pasta" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-200/70 backdrop-blur-sm border-none z-50">
+                  <Popover 
+                    open={openFolderPopovers[`mobile-${doc.id}`] || false} 
+                    onOpenChange={(open) => setOpenFolderPopovers(prev => ({ ...prev, [`mobile-${doc.id}`]: open }))}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-between bg-gray-200/50 backdrop-blur-sm border-none hover:bg-gray-200/70 text-gray-700"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Folder className="w-4 h-4" />
+                          Selecionar pasta
+                        </span>
+                        <ChevronDown className="w-4 h-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-1 bg-gray-200/70 backdrop-blur-sm border-none z-50">
                       {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                        <SelectItem 
-                          key={folder.id} 
-                          value={folder.id} 
-                          className="hover:bg-gray-300/50 focus:bg-gray-300/50 text-gray-700"
+                        <div 
+                          key={folder.id}
+                          className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-300/50"
                           style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
                         >
-                          <div className="flex items-center gap-1">
-                            {hasChildren && (
-                              <span 
-                                onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
-                              >
-                                {expandedFolders.has(folder.id) ? (
-                                  <ChevronDown className="w-3 h-3" />
-                                ) : (
-                                  <ChevronRight className="w-3 h-3" />
-                                )}
-                              </span>
-                            )}
-                            {!hasChildren && level === 0 && <span className="w-4" />}
-                            {level > 0 && "└─ "}
-                            {folder.name}
-                          </div>
-                        </SelectItem>
+                          {hasChildren ? (
+                            <span 
+                              onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                              className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                            >
+                              {expandedFolders.has(folder.id) ? (
+                                <ChevronDown className="w-3 h-3" />
+                              ) : (
+                                <ChevronRight className="w-3 h-3" />
+                              )}
+                            </span>
+                          ) : (
+                            <span className="w-4" />
+                          )}
+                          {level > 0 && <span className="text-gray-400 mr-1">└─</span>}
+                          <span className="flex-1 cursor-default">{folder.name}</span>
+                          <span 
+                            onClick={() => {
+                              handleFolderSelect(doc.id, folder.id);
+                              setOpenFolderPopovers(prev => ({ ...prev, [`mobile-${doc.id}`]: false }));
+                            }}
+                            className="cursor-pointer hover:bg-gray-400/30 rounded p-0.5"
+                            title="Mover para esta pasta"
+                          >
+                            <Check className="w-3 h-3 text-gray-500" />
+                          </span>
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
             </div>;
