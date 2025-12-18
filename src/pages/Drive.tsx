@@ -434,17 +434,17 @@ const Drive = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedFolder(null)}
-              className="text-sm text-gray-700 hover:underline"
+              className="text-sm text-blue-700 hover:underline"
             >
               Drive
             </button>
-            {selectedFolder && getBreadcrumbPath().map((folder, index) => (
+            {selectedFolder && getBreadcrumbPath().map((folder, index, arr) => (
               <button
                 key={folder.id}
                 onClick={() => setSelectedFolder(folder.id)}
                 className={cn(
                   "text-sm hover:underline",
-                  index === 0 ? "text-gray-500" : "text-gray-400"
+                  index === arr.length - 1 ? "text-gray-500" : "text-blue-700"
                 )}
               >
                 {folder.name}
