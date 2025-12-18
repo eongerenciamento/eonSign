@@ -288,7 +288,7 @@ const Documents = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar documentos..."
-                    className="pl-10"
+                    className="pl-10 border-none bg-gray-100"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -299,7 +299,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateFrom && "text-muted-foreground"
                         )}
                       >
@@ -322,7 +322,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateTo && "text-muted-foreground"
                         )}
                       >
@@ -343,7 +343,7 @@ const Documents = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
@@ -353,7 +353,7 @@ const Documents = () => {
                     </SelectContent>
                   </Select>
                   <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Modo de Assinatura" />
                     </SelectTrigger>
                     <SelectContent>
@@ -386,7 +386,7 @@ const Documents = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar documentos..."
-                    className="pl-10"
+                    className="pl-10 border-none bg-gray-100"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -397,7 +397,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateFrom && "text-muted-foreground"
                         )}
                       >
@@ -420,7 +420,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateTo && "text-muted-foreground"
                         )}
                       >
@@ -441,7 +441,7 @@ const Documents = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
@@ -451,7 +451,7 @@ const Documents = () => {
                     </SelectContent>
                   </Select>
                   <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Modo de Assinatura" />
                     </SelectTrigger>
                     <SelectContent>
@@ -477,7 +477,7 @@ const Documents = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar documentos..."
-                    className="pl-10"
+                    className="pl-10 border-none bg-gray-100"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -488,7 +488,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateFrom && "text-muted-foreground"
                         )}
                       >
@@ -511,7 +511,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal",
+                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
                           !dateTo && "text-muted-foreground"
                         )}
                       >
@@ -532,7 +532,7 @@ const Documents = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
@@ -542,7 +542,7 @@ const Documents = () => {
                     </SelectContent>
                   </Select>
                   <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none bg-gray-100">
                       <SelectValue placeholder="Modo de Assinatura" />
                     </SelectTrigger>
                     <SelectContent>
