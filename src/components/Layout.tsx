@@ -27,7 +27,7 @@ export const Layout = ({ children }: LayoutProps) => {
           {/* Main Content */}
           <div className="flex-1 flex flex-col w-full bg-gradient-to-b from-[#273d60] to-[#001a4d]">
             {/* Content Area */}
-            <main className="flex-1 overflow-auto pt-16 md:pt-0 md:p-4">
+            <main className="flex-1 overflow-auto pt-16 md:pt-4 md:pb-4 md:pr-4">
               <div className="bg-white md:rounded-2xl min-h-full overflow-auto">
                 {children}
               </div>
