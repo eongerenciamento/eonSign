@@ -140,7 +140,7 @@ export const FoldersList = ({
             onDragOver={(e) => handleDragOver(e, folder.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, folder.id)}
-            className={`flex items-center justify-between p-3 cursor-pointer hover:bg-accent transition-colors group ${
+            className={`flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors group ${
               index % 2 === 0 ? "bg-card" : "bg-secondary/50"
             } ${dragOverId === folder.id ? "border-2 border-dashed border-primary bg-primary/10" : ""}`}
             onClick={() => onFolderClick(folder.id)}
@@ -169,7 +169,7 @@ export const FoldersList = ({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent focus-visible:ring-0 text-muted-foreground hover:text-foreground">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -179,7 +179,7 @@ export const FoldersList = ({
                     e.stopPropagation();
                     onRenameFolder(folder);
                   }}
-                  className="hover:bg-accent focus:bg-accent"
+                  className="hover:bg-muted focus:bg-muted"
                 >
                   <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
@@ -190,14 +190,14 @@ export const FoldersList = ({
                       e.stopPropagation();
                       handleOpenMoveSheet(folder.id);
                     }}
-                    className="hover:bg-accent focus:bg-accent"
+                    className="hover:bg-muted focus:bg-muted"
                   >
                     <Move className="w-4 h-4 mr-2" />
                     Mover
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive hover:bg-accent focus:bg-accent"
+                  className="text-destructive hover:bg-muted focus:bg-muted"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
@@ -235,7 +235,7 @@ export const FoldersList = ({
           onDragOver={(e) => handleDragOver(e, folder.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, folder.id)}
-          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative border-border ${
+          className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors group relative border-border ${
             dragOverId === folder.id ? "border-2 border-dashed border-primary bg-primary/10" : ""
           }`}
           onClick={() => onFolderClick(folder.id)}
@@ -260,7 +260,7 @@ export const FoldersList = ({
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent active:bg-transparent focus:bg-transparent focus-visible:ring-0 text-muted-foreground hover:text-foreground">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -270,7 +270,7 @@ export const FoldersList = ({
                     e.stopPropagation();
                     onRenameFolder(folder);
                   }}
-                  className="hover:bg-accent focus:bg-accent"
+                  className="hover:bg-muted focus:bg-muted"
                 >
                   <PenSquare className="w-4 h-4 mr-2" />
                   Renomear
@@ -281,14 +281,14 @@ export const FoldersList = ({
                       e.stopPropagation();
                       handleOpenMoveSheet(folder.id);
                     }}
-                    className="hover:bg-accent focus:bg-accent"
+                    className="hover:bg-muted focus:bg-muted"
                   >
                     <Move className="w-4 h-4 mr-2" />
                     Mover
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive hover:bg-accent focus:bg-accent"
+                  className="text-destructive hover:bg-muted focus:bg-muted"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
