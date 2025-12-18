@@ -411,7 +411,7 @@ const Settings = () => {
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
-            <Card>
+            <Card className="bg-gray-100 shadow-md border-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-gray-600 text-base">Informações da Empresa</CardTitle>
                 

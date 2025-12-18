@@ -183,7 +183,7 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
   const expirationStatus = getExpirationStatus();
 
   return (
-    <Card className="mt-6">
+    <Card className="mt-6 bg-gray-100 shadow-md border-0">
       <CardHeader>
         <CardTitle className="text-gray-600 text-base flex items-center gap-2">
           <Shield className="w-5 h-5" />
