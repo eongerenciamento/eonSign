@@ -168,11 +168,11 @@ export function ContactsTab() {
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={resetForm}>
+                <Button variant="cancel" size="sm" onClick={resetForm}>
                   <X className="w-4 h-4 mr-1" />
                   Cancelar
                 </Button>
-                <Button size="sm" onClick={handleSave} className="bg-[#273d60] hover:bg-[#273d60]/90">
+                <Button variant="confirm" size="sm" onClick={handleSave}>
                   <Check className="w-4 h-4 mr-1" />
                   Salvar
                 </Button>

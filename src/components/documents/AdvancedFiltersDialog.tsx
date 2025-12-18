@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, X, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -160,10 +160,14 @@ export const AdvancedFiltersDialog = ({ onApplyFilters }: AdvancedFiltersDialogP
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="cancel" onClick={handleReset}>
+            <X className="w-4 h-4 mr-1" />
             Limpar Filtros
           </Button>
-          <Button onClick={handleApply}>Aplicar Filtros</Button>
+          <Button variant="confirm" onClick={handleApply}>
+            <Check className="w-4 h-4 mr-1" />
+            Aplicar Filtros
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

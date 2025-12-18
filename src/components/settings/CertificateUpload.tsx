@@ -305,7 +305,8 @@ export function CertificateUpload({ userId, certificateData, onCertificateChange
                 )}
 
                 <Button
-                  className="w-full bg-[#273d60] hover:bg-[#273d60]/90 gap-2"
+                  variant="confirm"
+                  className="w-full gap-2"
                   onClick={handleParseAndUpload}
                   disabled={isUploading || !password}
                 >
