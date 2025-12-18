@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, HelpCircle, X, Check, ClipboardList } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle } from "lucide-react";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
@@ -18,7 +18,6 @@ import { CertificateUpload } from "@/components/settings/CertificateUpload";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 const Settings = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -38,7 +37,6 @@ const Settings = () => {
   const [companyEmail, setCompanyEmail] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [isAdmin, setIsAdmin] = useState(true);
-  
   const [isHealthcare, setIsHealthcare] = useState(false);
   const [professionalCouncil, setProfessionalCouncil] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
@@ -50,7 +48,7 @@ const Settings = () => {
   const [healthcareNeighborhood, setHealthcareNeighborhood] = useState("");
   const [healthcareCity, setHealthcareCity] = useState("");
   const [healthcareState, setHealthcareState] = useState("");
-  
+
   // Certificate data
   const [certificateData, setCertificateData] = useState<{
     certificate_file_url: string | null;
@@ -66,7 +64,7 @@ const Settings = () => {
   const urlTab = searchParams.get('tab') || 'company';
   // Redirect old tabs (members, contacts, groups) to cadastros
   const normalizedTab = ['members', 'contacts', 'groups'].includes(urlTab) ? 'cadastros' : urlTab;
-  const activeTab = !isAdmin && (normalizedTab === 'subscription') ? 'company' : normalizedTab;
+  const activeTab = !isAdmin && normalizedTab === 'subscription' ? 'company' : normalizedTab;
 
   // Fetch support tickets
   const {
@@ -129,13 +127,10 @@ const Settings = () => {
       setUser(user);
       if (user) {
         // Check if user is a member (not admin)
-        const { data: memberData } = await supabase
-          .from('organization_members')
-          .select('*')
-          .eq('member_user_id', user.id)
-          .eq('status', 'active')
-          .single();
-        
+        const {
+          data: memberData
+        } = await supabase.from('organization_members').select('*').eq('member_user_id', user.id).eq('status', 'active').single();
+
         // User is admin if they are NOT a member of another organization
         setIsAdmin(!memberData);
 
@@ -177,7 +172,7 @@ const Settings = () => {
             certificate_valid_from: (companyData as any).certificate_valid_from || null,
             certificate_valid_to: (companyData as any).certificate_valid_to || null,
             certificate_serial_number: (companyData as any).certificate_serial_number || null,
-            certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null,
+            certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null
           });
         }
       }
@@ -302,7 +297,7 @@ const Settings = () => {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
-    
+
     // Validate healthcare fields if healthcare is enabled
     if (isHealthcare && (!professionalCouncil || !registrationNumber || !registrationState)) {
       toast.error("Por favor, preencha o conselho de classe, número do registro e estado");
@@ -356,15 +351,11 @@ const Settings = () => {
     }
     toast.success("Dados da empresa salvos com sucesso!");
   };
-
   const handleCertificateChange = useCallback(async () => {
     if (!user) return;
-    const { data: companyData } = await supabase
-      .from('company_settings')
-      .select('certificate_file_url, certificate_subject, certificate_issuer, certificate_valid_from, certificate_valid_to, certificate_serial_number, certificate_uploaded_at')
-      .eq('user_id', user.id)
-      .single();
-    
+    const {
+      data: companyData
+    } = await supabase.from('company_settings').select('certificate_file_url, certificate_subject, certificate_issuer, certificate_valid_from, certificate_valid_to, certificate_serial_number, certificate_uploaded_at').eq('user_id', user.id).single();
     if (companyData) {
       setCertificateData({
         certificate_file_url: (companyData as any).certificate_file_url || null,
@@ -373,7 +364,7 @@ const Settings = () => {
         certificate_valid_from: (companyData as any).certificate_valid_from || null,
         certificate_valid_to: (companyData as any).certificate_valid_to || null,
         certificate_serial_number: (companyData as any).certificate_serial_number || null,
-        certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null,
+        certificate_uploaded_at: (companyData as any).certificate_uploaded_at || null
       });
     } else {
       setCertificateData(null);
@@ -399,14 +390,12 @@ const Settings = () => {
               <ClipboardList className="h-4 w-4" />
               <span className="hidden md:inline">Cadastros</span>
             </TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="subscription" className="gap-2">
+            {isAdmin && <TabsTrigger value="subscription" className="gap-2">
                 <CreditCard className="h-4 w-4" />
                 <span className="hidden md:inline">Assinatura</span>
-              </TabsTrigger>
-            )}
+              </TabsTrigger>}
             <TabsTrigger value="support" className="gap-2">
-              <HelpCircle className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" />
               <span className="hidden md:inline">Suporte</span>
             </TabsTrigger>
           </TabsList>
@@ -518,15 +507,10 @@ const Settings = () => {
                       <Label htmlFor="is-healthcare" className="text-sm font-medium">
                         Profissional da Área da Saúde
                       </Label>
-                      <Switch
-                        id="is-healthcare"
-                        checked={isHealthcare}
-                        onCheckedChange={setIsHealthcare}
-                      />
+                      <Switch id="is-healthcare" checked={isHealthcare} onCheckedChange={setIsHealthcare} />
                     </div>
 
-                    {isHealthcare && (
-                      <>
+                    {isHealthcare && <>
                         <div className="grid md:grid-cols-3 gap-4 pl-0 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="council-type">Conselho de Classe</Label>
@@ -535,25 +519,14 @@ const Settings = () => {
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent>
-                                {[
-                                  'CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 
-                                  'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'
-                                ].map(council => (
-                                  <SelectItem key={council} value={council}>{council}</SelectItem>
-                                ))}
+                                {['CRM', 'CRO', 'CRN', 'COREN', 'CRF', 'CREFITO', 'CRP', 'CRBM', 'CRBIO', 'CRFa', 'CRTR', 'CRV', 'CRMV', 'COFFITO'].map(council => <SelectItem key={council} value={council}>{council}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
 
                           <div className="grid gap-2">
                             <Label htmlFor="registration-number">Número do Registro</Label>
-                            <Input
-                              id="registration-number"
-                              value={registrationNumber}
-                              onChange={e => setRegistrationNumber(e.target.value)}
-                              placeholder="Ex: 12345"
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
+                            <Input id="registration-number" value={registrationNumber} onChange={e => setRegistrationNumber(e.target.value)} placeholder="Ex: 12345" className="text-gray-600 border-0 bg-gray-200" />
                           </div>
 
                           <div className="grid gap-2">
@@ -563,27 +536,17 @@ const Settings = () => {
                                 <SelectValue placeholder="UF" />
                               </SelectTrigger>
                               <SelectContent>
-                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
-                                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                                ))}
+                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
 
                         {/* Medical Specialty - Only for CRM and CRO */}
-                        {['CRM', 'CRO'].includes(professionalCouncil) && (
-                          <div className="grid gap-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {['CRM', 'CRO'].includes(professionalCouncil) && <div className="grid gap-2 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                             <Label htmlFor="medical-specialty">Especialidade</Label>
-                            <Input
-                              id="medical-specialty"
-                              value={medicalSpecialty}
-                              onChange={e => setMedicalSpecialty(e.target.value)}
-                              placeholder={professionalCouncil === 'CRM' ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'}
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
-                          </div>
-                        )}
+                            <Input id="medical-specialty" value={medicalSpecialty} onChange={e => setMedicalSpecialty(e.target.value)} placeholder={professionalCouncil === 'CRM' ? 'Ex: Cardiologia, Pediatria' : 'Ex: Ortodontia, Endodontia'} className="text-gray-600 border-0 bg-gray-200" />
+                          </div>}
 
                         {/* Healthcare Professional Address */}
                         <Separator className="my-4" />
@@ -592,48 +555,22 @@ const Settings = () => {
                         <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-cep">CEP</Label>
-                            <Input
-                              id="healthcare-cep"
-                              value={healthcareCep}
-                              onChange={e => handleHealthcareCepChange(e.target.value)}
-                              placeholder="00.000-000"
-                              maxLength={10}
-                              inputMode="numeric"
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
+                            <Input id="healthcare-cep" value={healthcareCep} onChange={e => handleHealthcareCepChange(e.target.value)} placeholder="00.000-000" maxLength={10} inputMode="numeric" className="text-gray-600 border-0 bg-gray-200" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-street">Endereço</Label>
-                            <Input
-                              id="healthcare-street"
-                              value={healthcareStreet}
-                              onChange={e => setHealthcareStreet(e.target.value)}
-                              placeholder="Rua, Avenida..."
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
+                            <Input id="healthcare-street" value={healthcareStreet} onChange={e => setHealthcareStreet(e.target.value)} placeholder="Rua, Avenida..." className="text-gray-600 border-0 bg-gray-200" />
                           </div>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-neighborhood">Bairro</Label>
-                            <Input
-                              id="healthcare-neighborhood"
-                              value={healthcareNeighborhood}
-                              onChange={e => setHealthcareNeighborhood(e.target.value)}
-                              placeholder="Bairro"
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
+                            <Input id="healthcare-neighborhood" value={healthcareNeighborhood} onChange={e => setHealthcareNeighborhood(e.target.value)} placeholder="Bairro" className="text-gray-600 border-0 bg-gray-200" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-city">Cidade</Label>
-                            <Input
-                              id="healthcare-city"
-                              value={healthcareCity}
-                              onChange={e => setHealthcareCity(e.target.value)}
-                              placeholder="Cidade"
-                              className="text-gray-600 border-0 bg-gray-200"
-                            />
+                            <Input id="healthcare-city" value={healthcareCity} onChange={e => setHealthcareCity(e.target.value)} placeholder="Cidade" className="text-gray-600 border-0 bg-gray-200" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="healthcare-state">Estado</Label>
@@ -642,32 +579,29 @@ const Settings = () => {
                                 <SelectValue placeholder="UF" />
                               </SelectTrigger>
                               <SelectContent>
-                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => (
-                                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                                ))}
+                                {['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'].map(uf => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
-                      </>
-                    )}
+                      </>}
                   </div>
 
                   <div className="flex gap-3 justify-end pt-6">
                     <Button variant="ghost" className="bg-transparent text-gray-500 border-0 hover:bg-transparent hover:text-gray-500 gap-2 w-28" onClick={() => {
-                    setLogo(null);
-                    setCompanyName("");
-                    setCnpj("");
-                    setCep("");
-                    setStreet("");
-                    setNeighborhood("");
-                    setCity("");
-                    setState("");
-                    setAdminName("");
-                    setAdminCpf("");
-                    setPhone("");
-                    setCompanyEmail("");
-                  }}>
+                      setLogo(null);
+                      setCompanyName("");
+                      setCnpj("");
+                      setCep("");
+                      setStreet("");
+                      setNeighborhood("");
+                      setCity("");
+                      setState("");
+                      setAdminName("");
+                      setAdminCpf("");
+                      setPhone("");
+                      setCompanyEmail("");
+                    }}>
                       <X className="w-4 h-4" />
                       Cancelar
                     </Button>
@@ -681,13 +615,7 @@ const Settings = () => {
             </Card>
 
             {/* Certificate Upload */}
-            {user && (
-              <CertificateUpload
-                userId={user.id}
-                certificateData={certificateData}
-                onCertificateChange={handleCertificateChange}
-              />
-            )}
+            {user && <CertificateUpload userId={user.id} certificateData={certificateData} onCertificateChange={handleCertificateChange} />}
 
             {/* Footer */}
             <div className="flex flex-col items-center pt-8 pb-4">
@@ -709,8 +637,7 @@ const Settings = () => {
             </div>
           </TabsContent>
 
-          {isAdmin && (
-            <TabsContent value="subscription" className="space-y-6 mt-6">
+          {isAdmin && <TabsContent value="subscription" className="space-y-6 mt-6">
               <SubscriptionTab />
               {/* Footer */}
               <div className="flex flex-col items-center pt-8 pb-4">
@@ -719,8 +646,7 @@ const Settings = () => {
                   Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
                 </p>
               </div>
-            </TabsContent>
-          )}
+            </TabsContent>}
 
           <TabsContent value="support" className="space-y-6 mt-6">
             <div className="flex justify-end mb-6">
@@ -744,12 +670,12 @@ const Settings = () => {
                     </thead>
                     <tbody>
                       {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
-                      // Extract category and priority from description
-                      const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                      const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                      const category = categoryMatch ? categoryMatch[1] : '-';
-                      const priority = priorityMatch ? priorityMatch[1] : '-';
-                      return <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                        // Extract category and priority from description
+                        const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                        const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                        const category = categoryMatch ? categoryMatch[1] : '-';
+                        const priority = priorityMatch ? priorityMatch[1] : '-';
+                        return <tr key={ticket.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
                               <td className="p-4 text-sm">{ticket.title}</td>
                               <td className="p-4 text-sm text-gray-600">
                                 {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
@@ -761,7 +687,7 @@ const Settings = () => {
                                 {getStatusBadge(ticket.status)}
                               </td>
                             </tr>;
-                    }) : <tr>
+                      }) : <tr>
                           <td colSpan={6} className="p-8 text-center text-sm text-gray-500">
                             Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
                           </td>
@@ -773,12 +699,12 @@ const Settings = () => {
                 {/* Mobile Card View */}
                 <div className="md:hidden space-y-4">
                   {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
-                  // Extract category and priority from description
-                  const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                  const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                  const category = categoryMatch ? categoryMatch[1] : '-';
-                  const priority = priorityMatch ? priorityMatch[1] : '-';
-                  return <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                    // Extract category and priority from description
+                    const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
+                    const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
+                    const category = categoryMatch ? categoryMatch[1] : '-';
+                    const priority = priorityMatch ? priorityMatch[1] : '-';
+                    return <div key={ticket.id} className={`p-4 space-y-3 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
                         <div>
                           <p className="text-xs text-gray-500">Título</p>
                           <p className="text-sm font-medium">{ticket.title}</p>
@@ -804,7 +730,7 @@ const Settings = () => {
                           <div className="mt-1">{getStatusBadge(ticket.status)}</div>
                         </div>
                       </div>;
-                }) : <div className="p-8 text-center text-sm text-gray-500">
+                  }) : <div className="p-8 text-center text-sm text-gray-500">
                       Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
                     </div>}
                 </div>
