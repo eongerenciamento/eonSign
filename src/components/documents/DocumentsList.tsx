@@ -73,7 +73,7 @@ export const DocumentsList = ({
                   className="flex items-center gap-2 cursor-pointer"
                   onClick={() => onViewDocument(document.id)}
                 >
-                  <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+                  <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   <span className="text-sm text-gray-600 truncate">{document.name}</span>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -159,7 +159,7 @@ export const DocumentsList = ({
               className="col-span-5 flex items-center gap-3 cursor-pointer"
               onClick={() => onViewDocument(document.id)}
             >
-              <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" strokeWidth={1.5} />
+              <FileText className="w-5 h-5 text-gray-500 flex-shrink-0" />
               <span className="text-sm text-gray-600 truncate">{document.name}</span>
             </div>
             <div className="col-span-2 text-sm text-gray-600">
@@ -238,12 +238,12 @@ export const DocumentsList = ({
           onDragStart={(e) => handleDragStart(e, document.id)}
           onDragEnd={handleDragEnd}
           onClick={() => onViewDocument(document.id)}
-          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative rounded-xl ${
+          className={`p-4 hover:bg-accent cursor-pointer transition-colors group relative ${
             dragOverId === document.id ? "border-2 border-dashed border-[#273d60] bg-[#273d60]/10" : ""
           }`}
         >
           <div className="flex flex-col items-center space-y-2">
-            <FileText className="w-12 h-12 text-primary" strokeWidth={1.5} />
+            <FileText className="w-12 h-12 text-primary" />
             <p className="text-sm font-medium text-center truncate w-full">
               {document.name}
             </p>
