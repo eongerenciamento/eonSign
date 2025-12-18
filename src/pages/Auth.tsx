@@ -58,13 +58,13 @@ const PoweredBy = () => (
 
 const PoweredBySimple = () => (
   <div className="text-center">
-    <span className="text-gray-400 text-sm">
+    <span className="text-gray-400 text-sm font-normal">
       Powered by{" "}
       <a 
         href="https://eonhub.com.br" 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="font-bold text-gray-300 hover:text-gray-400 transition-colors"
+        className="font-bold text-gray-600 hover:text-gray-700 transition-colors"
       >
         eonhub
       </a>
@@ -265,14 +265,6 @@ export default function Auth() {
             Instale o App
           </button>
         </div>
-        <a
-          href="https://certifica.eonhub.com.br"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="md:hidden mt-3 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition-colors block mx-auto w-fit"
-        >
-          Certificado Digital <span className="text-xs">R$</span>109.90
-        </a>
       </form>
     </Form>
   );
@@ -304,8 +296,20 @@ export default function Auth() {
 
           {formContent}
 
+          {/* Certificado Digital - centered between form and footer */}
+          <div className="flex-1 flex items-center justify-center py-4">
+            <a
+              href="https://certifica.eonhub.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition-colors"
+            >
+              Certificado Digital <span className="text-xs">R$</span>109.90
+            </a>
+          </div>
+
           {/* Footer */}
-          <div className="mt-auto pt-6">
+          <div className="pt-2">
             <PoweredBySimple />
           </div>
         </div>
