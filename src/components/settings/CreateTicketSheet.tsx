@@ -173,7 +173,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       >
         <SheetHeader>
           <SheetTitle>Abrir Novo Ticket</SheetTitle>
-          <SheetDescription>Preencha o formulário para novo chamado.</SheetDescription>
+          <SheetDescription>Preencha o formulário para abrir um ticket de suporte.</SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
