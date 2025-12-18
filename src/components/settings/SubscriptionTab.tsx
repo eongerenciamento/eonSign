@@ -60,7 +60,7 @@ function ComparisonTable({
   processingCheckout,
   onUpgrade
 }: ComparisonTableProps) {
-  return <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto">
+  return <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-gray-200">
       <Table>
         <TableHeader>
           <TableRow className="border-0 bg-gray-100/50">
@@ -166,7 +166,7 @@ function ComparisonTable({
           </TableRow>
         </TableBody>
       </Table>
-      <div className="border-b border-gray-200 mt-0"></div>
+      
     </div>;
 }
 
