@@ -872,7 +872,7 @@ export const DocumentsTable = ({
                           <p className="text-xs text-gray-500">{doc.createdAt}</p>
                           {/* For prescriptions, show prescription doc type instead of signature mode */}
                           {isPrescription(doc) && doc.prescriptionDocType ? (
-                            <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0">
+                            <Badge variant="outline" className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
                               {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                             </Badge>
                           ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
@@ -1183,7 +1183,7 @@ export const DocumentsTable = ({
                   )}
                   {/* For prescriptions, show prescription doc type instead of signature mode */}
                   {isPrescription(doc) && doc.prescriptionDocType ? (
-                    <Badge className="bg-purple-600 text-white text-[10px] px-1.5 py-0 w-fit">
+                    <Badge variant="outline" className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit">
                       {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
                     </Badge>
                   ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
