@@ -192,7 +192,7 @@ function CustomCaption({ displayMonth }: CaptionProps) {
       {showPicker && (
         <div 
           ref={pickerRef} 
-          className="absolute top-full mt-2 z-50 bg-gray-400/10 dark:bg-gray-600/10 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-2"
+          className="absolute top-full mt-2 z-50 bg-gray-400/40 dark:bg-gray-600/40 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-2"
         >
           <MonthYearPicker displayMonth={displayMonth} onChange={handleChange} />
         </div>
@@ -245,7 +245,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <SelectedDaysContext.Provider value={selectedDays}>
       <div className={cn(
-        "rounded-2xl bg-gray-400/10 dark:bg-gray-600/10 backdrop-blur-xl",
+        "rounded-2xl bg-gray-400/40 dark:bg-gray-600/40 backdrop-blur-xl",
         "border border-white/20 dark:border-white/10 shadow-2xl p-4 pointer-events-auto",
         className
       )}>
