@@ -101,6 +101,16 @@ export default {
             opacity: "1",
           },
         },
+        "slide-out-right": {
+          "0%": {
+            transform: "translateX(0)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateX(50px)",
+            opacity: "0",
+          },
+        },
         "float1": {
           "0%, 100%": { transform: "translate(0, 0) scale(1)" },
           "33%": { transform: "translate(40px, -30px) scale(1.1)" },
