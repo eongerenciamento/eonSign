@@ -265,17 +265,17 @@ const Documents = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="signed" className="data-[state=active]:text-gray-700">
-              <CheckCircle className="w-4 h-4 md:mr-2 text-gray-700" />
+          <TabsList className="grid w-full grid-cols-3 border-none bg-transparent">
+            <TabsTrigger value="signed" className="data-[state=active]:text-gray-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <CheckCircle className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-gray-700" />
               <span className="hidden md:inline">Assinados</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-700">
-              <User className="w-4 h-4 md:mr-2 text-yellow-700" />
+            <TabsTrigger value="pending-internal" className="data-[state=active]:text-yellow-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <User className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-yellow-700" />
               <span className="hidden md:inline">Pendente Interno</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-700">
-              <Users className="w-4 h-4 md:mr-2 text-red-700" />
+            <TabsTrigger value="pending-external" className="data-[state=active]:text-red-700 text-gray-500 hover:bg-transparent hover:text-gray-500 border-none shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent">
+              <Users className="w-4 h-4 md:mr-2 text-gray-500 data-[state=active]:text-red-700" />
               <span className="hidden md:inline">Pendente Externo</span>
             </TabsTrigger>
           </TabsList>
