@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -383,8 +383,14 @@ const Reports = () => {
 
         <Tabs defaultValue="overview" className="w-full">
           <TabsList>
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="signatories">Signatários</TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="signatories" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Signatários
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-8">
@@ -392,7 +398,7 @@ const Reports = () => {
         {/* Filters */}
         <div className="flex gap-4">
           <Select defaultValue="30">
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-none bg-gray-100">
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
@@ -403,7 +409,7 @@ const Reports = () => {
             </SelectContent>
           </Select>
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-none bg-gray-100">
               <SelectValue placeholder="Departamento" />
             </SelectTrigger>
             <SelectContent>
@@ -417,50 +423,50 @@ const Reports = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <TrendingUp className="w-6 h-6 text-primary" />
+              <div className="p-2 rounded-lg bg-gray-200">
+                <TrendingUp className="w-5 h-5 text-gray-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-gray-600">87.5%</p>
+                <p className="text-2xl font-bold text-blue-700">87.5%</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-success/10">
-                <FileCheck className="w-6 h-6 text-success" />
+              <div className="p-2 rounded-lg bg-gray-200">
+                <FileCheck className="w-5 h-5 text-gray-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Docs Assinados</p>
-                <p className="text-2xl font-bold text-gray-600">98</p>
+                <p className="text-2xl font-bold text-blue-700">98</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-warning/10">
-                <Clock className="w-6 h-6 text-warning" />
+              <div className="p-2 rounded-lg bg-gray-200">
+                <Clock className="w-5 h-5 text-gray-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tempo Médio</p>
-                <p className="text-2xl font-bold text-gray-600">2.3d</p>
+                <p className="text-2xl font-bold text-blue-700">2.3d</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-100 border-0">
+          <Card className="p-6 bg-gray-100 border-0 shadow-md">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-accent/10">
-                <Users className="w-6 h-6 text-accent" />
+              <div className="p-2 rounded-lg bg-gray-200">
+                <Users className="w-5 h-5 text-gray-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Signatários Ativos</p>
-                <p className="text-2xl font-bold text-gray-600">234</p>
+                <p className="text-2xl font-bold text-blue-700">234</p>
               </div>
             </div>
           </Card>
@@ -473,7 +479,7 @@ const Reports = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-green-700 text-white hover:bg-green-700">Assinados</Badge>
+                  <Badge className="bg-transparent border border-green-700 text-green-700 hover:bg-transparent">Assinados</Badge>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">62.8%</span>
@@ -482,7 +488,7 @@ const Reports = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-700 text-white hover:bg-blue-700">Em Andamento</Badge>
+                  <Badge className="bg-transparent border border-blue-700 text-blue-700 hover:bg-transparent">Em Andamento</Badge>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">28.8%</span>
@@ -491,7 +497,7 @@ const Reports = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-yellow-700 text-white hover:bg-yellow-700">Pendente</Badge>
+                  <Badge className="bg-transparent border border-yellow-600 text-yellow-600 hover:bg-transparent">Pendente</Badge>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">15.2%</span>
@@ -500,7 +506,7 @@ const Reports = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-red-700 text-white hover:bg-red-700">Expirados</Badge>
+                  <Badge className="bg-transparent border border-red-700 text-red-700 hover:bg-transparent">Expirados</Badge>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">8.4%</span>
