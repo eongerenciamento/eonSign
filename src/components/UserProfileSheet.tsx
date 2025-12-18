@@ -204,12 +204,16 @@ export function UserProfileSheet({
     } else {
       toast.custom(() => (
         <div className="flex items-center justify-center">
-          <LogOut className="h-6 w-6 text-white animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />
+          <LogOut
+            className="h-6 w-6 text-muted-foreground animate-[scale-in_0.3s_ease-out]"
+            strokeWidth={2.5}
+          />
         </div>
       ), {
         duration: 1500,
         position: "top-center",
-        unstyled: true
+        unstyled: true,
+        className: "!bg-transparent !border-0 !shadow-none !p-0",
       });
       setTimeout(() => navigate("/auth"), 800);
     }
