@@ -26,6 +26,11 @@ const getInitials = (name: string) => {
     .join('');
 };
 
+// Função para abreviar texto (primeiras 3 letras + ponto)
+const getAbbreviation = (text: string) => {
+  return text.slice(0, 3) + '.';
+};
+
 const Reports = () => {
   const isMobile = useIsMobile();
   const [dateFilter, setDateFilter] = useState("30");
@@ -597,7 +602,9 @@ const Reports = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground mt-2 text-center">{item.label}</span>
+<span className="text-xs text-muted-foreground mt-2 text-center">
+                    {isMobile ? getAbbreviation(item.label) : item.label}
+                  </span>
                 </div>
               ))}
             </div>
