@@ -219,7 +219,7 @@ export const AdminCouponsTab = () => {
         </Dialog>
       </div>
 
-      <Card className="bg-card shadow-md border-border">
+      <Card className="bg-gray-100 dark:bg-gray-800 border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="text-foreground text-base">Cupons Ativos</CardTitle>
         </CardHeader>
@@ -229,7 +229,7 @@ export const AdminCouponsTab = () => {
               {coupons.map((coupon) => (
                 <div
                   key={coupon.id}
-                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-lg shadow-sm"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`p-2 rounded-full ${coupon.valid ? "bg-green-500/20" : "bg-muted"}`}>
@@ -240,7 +240,7 @@ export const AdminCouponsTab = () => {
                       )}
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground">{coupon.name}</p>
+                      <p className="font-semibold text-blue-700 dark:text-blue-400">{coupon.name}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         {coupon.percent_off ? (
                           <span>{coupon.percent_off}% de desconto</span>
@@ -257,7 +257,7 @@ export const AdminCouponsTab = () => {
                             : `${coupon.duration_in_months} meses`}
                         </span>
                         <span>•</span>
-                        <span>{coupon.times_redeemed} usos</span>
+                        <span className="text-blue-700 dark:text-blue-400 font-medium">{coupon.times_redeemed} usos</span>
                       </div>
                     </div>
                   </div>

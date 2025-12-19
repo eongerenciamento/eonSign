@@ -160,12 +160,12 @@ export const AdminTicketsTab = () => {
       </div>
 
       {/* Tickets Table */}
-      <Card className="bg-card shadow-md border-border">
+      <Card className="bg-gray-100 dark:bg-gray-800 border-0 shadow-sm">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-secondary/50">
+                <tr className="bg-white dark:bg-gray-900">
                   <th className="text-left p-4 font-semibold text-sm text-foreground rounded-tl-lg">Usuário</th>
                   <th className="text-left p-4 font-semibold text-sm text-foreground">Empresa</th>
                   <th className="text-left p-4 font-semibold text-sm text-foreground">Título</th>
@@ -180,7 +180,7 @@ export const AdminTicketsTab = () => {
                   filteredTickets.map((ticket, index) => (
                     <tr
                       key={ticket.id}
-                      className={`hover:bg-secondary/30 ${index % 2 === 0 ? "bg-card" : "bg-secondary/50"}`}
+                      className={`hover:bg-gray-200 dark:hover:bg-gray-700 ${index % 2 === 0 ? "bg-gray-100 dark:bg-gray-800" : "bg-white dark:bg-gray-900"}`}
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export const AdminTicketsTab = () => {
                         </div>
                       </td>
                       <td className="p-4 text-sm text-foreground">{ticket.title}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{ticket.ticket_number}</td>
+                      <td className="p-4 text-sm text-blue-700 dark:text-blue-400 font-medium">{ticket.ticket_number}</td>
                       <td className="p-4 text-sm text-muted-foreground">
                         {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
                       </td>
