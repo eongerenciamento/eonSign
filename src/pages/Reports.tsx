@@ -17,6 +17,15 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+// Função para extrair iniciais do nome
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .filter(word => word.length > 0)
+    .map(word => word.charAt(0).toUpperCase())
+    .join('');
+};
+
 const Reports = () => {
   const isMobile = useIsMobile();
   const [dateFilter, setDateFilter] = useState("30");
@@ -612,7 +621,9 @@ const Reports = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground mt-2 text-center truncate w-full">{item.label}</span>
+                  <span className="text-xs text-muted-foreground mt-2 text-center truncate w-full">
+                    {isMobile ? getInitials(item.label) : item.label}
+                  </span>
                 </div>
               ))}
             </div>
