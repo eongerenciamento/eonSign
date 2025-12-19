@@ -159,8 +159,75 @@ export const AdminTicketsTab = () => {
         </Select>
       </div>
 
-      {/* Tickets Table */}
-      <Card className="bg-gray-100 dark:bg-gray-800 border-0 shadow-sm">
+      {/* Tickets - Mobile Cards */}
+      <div className="md:hidden space-y-3">
+        {filteredTickets && filteredTickets.length > 0 ? (
+          filteredTickets.map((ticket) => (
+            <Card key={ticket.id} className="bg-white dark:bg-gray-900 border-0 shadow-sm">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-700 dark:text-blue-400 font-medium text-sm">
+                    {ticket.ticket_number}
+                  </span>
+                  <Select
+                    value={ticket.status}
+                    onValueChange={(status) => updateStatusMutation.mutate({ ticketId: ticket.id, status })}
+                  >
+                    <SelectTrigger className="w-auto h-7 border-0 bg-transparent p-0">
+                      {getStatusBadge(ticket.status)}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aberto">Aberto</SelectItem>
+                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                      <SelectItem value="resolvido">Resolvido</SelectItem>
+                      <SelectItem value="fechado">Fechado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <p className="font-medium text-foreground text-sm">{ticket.title}</p>
+                
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-foreground">{ticket.user_name}</p>
+                    <p className="text-xs text-muted-foreground">{ticket.user_email}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{ticket.company_name}</span>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedTicket(ticket)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    Chat
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card className="bg-white dark:bg-gray-900 border-0 shadow-sm">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              Nenhum ticket encontrado
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Tickets Table - Desktop */}
+      <Card className="hidden md:block bg-gray-100 dark:bg-gray-800 border-0 shadow-sm">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
