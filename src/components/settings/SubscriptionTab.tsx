@@ -20,31 +20,31 @@ const SUBSCRIPTION_TIERS = [{
   name: "Básico",
   limit: 20,
   price: 54.9,
-  priceId: "price_1SZgF8HRTD5WvpxjUn1AZydj",
+  priceId: "price_1Se8TtHRTD5Wvpxj3gPRrRbg",
   description: "Para pequenas empresas"
 }, {
   name: "Profissional",
   limit: 50,
   price: 89.9,
-  priceId: "price_1SZgFeHRTD5Wvpxju4vtwaM0",
+  priceId: "price_1Se8U4HRTD5WvpxjR7sdwYC9",
   description: "Para empresas em crescimento"
 }, {
   name: "Empresarial",
   limit: 100,
   price: 159.9,
-  priceId: "price_1SZgFqHRTD5WvpxjHpfPyEEb",
+  priceId: "price_1Se8UIHRTD5WvpxjjQ6KyfKL",
   description: "Para empresas estabelecidas"
 }, {
   name: "Premium",
   limit: 150,
   price: 209.9,
-  priceId: "price_1SZgG2HRTD5WvpxjzJMpIc9C",
+  priceId: "price_1SeGrSHRTD5WvpxjPddcam2O",
   description: "Para grandes volumes"
 }, {
   name: "Enterprise",
   limit: 200,
   price: 289.9,
-  priceId: "price_1SZgGCHRTD5Wvpxjj79RSMXX",
+  priceId: "price_1SeGs0HRTD5Wvpxjbt5yi6NV",
   description: "Documentos ilimitados"
 }];
 
