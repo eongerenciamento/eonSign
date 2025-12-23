@@ -171,18 +171,28 @@ const handler = async (req: Request): Promise<Response> => {
         signerSignatureConfig.profile = "TIMESTAMP";
       }
 
+      // Para assinaturas ADVANCED e QUALIFIED, usar positioningMode SIGNEE
+      // O assinante define tanto a imagem quanto a posição da assinatura ao visualizar o documento
       const signerData: {
         name: string;
         email: string;
         phone?: string;
         authenticationOptions: AuthenticationOption[];
         signatureConfig: { mode: string; profile?: string };
+        positioningMode?: "CREATOR" | "PRESET" | "SIGNEE";
       } = {
         name: signer.name,
         email: signer.email,
         authenticationOptions: selectedAuthOptions,
         signatureConfig: signerSignatureConfig,
       };
+
+      // Adicionar positioningMode SIGNEE para ADVANCED e QUALIFIED
+      // Isso permite que o assinante escolha a imagem e posição da assinatura visual
+      if (selectedSignatureMode === "ADVANCED" || selectedSignatureMode === "QUALIFIED") {
+        signerData.positioningMode = "SIGNEE";
+        console.log(`Signer ${signer.name}: positioningMode set to SIGNEE for ${selectedSignatureMode} signature`);
+      }
 
       if (phone && phone.length >= 10) {
         if (!phone.startsWith("55")) {
