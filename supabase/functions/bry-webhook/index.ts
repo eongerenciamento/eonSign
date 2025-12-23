@@ -306,8 +306,12 @@ async function finalizeEnvelope(supabase: any, envelopeUuid: string): Promise<vo
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const timestamp = new Date().toISOString();
   console.log("=== BRY WEBHOOK CALLED ===");
+  console.log("Timestamp:", timestamp);
   console.log("Method:", req.method);
+  console.log("Request URL:", req.url);
+  console.log("Request Headers:", JSON.stringify(Object.fromEntries(req.headers.entries())));
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

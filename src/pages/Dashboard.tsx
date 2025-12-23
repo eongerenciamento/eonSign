@@ -138,10 +138,9 @@ const Dashboard = () => {
     setPendingByExternal(pendingExt);
   }, []);
 
-  // Automatic BRy status sync
+  // Automatic BRy status sync (adaptive polling: 10s initial, 20s after)
   useBryStatusSync(documents, {
     onStatusChange: loadDocuments,
-    pollingInterval: 30000
   });
   useEffect(() => {
     loadDocuments();

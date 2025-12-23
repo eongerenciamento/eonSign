@@ -148,10 +148,9 @@ const Documents = () => {
     setDocuments(documentsWithSigners);
   }, [toast]);
 
-  // Automatic BRy status sync
+  // Automatic BRy status sync (adaptive polling: 10s initial, 20s after)
   useBryStatusSync(documents, {
     onStatusChange: loadSignedDocuments,
-    pollingInterval: 30000, // 30 seconds
   });
 
   const loadFolders = async () => {

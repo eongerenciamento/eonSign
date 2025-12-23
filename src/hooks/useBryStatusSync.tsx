@@ -1,6 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Polling adaptativo: rápido inicialmente, depois mais lento
+const FAST_INTERVAL = 10000; // 10 segundos nas primeiras tentativas
+const NORMAL_INTERVAL = 20000; // 20 segundos depois
+const FAST_ATTEMPTS = 6; // 6 tentativas rápidas (~1 minuto)
+
 interface PendingDocument {
   id: string;
   status: string;
@@ -9,16 +14,16 @@ interface PendingDocument {
 
 interface UseBryStatusSyncOptions {
   onStatusChange?: () => void;
-  pollingInterval?: number; // in milliseconds
 }
 
 export const useBryStatusSync = (
   documents: PendingDocument[],
   options: UseBryStatusSyncOptions = {}
 ) => {
-  const { onStatusChange, pollingInterval = 30000 } = options;
+  const { onStatusChange } = options;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isSyncingRef = useRef(false);
+  const syncCountRef = useRef(0);
 
   // Filter documents that need BRy sync (pending with bry_envelope_uuid)
   const pendingBryDocuments = documents.filter(
@@ -61,12 +66,39 @@ export const useBryStatusSync = (
     }
   }, [pendingBryDocuments, onStatusChange]);
 
-  useEffect(() => {
-    // Clear existing interval
+  // Função para agendar próximo polling com intervalo adaptativo
+  const scheduleNextSync = useCallback(() => {
     if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+      clearTimeout(intervalRef.current);
+    }
+    
+    // Determinar intervalo baseado no número de tentativas
+    const currentInterval = syncCountRef.current < FAST_ATTEMPTS 
+      ? FAST_INTERVAL 
+      : NORMAL_INTERVAL;
+    
+    console.log(`[BRy Sync] Próximo sync em ${currentInterval / 1000}s (tentativa ${syncCountRef.current + 1})`);
+    
+    intervalRef.current = setTimeout(async () => {
+      await syncDocuments();
+      syncCountRef.current++;
+      
+      // Continuar agendando se ainda há documentos pendentes
+      if (pendingBryDocuments.length > 0) {
+        scheduleNextSync();
+      }
+    }, currentInterval);
+  }, [syncDocuments, pendingBryDocuments.length]);
+
+  useEffect(() => {
+    // Clear existing interval/timeout
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current);
       intervalRef.current = null;
     }
+
+    // Reset contador quando documentos pendentes mudam
+    syncCountRef.current = 0;
 
     // Only set up polling if there are pending BRy documents
     if (pendingBryDocuments.length === 0) {
@@ -75,25 +107,25 @@ export const useBryStatusSync = (
     }
 
     console.log(
-      `[BRy Sync] Starting polling for ${pendingBryDocuments.length} documents (every ${pollingInterval / 1000}s)`
+      `[BRy Sync] Starting adaptive polling for ${pendingBryDocuments.length} documents (${FAST_INTERVAL/1000}s x ${FAST_ATTEMPTS}, then ${NORMAL_INTERVAL/1000}s)`
     );
 
-    // Initial sync after a short delay
+    // Initial sync after a short delay (1 second)
     const initialTimeout = setTimeout(() => {
-      syncDocuments();
-    }, 2000);
-
-    // Set up interval
-    intervalRef.current = setInterval(syncDocuments, pollingInterval);
+      syncDocuments().then(() => {
+        syncCountRef.current++;
+        scheduleNextSync();
+      });
+    }, 1000);
 
     return () => {
       clearTimeout(initialTimeout);
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        clearTimeout(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [pendingBryDocuments.length, pollingInterval, syncDocuments]);
+  }, [pendingBryDocuments.length, syncDocuments, scheduleNextSync]);
 
   return {
     pendingCount: pendingBryDocuments.length,
