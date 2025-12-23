@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.sign-with-local-certificate]
 verify_jwt = false
+
+[functions.bry-sync-cron]
+verify_jwt = false
