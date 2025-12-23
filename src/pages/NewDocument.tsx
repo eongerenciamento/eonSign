@@ -722,6 +722,63 @@ const NewDocument = () => {
     const fileName = title || 'Prescricao';
     return new File([pdfBlob], `${fileName}.pdf`, { type: 'application/pdf' });
   };
+  // Function to convert image files to PDF for BRy compatibility
+  const convertImageToPdf = async (imageFile: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const img = new Image();
+          img.onload = () => {
+            // Determine orientation based on image dimensions
+            const isLandscape = img.width > img.height;
+            const pdf = new jsPDF({
+              orientation: isLandscape ? 'landscape' : 'portrait',
+              unit: 'mm',
+            });
+            
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            // Calculate dimensions to fit in page with margins
+            const margin = 10; // 10mm margin
+            const maxWidth = pageWidth - (margin * 2);
+            const maxHeight = pageHeight - (margin * 2);
+            
+            const imgRatio = img.width / img.height;
+            const pageRatio = maxWidth / maxHeight;
+            
+            let imgWidth, imgHeight;
+            if (imgRatio > pageRatio) {
+              imgWidth = maxWidth;
+              imgHeight = imgWidth / imgRatio;
+            } else {
+              imgHeight = maxHeight;
+              imgWidth = imgHeight * imgRatio;
+            }
+            
+            const x = (pageWidth - imgWidth) / 2;
+            const y = (pageHeight - imgHeight) / 2;
+            
+            pdf.addImage(e.target?.result as string, 'JPEG', x, y, imgWidth, imgHeight);
+            
+            const pdfBlob = pdf.output('blob');
+            const pdfFileName = imageFile.name.replace(/\.[^/.]+$/, '') + '.pdf';
+            const pdfFile = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
+            
+            console.log(`[Upload] Converted image ${imageFile.name} to PDF: ${pdfFileName}`);
+            resolve(pdfFile);
+          };
+          img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+          img.src = e.target?.result as string;
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+      reader.readAsDataURL(imageFile);
+    });
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -940,6 +997,36 @@ const NewDocument = () => {
             await supabase.from('signer_group_members').insert(groupMembers);
           }
         }
+      }
+
+      // Convert image files to PDF for BRy compatibility (ADVANCED/QUALIFIED modes)
+      const requiresPdfConversion = signatureMode !== 'SIMPLE';
+      if (requiresPdfConversion) {
+        const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+        const convertedFiles: File[] = [];
+
+        for (const file of filesToUpload) {
+          if (IMAGE_TYPES.includes(file.type)) {
+            console.log(`[Upload] Converting image ${file.name} to PDF for BRy compatibility`);
+            try {
+              const pdfFile = await convertImageToPdf(file);
+              convertedFiles.push(pdfFile);
+            } catch (conversionError) {
+              console.error(`[Upload] Failed to convert image ${file.name}:`, conversionError);
+              toast({
+                title: "Erro na conversão",
+                description: `Não foi possível converter a imagem ${file.name} para PDF.`,
+                variant: "destructive"
+              });
+              setIsSubmitting(false);
+              return;
+            }
+          } else {
+            convertedFiles.push(file);
+          }
+        }
+
+        filesToUpload = convertedFiles;
       }
 
       let envelopeId: string | null = null;
