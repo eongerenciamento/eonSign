@@ -19,34 +19,42 @@ interface DocumentCompletedEmailRequest {
   senderName: string;
 }
 
-// Get BRy access token
+// Get BRy access token using correct Cloud authentication
 async function getBryToken(): Promise<string | null> {
   const clientId = Deno.env.get("BRY_CLIENT_ID");
   const clientSecret = Deno.env.get("BRY_CLIENT_SECRET");
-  const bryEnvironment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
 
   if (!clientId || !clientSecret) {
     console.log("BRy credentials not configured");
     return null;
   }
 
-  const apiBaseUrl =
-    bryEnvironment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
+  // Use BRy Cloud token endpoint (same as other working functions)
+  const authUrl = "https://cloud.bry.com.br/token-service/jwt";
 
   try {
-    const tokenResponse = await fetch(`${apiBaseUrl}/api/service/token-service/jwt`, {
+    console.log("[BRy Auth] Requesting token from:", authUrl);
+    
+    const basicAuth = btoa(`${clientId}:${clientSecret}`);
+
+    const tokenResponse = await fetch(authUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId, clientSecret }),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": `Basic ${basicAuth}`,
+      },
+      body: "grant_type=client_credentials",
     });
 
     if (!tokenResponse.ok) {
-      console.error("Failed to get BRy token:", tokenResponse.status);
+      const errorText = await tokenResponse.text();
+      console.error("Failed to get BRy token:", tokenResponse.status, errorText);
       return null;
     }
 
     const tokenData = await tokenResponse.json();
-    return tokenData.accessToken;
+    console.log("BRy token obtained successfully");
+    return tokenData.access_token;
   } catch (error) {
     console.error("Error getting BRy token:", error);
     return null;
