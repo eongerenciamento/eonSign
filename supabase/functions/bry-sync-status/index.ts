@@ -136,6 +136,10 @@ interface SyncResult {
 }
 
 async function syncSingleDocument(supabase: any, documentId: string, accessToken: string): Promise<SyncResult> {
+  console.log(`\n========================================`);
+  console.log(`[Sync] Starting sync for document: ${documentId}`);
+  console.log(`========================================`);
+
   try {
     // Buscar documento
     const { data: document, error: docError } = await supabase
@@ -145,19 +149,25 @@ async function syncSingleDocument(supabase: any, documentId: string, accessToken
       .single();
 
     if (docError || !document) {
+      console.log(`[Sync] Document not found: ${documentId}`);
       return { documentId, success: false, changed: false, error: "Document not found" };
     }
 
+    console.log(`[Sync] Document: ${document.name}, Status: ${document.status}, signed_by: ${document.signed_by}`);
+
     if (!document.bry_envelope_uuid) {
+      console.log(`[Sync] No BRy envelope UUID for document: ${documentId}`);
       return { documentId, success: false, changed: false, error: "No BRy envelope" };
     }
+
+    console.log(`[Sync] BRy envelope UUID: ${document.bry_envelope_uuid}`);
 
     const environment = Deno.env.get("BRY_ENVIRONMENT") || "homologation";
     const apiBaseUrl = environment === "production" ? "https://easysign.bry.com.br" : "https://easysign.hom.bry.com.br";
 
     // Tentar endpoint completo do envelope primeiro (retorna signers e documents)
     const envelopeUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}`;
-    console.log(`Fetching BRy envelope from: ${envelopeUrl}`);
+    console.log(`[Sync] Fetching BRy envelope from: ${envelopeUrl}`);
 
     const envelopeResponse = await fetch(envelopeUrl, {
       method: "GET",
@@ -170,10 +180,10 @@ async function syncSingleDocument(supabase: any, documentId: string, accessToken
 
     if (envelopeResponse.ok) {
       statusData = await envelopeResponse.json();
-      console.log(`BRy envelope data for ${documentId}:`, JSON.stringify(statusData));
+      console.log(`[Sync] BRy envelope data received:`, JSON.stringify(statusData, null, 2));
     } else {
       // Fallback para endpoint de status
-      console.log("Envelope endpoint failed, trying status endpoint...");
+      console.log("[Sync] Envelope endpoint failed, trying status endpoint...");
       const statusUrl = `${apiBaseUrl}/api/service/sign/v1/signatures/${document.bry_envelope_uuid}/status`;
 
       const statusResponse = await fetch(statusUrl, {
@@ -185,12 +195,12 @@ async function syncSingleDocument(supabase: any, documentId: string, accessToken
 
       if (!statusResponse.ok) {
         const errorText = await statusResponse.text();
-        console.error(`Failed to get BRy status for ${documentId}:`, statusResponse.status, errorText);
+        console.error(`[Sync] Failed to get BRy status: ${statusResponse.status} - ${errorText}`);
         return { documentId, success: false, changed: false, error: "Failed to get BRy status" };
       }
 
       statusData = await statusResponse.json();
-      console.log(`BRy status for ${documentId}:`, JSON.stringify(statusData));
+      console.log(`[Sync] BRy status data received:`, JSON.stringify(statusData, null, 2));
     }
 
     // Processar status dos signatários
@@ -202,46 +212,122 @@ async function syncSingleDocument(supabase: any, documentId: string, accessToken
     const signersList = statusData.signers || statusData.subscribers || [];
     const documentsList = statusData.documents || [];
 
-    // Log detalhado para debug
-    console.log(`BRy signers count: ${signersList.length}, documents count: ${documentsList.length}`);
+    console.log(`[Sync] BRy signers count: ${signersList.length}, documents count: ${documentsList.length}`);
+
+    // Log detalhado de todos os signatários da BRy para debug
+    console.log(`[Sync] === BRy Signers Details ===`);
+    signersList.forEach((brySigner: any, index: number) => {
+      console.log(`[Sync] BRy Signer ${index + 1}:`, {
+        email: brySigner.email,
+        emailLower: brySigner.email?.toLowerCase(),
+        name: brySigner.name,
+        status: brySigner.status,
+        signatureStatus: brySigner.signatureStatus,
+        signerNonce: brySigner.signerNonce,
+        signedAt: brySigner.signedAt,
+      });
+    });
+
+    // Buscar signatários locais para comparação
+    const { data: localSigners } = await supabase
+      .from("document_signers")
+      .select("*")
+      .eq("document_id", documentId);
+
+    console.log(`[Sync] === Local Signers Details ===`);
+    localSigners?.forEach((localSigner: any, index: number) => {
+      console.log(`[Sync] Local Signer ${index + 1}:`, {
+        id: localSigner.id,
+        email: localSigner.email,
+        emailLower: localSigner.email?.toLowerCase(),
+        name: localSigner.name,
+        status: localSigner.status,
+        bry_signer_nonce: localSigner.bry_signer_nonce,
+        signed_at: localSigner.signed_at,
+      });
+    });
 
     // Extrair documentUuid se não temos
     if (!document.bry_document_uuid && documentsList.length > 0) {
       const docUuid = documentsList[0].documentUuid || documentsList[0].uuid;
       if (docUuid) {
         await supabase.from("documents").update({ bry_document_uuid: docUuid }).eq("id", documentId);
-        console.log(`Updated bry_document_uuid: ${docUuid}`);
+        console.log(`[Sync] Updated bry_document_uuid: ${docUuid}`);
       }
     }
 
     if (signersList.length > 0) {
       for (const brySigner of signersList) {
-        const isCompleted = brySigner.status === "COMPLETED" || brySigner.status === "SIGNED";
-        console.log(`BRy signer ${brySigner.email}: status=${brySigner.status}, isCompleted=${isCompleted}`);
+        const isCompleted = 
+          brySigner.status === "COMPLETED" || 
+          brySigner.status === "SIGNED" ||
+          brySigner.signatureStatus === "SIGNED" ||
+          brySigner.signatureStatus === "COMPLETED";
+        
+        console.log(`\n[Sync] Processing BRy signer: ${brySigner.email}`);
+        console.log(`[Sync]   status=${brySigner.status}, signatureStatus=${brySigner.signatureStatus}, isCompleted=${isCompleted}`);
 
         if (isCompleted) {
           signedCount++;
 
-          // Atualizar signatário no banco
-          const { data: updated } = await supabase
-            .from("document_signers")
-            .update({
-              status: "signed",
-              signed_at: brySigner.signedAt || brySigner.completedAt || new Date().toISOString(),
-            })
-            .eq("document_id", documentId)
-            .eq("email", brySigner.email)
-            .eq("status", "pending")
-            .select();
+          // IMPROVED MATCHING: Case-insensitive email + nonce fallback
+          const bryEmailLower = brySigner.email?.toLowerCase().trim();
+          const bryNonce = brySigner.signerNonce;
 
-          if (updated && updated.length > 0) {
-            hasChanges = true;
-            console.log(`Signer ${brySigner.email} marked as signed for ${documentId}`);
+          console.log(`[Sync]   Looking for local match with email (case-insensitive): "${bryEmailLower}" OR nonce: "${bryNonce}"`);
+
+          // Find matching local signer
+          const matchedLocalSigner = localSigners?.find((local: any) => {
+            const localEmailLower = local.email?.toLowerCase().trim();
+            const localNonce = local.bry_signer_nonce;
+
+            // Match by nonce first (most reliable)
+            if (bryNonce && localNonce && bryNonce === localNonce) {
+              console.log(`[Sync]   ✓ Matched by nonce: ${bryNonce}`);
+              return true;
+            }
+
+            // Fallback to case-insensitive email match
+            if (bryEmailLower && localEmailLower && bryEmailLower === localEmailLower) {
+              console.log(`[Sync]   ✓ Matched by email (case-insensitive): ${localEmailLower}`);
+              return true;
+            }
+
+            return false;
+          });
+
+          if (!matchedLocalSigner) {
+            console.log(`[Sync]   ⚠ No local match found for BRy signer: ${brySigner.email} (nonce: ${bryNonce})`);
+            continue;
+          }
+
+          console.log(`[Sync]   Matched to local signer ID: ${matchedLocalSigner.id}, current status: ${matchedLocalSigner.status}`);
+
+          // Only update if local status is still pending
+          if (matchedLocalSigner.status !== "signed") {
+            const { data: updated, error: updateError } = await supabase
+              .from("document_signers")
+              .update({
+                status: "signed",
+                signed_at: brySigner.signedAt || brySigner.completedAt || new Date().toISOString(),
+              })
+              .eq("id", matchedLocalSigner.id)
+              .select();
+
+            if (updateError) {
+              console.error(`[Sync]   Error updating signer: ${updateError.message}`);
+            } else if (updated && updated.length > 0) {
+              hasChanges = true;
+              console.log(`[Sync]   ✓ Signer ${matchedLocalSigner.email} marked as signed`);
+            }
+          } else {
+            console.log(`[Sync]   Signer already marked as signed locally`);
           }
         }
       }
     } else {
       // Se não há signers na resposta, buscar do banco para contar
+      console.log(`[Sync] No signers in BRy response, counting from local DB`);
       const { data: dbSigners } = await supabase
         .from("document_signers")
         .select("status")
@@ -249,6 +335,7 @@ async function syncSingleDocument(supabase: any, documentId: string, accessToken
 
       if (dbSigners) {
         signedCount = dbSigners.filter((s: { status: string }) => s.status === "signed").length;
+        console.log(`[Sync] Local signed count: ${signedCount}`);
       }
     }
 
