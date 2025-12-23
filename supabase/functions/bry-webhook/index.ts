@@ -379,24 +379,60 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (isSignerCompleted) {
       console.log("=== SIGNER COMPLETED ===");
+      console.log("Signer Email:", signerEmail);
+      console.log("Signer Nonce:", signerNonce);
 
       // Atualizar status do signatário em TODOS os documentos do envelope
       for (const document of documents) {
-        let query = supabase
+        console.log(`Processing document: ${document.id}`);
+        
+        // Buscar signatário usando correspondência case-insensitive ou nonce
+        const { data: localSigners } = await supabase
           .from("document_signers")
-          .update({
-            status: "signed",
-            signed_at: new Date().toISOString(),
-          })
-          .eq("document_id", document.id);
+          .select("*")
+          .eq("document_id", document.id)
+          .eq("status", "pending");
 
-        if (signerNonce) {
-          query = query.eq("bry_signer_nonce", signerNonce);
-        } else if (signerEmail) {
-          query = query.eq("email", signerEmail);
+        if (!localSigners || localSigners.length === 0) {
+          console.log(`No pending signers for document: ${document.id}`);
+          continue;
         }
 
-        await query;
+        // IMPROVED MATCHING: Case-insensitive email + nonce fallback
+        const signerEmailLower = signerEmail?.toLowerCase().trim();
+        
+        const matchedSigner = localSigners.find((local: any) => {
+          const localEmailLower = local.email?.toLowerCase().trim();
+          const localNonce = local.bry_signer_nonce;
+
+          // Match by nonce first (most reliable)
+          if (signerNonce && localNonce && signerNonce === localNonce) {
+            console.log(`✓ Matched by nonce: ${signerNonce}`);
+            return true;
+          }
+
+          // Fallback to case-insensitive email match
+          if (signerEmailLower && localEmailLower && signerEmailLower === localEmailLower) {
+            console.log(`✓ Matched by email (case-insensitive): ${localEmailLower}`);
+            return true;
+          }
+
+          return false;
+        });
+
+        if (matchedSigner) {
+          console.log(`Updating signer ${matchedSigner.id} (${matchedSigner.email}) to signed`);
+          
+          await supabase
+            .from("document_signers")
+            .update({
+              status: "signed",
+              signed_at: new Date().toISOString(),
+            })
+            .eq("id", matchedSigner.id);
+        } else {
+          console.log(`⚠ No matching signer found for email: ${signerEmail}, nonce: ${signerNonce}`);
+        }
 
         // Atualizar contagem no documento
         const { data: signedSigners } = await supabase
