@@ -53,10 +53,54 @@ const handler = async (req: Request): Promise<Response> => {
       cleanPhone = "55" + cleanPhone;
     }
 
+    // Se não foi fornecido brySignerLink, verificar se é documento ADVANCED/QUALIFIED e buscar do banco
+    let finalBrySignerLink = brySignerLink;
+    if (!finalBrySignerLink && documentId) {
+      console.log("BRy link not provided, checking document signature mode...");
+      
+      const { data: docData, error: docError } = await supabase
+        .from('documents')
+        .select('signature_mode, bry_envelope_uuid')
+        .eq('id', documentId)
+        .single();
+      
+      if (docError) {
+        console.error("Error fetching document:", docError);
+      } else if (docData?.signature_mode && docData.signature_mode !== 'SIMPLE' && docData.bry_envelope_uuid) {
+        console.log(`Document is ${docData.signature_mode}, fetching BRy link from database...`);
+        
+        // Buscar pelo telefone do signatário
+        let cleanPhoneForQuery = signerPhone.replace(/\D/g, "");
+        
+        const { data: signerData, error: signerError } = await supabase
+          .from('document_signers')
+          .select('bry_signer_link, phone')
+          .eq('document_id', documentId);
+        
+        if (signerError) {
+          console.error("Error fetching signer link:", signerError);
+        } else if (signerData && signerData.length > 0) {
+          // Encontrar o signatário pelo telefone (comparar últimos 8-9 dígitos)
+          const matchingSigner = signerData.find(s => {
+            const signerCleanPhone = s.phone?.replace(/\D/g, "") || "";
+            return signerCleanPhone.endsWith(cleanPhoneForQuery.slice(-8)) || 
+                   cleanPhoneForQuery.endsWith(signerCleanPhone.slice(-8));
+          });
+          
+          if (matchingSigner?.bry_signer_link) {
+            finalBrySignerLink = matchingSigner.bry_signer_link;
+            console.log("Found BRy link in database:", finalBrySignerLink);
+          } else {
+            console.warn("WARNING: Document is ADVANCED/QUALIFIED but no BRy link found for this signer!");
+          }
+        }
+      }
+    }
+    
     // Usar link BRy se disponível, senão link interno
-    const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
+    const signatureUrl = finalBrySignerLink || `${APP_URL}/assinar/${documentId}`;
     console.log(`Using signature URL: ${signatureUrl}`);
-    console.log(`BRy link provided: ${brySignerLink ? 'Yes' : 'No'}`);
+    console.log(`BRy link provided: ${finalBrySignerLink ? 'Yes (from DB or param)' : 'No - using system link'}`);
 
     const templateSid = isCompleted ? templateCompleted : templateInvitation;
     const templateType = isCompleted ? "document_completed" : "signature_invitation";

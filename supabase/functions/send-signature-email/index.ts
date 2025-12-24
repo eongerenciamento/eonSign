@@ -50,14 +50,47 @@ const handler = async (req: Request): Promise<Response> => {
     if (APP_URL && !APP_URL.startsWith("http")) {
       APP_URL = `https://${APP_URL}`;
     }
-    console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
-    console.log("[DEBUG] APP_URL being used:", APP_URL);
-    const signatureUrl = brySignerLink || `${APP_URL}/assinar/${documentId}`;
+    
+    // Se não foi fornecido brySignerLink, verificar se é documento ADVANCED/QUALIFIED e buscar do banco
+    let finalBrySignerLink = brySignerLink;
+    if (!finalBrySignerLink && documentId) {
+      console.log("BRy link not provided, checking document signature mode...");
+      
+      const { data: docData, error: docError } = await supabase
+        .from('documents')
+        .select('signature_mode, bry_envelope_uuid')
+        .eq('id', documentId)
+        .single();
+      
+      if (docError) {
+        console.error("Error fetching document:", docError);
+      } else if (docData?.signature_mode && docData.signature_mode !== 'SIMPLE' && docData.bry_envelope_uuid) {
+        console.log(`Document is ${docData.signature_mode}, fetching BRy link from database...`);
+        
+        const { data: signerData, error: signerError } = await supabase
+          .from('document_signers')
+          .select('bry_signer_link')
+          .eq('document_id', documentId)
+          .eq('email', signerEmail)
+          .single();
+        
+        if (signerError) {
+          console.error("Error fetching signer link:", signerError);
+        } else if (signerData?.bry_signer_link) {
+          finalBrySignerLink = signerData.bry_signer_link;
+          console.log("Found BRy link in database:", finalBrySignerLink);
+        } else {
+          console.warn("WARNING: Document is ADVANCED/QUALIFIED but no BRy link found in database!");
+        }
+      }
+    }
+    
+    const signatureUrl = finalBrySignerLink || `${APP_URL}/assinar/${documentId}`;
     console.log("[DEBUG] Final signature URL:", signatureUrl);
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     // Texto diferente se for BRy
-    const isBrySignature = !!brySignerLink;
+    const isBrySignature = !!finalBrySignerLink;
     const instructionText = isBrySignature
       ? "Clique no botão abaixo para visualizar e assinar o documento digitalmente com certificado ICP-Brasil."
       : "Clique no botão abaixo para visualizar e assinar o documento. Você precisará informar seu CPF/CNPJ para concluir a assinatura.";
