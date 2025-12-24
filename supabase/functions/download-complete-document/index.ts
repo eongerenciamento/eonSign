@@ -7,6 +7,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Sanitiza nome de arquivo para evitar problemas com caracteres especiais
+function sanitizeFilename(filename: string): string {
+  return filename
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-zA-Z0-9._-]/g, '_'); // Substitui caracteres especiais por _
+}
+
 async function mergePdfs(signedPdfBytes: ArrayBuffer, reportPdfBytes: ArrayBuffer): Promise<Uint8Array> {
   const mergedPdf = await PDFDocument.create();
   
@@ -89,10 +97,12 @@ serve(async (req) => {
     const mergedPdf = await mergePdfs(signedPdfBytes, reportPdfBytes);
     console.log("Merged PDF size:", mergedPdf.byteLength, "bytes");
 
+    const safeFilename = sanitizeFilename(document.name);
+
     return new Response(
       JSON.stringify({
         pdfBytes: Array.from(mergedPdf),
-        fileName: `${document.name}_completo.pdf`
+        fileName: `${safeFilename}_completo.pdf`
       }),
       {
         status: 200,
