@@ -35,6 +35,77 @@ const getDisplayName = (name: string): string => {
   return normalizeText(name);
 };
 
+// Helper to download and embed selfie image
+const embedSelfieImage = async (
+  pdfDoc: any,
+  supabase: any,
+  selfieUrl: string | null
+): Promise<any> => {
+  if (!selfieUrl) return null;
+
+  try {
+    // Extract path from storage URL
+    let selfiePath: string;
+    if (selfieUrl.includes('/biometry/')) {
+      const urlParts = selfieUrl.split('/biometry/');
+      selfiePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+    } else if (selfieUrl.includes('/selfies/')) {
+      const urlParts = selfieUrl.split('/selfies/');
+      selfiePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+    } else {
+      selfiePath = selfieUrl;
+    }
+
+    console.log("Downloading selfie from path:", selfiePath);
+
+    // Try biometry bucket first, then selfies
+    let selfieData = null;
+    let error = null;
+
+    const { data: biometryData, error: biometryError } = await supabase.storage
+      .from("biometry")
+      .download(selfiePath);
+
+    if (!biometryError && biometryData) {
+      selfieData = biometryData;
+    } else {
+      // Try selfies bucket
+      const { data: selfiesData, error: selfiesError } = await supabase.storage
+        .from("selfies")
+        .download(selfiePath);
+      
+      if (!selfiesError && selfiesData) {
+        selfieData = selfiesData;
+      } else {
+        error = selfiesError || biometryError;
+      }
+    }
+
+    if (error || !selfieData) {
+      console.log("Selfie not found in storage:", error);
+      return null;
+    }
+
+    const selfieBytes = await selfieData.arrayBuffer();
+    console.log("Selfie downloaded, size:", selfieBytes.byteLength);
+
+    // Try to embed as JPEG first, then PNG
+    try {
+      return await pdfDoc.embedJpg(new Uint8Array(selfieBytes));
+    } catch {
+      try {
+        return await pdfDoc.embedPng(new Uint8Array(selfieBytes));
+      } catch (embedError) {
+        console.log("Error embedding selfie image:", embedError);
+        return null;
+      }
+    }
+  } catch (err) {
+    console.log("Error processing selfie:", err);
+    return null;
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -177,12 +248,28 @@ serve(async (req) => {
 
     console.log(`Total signed signers: ${totalSignersCount}, displaying: ${signersToDisplay.length} (truncated: ${!showAllSigners})`);
 
-    // === LAYOUT: TWO VERTICAL COLUMNS ON RIGHT MARGIN ===
-    // Column 1 (left): Validation link
-    // Column 2 (right): Logo + Signatures
+    // Pre-load all selfie images
+    const signerSelfies: Map<string, any> = new Map();
+    for (const signer of signersToDisplay) {
+      if (signer.selfie_url) {
+        const selfieImage = await embedSelfieImage(pdfDoc, supabase, signer.selfie_url);
+        if (selfieImage) {
+          const signerKey = signer.cpf || signer.name;
+          signerSelfies.set(signerKey, selfieImage);
+          console.log("Selfie embedded for:", signerKey);
+        }
+      }
+    }
+
+    // === LAYOUT: THREE COLUMNS ON RIGHT MARGIN ===
+    // Column 1 (leftmost): Validation link - X = 28
+    // Column 2 (middle): Metadata text - X = 16
+    // Column 3 (rightmost): Selfie thumbnail - X = 6
     
-    const validationColumnX = 18;  // Leftmost column (validation link)
-    const signaturesColumnX = 8;   // Rightmost column (signatures)
+    const validationColumnX = 28;  // Validation link (leftmost)
+    const metadataColumnX = 16;    // Signer metadata (middle)
+    const selfieColumnX = 6;       // Selfie photo (rightmost)
+    const selfieSize = 22;         // Selfie thumbnail size in points
     const startY = 35;             // Start closer to footer
 
     // Apply signatures to ALL pages
@@ -193,18 +280,16 @@ serve(async (req) => {
       // Calculate where signatures start (after logo if present)
       let signaturesStartY = startY;
       
-      // 1. Draw Logo aligned with the two text columns
+      // 1. Draw Logo centered between columns
       if (logoImage) {
         const logoDisplaySize = 25;
         const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
         
-        // Position logo at the center between validation (18) and signatures (8) columns
-        // With 90° rotation, the image rotates around (x, y) point
-        // To align correctly, we position it at the midpoint without additional offset
-        const logoColumnX = (validationColumnX + signaturesColumnX) / 2;  // = 13
+        // Position logo at the center between validation and selfie columns
+        const logoColumnX = (validationColumnX + selfieColumnX) / 2;
         
         page.drawImage(logoImage, {
-          x: width - logoColumnX + (logoDims.height / 2),  // Center the logo visually between columns
+          x: width - logoColumnX + (logoDims.height / 2),
           y: startY,
           width: logoDims.width,
           height: logoDims.height,
@@ -215,8 +300,7 @@ serve(async (req) => {
 
       let currentY = signaturesStartY;
 
-      // 2. Draw each signature (Nome - CPF - Assinado em DD/MM/YYYY às HH:MM)
-      // Only display first 3 signers when 4+ total signers
+      // 2. Draw each signature with metadata on left and selfie on right
       for (const signer of signersToDisplay) {
         const displayName = getDisplayName(signer.typed_signature || signer.name);
         const cpfFormatted = formatCPF(signer.cpf);
@@ -239,40 +323,44 @@ serve(async (req) => {
               timeZone: "America/Sao_Paulo",
             });
 
-        // Build security indicators
+        // Build security indicators (without "Biometria" - the photo shows it)
         const securityIndicators: string[] = [];
-        if (signer.selfie_url) {
-          securityIndicators.push("Biometria");
-        }
         if (signer.signature_city || signer.signature_state) {
-          securityIndicators.push("Geo");
+          const city = signer.signature_city || "";
+          const state = signer.signature_state || "";
+          if (city && state) {
+            securityIndicators.push(`${city}/${state}`);
+          } else {
+            securityIndicators.push(city || state);
+          }
         }
         if (signer.signature_ip) {
-          securityIndicators.push("IP");
+          securityIndicators.push(`IP: ${signer.signature_ip}`);
         }
 
-        // Build signature text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM [Biometria | Geo | IP]
-        let signatureText = displayName;
+        // Build metadata text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM [Geo | IP]
+        let metadataText = displayName;
         if (cpfFormatted) {
-          signatureText += ` - ${cpfFormatted}`;
+          metadataText += ` - ${cpfFormatted}`;
         }
-        signatureText += ` - Assinado em ${signDate}`;
+        metadataText += ` - ${signDate}`;
         
         // Add security indicators if any
         if (securityIndicators.length > 0) {
-          signatureText += ` [${securityIndicators.join(" | ")}]`;
+          metadataText += ` [${securityIndicators.join(" | ")}]`;
         }
         
-        signatureText = normalizeText(signatureText);
+        metadataText = normalizeText(metadataText);
 
         // Adjust font size based on text length
         let fontSize = 6;
-        if (signatureText.length > 70) fontSize = 4.5;
-        else if (signatureText.length > 55) fontSize = 5;
-        else if (signatureText.length > 45) fontSize = 5.5;
+        if (metadataText.length > 70) fontSize = 4.5;
+        else if (metadataText.length > 55) fontSize = 5;
+        else if (metadataText.length > 45) fontSize = 5.5;
 
-        page.drawText(signatureText, {
-          x: width - signaturesColumnX,
+        // Draw metadata text (middle column)
+        page.drawText(metadataText, {
+          x: width - metadataColumnX,
           y: currentY,
           size: fontSize,
           font: helveticaBold,
@@ -280,32 +368,53 @@ serve(async (req) => {
           rotate: degrees(90),
         });
 
-        // Move up for next signature (text width + spacing)
-        const textWidth = helveticaBold.widthOfTextAtSize(signatureText, fontSize);
-        currentY += textWidth + 12;
+        // Draw selfie thumbnail (rightmost column)
+        const signerKey = signer.cpf || signer.name;
+        const selfieImage = signerSelfies.get(signerKey);
+        
+        if (selfieImage) {
+          // Calculate scale to fit within selfieSize while maintaining aspect ratio
+          const originalWidth = selfieImage.width;
+          const originalHeight = selfieImage.height;
+          const scaleFactor = Math.min(selfieSize / originalWidth, selfieSize / originalHeight);
+          const scaledWidth = originalWidth * scaleFactor;
+          const scaledHeight = originalHeight * scaleFactor;
+
+          // Draw selfie at rightmost column, rotated 90 degrees
+          page.drawImage(selfieImage, {
+            x: width - selfieColumnX,
+            y: currentY,
+            width: scaledWidth,
+            height: scaledHeight,
+            rotate: degrees(90),
+          });
+        }
+
+        // Move up for next signature (use max of text width or selfie size + spacing)
+        const textWidth = helveticaBold.widthOfTextAtSize(metadataText, fontSize);
+        const rowHeight = Math.max(textWidth, selfieImage ? selfieSize : 0);
+        currentY += rowHeight + 15;
       }
 
-      // 3. Draw validation link aligned with first signatory
-      // Add suffix when not all signers are displayed
+      // 3. Draw validation link (leftmost column)
       let validationText = `Verifique em: sign.eonhub.com.br/validar/${documentId}`;
       if (!showAllSigners) {
         validationText += ` / verifique todos os signatarios na pagina de assinaturas`;
       }
       validationText = normalizeText(validationText);
       
-      // Adjust font size if text is longer (when showing truncation message)
       const validationFontSize = showAllSigners ? 5 : 4.5;
       
       page.drawText(validationText, {
         x: width - validationColumnX,
-        y: signaturesStartY,  // Aligned with first signatory, after logo
+        y: signaturesStartY,
         size: validationFontSize,
         font: helveticaFont,
         color: rgb(0.42, 0.45, 0.50),
         rotate: degrees(90),
       });
 
-      console.log(`Page ${pageIndex + 1}/${totalPages}: Applied ${signersToDisplay.length} of ${totalSignersCount} signatures (truncated: ${!showAllSigners})`);
+      console.log(`Page ${pageIndex + 1}/${totalPages}: Applied ${signersToDisplay.length} signatures with ${signerSelfies.size} selfies`);
     }
 
     // Save the modified PDF
