@@ -235,7 +235,7 @@ const ValidateDocument = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(data.valid ? "✓ DOCUMENTO VÁLIDO" : "⏳ DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, {
+    doc.text(data.valid ? "DOCUMENTO VÁLIDO" : "DOCUMENTO PENDENTE", pageWidth / 2, yPos + 10, {
       align: "center",
     });
 
@@ -314,20 +314,13 @@ const ValidateDocument = () => {
         }
       }
 
-      // Signer status indicator
-      if (signer.status === "signed") {
-        doc.setFillColor(34, 197, 94);
-      } else {
-        doc.setFillColor(156, 163, 175);
-      }
-      doc.circle(margin + 5, yPos + 3, 3, "F");
-
-      // Signer name and status
+      // Signer name
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text(signer.name, margin + 12, yPos + 5);
+      doc.text(signer.name, margin + 5, yPos + 5);
 
+      // Status label below name (without brackets)
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       const statusLabel = signer.status === "signed" ? "Assinado" : "Pendente";
@@ -336,16 +329,16 @@ const ValidateDocument = () => {
         signer.status === "signed" ? 197 : 163,
         signer.status === "signed" ? 94 : 175,
       );
-      doc.text(`[${statusLabel}]`, margin + 12 + doc.getTextWidth(signer.name) + 3, yPos + 5);
+      doc.text(statusLabel, margin + 5, yPos + 11);
 
       if (signer.status === "signed") {
         doc.setTextColor(100, 100, 100);
         doc.setFontSize(9);
 
-        let infoY = yPos + 12;
+        let infoY = yPos + 17;
 
         if (signer.signed_at) {
-          doc.text(`Data: ${formatDate(signer.signed_at)}`, margin + 12, infoY);
+          doc.text(`Data: ${formatDate(signer.signed_at)}`, margin + 5, infoY);
           infoY += 6;
         }
 
@@ -353,19 +346,19 @@ const ValidateDocument = () => {
         if (location) {
           doc.text(
             `Local: ${location}${signer.signature_country ? ` - ${signer.signature_country}` : ""}`,
-            margin + 12,
+            margin + 5,
             infoY,
           );
           infoY += 6;
         }
 
         if (signer.cpf) {
-          doc.text(`CPF: ${signer.cpf}`, margin + 12, infoY);
+          doc.text(`CPF: ${signer.cpf}`, margin + 5, infoY);
           infoY += 6;
         }
 
         if (signer.signature_ip) {
-          doc.text(`IP: ${signer.signature_ip}`, margin + 12, infoY);
+          doc.text(`IP: ${signer.signature_ip}`, margin + 5, infoY);
         }
       }
 
