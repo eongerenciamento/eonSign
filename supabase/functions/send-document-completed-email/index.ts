@@ -252,8 +252,10 @@ const handler = async (req: Request): Promise<Response> => {
         console.log("Could not generate local report, sending signed document only");
       }
     } else if (document.bry_envelope_uuid && document.bry_document_uuid) {
-      // ADVANCED/QUALIFIED mode: Use BRy report
-      console.log("Using BRy report for ADVANCED/QUALIFIED signature mode");
+      // ADVANCED/QUALIFIED mode: Use BRy reportUnified directly
+      // The reportUnified already contains: original document + signatures + evidence page
+      // DO NOT merge with signedPdfBuffer to avoid duplicate pages
+      console.log("Using BRy reportUnified for ADVANCED/QUALIFIED signature mode (no merge needed)");
 
       const bryToken = await getBryToken();
       if (bryToken) {
@@ -264,14 +266,11 @@ const handler = async (req: Request): Promise<Response> => {
         );
 
         if (reportPdfBuffer) {
-          console.log(`BRy report size: ${reportPdfBuffer.byteLength} bytes`);
-          try {
-            finalPdfBuffer = await mergePdfs(signedPdfBuffer, reportPdfBuffer);
-            attachmentFilename = `${documentName}_completo.pdf`;
-            console.log(`Merged PDF size: ${finalPdfBuffer.byteLength} bytes`);
-          } catch (mergeError) {
-            console.error("Error merging PDFs, using signed document only:", mergeError);
-          }
+          console.log(`BRy reportUnified size: ${reportPdfBuffer.byteLength} bytes`);
+          // Use reportUnified directly - it already contains the complete document with evidence
+          finalPdfBuffer = reportPdfBuffer;
+          attachmentFilename = `${documentName}_completo.pdf`;
+          console.log("Using BRy reportUnified directly as final PDF (no merge)");
         } else {
           console.log("Could not download BRy report, sending signed document only");
         }
