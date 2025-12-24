@@ -95,7 +95,14 @@ const Documents = () => {
     // Sort by created_at
     displayItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-    // Load signers for each item
+    // Helper to normalize phone for comparison
+    const normalizePhone = (phone: string | null): string => {
+      if (!phone) return "";
+      const numbers = phone.replace(/\D/g, "");
+      return numbers.startsWith("55") ? numbers : `55${numbers}`;
+    };
+
+    // Load signers and WhatsApp statuses for each item
     const documentsWithSigners = await Promise.all(
       displayItems.map(async (item) => {
         const { data: signersData } = await supabase
@@ -104,10 +111,34 @@ const Documents = () => {
           .eq("document_id", item.id)
           .order("is_company_signer", { ascending: false });
 
+        // Fetch WhatsApp history for this document
+        const { data: whatsappData } = await supabase
+          .from("whatsapp_history")
+          .select("recipient_phone, status, read_at")
+          .eq("document_id", item.id)
+          .eq("message_type", "signature_invitation");
+
+        // Create map of WhatsApp status by normalized phone
+        const whatsappStatusMap = new Map<string, string>();
+        whatsappData?.forEach(wh => {
+          // Use the most recent/best status for each phone
+          const existingStatus = whatsappStatusMap.get(wh.recipient_phone);
+          if (!existingStatus || wh.status === 'read' || (wh.status === 'delivered' && existingStatus !== 'read')) {
+            whatsappStatusMap.set(wh.recipient_phone, wh.status);
+          }
+        });
+
         const signerNames = (signersData || []).map(s => s.name);
         const signerEmails = (signersData || []).map(s => s.email);
         const signerPhones = (signersData || []).map(s => s.phone);
         const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
+        
+        // Map WhatsApp status for each signer
+        const signerWhatsAppStatuses = (signersData || []).map(signer => {
+          const normalizedPhone = normalizePhone(signer.phone);
+          const whStatus = whatsappStatusMap.get(normalizedPhone);
+          return (whStatus as "read" | "delivered" | "sent" | "pending" | "failed" | null) || null;
+        });
 
         // Format envelope documents for the dialog
         const envelopeDocuments = item.envelopeDocuments?.map((doc: any) => ({
@@ -133,6 +164,7 @@ const Documents = () => {
           signerNames,
           signerEmails,
           signerPhones,
+          signerWhatsAppStatuses,
           bryEnvelopeUuid: item.bry_envelope_uuid,
           isEnvelope: item.isEnvelope,
           documentCount: item.documentCount,

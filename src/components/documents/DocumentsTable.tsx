@@ -35,6 +35,7 @@ export interface Document {
   signerNames?: string[];
   signerEmails?: string[];
   signerPhones?: string[];
+  signerWhatsAppStatuses?: ("read" | "delivered" | "sent" | "pending" | "failed" | null)[];
   folderId?: string | null;
   fileUrl?: string | null;
   bryEnvelopeUuid?: string | null;
@@ -552,7 +553,43 @@ export const DocumentsTable = ({
     e.currentTarget.classList.remove("opacity-50");
   };
 
-  const handleResendNotifications = async (documentId: string) => {
+// Helper to get resend icon state based on WhatsApp read statuses
+  const getResendIconState = (doc: Document) => {
+    const pendingSigners: { name: string; phone: string; whatsappStatus: string | null }[] = [];
+    const readSigners: { name: string; phone: string }[] = [];
+    const unreadSigners: { name: string; phone: string }[] = [];
+
+    doc.signerStatuses?.forEach((status, idx) => {
+      if (status === 'pending') {
+        const name = doc.signerNames?.[idx] || '';
+        const phone = doc.signerPhones?.[idx] || '';
+        const whatsappStatus = doc.signerWhatsAppStatuses?.[idx] || null;
+        
+        pendingSigners.push({ name, phone, whatsappStatus });
+        
+        if (whatsappStatus === 'read') {
+          readSigners.push({ name, phone });
+        } else {
+          unreadSigners.push({ name, phone });
+        }
+      }
+    });
+
+    // All pending signers have read -> green, disabled
+    if (pendingSigners.length > 0 && readSigners.length === pendingSigners.length) {
+      return { color: 'text-green-600', disabled: true, readSigners, unreadSigners };
+    }
+
+    // At least one has read -> blue, resend only to unread
+    if (readSigners.length > 0) {
+      return { color: 'text-blue-700', disabled: false, readSigners, unreadSigners };
+    }
+
+    // No one has read -> default color
+    return { color: 'text-muted-foreground', disabled: false, readSigners, unreadSigners };
+  };
+
+  const handleResendNotifications = async (documentId: string, signersToResend?: { name: string; phone: string }[]) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -590,14 +627,22 @@ export const DocumentsTable = ({
       }
 
       // Send emails and WhatsApp to pending signers
-      const pendingSigners = documentData.document_signers.filter(
+      let pendingSigners = documentData.document_signers.filter(
         (signer: any) => signer.status === 'pending'
       );
+
+      // If specific signers to resend were provided, filter by them
+      if (signersToResend && signersToResend.length > 0) {
+        const namesToResend = signersToResend.map(s => s.name);
+        pendingSigners = pendingSigners.filter((signer: any) => 
+          namesToResend.includes(signer.name)
+        );
+      }
 
       if (pendingSigners.length === 0) {
         toast({
           title: "Nenhum signatário pendente",
-          description: "Todos os signatários já assinaram o documento.",
+          description: "Todos os signatários já assinaram ou leram a mensagem.",
         });
         return;
       }
@@ -1099,17 +1144,52 @@ export const DocumentsTable = ({
                           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
-                      {doc.status !== 'signed' && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
-                          onClick={() => handleResendNotifications(doc.id)}
-                          title="Reenviar e-mail e WhatsApp para signatários pendentes"
-                        >
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                      )}
+                      {doc.status !== 'signed' && (() => {
+                        const iconState = getResendIconState(doc);
+                        return (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-full hover:bg-transparent" 
+                                onClick={() => !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)}
+                                disabled={iconState.disabled}
+                              >
+                                <Mail className={`w-4 h-4 ${iconState.color}`} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              {iconState.readSigners.length > 0 && (
+                                <div className="text-green-600 mb-1">
+                                  <p className="font-semibold text-xs">✓ Leram:</p>
+                                  {iconState.readSigners.map((s, i) => (
+                                    <p key={i} className="text-xs">{s.name}</p>
+                                  ))}
+                                </div>
+                              )}
+                              {iconState.unreadSigners.length > 0 && (
+                                <div className="text-yellow-600">
+                                  <p className="font-semibold text-xs">⏳ Pendentes:</p>
+                                  {iconState.unreadSigners.map((s, i) => (
+                                    <p key={i} className="text-xs">{s.name}</p>
+                                  ))}
+                                </div>
+                              )}
+                              {iconState.disabled && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Todos já leram a mensagem
+                                </p>
+                              )}
+                              {!iconState.disabled && iconState.unreadSigners.length > 0 && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Clique para reenviar
+                                </p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })()}
                       {doc.signedBy === 0 && (
                         <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
                           <Trash2 className="w-4 h-4 text-muted-foreground" />
@@ -1212,17 +1292,52 @@ export const DocumentsTable = ({
                         <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
-                    {doc.status !== 'signed' && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleResendNotifications(doc.id)}
-                        title="Reenviar e-mail e WhatsApp para signatários pendentes"
-                      >
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
+                    {doc.status !== 'signed' && (() => {
+                      const iconState = getResendIconState(doc);
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-transparent h-8 w-8" 
+                              onClick={() => !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)}
+                              disabled={iconState.disabled}
+                            >
+                              <Mail className={`w-4 h-4 ${iconState.color}`} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            {iconState.readSigners.length > 0 && (
+                              <div className="text-green-600 mb-1">
+                                <p className="font-semibold text-xs">✓ Leram:</p>
+                                {iconState.readSigners.map((s, i) => (
+                                  <p key={i} className="text-xs">{s.name}</p>
+                                ))}
+                              </div>
+                            )}
+                            {iconState.unreadSigners.length > 0 && (
+                              <div className="text-yellow-600">
+                                <p className="font-semibold text-xs">⏳ Pendentes:</p>
+                                {iconState.unreadSigners.map((s, i) => (
+                                  <p key={i} className="text-xs">{s.name}</p>
+                                ))}
+                              </div>
+                            )}
+                            {iconState.disabled && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Todos já leram a mensagem
+                              </p>
+                            )}
+                            {!iconState.disabled && iconState.unreadSigners.length > 0 && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Clique para reenviar
+                              </p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })()}
                     {doc.signedBy === 0 && (
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
                         <Trash2 className="w-4 h-4 text-muted-foreground" />
