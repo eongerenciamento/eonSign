@@ -36,6 +36,7 @@ interface Signer {
   signature_country: string | null;
   signature_id: string | null;
   cpf: string | null;
+  selfie_url: string | null;
 }
 
 interface TimestampInfo {
@@ -174,10 +175,33 @@ const ValidateDocument = () => {
     }
   };
 
-  const handleDownloadCertificate = () => {
+  const handleDownloadCertificate = async () => {
     if (!data) return;
 
     const { document, organization, signers } = data;
+    
+    // Pre-load selfie images as base64
+    const signerImages: { [key: string]: string | null } = {};
+    await Promise.all(
+      signers.map(async (signer) => {
+        if (signer.selfie_url && signer.status === "signed") {
+          try {
+            const response = await fetch(signer.selfie_url);
+            const blob = await response.blob();
+            const base64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+            signerImages[signer.id] = base64;
+          } catch (e) {
+            console.error("Failed to load selfie:", e);
+            signerImages[signer.id] = null;
+          }
+        }
+      })
+    );
+    
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
@@ -264,10 +288,31 @@ const ValidateDocument = () => {
         yPos = 20;
       }
 
-      // Signer box
-      const boxHeight = signer.status === "signed" ? 35 : 15;
+      // Calculate box height based on whether there's a selfie
+      const hasSelfie = !!signerImages[signer.id];
+      const boxHeight = signer.status === "signed" 
+        ? (hasSelfie ? 45 : 35) 
+        : 15;
+      
       doc.setFillColor(245, 245, 245);
       doc.roundedRect(margin, yPos - 5, pageWidth - margin * 2, boxHeight, 2, 2, "F");
+
+      // Draw selfie if available (right side of box)
+      if (hasSelfie && signerImages[signer.id]) {
+        const imgSize = 35;
+        try {
+          doc.addImage(
+            signerImages[signer.id]!,
+            'JPEG',
+            pageWidth - margin - imgSize - 5,
+            yPos - 2,
+            imgSize,
+            imgSize
+          );
+        } catch (e) {
+          console.error("Error adding selfie to PDF:", e);
+        }
+      }
 
       // Signer status indicator
       if (signer.status === "signed") {
@@ -638,6 +683,16 @@ const ValidateDocument = () => {
                 <div key={signer.id}>
                   {index > 0 && <Separator className="my-4" />}
                   <div className="flex items-start gap-4">
+                    {/* Selfie Image - show if exists and signed */}
+                    {signer.selfie_url && signer.status === "signed" && (
+                      <div className="flex-shrink-0">
+                        <img
+                          src={signer.selfie_url}
+                          alt={`Biometria de ${signer.name}`}
+                          className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+                        />
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-semibold text-gray-900">{signer.name}</h4>

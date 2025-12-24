@@ -61,7 +61,8 @@ serve(async (req) => {
         signature_state,
         signature_country,
         signature_id,
-        cpf
+        cpf,
+        selfie_url
       `)
       .eq("document_id", documentId)
       .order("signed_at", { ascending: true });
@@ -70,8 +71,8 @@ serve(async (req) => {
       console.error("Error fetching signers:", signersError);
     }
 
-    // Mask CPF for privacy (show only last 4 digits)
-    const maskedSigners = signers?.map(signer => {
+    // Mask CPF and generate signed URLs for selfies
+    const maskedSigners = await Promise.all((signers || []).map(async (signer) => {
       let maskedCpf = null;
       if (signer.cpf) {
         const clean = signer.cpf.replace(/\D/g, "");
@@ -81,11 +82,36 @@ serve(async (req) => {
           maskedCpf = `**.***.***/***${clean.slice(10, 12)}-${clean.slice(12)}`;
         }
       }
+
+      // Generate signed URL for selfie if exists (biometry bucket is private)
+      let selfieSignedUrl = null;
+      if (signer.selfie_url) {
+        try {
+          let filePath = signer.selfie_url;
+          // Handle both URL and path formats
+          if (filePath.includes('/biometry/')) {
+            const urlParts = filePath.split('/biometry/');
+            filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+          }
+          
+          const { data: selfieUrlData } = await supabase.storage
+            .from("biometry")
+            .createSignedUrl(filePath, 3600); // 1 hour expiry
+          
+          if (selfieUrlData?.signedUrl) {
+            selfieSignedUrl = selfieUrlData.signedUrl;
+          }
+        } catch (e) {
+          console.error("Error generating selfie signed URL:", e);
+        }
+      }
+
       return {
         ...signer,
-        cpf: maskedCpf
+        cpf: maskedCpf,
+        selfie_url: selfieSignedUrl
       };
-    });
+    }));
 
     const isCompleted = document.status === "signed";
     const isValid = isCompleted && document.signed_by === document.signers;
