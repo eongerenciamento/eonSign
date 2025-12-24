@@ -139,7 +139,7 @@ serve(async (req) => {
     // Get all signers to display all signatures accumulated so far
     const { data: allSigners, error: signersError } = await supabase
       .from("document_signers")
-      .select("name, cpf, signed_at, typed_signature")
+      .select("name, cpf, signed_at, typed_signature, selfie_url, signature_ip, signature_city, signature_state")
       .eq("document_id", documentId)
       .not("signed_at", "is", null)
       .order("signed_at", { ascending: true });
@@ -160,7 +160,11 @@ serve(async (req) => {
         name: typedSignature || signerData.name,
         cpf: signerData.cpf,
         signed_at: new Date().toISOString(),
-        typed_signature: typedSignature
+        typed_signature: typedSignature,
+        selfie_url: signerData.selfie_url || null,
+        signature_ip: signerData.signature_ip || null,
+        signature_city: signerData.signature_city || null,
+        signature_state: signerData.signature_state || null
       });
     }
 
@@ -235,12 +239,30 @@ serve(async (req) => {
               timeZone: "America/Sao_Paulo",
             });
 
-        // Build signature text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM
+        // Build security indicators
+        const securityIndicators: string[] = [];
+        if (signer.selfie_url) {
+          securityIndicators.push("Biometria");
+        }
+        if (signer.signature_city || signer.signature_state) {
+          securityIndicators.push("Geo");
+        }
+        if (signer.signature_ip) {
+          securityIndicators.push("IP");
+        }
+
+        // Build signature text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM [Biometria | Geo | IP]
         let signatureText = displayName;
         if (cpfFormatted) {
           signatureText += ` - ${cpfFormatted}`;
         }
         signatureText += ` - Assinado em ${signDate}`;
+        
+        // Add security indicators if any
+        if (securityIndicators.length > 0) {
+          signatureText += ` [${securityIndicators.join(" | ")}]`;
+        }
+        
         signatureText = normalizeText(signatureText);
 
         // Adjust font size based on text length

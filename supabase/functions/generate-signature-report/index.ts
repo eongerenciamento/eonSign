@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: signers, error: signersError } = await supabase
       .from("document_signers")
       .select(
-        "name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id",
+        "name, email, phone, cpf, birth_date, status, signed_at, signature_ip, signature_city, signature_state, signature_country, signature_id, selfie_url",
       )
       .eq("document_id", documentId);
 
@@ -216,7 +216,9 @@ const handler = async (req: Request): Promise<Response> => {
     // Draw each signer card
     for (let i = 0; i < signers.length; i++) {
       const signer = signers[i];
-      const cardHeight = 110;
+      // Increase card height if biometry was collected
+      const hasBiometry = !!signer.selfie_url;
+      const cardHeight = hasBiometry ? 125 : 110;
 
       // Check if we need a new page
       if (yPos - cardHeight < 100) {
@@ -377,6 +379,18 @@ const handler = async (req: Request): Promise<Response> => {
         font: helveticaFont,
         color: gray600,
       });
+      rightY -= lineHeight;
+
+      // Show biometry indicator if selfie was collected
+      if (signer.selfie_url) {
+        page.drawText("Biometria Facial: Coletada", {
+          x: rightX,
+          y: rightY,
+          size: 9,
+          font: helveticaBold,
+          color: greenColor,
+        });
+      }
 
       yPos -= cardHeight + 15;
     }
