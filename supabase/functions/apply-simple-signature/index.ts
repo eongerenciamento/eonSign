@@ -207,6 +207,7 @@ serve(async (req) => {
               year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
+              timeZone: "America/Sao_Paulo",
             })
           : new Date().toLocaleString("pt-BR", {
               day: "2-digit",
@@ -214,6 +215,7 @@ serve(async (req) => {
               year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
+              timeZone: "America/Sao_Paulo",
             });
 
         // Build signature text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM
@@ -245,7 +247,7 @@ serve(async (req) => {
       }
 
       // 3. Draw validation link in separate column (to the left of signatures)
-      const validationText = normalizeText(`Verifique em: app.eon.med.br/verificacao/${documentId}`);
+      const validationText = normalizeText(`Verifique em: sign.eonhub.com.br/validar/${documentId}`);
       page.drawText(validationText, {
         x: width - validationColumnX,
         y: startY,
