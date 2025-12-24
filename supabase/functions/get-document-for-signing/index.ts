@@ -21,10 +21,10 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Buscar documento
+    // Buscar documento (including require_facial_biometry field)
     const { data: document, error: docError } = await supabase
       .from("documents")
-      .select("*")
+      .select("*, require_facial_biometry")
       .eq("id", documentId)
       .single();
 

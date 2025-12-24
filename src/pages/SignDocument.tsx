@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck, MapPin, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign-white.png";
+import { SelfieCaptureDialog } from "@/components/documents/SelfieCaptureDialog";
 
 const emailSchema = z
   .string()
@@ -50,6 +51,7 @@ interface Document {
   signed_by: number;
   signers: number;
   signature_mode?: string;
+  require_facial_biometry?: boolean;
 }
 
 const SignDocument = () => {
@@ -73,13 +75,19 @@ const SignDocument = () => {
   const [pdfScale, setPdfScale] = useState(1);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState(false);
+  const [locationRequesting, setLocationRequesting] = useState(false);
   const [linkExpired, setLinkExpired] = useState(false);
   const [autoIdentifyChecked, setAutoIdentifyChecked] = useState(false);
 
   // Simple signature specific states
   const [typedSignature, setTypedSignature] = useState("");
+  
+  // Selfie capture states
+  const [showSelfieDialog, setShowSelfieDialog] = useState(false);
+  const [selfieBase64, setSelfieBase64] = useState<string | null>(null);
 
   const isSimpleSignature = document?.signature_mode === "SIMPLE" || !document?.signature_mode;
+  const requiresFacialBiometry = document?.require_facial_biometry === true;
 
   // Auto-identify logged-in user (internal signer)
   useEffect(() => {
@@ -129,28 +137,36 @@ const SignDocument = () => {
     }
   }, [documentId, autoIdentifyChecked]);
 
+  // Request geolocation when identified - MANDATORY for simple signatures
   useEffect(() => {
-    if (isIdentified && !location && !locationError) {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-            console.log("Localização capturada:", position.coords);
-          },
-          (error) => {
-            console.warn("Erro ao obter localização:", error);
-            setLocationError(true);
-            toast.info("Permissão de localização negada. A assinatura ainda é válida.");
-          },
-        );
-      } else {
-        setLocationError(true);
-      }
+    if (isIdentified && !location && !locationError && !locationRequesting) {
+      requestLocation();
     }
-  }, [isIdentified, location, locationError]);
+  }, [isIdentified, location, locationError, locationRequesting]);
+
+  const requestLocation = () => {
+    if ("geolocation" in navigator) {
+      setLocationRequesting(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationRequesting(false);
+          console.log("Localização capturada:", position.coords);
+        },
+        (error) => {
+          console.warn("Erro ao obter localização:", error);
+          setLocationError(true);
+          setLocationRequesting(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      setLocationError(true);
+    }
+  };
 
   // Pre-fill typed signature with signer name
   useEffect(() => {
@@ -341,6 +357,11 @@ const SignDocument = () => {
     }
   };
 
+  const handleSelfieCapture = (base64: string) => {
+    setSelfieBase64(base64);
+    toast.success("Selfie capturada com sucesso!");
+  };
+
   const handleSign = async () => {
     if (!cpf) {
       toast.error("Por favor, informe seu CPF/CNPJ");
@@ -384,6 +405,19 @@ const SignDocument = () => {
       return;
     }
 
+    // For simple signatures, geolocation is MANDATORY
+    if (isSimpleSignature && !location) {
+      toast.error("A localização é obrigatória para assinar este documento. Por favor, permita o acesso à sua localização.");
+      return;
+    }
+
+    // If facial biometry is required, check for selfie
+    if (isSimpleSignature && requiresFacialBiometry && !selfieBase64) {
+      toast.error("A biometria facial é obrigatória para este documento. Por favor, capture sua selfie.");
+      setShowSelfieDialog(true);
+      return;
+    }
+
     try {
       setIsSigning(true);
       const { data, error } = await supabase.functions.invoke("sign-document", {
@@ -396,6 +430,8 @@ const SignDocument = () => {
           longitude: location?.longitude || null,
           // Simple signature specific data
           typedSignature: isSimpleSignature ? typedSignature : null,
+          // Selfie data (if captured)
+          selfieBase64: selfieBase64 || null,
         },
       });
 
@@ -576,6 +612,51 @@ const SignDocument = () => {
           {/* Documento Info e Assinatura */}
           {isIdentified && (
             <>
+              {/* Location Status Alert for Simple Signatures */}
+              {isSimpleSignature && !location && (
+                <Card className="p-4 mb-6 border-amber-500" style={{ backgroundColor: '#fffbeb', borderColor: '#f59e0b' }}>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#d97706' }} />
+                    <div className="flex-1">
+                      <h4 className="font-medium mb-1" style={{ color: '#92400e' }}>Localização Obrigatória</h4>
+                      <p className="text-sm mb-3" style={{ color: '#b45309' }}>
+                        {locationRequesting 
+                          ? "Obtendo sua localização..." 
+                          : locationError 
+                            ? "Não foi possível obter sua localização. Clique no botão abaixo para tentar novamente."
+                            : "Por favor, permita o acesso à sua localização para assinar este documento."}
+                      </p>
+                      {locationError && (
+                        <Button
+                          onClick={requestLocation}
+                          variant="outline"
+                          size="sm"
+                          style={{ borderColor: '#f59e0b', color: '#92400e' }}
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Permitir Localização
+                        </Button>
+                      )}
+                      {locationRequesting && (
+                        <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#d97706' }} />
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* Location Confirmed */}
+              {isSimpleSignature && location && (
+                <Card className="p-4 mb-6" style={{ backgroundColor: '#f0fdf4', borderColor: '#22c55e' }}>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5" style={{ color: '#16a34a' }} />
+                    <p className="text-sm font-medium" style={{ color: '#166534' }}>
+                      Localização capturada com sucesso
+                    </p>
+                  </div>
+                </Card>
+              )}
+
               {/* PDF Viewer */}
               <Card className="p-6 mb-6" style={{ backgroundColor: '#ffffff' }}>
                 <div className="flex items-center justify-between mb-4">
@@ -623,7 +704,7 @@ const SignDocument = () => {
                   <FileText className="h-8 w-8 flex-shrink-0" style={{ color: '#273d60' }} />
                   <div className="flex-1">
                     <h2 className="text-xl font-bold mb-2" style={{ color: '#111827' }}>{document.name}</h2>
-                    <div className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
+                    <div className="flex items-center gap-2 text-sm flex-wrap" style={{ color: '#6b7280' }}>
                       <span>Status: {getStatusBadge(document.status)}</span>
                       <span>•</span>
                       <span>
@@ -633,6 +714,15 @@ const SignDocument = () => {
                         <>
                           <span>•</span>
                           <Badge variant="secondary" style={{ backgroundColor: '#f3f4f6', color: '#4b5563' }}>Assinatura Eletrônica</Badge>
+                        </>
+                      )}
+                      {requiresFacialBiometry && (
+                        <>
+                          <span>•</span>
+                          <Badge variant="secondary" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                            <Camera className="h-3 w-3 mr-1" />
+                            Biometria Facial
+                          </Badge>
                         </>
                       )}
                     </div>
@@ -718,6 +808,42 @@ const SignDocument = () => {
                       </div>
                     )}
 
+                    {/* Selfie Capture for Simple Mode with Facial Biometry */}
+                    {isSimpleSignature && requiresFacialBiometry && (
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2" style={{ color: '#374151' }}>
+                          <Camera className="h-4 w-4" />
+                          Biometria Facial (Obrigatória)
+                        </Label>
+                        {selfieBase64 ? (
+                          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4', border: '1px solid #22c55e' }}>
+                            <CheckCircle className="h-5 w-5" style={{ color: '#16a34a' }} />
+                            <span className="text-sm font-medium" style={{ color: '#166534' }}>Selfie capturada</span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowSelfieDialog(true)}
+                              className="ml-auto"
+                            >
+                              Capturar Novamente
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowSelfieDialog(true)}
+                            className="w-full"
+                            style={{ borderColor: '#3b82f6', color: '#1d4ed8' }}
+                          >
+                            <Camera className="h-4 w-4 mr-2" />
+                            Capturar Selfie
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
                     <div>
                       <Label htmlFor="cpf" style={{ color: '#374151' }}>CPF/CNPJ</Label>
                       <div className="relative">
@@ -784,7 +910,9 @@ const SignDocument = () => {
                         !birthDate ||
                         cpfValid === false ||
                         !!birthDateError ||
-                        (isSimpleSignature && !typedSignature.trim())
+                        (isSimpleSignature && !typedSignature.trim()) ||
+                        (isSimpleSignature && !location) ||
+                        (isSimpleSignature && requiresFacialBiometry && !selfieBase64)
                       }
                       className="w-full"
                       style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
@@ -815,6 +943,14 @@ const SignDocument = () => {
           )}
         </div>
       </div>
+
+      {/* Selfie Capture Dialog */}
+      <SelfieCaptureDialog
+        open={showSelfieDialog}
+        onOpenChange={setShowSelfieDialog}
+        onCapture={handleSelfieCapture}
+        signerName={currentSigner?.name || ""}
+      />
     </div>
   );
 };

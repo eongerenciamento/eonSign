@@ -174,6 +174,7 @@ export type Database = {
           is_company_signer: boolean
           name: string
           phone: string
+          selfie_url: string | null
           signature_city: string | null
           signature_country: string | null
           signature_id: string | null
@@ -201,6 +202,7 @@ export type Database = {
           is_company_signer?: boolean
           name: string
           phone: string
+          selfie_url?: string | null
           signature_city?: string | null
           signature_country?: string | null
           signature_id?: string | null
@@ -228,6 +230,7 @@ export type Database = {
           is_company_signer?: boolean
           name?: string
           phone?: string
+          selfie_url?: string | null
           signature_city?: string | null
           signature_country?: string | null
           signature_id?: string | null
@@ -266,6 +269,7 @@ export type Database = {
           name: string
           patient_name: string | null
           prescription_doc_type: string | null
+          require_facial_biometry: boolean | null
           signature_mode: string | null
           signed_by: number
           signers: number
@@ -285,6 +289,7 @@ export type Database = {
           name: string
           patient_name?: string | null
           prescription_doc_type?: string | null
+          require_facial_biometry?: boolean | null
           signature_mode?: string | null
           signed_by?: number
           signers?: number
@@ -304,6 +309,7 @@ export type Database = {
           name?: string
           patient_name?: string | null
           prescription_doc_type?: string | null
+          require_facial_biometry?: boolean | null
           signature_mode?: string | null
           signed_by?: number
           signers?: number
