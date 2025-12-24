@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, rgb, StandardFonts, degrees } from "https://esm.sh/pdf-lib@1.17.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +12,21 @@ const normalizeText = (text: string | null): string => {
   if (!text) return "";
   return text
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove combining diacritical marks
-    .replace(/[^\x00-\x7F]/g, ""); // Remove any remaining non-ASCII characters
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x00-\x7F]/g, "");
+};
+
+// Format CPF for display
+const formatCPF = (cpf: string | null): string => {
+  if (!cpf) return "";
+  const cleaned = cpf.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  }
+  if (cleaned.length === 14) {
+    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+  }
+  return cpf;
 };
 
 // Get display name without truncation
@@ -41,9 +54,11 @@ serve(async (req) => {
     console.log("Processing simple signature for document:", documentId);
     console.log("Signer index:", signerIndex, "of", totalSigners);
     console.log("Is last signer:", isLastSigner);
+    console.log("Signer data:", JSON.stringify(signerData));
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      supabaseUrl,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
@@ -102,62 +117,34 @@ serve(async (req) => {
     const lastPage = pages[totalPages - 1];
     const { width, height } = lastPage.getSize();
 
+    console.log("Page dimensions:", width, "x", height);
+
     // Embed fonts
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Get display name (full name, no truncation)
-    const displayName = getDisplayName(typedSignature || signerData.name);
-    
-    // Adjust font size based on name length
-    let nameFontSize = 9;
-    if (displayName.length > 40) {
-      nameFontSize = 7;
-    } else if (displayName.length > 30) {
-      nameFontSize = 8;
+    // Try to download and embed logo
+    let logoImage = null;
+    try {
+      const logoUrl = `${supabaseUrl}/storage/v1/object/public/email-assets/eon-sign-logo.png`;
+      console.log("Downloading logo from:", logoUrl);
+      const logoResponse = await fetch(logoUrl);
+      if (logoResponse.ok) {
+        const logoBytes = await logoResponse.arrayBuffer();
+        logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
+        console.log("Logo embedded successfully");
+      } else {
+        console.log("Logo not found, skipping:", logoResponse.status);
+      }
+    } catch (logoError) {
+      console.log("Error loading logo, skipping:", logoError);
     }
+
+    // Get display name and CPF
+    const displayName = getDisplayName(typedSignature || signerData.name);
+    const cpfFormatted = formatCPF(signerData.cpf);
     
-    // Signature box dimensions
-    const signatureBoxHeight = 42;
-    const margin = 40;
-    const bottomMargin = 30;
-    const gap = 10;
-
-    // Calculate available width and divide equally among all signers
-    const availableWidth = width - (margin * 2);
-    const maxSignersPerRow = 4; // Maximum signers per row
-    const signersInRow = Math.min(totalSigners, maxSignersPerRow);
-    const totalGapWidth = (signersInRow - 1) * gap;
-    const widthPerSigner = (availableWidth - totalGapWidth) / signersInRow;
-
-    // Calculate position based on fixed slots (not dynamic width)
-    const row = Math.floor(signerIndex / maxSignersPerRow);
-    const col = signerIndex % maxSignersPerRow;
-    
-    const sigX = margin + (col * (widthPerSigner + gap));
-    const sigY = bottomMargin + (row * (signatureBoxHeight + gap));
-
-    console.log(`Signature position: x=${sigX}, y=${sigY} for signer ${signerIndex + 1}/${totalSigners}, name: ${displayName}`);
-
-    // Draw typed signature name - dynamic font size, gray700
-    lastPage.drawText(displayName, {
-      x: sigX,
-      y: sigY + signatureBoxHeight - 12,
-      size: nameFontSize,
-      font: helveticaBold,
-      color: rgb(0.22, 0.25, 0.32), // gray700
-    });
-
-    // Draw "Assinado Eletronicamente" label - gray600
-    lastPage.drawText("Assinado Eletronicamente", {
-      x: sigX,
-      y: sigY + signatureBoxHeight - 22,
-      size: 6,
-      font: helveticaFont,
-      color: rgb(0.29, 0.33, 0.39), // gray600
-    });
-
-    // Draw signature date - gray500
+    // Signature date
     const signDate = new Date().toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -165,13 +152,98 @@ serve(async (req) => {
       hour: "2-digit",
       minute: "2-digit",
     });
-    lastPage.drawText(signDate, {
-      x: sigX,
-      y: sigY + signatureBoxHeight - 32,
-      size: 6,
-      font: helveticaFont,
-      color: rgb(0.42, 0.45, 0.50), // gray500
+
+    // === NEW VERTICAL LAYOUT ON RIGHT MARGIN ===
+    const rightMargin = 22;
+    const signatureAreaStartY = 50;
+    
+    // Logo dimensions (when rotated)
+    const logoDisplaySize = 25;
+    
+    // Calculate positions for vertical text
+    // Elements from bottom to top: Logo, Validation Link, Signatures
+    
+    // Position X for the vertical strip (from right edge)
+    const stripX = width - rightMargin;
+    
+    // Only draw logo and validation link on first signer (index 0)
+    let currentY = signatureAreaStartY;
+    
+    if (signerIndex === 0) {
+      // 1. Draw Logo at the bottom (rotated 90 degrees)
+      if (logoImage) {
+        const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
+        lastPage.drawImage(logoImage, {
+          x: stripX - logoDims.height / 2,
+          y: currentY,
+          width: logoDims.width,
+          height: logoDims.height,
+          rotate: degrees(90),
+        });
+        currentY += logoDims.width + 8;
+        console.log("Logo drawn at Y:", signatureAreaStartY);
+      }
+
+      // 2. Draw validation link (rotated 90 degrees)
+      const validationText = normalizeText(`Verifique em: app.eon.med.br/verificacao/${documentId}`);
+      lastPage.drawText(validationText, {
+        x: stripX + 3,
+        y: currentY,
+        size: 5,
+        font: helveticaFont,
+        color: rgb(0.42, 0.45, 0.50),
+        rotate: degrees(90),
+      });
+      
+      // Estimate text width for positioning next element
+      const validationTextWidth = helveticaFont.widthOfTextAtSize(validationText, 5);
+      currentY += validationTextWidth + 15;
+      console.log("Validation link drawn, currentY now:", currentY);
+    } else {
+      // For subsequent signers, calculate where their signature should start
+      // Logo + validation link space
+      const logoSpace = logoImage ? logoDisplaySize + 8 : 0;
+      const validationText = `Verifique em: app.eon.med.br/verificacao/${documentId}`;
+      const validationTextWidth = helveticaFont.widthOfTextAtSize(validationText, 5);
+      currentY = signatureAreaStartY + logoSpace + validationTextWidth + 15;
+      
+      // Add space for previous signers
+      const signatureHeight = 55; // Height each signature occupies
+      currentY += signerIndex * signatureHeight;
+    }
+
+    // 3. Draw signature (rotated 90 degrees)
+    // Line 1: Name + CPF
+    const nameCpfText = cpfFormatted 
+      ? normalizeText(`${displayName} - ${cpfFormatted}`)
+      : normalizeText(displayName);
+    
+    // Adjust font size based on text length
+    let fontSize = 7;
+    if (nameCpfText.length > 50) fontSize = 5;
+    else if (nameCpfText.length > 40) fontSize = 6;
+    
+    lastPage.drawText(nameCpfText, {
+      x: stripX + 3,
+      y: currentY,
+      size: fontSize,
+      font: helveticaBold,
+      color: rgb(0.22, 0.25, 0.32),
+      rotate: degrees(90),
     });
+
+    // Line 2: Date/time (offset to the left)
+    const dateText = normalizeText(`Assinado em ${signDate}`);
+    lastPage.drawText(dateText, {
+      x: stripX - 7,
+      y: currentY,
+      size: 5,
+      font: helveticaFont,
+      color: rgb(0.42, 0.45, 0.50),
+      rotate: degrees(90),
+    });
+
+    console.log(`Signature drawn for signer ${signerIndex + 1}/${totalSigners} at Y:${currentY}`);
 
     // Save the modified PDF
     const modifiedPdfBytes = await pdfDoc.save();
