@@ -28,7 +28,7 @@ export interface Document {
   id: string;
   name: string;
   createdAt: string;
-  status: "pending" | "signed" | "expired" | "in_progress";
+  status: "pending" | "signed" | "expired" | "in_progress" | "cancelled";
   signers: number;
   signedBy: number;
   signerStatuses?: ("signed" | "pending" | "rejected")[];
@@ -77,6 +77,10 @@ const statusConfig = {
   },
   expired: {
     label: "Expirado",
+    className: "bg-red-700 text-white hover:bg-red-700"
+  },
+  cancelled: {
+    label: "Cancelado",
     className: "bg-red-700 text-white hover:bg-red-700"
   }
 };
@@ -465,39 +469,92 @@ export const DocumentsTable = ({
     }
   };
 
-  const handleDeleteDocument = async (documentId: string, signedBy: number) => {
-    if (signedBy > 0) {
-      toast({
-        title: "Não é possível excluir",
-        description: "Este documento já possui assinaturas e não pode ser excluído.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleCancelDocument = async (doc: Document) => {
+    const hasSignatures = doc.signedBy > 0;
+    
+    const confirmMessage = hasSignatures
+      ? `Este documento já possui ${doc.signedBy} assinatura(s). Ao cancelar, os signatários pendentes serão notificados e o link de assinatura será invalidado. Deseja continuar?`
+      : "Tem certeza que deseja excluir este documento?";
+    
+    if (!confirm(confirmMessage)) return;
 
-    if (!confirm("Tem certeza que deseja excluir este documento?")) {
-      return;
-    }
+    try {
+      // Buscar signatários pendentes para notificar
+      const { data: pendingSigners } = await supabase
+        .from("document_signers")
+        .select("*")
+        .eq("document_id", doc.id)
+        .eq("status", "pending");
 
-    const { error } = await supabase
-      .from("documents")
-      .delete()
-      .eq("id", documentId);
+      if (hasSignatures) {
+        // Atualizar status do documento para 'cancelled'
+        const { error } = await supabase
+          .from("documents")
+          .update({ status: "cancelled" })
+          .eq("id", doc.id);
 
-    if (error) {
-      toast({
-        title: "Erro ao excluir documento",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Documento excluído",
-        description: "O documento foi excluído com sucesso.",
-      });
+        if (error) {
+          toast({
+            title: "Erro ao cancelar documento",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Notificar signatários pendentes (se houver)
+        if (pendingSigners && pendingSigners.length > 0) {
+          try {
+            await supabase.functions.invoke("send-document-cancelled", {
+              body: {
+                documentId: doc.id,
+                documentName: doc.name,
+                signers: pendingSigners
+              }
+            });
+          } catch (e) {
+            console.error("Erro ao notificar signatários:", e);
+          }
+        }
+
+        toast({
+          title: "Documento cancelado",
+          description: hasSignatures && pendingSigners && pendingSigners.length > 0
+            ? "Os signatários pendentes foram notificados."
+            : "O documento foi cancelado com sucesso."
+        });
+      } else {
+        // Documento sem assinaturas - excluir normalmente
+        const { error } = await supabase
+          .from("documents")
+          .delete()
+          .eq("id", doc.id);
+
+        if (error) {
+          toast({
+            title: "Erro ao excluir documento",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Documento excluído",
+          description: "O documento foi excluído com sucesso.",
+        });
+      }
+
       if (onDocumentMoved) {
         onDocumentMoved();
       }
+      onRefresh?.();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao processar solicitação",
+        variant: "destructive",
+      });
     }
   };
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
@@ -1190,8 +1247,8 @@ export const DocumentsTable = ({
                           </Tooltip>
                         );
                       })()}
-                      {doc.signedBy === 0 && (
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
+                      {doc.status !== 'signed' && doc.status !== 'cancelled' && (
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleCancelDocument(doc)} title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
                           <Trash2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
@@ -1338,8 +1395,8 @@ export const DocumentsTable = ({
                         </Tooltip>
                       );
                     })()}
-                    {doc.signedBy === 0 && (
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleDeleteDocument(doc.id, doc.signedBy)} title="Excluir documento">
+                    {doc.status !== 'signed' && doc.status !== 'cancelled' && (
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleCancelDocument(doc)} title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
                         <Trash2 className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}

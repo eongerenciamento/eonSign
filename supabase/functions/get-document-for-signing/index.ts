@@ -36,6 +36,15 @@ serve(async (req) => {
       });
     }
 
+    // Check if document was cancelled
+    if (document.status === "cancelled") {
+      console.log("Document was cancelled:", documentId);
+      return new Response(JSON.stringify({ error: "cancelled", message: "Este documento foi cancelado" }), {
+        status: 410,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Gerar URL assinada temporária para o documento
     let documentWithSignedUrl = document;
     
