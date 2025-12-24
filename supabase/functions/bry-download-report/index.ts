@@ -6,6 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Sanitiza nome de arquivo para evitar erro de ByteString em headers HTTP
+function sanitizeFilename(filename: string): string {
+  return filename
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-zA-Z0-9._-]/g, '_'); // Substitui caracteres especiais por _
+}
+
 async function getToken(): Promise<string> {
   const clientId = Deno.env.get('BRY_CLIENT_ID');
   const clientSecret = Deno.env.get('BRY_CLIENT_SECRET');
@@ -160,11 +168,14 @@ const handler = async (req: Request): Promise<Response> => {
     const pdfBuffer = await reportResponse.arrayBuffer();
     console.log(`Report downloaded, size: ${pdfBuffer.byteLength} bytes`);
 
+    const safeFilename = sanitizeFilename(document.name);
+    console.log(`Original filename: ${document.name}, sanitized: ${safeFilename}`);
+
     return new Response(pdfBuffer, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${document.name}_evidencias.pdf"`,
+        'Content-Disposition': `attachment; filename="${safeFilename}_evidencias.pdf"`,
       },
     });
 
