@@ -61,6 +61,80 @@ const truncateText = (text: string | null, maxLength: number): string => {
   return normalized.substring(0, maxLength - 3) + "...";
 };
 
+// Helper to download and embed selfie image
+const embedSelfieImage = async (
+  pdfDoc: any,
+  supabase: any,
+  selfieUrl: string | null
+): Promise<any> => {
+  if (!selfieUrl) return null;
+
+  try {
+    // Extract path from storage URL
+    let bucketName = "biometry";
+    let selfiePath: string;
+
+    if (selfieUrl.includes('/biometry/')) {
+      const urlParts = selfieUrl.split('/biometry/');
+      selfiePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+    } else if (selfieUrl.includes('/selfies/')) {
+      bucketName = "selfies";
+      const urlParts = selfieUrl.split('/selfies/');
+      selfiePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+    } else {
+      selfiePath = selfieUrl;
+    }
+
+    console.log(`Downloading selfie from bucket "${bucketName}", path: ${selfiePath}`);
+
+    // Try biometry bucket first
+    let selfieData = null;
+    let error = null;
+
+    const { data: biometryData, error: biometryError } = await supabase.storage
+      .from("biometry")
+      .download(selfiePath);
+
+    if (!biometryError && biometryData) {
+      selfieData = biometryData;
+    } else {
+      // Try selfies bucket
+      const { data: selfiesData, error: selfiesError } = await supabase.storage
+        .from("selfies")
+        .download(selfiePath);
+      
+      if (!selfiesError && selfiesData) {
+        selfieData = selfiesData;
+      } else {
+        error = selfiesError || biometryError;
+      }
+    }
+
+    if (error || !selfieData) {
+      console.log("Selfie not found in storage:", error);
+      return null;
+    }
+
+    const selfieBytes = await selfieData.arrayBuffer();
+    console.log("Selfie downloaded, size:", selfieBytes.byteLength);
+
+    // Try to embed as JPEG first, then PNG
+    try {
+      return await pdfDoc.embedJpg(new Uint8Array(selfieBytes));
+    } catch {
+      try {
+        return await pdfDoc.embedPng(new Uint8Array(selfieBytes));
+      } catch (embedError) {
+        console.log("Error embedding selfie image:", embedError);
+        return null;
+      }
+    }
+  } catch (err) {
+    console.log("Error processing selfie:", err);
+    return null;
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -113,6 +187,23 @@ const handler = async (req: Request): Promise<Response> => {
     const lightGray = rgb(250 / 255, 250 / 255, 250 / 255);
     const borderGray = rgb(230 / 255, 230 / 255, 230 / 255);
     const cardBorderGray = rgb(217 / 255, 217 / 255, 217 / 255);
+
+    // Pre-load all selfie images
+    console.log("Pre-loading selfie images for signers...");
+    const signerSelfies: Map<string, any> = new Map();
+    
+    for (const signer of signers) {
+      if (signer.selfie_url) {
+        const signerKey = signer.cpf || signer.email || signer.name;
+        const selfieImage = await embedSelfieImage(pdfDoc, supabase, signer.selfie_url);
+        if (selfieImage) {
+          signerSelfies.set(signerKey, selfieImage);
+          console.log("Selfie embedded for:", signerKey);
+        }
+      }
+    }
+    
+    console.log(`Total selfies loaded: ${signerSelfies.size}`);
 
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
     let yPos = pageHeight;
@@ -213,12 +304,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     yPos -= 25;
 
+    // Selfie configuration
+    const selfieSize = 70;
+    const selfieMargin = 10;
+
     // Draw each signer card
     for (let i = 0; i < signers.length; i++) {
       const signer = signers[i];
-      // Increase card height if biometry was collected
-      const hasBiometry = !!signer.selfie_url;
-      const cardHeight = hasBiometry ? 125 : 110;
+      const signerKey = signer.cpf || signer.email || signer.name;
+      const selfieImage = signerSelfies.get(signerKey);
+      const hasSelfie = !!selfieImage;
+      
+      // Increase card height if selfie is present
+      const cardHeight = hasSelfie ? 140 : 110;
 
       // Check if we need a new page
       if (yPos - cardHeight < 100) {
@@ -330,18 +428,18 @@ const handler = async (req: Request): Promise<Response> => {
         color: gray600,
       });
 
-      // Right column details
-      const rightX = pageWidth / 2 + 20;
-      let rightY = yPos - 40;
+      // Middle column details (shifted left to make room for selfie)
+      const middleX = pageWidth / 2 - 30;
+      let middleY = yPos - 40;
 
       page.drawText(`IP: ${signer.signature_ip || "N/A"}`, {
-        x: rightX,
-        y: rightY,
+        x: middleX,
+        y: middleY,
         size: 9,
         font: helveticaFont,
         color: gray600,
       });
-      rightY -= lineHeight;
+      middleY -= lineHeight;
 
       let locationStr = "N/A";
       if (signer.signature_city || signer.signature_state) {
@@ -351,42 +449,72 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
       // Truncate and normalize location
-      const displayLocation = truncateText(locationStr, 30);
+      const displayLocation = truncateText(locationStr, 25);
 
       page.drawText(`Local: ${displayLocation}`, {
-        x: rightX,
-        y: rightY,
+        x: middleX,
+        y: middleY,
         size: 9,
         font: helveticaFont,
         color: gray600,
       });
-      rightY -= lineHeight;
+      middleY -= lineHeight;
 
       const shortSignatureId = signer.signature_id ? signer.signature_id.substring(0, 18) + "..." : "N/A";
       page.drawText(`ID: ${shortSignatureId}`, {
-        x: rightX,
-        y: rightY,
+        x: middleX,
+        y: middleY,
         size: 9,
         font: helveticaFont,
         color: gray600,
       });
-      rightY -= lineHeight;
+      middleY -= lineHeight;
 
       page.drawText(`Data/Hora: ${signer.signed_at ? formatDate(signer.signed_at) : "N/A"}`, {
-        x: rightX,
-        y: rightY,
+        x: middleX,
+        y: middleY,
         size: 9,
         font: helveticaFont,
         color: gray600,
       });
-      rightY -= lineHeight;
 
-      // Show biometry indicator if selfie was collected
-      if (signer.selfie_url) {
-        page.drawText("Biometria Facial: Coletada", {
-          x: rightX,
-          y: rightY,
-          size: 9,
+      // Draw selfie on the right side of the card
+      if (selfieImage) {
+        // Calculate scale to fit within selfieSize while maintaining aspect ratio
+        const originalWidth = selfieImage.width;
+        const originalHeight = selfieImage.height;
+        const scaleFactor = Math.min(selfieSize / originalWidth, selfieSize / originalHeight);
+        const scaledWidth = originalWidth * scaleFactor;
+        const scaledHeight = originalHeight * scaleFactor;
+        
+        // Position selfie on the right side of the card
+        const selfieX = pageWidth - margin - selfieSize - selfieMargin;
+        const selfieY = yPos - cardHeight + selfieMargin + (selfieSize - scaledHeight) / 2;
+        
+        // Draw border/frame around selfie
+        page.drawRectangle({
+          x: selfieX - 2,
+          y: selfieY - 2,
+          width: selfieSize + 4,
+          height: selfieSize + 4,
+          borderColor: cardBorderGray,
+          borderWidth: 1,
+          color: lightGray,
+        });
+        
+        // Draw selfie image
+        page.drawImage(selfieImage, {
+          x: selfieX + (selfieSize - scaledWidth) / 2,
+          y: selfieY,
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+        
+        // Label below selfie
+        page.drawText("Biometria Facial", {
+          x: selfieX + selfieSize / 2 - helveticaBold.widthOfTextAtSize("Biometria Facial", 7) / 2,
+          y: selfieY - 12,
+          size: 7,
           font: helveticaBold,
           color: greenColor,
         });
@@ -498,24 +626,16 @@ const handler = async (req: Request): Promise<Response> => {
     const pdfBytes = await pdfDoc.save();
     const base64Content = btoa(String.fromCharCode(...pdfBytes));
 
-    console.log(`Generated signature report PDF, size: ${pdfBytes.length} bytes`);
+    console.log("Signature report generated successfully");
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        pdfBase64: base64Content,
-        pdfBytes: Array.from(pdfBytes),
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      },
-    );
+    return new Response(JSON.stringify({ pdf: base64Content }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
-    console.error("Error generating signature report:", error);
+    console.error("Error generating report:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 };
