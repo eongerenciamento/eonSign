@@ -171,29 +171,33 @@ serve(async (req) => {
     // Column 2 (right): Logo + Signatures
     
     const validationColumnX = 18;  // Leftmost column (validation link)
-    const signaturesColumnX = 8;   // Rightmost column (logo + signatures)
-    const startY = 50;             // Start from bottom
+    const signaturesColumnX = 8;   // Rightmost column (signatures)
+    const logoColumnX = 13;        // Center column (logo between 18 and 8)
+    const startY = 80;             // Start further down the page
 
     // Apply signatures to ALL pages
     for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
       const page = pages[pageIndex];
       const { width, height } = page.getSize();
       
-      let currentY = startY;
+      // Calculate where signatures start (after logo if present)
+      let signaturesStartY = startY;
       
-      // 1. Draw Logo at the bottom of signatures column
+      // 1. Draw Logo centered between the two columns
       if (logoImage) {
         const logoDisplaySize = 25;
         const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
         page.drawImage(logoImage, {
-          x: width - signaturesColumnX,
-          y: currentY,
+          x: width - logoColumnX,
+          y: startY,
           width: logoDims.width,
           height: logoDims.height,
           rotate: degrees(90),
         });
-        currentY += logoDims.width + 10;
+        signaturesStartY = startY + logoDims.width + 10;
       }
+
+      let currentY = signaturesStartY;
 
       // 2. Draw each signature (Nome - CPF - Assinado em DD/MM/YYYY às HH:MM)
       for (const signer of signedSigners) {
@@ -246,11 +250,11 @@ serve(async (req) => {
         currentY += textWidth + 12;
       }
 
-      // 3. Draw validation link in separate column (to the left of signatures)
+      // 3. Draw validation link aligned with first signatory
       const validationText = normalizeText(`Verifique em: sign.eonhub.com.br/validar/${documentId}`);
       page.drawText(validationText, {
         x: width - validationColumnX,
-        y: startY,
+        y: signaturesStartY,  // Aligned with first signatory, after logo
         size: 5,
         font: helveticaFont,
         color: rgb(0.42, 0.45, 0.50),
