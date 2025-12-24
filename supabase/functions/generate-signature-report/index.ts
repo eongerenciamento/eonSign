@@ -392,7 +392,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`CPF/CNPJ: ${formatCpf(signer.cpf)}`, {
         x: margin + 10,
         y: leftY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -401,7 +401,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`Nascimento: ${signer.birth_date ? formatDate(signer.birth_date).split(" ")[0] : "N/A"}`, {
         x: margin + 10,
         y: leftY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -414,7 +414,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`E-mail: ${displayEmail}`, {
         x: margin + 10,
         y: leftY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -423,7 +423,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`Telefone: ${formatPhone(signer.phone)}`, {
         x: margin + 10,
         y: leftY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -435,7 +435,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`IP: ${signer.signature_ip || "N/A"}`, {
         x: middleX,
         y: middleY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -454,7 +454,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`Local: ${displayLocation}`, {
         x: middleX,
         y: middleY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -464,7 +464,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`ID: ${shortSignatureId}`, {
         x: middleX,
         y: middleY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -473,7 +473,7 @@ const handler = async (req: Request): Promise<Response> => {
       page.drawText(`Data/Hora: ${signer.signed_at ? formatDate(signer.signed_at) : "N/A"}`, {
         x: middleX,
         y: middleY,
-        size: 9,
+        size: 10,
         font: helveticaFont,
         color: gray600,
       });
@@ -491,32 +491,12 @@ const handler = async (req: Request): Promise<Response> => {
         const selfieX = pageWidth - margin - selfieSize - selfieMargin;
         const selfieY = yPos - cardHeight + selfieMargin + (selfieSize - scaledHeight) / 2;
         
-        // Draw border/frame around selfie
-        page.drawRectangle({
-          x: selfieX - 2,
-          y: selfieY - 2,
-          width: selfieSize + 4,
-          height: selfieSize + 4,
-          borderColor: cardBorderGray,
-          borderWidth: 1,
-          color: lightGray,
-        });
-        
-        // Draw selfie image
+        // Draw selfie image directly (no border/frame)
         page.drawImage(selfieImage, {
           x: selfieX + (selfieSize - scaledWidth) / 2,
           y: selfieY,
           width: scaledWidth,
           height: scaledHeight,
-        });
-        
-        // Label below selfie
-        page.drawText("Biometria Facial", {
-          x: selfieX + selfieSize / 2 - helveticaBold.widthOfTextAtSize("Biometria Facial", 7) / 2,
-          y: selfieY - 12,
-          size: 7,
-          font: helveticaBold,
-          color: greenColor,
         });
       }
 
