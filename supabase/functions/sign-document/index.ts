@@ -91,7 +91,7 @@ serve(async (req) => {
 
     console.log("Client IP:", clientIp);
 
-    const { documentId, signerId, cpf, birthDate, latitude, longitude, typedSignature } = await req.json();
+    const { documentId, signerId, cpf, birthDate, latitude, longitude, typedSignature, selfieBase64 } = await req.json();
 
     if (!documentId || !signerId || !cpf || !birthDate) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios não fornecidos" }), {
@@ -201,23 +201,55 @@ serve(async (req) => {
     // Check if this is a SIMPLE signature (native flow)
     const isSimpleSignature = document.signature_mode === "SIMPLE" || !document.signature_mode;
 
+    // Upload selfie if provided
+    let selfieUrl: string | null = null;
+    if (selfieBase64) {
+      try {
+        console.log("Uploading selfie for signer:", signerId);
+        const selfieBuffer = Uint8Array.from(atob(selfieBase64), c => c.charCodeAt(0));
+        const selfieFileName = `${documentId}/${signerId}_${Date.now()}.jpg`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("biometry")
+          .upload(selfieFileName, selfieBuffer, {
+            contentType: "image/jpeg",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("Error uploading selfie:", uploadError);
+        } else {
+          selfieUrl = selfieFileName;
+          console.log("Selfie uploaded successfully:", selfieUrl);
+        }
+      } catch (selfieError) {
+        console.error("Error processing selfie:", selfieError);
+      }
+    }
+
     // First, update signer record with signature data (before applying signature to PDF)
+    const signerUpdateData: any = {
+      cpf: cpf,
+      birth_date: birthDate,
+      status: "signed",
+      signed_at: new Date().toISOString(),
+      signature_latitude: latitude,
+      signature_longitude: longitude,
+      signature_city: city,
+      signature_state: state,
+      signature_country: country,
+      signature_ip: clientIp,
+      signature_id: signatureId,
+      typed_signature: typedSignature || signerInfo.name,
+    };
+
+    if (selfieUrl) {
+      signerUpdateData.selfie_url = selfieUrl;
+    }
+
     const { error: signerError } = await supabase
       .from("document_signers")
-      .update({
-        cpf: cpf,
-        birth_date: birthDate,
-        status: "signed",
-        signed_at: new Date().toISOString(),
-        signature_latitude: latitude,
-        signature_longitude: longitude,
-        signature_city: city,
-        signature_state: state,
-        signature_country: country,
-        signature_ip: clientIp,
-        signature_id: signatureId,
-        typed_signature: typedSignature || signerInfo.name,
-      })
+      .update(signerUpdateData)
       .eq("id", signerId);
 
     if (signerError) {

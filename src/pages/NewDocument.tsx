@@ -155,6 +155,7 @@ const NewDocument = () => {
   const [prescriptionDocumentId, setPrescriptionDocumentId] = useState<string | null>(null);
   const [prescriptionDocumentName, setPrescriptionDocumentName] = useState<string>("");
   const [hasLocalCertificate, setHasLocalCertificate] = useState(false);
+  const [requireFacialBiometry, setRequireFacialBiometry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     toast
@@ -1087,7 +1088,8 @@ const NewDocument = () => {
           envelope_id: envelopeId,
           signature_mode: dbSignatureMode,
           patient_name: isPrescriptionMode && patientInfo.name ? patientInfo.name : null,
-          prescription_doc_type: isPrescriptionMode ? prescriptionDocType : null
+          prescription_doc_type: isPrescriptionMode ? prescriptionDocType : null,
+          require_facial_biometry: signatureMode === 'SIMPLE' ? requireFacialBiometry : false
         }).select().single();
         if (docError) throw docError;
         documentIds.push(documentData.id);
@@ -1793,6 +1795,29 @@ const NewDocument = () => {
               </div>
             )}
           </div>
+
+          {/* Security Options Section for SIMPLE mode */}
+          {signatureMode === 'SIMPLE' && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-gray-600">Segurança Adicional (Opcional)</Label>
+              <div className="space-y-2">
+                <div 
+                  onClick={() => setRequireFacialBiometry(!requireFacialBiometry)} 
+                  className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer bg-sidebar-foreground"
+                >
+                  <Checkbox 
+                    checked={requireFacialBiometry} 
+                    onClick={e => e.stopPropagation()} 
+                    onCheckedChange={() => setRequireFacialBiometry(!requireFacialBiometry)} 
+                  />
+                  <span className="text-sm text-gray-600">Biometria Facial (Selfie)</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                IP e Geolocalização são sempre capturados. A biometria facial adiciona uma camada extra de verificação.
+              </p>
+            </div>
+          )}
 
           {/* Authentication Options Section - Only for BRy modes (not SIMPLE or PRESCRIPTION) */}
           {signatureMode !== 'SIMPLE' && signatureMode !== 'PRESCRIPTION' && (
