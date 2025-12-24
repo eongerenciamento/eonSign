@@ -14,6 +14,7 @@ const corsHeaders = {
 
 interface DocumentCompletedEmailRequest {
   documentId: string;
+  documentIds?: string[]; // Array para múltiplos documentos (envelope)
   documentName: string;
   signerEmails: string[];
   senderName: string;
@@ -29,7 +30,6 @@ async function getBryToken(): Promise<string | null> {
     return null;
   }
 
-  // Use BRy Cloud token endpoint (same as other working functions)
   const authUrl = "https://cloud.bry.com.br/token-service/jwt";
 
   try {
@@ -61,7 +61,7 @@ async function getBryToken(): Promise<string | null> {
   }
 }
 
-// Download BRy evidence report
+// Download BRy evidence report (reportUnified)
 async function downloadBryReport(
   envelopeUuid: string,
   documentUuid: string,
@@ -98,7 +98,7 @@ async function downloadBryReport(
 // Generate local signature report for SIMPLE mode
 async function generateLocalReport(documentId: string): Promise<ArrayBuffer | null> {
   try {
-    console.log("Generating local signature report for SIMPLE mode...");
+    console.log("Generating local signature report for document:", documentId);
 
     const response = await fetch(`${supabaseUrl}/functions/v1/generate-signature-report`, {
       method: "POST",
@@ -120,7 +120,6 @@ async function generateLocalReport(documentId: string): Promise<ArrayBuffer | nu
       return null;
     }
 
-    // Convert pdfBytes array back to ArrayBuffer
     if (data.pdfBytes) {
       const uint8Array = new Uint8Array(data.pdfBytes);
       return uint8Array.buffer;
@@ -134,23 +133,47 @@ async function generateLocalReport(documentId: string): Promise<ArrayBuffer | nu
 }
 
 // Merge two PDFs into one
-async function mergePdfs(signedPdfBuffer: ArrayBuffer, reportPdfBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+async function mergeTwoPdfs(pdf1Buffer: ArrayBuffer, pdf2Buffer: ArrayBuffer): Promise<ArrayBuffer> {
   const mergedPdf = await PDFDocument.create();
 
-  // Load signed document
-  const signedDoc = await PDFDocument.load(signedPdfBuffer);
-  const signedPages = await mergedPdf.copyPages(signedDoc, signedDoc.getPageIndices());
-  signedPages.forEach((page) => mergedPdf.addPage(page));
+  const doc1 = await PDFDocument.load(pdf1Buffer);
+  const pages1 = await mergedPdf.copyPages(doc1, doc1.getPageIndices());
+  pages1.forEach((page) => mergedPdf.addPage(page));
 
-  // Load evidence report
-  const reportDoc = await PDFDocument.load(reportPdfBuffer);
-  const reportPages = await mergedPdf.copyPages(reportDoc, reportDoc.getPageIndices());
-  reportPages.forEach((page) => mergedPdf.addPage(page));
+  const doc2 = await PDFDocument.load(pdf2Buffer);
+  const pages2 = await mergedPdf.copyPages(doc2, doc2.getPageIndices());
+  pages2.forEach((page) => mergedPdf.addPage(page));
 
-  // Save merged PDF and copy to new ArrayBuffer
   const mergedBytes = await mergedPdf.save();
   const result = new ArrayBuffer(mergedBytes.length);
   new Uint8Array(result).set(mergedBytes);
+  return result;
+}
+
+// Merge multiple PDFs into one unified document
+async function mergeMultiplePdfs(pdfBuffers: ArrayBuffer[]): Promise<ArrayBuffer> {
+  if (pdfBuffers.length === 0) {
+    throw new Error("No PDFs to merge");
+  }
+  
+  if (pdfBuffers.length === 1) {
+    return pdfBuffers[0];
+  }
+
+  const mergedPdf = await PDFDocument.create();
+
+  for (let i = 0; i < pdfBuffers.length; i++) {
+    const doc = await PDFDocument.load(pdfBuffers[i]);
+    const pages = await mergedPdf.copyPages(doc, doc.getPageIndices());
+    pages.forEach((page) => mergedPdf.addPage(page));
+    console.log(`Added ${pages.length} pages from document ${i + 1}`);
+  }
+
+  const mergedBytes = await mergedPdf.save();
+  const result = new ArrayBuffer(mergedBytes.length);
+  new Uint8Array(result).set(mergedBytes);
+  
+  console.log(`Merged ${pdfBuffers.length} PDFs into ${mergedBytes.length} bytes`);
   return result;
 }
 
@@ -158,12 +181,84 @@ async function mergePdfs(signedPdfBuffer: ArrayBuffer, reportPdfBuffer: ArrayBuf
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
-  const chunkSize = 0x8000; // 32KB chunks to avoid stack overflow
+  const chunkSize = 0x8000;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
     binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
   }
   return btoa(binary);
+}
+
+// Process a single document and return its complete PDF
+async function getDocumentCompletePdf(
+  supabase: any,
+  documentId: string,
+  bryToken: string | null
+): Promise<{ buffer: ArrayBuffer; name: string } | null> {
+  const { data: document, error: docError } = await supabase
+    .from("documents")
+    .select("id, name, file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url, signature_mode")
+    .eq("id", documentId)
+    .single();
+
+  if (docError || !document) {
+    console.error(`Document ${documentId} not found`);
+    return null;
+  }
+
+  const isSimpleMode = document.signature_mode === "SIMPLE" || !document.bry_envelope_uuid;
+
+  if (isSimpleMode) {
+    // SIMPLE mode: download signed doc + merge with local report
+    let filePath: string;
+    if (document.bry_signed_file_url) {
+      if (document.bry_signed_file_url.includes("/documents/")) {
+        const urlParts = document.bry_signed_file_url.split("/documents/");
+        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
+      } else {
+        filePath = document.bry_signed_file_url;
+      }
+    } else if (document.file_url) {
+      const urlParts = document.file_url.split("/documents/");
+      filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
+    } else {
+      console.error(`No file URL for document ${documentId}`);
+      return null;
+    }
+
+    const { data: fileData, error: fileError } = await supabase.storage.from("documents").download(filePath);
+    if (fileError || !fileData) {
+      console.error(`Error downloading document ${documentId}:`, fileError);
+      return null;
+    }
+
+    const signedPdfBuffer = await fileData.arrayBuffer();
+    const localReportBuffer = await generateLocalReport(documentId);
+
+    if (localReportBuffer) {
+      const mergedBuffer = await mergeTwoPdfs(signedPdfBuffer, localReportBuffer);
+      return { buffer: mergedBuffer, name: document.name };
+    }
+    
+    return { buffer: signedPdfBuffer, name: document.name };
+  } else if (document.bry_envelope_uuid && document.bry_document_uuid && bryToken) {
+    // ADVANCED/QUALIFIED mode: use BRy reportUnified directly
+    const reportBuffer = await downloadBryReport(
+      document.bry_envelope_uuid,
+      document.bry_document_uuid,
+      bryToken
+    );
+
+    if (reportBuffer) {
+      return { buffer: reportBuffer, name: document.name };
+    }
+    
+    console.error(`Could not download BRy report for document ${documentId}`);
+    return null;
+  }
+
+  console.error(`Could not process document ${documentId}`);
+  return null;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -172,117 +267,61 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { documentId, documentName, signerEmails, senderName }: DocumentCompletedEmailRequest = await req.json();
+    const { documentId, documentIds, documentName, signerEmails, senderName }: DocumentCompletedEmailRequest = await req.json();
 
-    console.log("Sending document completed email for document:", documentId);
-    console.log("[DEBUG] APP_URL secret value:", Deno.env.get("APP_URL"));
+    // Determinar quais documentos processar
+    const idsToProcess = documentIds && documentIds.length > 0 ? documentIds : [documentId];
+    
+    console.log(`Processing ${idsToProcess.length} documents for completed email`);
+    console.log("Document IDs:", idsToProcess);
 
     let APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
-    // Garantir que tenha https://
     if (APP_URL && !APP_URL.startsWith("http")) {
       APP_URL = `https://${APP_URL}`;
     }
-    console.log("[DEBUG] APP_URL being used:", APP_URL);
-    console.log("[DEBUG] Drive URL will be:", `${APP_URL}/drive`);
+    
     const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch document from database including signature_mode
-    const { data: document, error: docError } = await supabase
-      .from("documents")
-      .select("file_url, user_id, bry_envelope_uuid, bry_document_uuid, bry_signed_file_url, signature_mode")
-      .eq("id", documentId)
-      .single();
+    // Get BRy token once for all documents
+    const bryToken = await getBryToken();
 
-    if (docError || !document) {
-      throw new Error("Documento não encontrado");
-    }
+    // Process all documents and collect their PDFs
+    const documentPdfs: ArrayBuffer[] = [];
+    let firstUserId: string | null = null;
 
-    // Determine file path - prefer signed file if available
-    let filePath: string;
-    if (document.bry_signed_file_url) {
-      // bry_signed_file_url can be either a full URL or just a path
-      if (document.bry_signed_file_url.includes("/documents/")) {
-        // It's a full URL, extract the path
-        const urlParts = document.bry_signed_file_url.split("/documents/");
-        filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
-      } else {
-        // It's already a path
-        filePath = document.bry_signed_file_url;
-      }
-    } else if (document.file_url) {
-      const urlParts = document.file_url.split("/documents/");
-      filePath = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
-    } else {
-      throw new Error("URL do documento não encontrada");
-    }
-
-    // Download signed document from Storage
-    console.log("Downloading signed document from path:", filePath);
-    const { data: fileData, error: fileError } = await supabase.storage.from("documents").download(filePath);
-
-    if (fileError || !fileData) {
-      console.error("Error downloading document:", fileError);
-      throw new Error("Erro ao baixar o documento assinado");
-    }
-
-    const signedPdfBuffer = await fileData.arrayBuffer();
-    console.log(`Signed document size: ${signedPdfBuffer.byteLength} bytes`);
-
-    // Determine which report to use based on signature_mode
-    let finalPdfBuffer: ArrayBuffer = signedPdfBuffer;
-    let attachmentFilename = `${documentName}.pdf`;
-    const isSimpleMode = document.signature_mode === "SIMPLE" || !document.bry_envelope_uuid;
-
-    if (isSimpleMode) {
-      // SIMPLE mode: Generate local report
-      console.log("Using local report generation for SIMPLE signature mode");
-      const localReportBuffer = await generateLocalReport(documentId);
-
-      if (localReportBuffer) {
-        console.log(`Local report size: ${localReportBuffer.byteLength} bytes`);
-        try {
-          finalPdfBuffer = await mergePdfs(signedPdfBuffer, localReportBuffer);
-          attachmentFilename = `${documentName}_completo.pdf`;
-          console.log(`Merged PDF size: ${finalPdfBuffer.byteLength} bytes`);
-        } catch (mergeError) {
-          console.error("Error merging PDFs, using signed document only:", mergeError);
+    for (const docId of idsToProcess) {
+      console.log(`Processing document: ${docId}`);
+      
+      const result = await getDocumentCompletePdf(supabase, docId, bryToken);
+      
+      if (result) {
+        documentPdfs.push(result.buffer);
+        console.log(`Document ${docId} (${result.name}): ${result.buffer.byteLength} bytes`);
+        
+        // Get user_id from first document for email history
+        if (!firstUserId) {
+          const { data: doc } = await supabase.from("documents").select("user_id").eq("id", docId).single();
+          firstUserId = doc?.user_id;
         }
       } else {
-        console.log("Could not generate local report, sending signed document only");
+        console.error(`Failed to process document ${docId}`);
       }
-    } else if (document.bry_envelope_uuid && document.bry_document_uuid) {
-      // ADVANCED/QUALIFIED mode: Use BRy reportUnified directly
-      // The reportUnified already contains: original document + signatures + evidence page
-      // DO NOT merge with signedPdfBuffer to avoid duplicate pages
-      console.log("Using BRy reportUnified for ADVANCED/QUALIFIED signature mode (no merge needed)");
-
-      const bryToken = await getBryToken();
-      if (bryToken) {
-        const reportPdfBuffer = await downloadBryReport(
-          document.bry_envelope_uuid,
-          document.bry_document_uuid,
-          bryToken,
-        );
-
-        if (reportPdfBuffer) {
-          console.log(`BRy reportUnified size: ${reportPdfBuffer.byteLength} bytes`);
-          // Use reportUnified directly - it already contains the complete document with evidence
-          finalPdfBuffer = reportPdfBuffer;
-          attachmentFilename = `${documentName}_completo.pdf`;
-          console.log("Using BRy reportUnified directly as final PDF (no merge)");
-        } else {
-          console.log("Could not download BRy report, sending signed document only");
-        }
-      } else {
-        console.log("Could not get BRy token, sending signed document only");
-      }
-    } else {
-      console.log("No BRy envelope/document UUID and not SIMPLE mode, sending signed document only");
     }
+
+    if (documentPdfs.length === 0) {
+      throw new Error("Nenhum documento pôde ser processado");
+    }
+
+    // Merge all document PDFs into one
+    console.log(`Merging ${documentPdfs.length} document PDFs...`);
+    const finalPdfBuffer = await mergeMultiplePdfs(documentPdfs);
+    console.log(`Final merged PDF size: ${finalPdfBuffer.byteLength} bytes`);
 
     const base64Content = arrayBufferToBase64(finalPdfBuffer);
-    console.log(`Base64 conversion successful, length: ${base64Content.length}`);
+    const attachmentFilename = idsToProcess.length > 1 
+      ? `${documentName}_envelope_completo.pdf`
+      : `${documentName}_completo.pdf`;
 
     // Prepare recipients
     const recipients = signerEmails;
@@ -290,6 +329,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to each signatory
     const emailPromises = recipients.map(async (email) => {
+      const documentCount = idsToProcess.length > 1 
+        ? `<br><strong>Documentos no envelope:</strong> ${idsToProcess.length}`
+        : '';
+        
       return await resend.emails.send({
         from: "eonSign <noreply@eonhub.com.br>",
         to: [email],
@@ -306,7 +349,7 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <p style="margin: 0; color: #666;">
-                  <strong>Documento:</strong> ${documentName}<br>
+                  <strong>Documento:</strong> ${documentName}${documentCount}<br>
                   <strong>Enviado por:</strong> ${senderName}<br>
                   <strong>Status:</strong> <span style="color: #16a34a; font-weight: bold;">✓ Assinado</span>
                 </p>
@@ -348,21 +391,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     const results = await Promise.allSettled(emailPromises);
 
-    // Save to email history
-    const historyPromises = recipients.map(async (email, index) => {
-      const result = results[index];
-      return supabase.from("email_history").insert({
-        user_id: document.user_id,
-        recipient_email: email,
-        subject: `Documento Assinado - ${documentName}`,
-        email_type: "document_completed",
-        document_id: documentId,
-        status: result.status === "fulfilled" ? "sent" : "failed",
-        error_message: result.status === "rejected" ? String(result.reason) : null,
+    // Save to email history (using first document ID for reference)
+    if (firstUserId) {
+      const historyPromises = recipients.map(async (email, index) => {
+        const result = results[index];
+        return supabase.from("email_history").insert({
+          user_id: firstUserId,
+          recipient_email: email,
+          subject: `Documento Assinado - ${documentName}`,
+          email_type: "document_completed",
+          document_id: documentId,
+          status: result.status === "fulfilled" ? "sent" : "failed",
+          error_message: result.status === "rejected" ? String(result.reason) : null,
+        });
       });
-    });
 
-    await Promise.allSettled(historyPromises);
+      await Promise.allSettled(historyPromises);
+    }
 
     // Log results
     results.forEach((result, index) => {
@@ -378,8 +423,8 @@ const handler = async (req: Request): Promise<Response> => {
         success: true,
         sent: results.filter((r) => r.status === "fulfilled").length,
         total: results.length,
-        merged: attachmentFilename.includes("_completo"),
-        reportType: isSimpleMode ? "local" : "bry",
+        documentsProcessed: documentPdfs.length,
+        totalDocuments: idsToProcess.length,
       }),
       {
         status: 200,
