@@ -264,7 +264,7 @@ const Documents = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-secondary rounded-xl p-1 h-10 border-none">
+          <TabsList className="grid w-full grid-cols-3 bg-secondary rounded-xl p-1 h-10 border-none">
             <TabsTrigger value="signed" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
               <CheckCircle className="w-4 h-4" />
             </TabsTrigger>
@@ -273,9 +273,6 @@ const Documents = () => {
             </TabsTrigger>
             <TabsTrigger value="pending-external" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
               <Users className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
-              <SlidersHorizontal className="w-4 h-4" />
             </TabsTrigger>
           </TabsList>
 
