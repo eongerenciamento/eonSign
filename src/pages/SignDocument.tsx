@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck, MapPin, Camera } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Plus, Minus, Download, PenLine, Award, ShieldCheck, MapPin, Camera, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/logo-sign-white.png";
@@ -77,6 +77,7 @@ const SignDocument = () => {
   const [locationError, setLocationError] = useState(false);
   const [locationRequesting, setLocationRequesting] = useState(false);
   const [linkExpired, setLinkExpired] = useState(false);
+  const [documentCancelled, setDocumentCancelled] = useState(false);
   const [autoIdentifyChecked, setAutoIdentifyChecked] = useState(false);
 
   // Simple signature specific states
@@ -183,7 +184,18 @@ const SignDocument = () => {
       });
 
       if (error) {
+        // Check if it's a cancelled document error
+        if (error.message?.includes("cancelled") || error.context?.body?.error === "cancelled") {
+          setDocumentCancelled(true);
+          return;
+        }
         setLinkExpired(true);
+        return;
+      }
+
+      // Check for cancelled status in response
+      if (data?.error === "cancelled") {
+        setDocumentCancelled(true);
         return;
       }
 
@@ -568,6 +580,24 @@ const SignDocument = () => {
       <div className="light" style={{ colorScheme: 'light' }}>
         <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
           <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#ffffff' }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (documentCancelled) {
+    return (
+      <div className="light" style={{ colorScheme: 'light' }}>
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, #273d60, #001a4d)' }}>
+          <Card className="p-8 text-center max-w-md" style={{ backgroundColor: '#ffffff' }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#fee2e2' }}>
+              <XCircle className="h-8 w-8" style={{ color: '#dc2626' }} />
+            </div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: '#dc2626' }}>Documento Cancelado</h2>
+            <p style={{ color: '#6b7280' }}>
+              Este documento foi cancelado pelo remetente e não está mais disponível para assinatura.
+            </p>
+          </Card>
         </div>
       </div>
     );

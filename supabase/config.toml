@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.bry-sync-cron]
 verify_jwt = false
+
+[functions.send-document-cancelled]
+verify_jwt = false
