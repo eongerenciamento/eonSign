@@ -172,8 +172,7 @@ serve(async (req) => {
     
     const validationColumnX = 18;  // Leftmost column (validation link)
     const signaturesColumnX = 8;   // Rightmost column (signatures)
-    const logoColumnX = 13;        // Center column (logo between 18 and 8)
-    const startY = 80;             // Start further down the page
+    const startY = 35;             // Start closer to footer
 
     // Apply signatures to ALL pages
     for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
@@ -187,8 +186,13 @@ serve(async (req) => {
       if (logoImage) {
         const logoDisplaySize = 25;
         const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
+        
+        // Calculate center position between the two columns (18 and 8)
+        // logoColumnX = (18 + 8) / 2 = 13, but we need to center the logo itself
+        const logoColumnX = (validationColumnX + signaturesColumnX) / 2;
+        
         page.drawImage(logoImage, {
-          x: width - logoColumnX,
+          x: width - logoColumnX - (logoDims.height / 2),  // Center the logo horizontally
           y: startY,
           width: logoDims.width,
           height: logoDims.height,
