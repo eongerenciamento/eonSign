@@ -460,11 +460,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
       middleY -= lineHeight;
 
-      const shortSignatureId = signer.signature_id ? signer.signature_id.substring(0, 18) + "..." : "N/A";
-      page.drawText(`ID: ${shortSignatureId}`, {
+      const signatureId = signer.signature_id || "N/A";
+      page.drawText(`ID: ${signatureId}`, {
         x: middleX,
         y: middleY,
-        size: 10,
+        size: 8,
         font: helveticaFont,
         color: gray600,
       });
@@ -491,7 +491,33 @@ const handler = async (req: Request): Promise<Response> => {
         const selfieX = pageWidth - margin - selfieSize - selfieMargin;
         const selfieY = yPos - cardHeight + selfieMargin + (selfieSize - scaledHeight) / 2;
         
-        // Draw selfie image directly (no border/frame)
+        // Draw rounded border around selfie using SVG-style path
+        const borderRadius = 8;
+        const borderX = selfieX - 4;
+        const borderY = selfieY - 4;
+        const borderW = selfieSize + 8;
+        const borderH = selfieSize + 8;
+        
+        // Draw rounded rectangle border (simulated with lines and arcs)
+        page.moveTo(borderX + borderRadius, borderY);
+        page.drawSvgPath(
+          `M ${borderX + borderRadius} ${borderY} ` +
+          `L ${borderX + borderW - borderRadius} ${borderY} ` +
+          `Q ${borderX + borderW} ${borderY} ${borderX + borderW} ${borderY + borderRadius} ` +
+          `L ${borderX + borderW} ${borderY + borderH - borderRadius} ` +
+          `Q ${borderX + borderW} ${borderY + borderH} ${borderX + borderW - borderRadius} ${borderY + borderH} ` +
+          `L ${borderX + borderRadius} ${borderY + borderH} ` +
+          `Q ${borderX} ${borderY + borderH} ${borderX} ${borderY + borderH - borderRadius} ` +
+          `L ${borderX} ${borderY + borderRadius} ` +
+          `Q ${borderX} ${borderY} ${borderX + borderRadius} ${borderY} Z`,
+          {
+            borderColor: cardBorderGray,
+            borderWidth: 1.5,
+            color: lightGray,
+          }
+        );
+        
+        // Draw selfie image
         page.drawImage(selfieImage, {
           x: selfieX + (selfieSize - scaledWidth) / 2,
           y: selfieY,
