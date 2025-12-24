@@ -195,8 +195,9 @@ async function finalizeEnvelope(supabase: any, envelopeUuid: string): Promise<vo
     }
   }
 
-  // Enviar notificações de conclusão UMA VEZ (usando o primeiro documento para info)
+  // Enviar notificações de conclusão UMA VEZ (usando todos os documentos do envelope)
   const firstDocument = documents[0];
+  const allDocumentIds = documents.map((d: any) => d.id);
 
   try {
     // Pegar signatários únicos (evitar duplicatas em envelope)
@@ -212,16 +213,17 @@ async function finalizeEnvelope(supabase: any, envelopeUuid: string): Promise<vo
       const envelopeName =
         documents.length > 1 ? `Envelope: ${firstDocument.name.split(" - ")[0]}` : firstDocument.name;
 
-      // Enviar email de conclusão
+      // Enviar email de conclusão com TODOS os documentIds do envelope
       await supabase.functions.invoke("send-document-completed-email", {
         body: {
           documentId: firstDocument.id,
+          documentIds: allDocumentIds, // Array com todos os documentos do envelope
           documentName: envelopeName,
           signerEmails,
           senderName: "eonSign",
         },
       });
-      console.log("Document completed email sent");
+      console.log(`Document completed email sent for ${allDocumentIds.length} documents`);
 
       // Enviar WhatsApp de conclusão com link de validação
       const APP_URL = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
