@@ -164,7 +164,14 @@ serve(async (req) => {
       });
     }
 
-    console.log("Total signed signers to display:", signedSigners.length);
+    // Determine how many signers to display (max 3 when 4+ signers)
+    const totalSignersCount = signedSigners.length;
+    const showAllSigners = totalSignersCount <= 3;
+    const signersToDisplay = showAllSigners 
+      ? signedSigners 
+      : signedSigners.slice(0, 3);
+
+    console.log(`Total signed signers: ${totalSignersCount}, displaying: ${signersToDisplay.length} (truncated: ${!showAllSigners})`);
 
     // === LAYOUT: TWO VERTICAL COLUMNS ON RIGHT MARGIN ===
     // Column 1 (left): Validation link
@@ -205,7 +212,8 @@ serve(async (req) => {
       let currentY = signaturesStartY;
 
       // 2. Draw each signature (Nome - CPF - Assinado em DD/MM/YYYY às HH:MM)
-      for (const signer of signedSigners) {
+      // Only display first 3 signers when 4+ total signers
+      for (const signer of signersToDisplay) {
         const displayName = getDisplayName(signer.typed_signature || signer.name);
         const cpfFormatted = formatCPF(signer.cpf);
         
@@ -256,17 +264,26 @@ serve(async (req) => {
       }
 
       // 3. Draw validation link aligned with first signatory
-      const validationText = normalizeText(`Verifique em: sign.eonhub.com.br/validar/${documentId}`);
+      // Add suffix when not all signers are displayed
+      let validationText = `Verifique em: sign.eonhub.com.br/validar/${documentId}`;
+      if (!showAllSigners) {
+        validationText += ` / verifique todos os signatarios na pagina de assinaturas`;
+      }
+      validationText = normalizeText(validationText);
+      
+      // Adjust font size if text is longer (when showing truncation message)
+      const validationFontSize = showAllSigners ? 5 : 4.5;
+      
       page.drawText(validationText, {
         x: width - validationColumnX,
         y: signaturesStartY,  // Aligned with first signatory, after logo
-        size: 5,
+        size: validationFontSize,
         font: helveticaFont,
         color: rgb(0.42, 0.45, 0.50),
         rotate: degrees(90),
       });
 
-      console.log(`Page ${pageIndex + 1}/${totalPages}: Applied ${signedSigners.length} signatures`);
+      console.log(`Page ${pageIndex + 1}/${totalPages}: Applied ${signersToDisplay.length} of ${totalSignersCount} signatures (truncated: ${!showAllSigners})`);
     }
 
     // Save the modified PDF
