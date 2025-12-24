@@ -182,17 +182,18 @@ serve(async (req) => {
       // Calculate where signatures start (after logo if present)
       let signaturesStartY = startY;
       
-      // 1. Draw Logo centered between the two columns
+      // 1. Draw Logo aligned with the two text columns
       if (logoImage) {
         const logoDisplaySize = 25;
         const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
         
-        // Calculate center position between the two columns (18 and 8)
-        // logoColumnX = (18 + 8) / 2 = 13, but we need to center the logo itself
-        const logoColumnX = (validationColumnX + signaturesColumnX) / 2;
+        // Position logo at the center between validation (18) and signatures (8) columns
+        // With 90° rotation, the image rotates around (x, y) point
+        // To align correctly, we position it at the midpoint without additional offset
+        const logoColumnX = (validationColumnX + signaturesColumnX) / 2;  // = 13
         
         page.drawImage(logoImage, {
-          x: width - logoColumnX - (logoDims.height / 2),  // Center the logo horizontally
+          x: width - logoColumnX,  // Aligned with center of columns
           y: startY,
           width: logoDims.width,
           height: logoDims.height,
