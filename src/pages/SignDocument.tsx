@@ -357,12 +357,18 @@ const SignDocument = () => {
     }
   };
 
-  const handleSelfieCapture = (base64: string) => {
+  const handleSelfieCapture = async (base64: string) => {
     setSelfieBase64(base64);
-    toast.success("Selfie capturada com sucesso!");
+    toast.success("Selfie capturada! Assinando documento...");
+    
+    // Auto-sign after selfie capture
+    await performSign(base64);
   };
 
-  const handleSign = async () => {
+  // Separated sign logic to be called with selfie data
+  const performSign = async (selfie?: string) => {
+    const selfieData = selfie || selfieBase64;
+    
     if (!cpf) {
       toast.error("Por favor, informe seu CPF/CNPJ");
       return;
@@ -412,9 +418,8 @@ const SignDocument = () => {
     }
 
     // If facial biometry is required, check for selfie
-    if (isSimpleSignature && requiresFacialBiometry && !selfieBase64) {
-      toast.error("A biometria facial é obrigatória para este documento. Por favor, capture sua selfie.");
-      setShowSelfieDialog(true);
+    if (isSimpleSignature && requiresFacialBiometry && !selfieData) {
+      toast.error("A biometria facial é obrigatória para este documento.");
       return;
     }
 
@@ -430,8 +435,8 @@ const SignDocument = () => {
           longitude: location?.longitude || null,
           // Simple signature specific data
           typedSignature: isSimpleSignature ? typedSignature : null,
-          // Selfie data (if captured)
-          selfieBase64: selfieBase64 || null,
+          // Selfie data
+          selfieBase64: selfieData || null,
         },
       });
 
@@ -455,6 +460,67 @@ const SignDocument = () => {
     } finally {
       setIsSigning(false);
     }
+  };
+
+  const handleSign = async () => {
+    // Validate basic requirements first
+    if (!cpf) {
+      toast.error("Por favor, informe seu CPF/CNPJ");
+      return;
+    }
+
+    if (!validateCpfCnpj(cpf)) {
+      const cleanCpf = cpf.replace(/\D/g, "");
+      const type = cleanCpf.length === 11 ? "CPF" : cleanCpf.length === 14 ? "CNPJ" : "CPF/CNPJ";
+      toast.error(`${type} inválido. Por favor, verifique o número informado.`);
+      return;
+    }
+
+    if (!birthDate) {
+      toast.error("Por favor, informe sua data de nascimento");
+      return;
+    }
+
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    if (age < 18) {
+      toast.error("Você deve ter pelo menos 18 anos para assinar documentos");
+      return;
+    }
+
+    if (!currentSigner) {
+      toast.error("Signatário não identificado");
+      return;
+    }
+
+    // For simple signatures, require typed signature
+    if (isSimpleSignature && !typedSignature.trim()) {
+      toast.error("Por favor, digite sua assinatura");
+      return;
+    }
+
+    // For simple signatures, geolocation is MANDATORY
+    if (isSimpleSignature && !location) {
+      toast.error("A localização é obrigatória para assinar este documento. Por favor, permita o acesso à sua localização.");
+      return;
+    }
+
+    // If facial biometry is required and no selfie yet, open camera dialog
+    // The signing will happen automatically after selfie capture
+    if (isSimpleSignature && requiresFacialBiometry && !selfieBase64) {
+      setShowSelfieDialog(true);
+      return;
+    }
+
+    // If no biometry required or already has selfie, sign directly
+    await performSign();
   };
 
   const handleZoomIn = () => {
@@ -808,7 +874,7 @@ const SignDocument = () => {
                       </div>
                     )}
 
-                    {/* Selfie Capture for Simple Mode with Facial Biometry */}
+                    {/* Selfie Status for Simple Mode with Facial Biometry */}
                     {isSimpleSignature && requiresFacialBiometry && (
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2" style={{ color: '#374151' }}>
@@ -823,23 +889,24 @@ const SignDocument = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => setShowSelfieDialog(true)}
+                              onClick={() => {
+                                setSelfieBase64(null);
+                                setShowSelfieDialog(true);
+                              }}
                               className="ml-auto"
                             >
                               Capturar Novamente
                             </Button>
                           </div>
                         ) : (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowSelfieDialog(true)}
-                            className="w-full"
-                            style={{ borderColor: '#3b82f6', color: '#1d4ed8' }}
-                          >
-                            <Camera className="h-4 w-4 mr-2" />
-                            Capturar Selfie
-                          </Button>
+                          <div className="p-3 rounded-lg" style={{ backgroundColor: '#eff6ff', border: '1px solid #3b82f6' }}>
+                            <div className="flex items-center gap-2">
+                              <Camera className="h-4 w-4" style={{ color: '#2563eb' }} />
+                              <span className="text-sm" style={{ color: '#1e40af' }}>
+                                A câmera será aberta automaticamente ao clicar em "Assinar Documento"
+                              </span>
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}
@@ -911,8 +978,7 @@ const SignDocument = () => {
                         cpfValid === false ||
                         !!birthDateError ||
                         (isSimpleSignature && !typedSignature.trim()) ||
-                        (isSimpleSignature && !location) ||
-                        (isSimpleSignature && requiresFacialBiometry && !selfieBase64)
+                        (isSimpleSignature && !location)
                       }
                       className="w-full"
                       style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
@@ -921,6 +987,11 @@ const SignDocument = () => {
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Processando...
+                        </>
+                      ) : requiresFacialBiometry && !selfieBase64 ? (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Assinar com Biometria
                         </>
                       ) : (
                         "Assinar Documento"
