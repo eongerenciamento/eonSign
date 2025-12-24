@@ -506,16 +506,18 @@ const SignDocument = () => {
       return;
     }
 
-    // For simple signatures, geolocation is MANDATORY
-    if (isSimpleSignature && !location) {
-      toast.error("A localização é obrigatória para assinar este documento. Por favor, permita o acesso à sua localização.");
+    // If facial biometry is required and no selfie yet, open camera dialog first
+    // (Even if location is still being requested)
+    if (isSimpleSignature && requiresFacialBiometry && !selfieBase64) {
+      setShowSelfieDialog(true);
       return;
     }
 
-    // If facial biometry is required and no selfie yet, open camera dialog
-    // The signing will happen automatically after selfie capture
-    if (isSimpleSignature && requiresFacialBiometry && !selfieBase64) {
-      setShowSelfieDialog(true);
+    // For simple signatures, geolocation is MANDATORY
+    if (isSimpleSignature && !location) {
+      toast.error(
+        "A localização é obrigatória para assinar este documento. Por favor, permita o acesso à sua localização."
+      );
       return;
     }
 
@@ -885,18 +887,6 @@ const SignDocument = () => {
                           <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4', border: '1px solid #22c55e' }}>
                             <CheckCircle className="h-5 w-5" style={{ color: '#16a34a' }} />
                             <span className="text-sm font-medium" style={{ color: '#166534' }}>Selfie capturada</span>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelfieBase64(null);
-                                setShowSelfieDialog(true);
-                              }}
-                              className="ml-auto"
-                            >
-                              Capturar Novamente
-                            </Button>
                           </div>
                         ) : (
                           <div className="p-3 rounded-lg" style={{ backgroundColor: '#eff6ff', border: '1px solid #3b82f6' }}>
@@ -978,7 +968,8 @@ const SignDocument = () => {
                         cpfValid === false ||
                         !!birthDateError ||
                         (isSimpleSignature && !typedSignature.trim()) ||
-                        (isSimpleSignature && !location)
+                        // allow opening camera even if location not yet available when selfie is still missing
+                        (isSimpleSignature && !location && !(requiresFacialBiometry && !selfieBase64))
                       }
                       className="w-full"
                       style={{ background: 'linear-gradient(to right, #273d60, #001a4d)', color: '#ffffff' }}
