@@ -193,7 +193,7 @@ serve(async (req) => {
         const logoColumnX = (validationColumnX + signaturesColumnX) / 2;  // = 13
         
         page.drawImage(logoImage, {
-          x: width - logoColumnX,  // Aligned with center of columns
+          x: width - logoColumnX + (logoDims.height / 2),  // Center the logo visually between columns
           y: startY,
           width: logoDims.width,
           height: logoDims.height,
