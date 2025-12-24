@@ -624,7 +624,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Save PDF
     const pdfBytes = await pdfDoc.save();
-    const base64Content = btoa(String.fromCharCode(...pdfBytes));
+    
+    // Convert large byte array to base64 without stack overflow
+    const uint8Array = new Uint8Array(pdfBytes);
+    let binaryString = '';
+    const chunkSize = 8192; // Process in chunks to avoid stack overflow
+
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize);
+      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+
+    const base64Content = btoa(binaryString);
 
     console.log("Signature report generated successfully");
 
