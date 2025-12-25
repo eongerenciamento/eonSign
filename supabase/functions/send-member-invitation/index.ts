@@ -197,7 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <!-- Header -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #273d60 0%, #001f3f 100%); padding: 30px; text-align: center;">
+                  <td style="background: linear-gradient(135deg, #273d60 0%, #001f3f 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
                     <img src="https://lbyoniuealghclfuahko.supabase.co/storage/v1/object/public/email-assets/header-banner.png" alt="eonSign" style="max-width: 200px; height: auto; margin: 0 auto;">
                   </td>
                 </tr>
