@@ -470,36 +470,42 @@ export type Database = {
           accepted_at: string | null
           created_at: string | null
           id: string
+          invitation_token: string | null
           invited_at: string | null
           member_email: string
           member_user_id: string | null
           organization_id: string
           role: Database["public"]["Enums"]["member_role"]
           status: string
+          token_expires_at: string | null
           updated_at: string | null
         }
         Insert: {
           accepted_at?: string | null
           created_at?: string | null
           id?: string
+          invitation_token?: string | null
           invited_at?: string | null
           member_email: string
           member_user_id?: string | null
           organization_id: string
           role?: Database["public"]["Enums"]["member_role"]
           status?: string
+          token_expires_at?: string | null
           updated_at?: string | null
         }
         Update: {
           accepted_at?: string | null
           created_at?: string | null
           id?: string
+          invitation_token?: string | null
           invited_at?: string | null
           member_email?: string
           member_user_id?: string | null
           organization_id?: string
           role?: Database["public"]["Enums"]["member_role"]
           status?: string
+          token_expires_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
