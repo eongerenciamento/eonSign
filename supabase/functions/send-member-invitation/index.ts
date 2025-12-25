@@ -12,6 +12,23 @@ interface InvitationRequest {
   organizationId: string;
 }
 
+// Generate a secure random token
+function generateToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// Generate a temporary password
+function generateTempPassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -26,6 +43,12 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
     );
 
     // Get authenticated user
@@ -54,7 +77,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Você não tem permissão para convidar membros nesta organização");
     }
 
-    console.log("[MEMBER-INVITATION] Inviting member:", memberEmail);
+    const normalizedEmail = memberEmail.toLowerCase().trim();
+    console.log("[MEMBER-INVITATION] Inviting member:", normalizedEmail);
 
     // Get organization info
     const { data: companyData, error: companyError } = await supabaseAdmin
@@ -74,33 +98,90 @@ const handler = async (req: Request): Promise<Response> => {
     // Check if member already exists
     const { data: existingMember } = await supabaseAdmin
       .from("organization_members")
-      .select("id")
+      .select("id, status")
       .eq("organization_id", organizationId)
-      .eq("member_email", memberEmail.toLowerCase())
+      .eq("member_email", normalizedEmail)
       .single();
 
     if (existingMember) {
-      throw new Error("Este e-mail já foi convidado para a organização");
+      if (existingMember.status === "active") {
+        throw new Error("Este membro já faz parte da organização");
+      }
+      // If pending, we'll update the existing record with a new token
     }
 
-    // Create member record
-    const { error: insertError } = await supabaseAdmin.from("organization_members").insert({
-      organization_id: organizationId,
-      member_email: memberEmail.toLowerCase(),
-      role: "member",
-      status: "pending",
-    });
+    // Check if user already exists in auth
+    const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = usersData?.users?.find(u => u.email === normalizedEmail);
 
-    if (insertError) {
-      console.error("[MEMBER-INVITATION] Insert error:", insertError);
-      throw new Error("Erro ao criar convite");
+    let userId: string;
+
+    if (existingUser) {
+      userId = existingUser.id;
+      console.log("[MEMBER-INVITATION] User already exists:", userId);
+    } else {
+      // Create user with temporary password
+      const tempPassword = generateTempPassword();
+      const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
+        email: normalizedEmail,
+        password: tempPassword,
+        email_confirm: false, // Will be confirmed when they set their password
+      });
+
+      if (createUserError) {
+        console.error("[MEMBER-INVITATION] Error creating user:", createUserError);
+        throw new Error("Erro ao criar conta do usuário");
+      }
+
+      userId = newUser.user.id;
+      console.log("[MEMBER-INVITATION] User created:", userId);
     }
 
-    console.log("[MEMBER-INVITATION] Member record created");
+    // Generate invitation token
+    const invitationToken = generateToken();
+    const tokenExpiresAt = new Date();
+    tokenExpiresAt.setDate(tokenExpiresAt.getDate() + 7); // Token expires in 7 days
+
+    // Create or update member record
+    if (existingMember) {
+      const { error: updateError } = await supabaseAdmin
+        .from("organization_members")
+        .update({
+          invitation_token: invitationToken,
+          token_expires_at: tokenExpiresAt.toISOString(),
+          invited_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existingMember.id);
+
+      if (updateError) {
+        console.error("[MEMBER-INVITATION] Update error:", updateError);
+        throw new Error("Erro ao atualizar convite");
+      }
+    } else {
+      const { error: insertError } = await supabaseAdmin.from("organization_members").insert({
+        organization_id: organizationId,
+        member_email: normalizedEmail,
+        member_user_id: userId,
+        role: "member",
+        status: "pending",
+        invitation_token: invitationToken,
+        token_expires_at: tokenExpiresAt.toISOString(),
+      });
+
+      if (insertError) {
+        console.error("[MEMBER-INVITATION] Insert error:", insertError);
+        throw new Error("Erro ao criar convite");
+      }
+    }
+
+    console.log("[MEMBER-INVITATION] Member record created/updated with token");
 
     // Send invitation email
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const appUrl = Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
+    
+    const setPasswordUrl = `${appUrl}/definir-senha?email=${encodeURIComponent(normalizedEmail)}&token=${invitationToken}`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -133,21 +214,28 @@ const handler = async (req: Request): Promise<Response> => {
                     <p style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
                       <strong>${adminName}</strong> convidou você para fazer parte da organização <strong>${organizationName}</strong> no eonSign.
                     </p>
-                    <p style="margin: 0 0 30px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
+                    <p style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
                       Como membro da organização, você terá acesso à plataforma utilizando a assinatura da empresa, sem custos adicionais.
+                    </p>
+                    <p style="margin: 0 0 30px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
+                      Clique no botão abaixo para definir sua senha e acessar o sistema:
                     </p>
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td align="center">
-                          <a href="${appUrl}/auth?invitation=${encodeURIComponent(memberEmail)}" 
+                          <a href="${setPasswordUrl}" 
                              style="display: inline-block; background: linear-gradient(135deg, #273d60 0%, #001f3f 100%); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                            Aceitar Convite
+                            Definir Senha
                           </a>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin: 30px 0 0 0; color: #718096; font-size: 14px; line-height: 1.6;">
-                      Se você não esperava este convite, pode ignorar este e-mail.
+                    <p style="margin: 30px 0 10px 0; color: #718096; font-size: 14px; line-height: 1.6;">
+                      Este link expira em 7 dias. Se você não esperava este convite, pode ignorar este e-mail.
+                    </p>
+                    <p style="margin: 0; color: #a0aec0; font-size: 12px; line-height: 1.6;">
+                      Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                      <a href="${setPasswordUrl}" style="color: #273d60; word-break: break-all;">${setPasswordUrl}</a>
                     </p>
                   </td>
                 </tr>
@@ -170,7 +258,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "eonSign <noreply@eonhub.com.br>",
-      to: [memberEmail],
+      to: [normalizedEmail],
       subject: `${adminName} convidou você para ${organizationName}`,
       html: emailHtml,
     });

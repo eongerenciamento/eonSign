@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
 import ValidateDocument from "./pages/ValidateDocument";
+import SetPassword from "./pages/SetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const AppRoutes = () => {
   return <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/install" element={<Install />} />
+      <Route path="/definir-senha" element={<SetPassword />} />
       <Route path="/assinar/:documentId" element={<SignDocument />} />
       <Route path="/validar/:documentId" element={<ValidateDocument />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
