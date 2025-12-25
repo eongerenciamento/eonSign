@@ -296,14 +296,14 @@ const Documents = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-secondary rounded-xl p-1 h-10 border-none">
-            <TabsTrigger value="signed" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+          <TabsList className="grid w-full grid-cols-3 rounded-full p-1 h-10">
+            <TabsTrigger value="signed" className="rounded-full">
               <CheckCircle className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+            <TabsTrigger value="pending-internal" className="rounded-full">
               <User className="w-4 h-4" />
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-muted-foreground">
+            <TabsTrigger value="pending-external" className="rounded-full">
               <Users className="w-4 h-4" />
             </TabsTrigger>
           </TabsList>
