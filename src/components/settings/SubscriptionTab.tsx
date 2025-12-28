@@ -10,6 +10,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
+// Single tiered price ID for all paid plans
+const TIERED_PRICE_ID = "price_1SWhQIHRTD5WvpxjPvRHBY18";
+
 const SUBSCRIPTION_TIERS = [{
   name: "Grátis",
   limit: 5,
@@ -20,31 +23,31 @@ const SUBSCRIPTION_TIERS = [{
   name: "Básico",
   limit: 20,
   price: 54.9,
-  priceId: "price_1Se8TtHRTD5Wvpxj3gPRrRbg",
+  priceId: TIERED_PRICE_ID,
   description: "Para pequenas empresas"
 }, {
   name: "Profissional",
   limit: 50,
   price: 89.9,
-  priceId: "price_1Se8U4HRTD5WvpxjR7sdwYC9",
+  priceId: TIERED_PRICE_ID,
   description: "Para empresas em crescimento"
 }, {
   name: "Empresarial",
   limit: 100,
   price: 159.9,
-  priceId: "price_1Se8UIHRTD5WvpxjjQ6KyfKL",
+  priceId: TIERED_PRICE_ID,
   description: "Para empresas estabelecidas"
 }, {
   name: "Premium",
   limit: 150,
   price: 209.9,
-  priceId: "price_1SeGrSHRTD5WvpxjPddcam2O",
+  priceId: TIERED_PRICE_ID,
   description: "Para grandes volumes"
 }, {
   name: "Enterprise",
   limit: 200,
   price: 289.9,
-  priceId: "price_1SeGs0HRTD5Wvpxjbt5yi6NV",
+  priceId: TIERED_PRICE_ID,
   description: "Documentos ilimitados"
 }];
 

@@ -41,6 +41,7 @@ serve(async (req) => {
     }
 
     // Create checkout session for new account registration
+    // For tiered pricing, the quantity represents the document limit tier
     const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://sign.eonhub.com.br";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -48,7 +49,7 @@ serve(async (req) => {
       line_items: [
         {
           price: priceId,
-          quantity: 1,
+          quantity: documentLimit, // Tiered pricing: quantity = document limit
         },
       ],
       mode: "subscription",
