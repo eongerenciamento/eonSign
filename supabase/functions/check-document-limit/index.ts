@@ -6,6 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Price ID específico do eonSign
+const EONSIGN_PRICE_ID = "price_1SWhQIHRTD5WvpxjPvRHBY18";
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-LIMIT] ${step}${detailsStr}`);
@@ -35,17 +38,34 @@ serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    // Get user's tier (default to free tier if none)
+    // Busca assinatura ativa do eonSign especificamente (verifica price_id)
     const { data: subscription } = await supabaseClient
       .from("user_subscriptions")
-      .select("plan_name, document_limit, status")
+      .select("plan_name, document_limit, status, stripe_price_id")
       .eq("user_id", user.id)
       .eq("status", "active")
+      .eq("stripe_price_id", EONSIGN_PRICE_ID) // Só considera assinaturas do eonSign
       .single();
 
-    const documentLimit = subscription?.document_limit || 5;
-    const planName = subscription?.plan_name || "Grátis";
-    logStep("User tier", { planName, documentLimit });
+    // Se não tem assinatura do eonSign, não permite criar documentos
+    if (!subscription) {
+      logStep("No valid eonSign subscription found");
+      return new Response(JSON.stringify({
+        canCreate: false,
+        current: 0,
+        limit: 0,
+        planName: "Sem assinatura eonSign",
+        remaining: 0,
+        reason: "no_eonsign_subscription"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const documentLimit = subscription.document_limit || 0;
+    const planName = subscription.plan_name || "eonSign";
+    logStep("User tier", { planName, documentLimit, priceId: subscription.stripe_price_id });
 
     // Get current month usage
     const currentMonth = new Date();
