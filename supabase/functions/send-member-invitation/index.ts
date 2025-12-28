@@ -128,6 +128,16 @@ const handler = async (req: Request): Promise<Response> => {
     const organizationName = companyData?.company_name || "Organização";
     const adminName = companyData?.admin_name || "Administrador";
 
+    // Get organization's stripe_customer_id
+    const { data: subscriptionData } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", organizationId)
+      .eq("status", "active")
+      .single();
+
+    const organizationStripeId = subscriptionData?.stripe_customer_id || null;
+
     // Check if member already exists
     const { data: existingMember } = await supabaseAdmin
       .from("organization_members")
@@ -148,6 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
     const existingUser = usersData?.users?.find(u => u.email === normalizedEmail);
 
     let userId: string;
+    let memberId: string;
 
     if (existingUser) {
       userId = existingUser.id;
@@ -177,6 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create or update member record
     if (existingMember) {
+      memberId = existingMember.id;
       const { error: updateError } = await supabaseAdmin
         .from("organization_members")
         .update({
@@ -192,20 +204,26 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error("Erro ao atualizar convite");
       }
     } else {
-      const { error: insertError } = await supabaseAdmin.from("organization_members").insert({
-        organization_id: organizationId,
-        member_email: normalizedEmail,
-        member_user_id: userId,
-        role: "member",
-        status: "pending",
-        invitation_token: invitationToken,
-        token_expires_at: tokenExpiresAt.toISOString(),
-      });
+      const { data: newMember, error: insertError } = await supabaseAdmin
+        .from("organization_members")
+        .insert({
+          organization_id: organizationId,
+          member_email: normalizedEmail,
+          member_user_id: userId,
+          role: "member",
+          status: "pending",
+          invitation_token: invitationToken,
+          token_expires_at: tokenExpiresAt.toISOString(),
+        })
+        .select("id")
+        .single();
 
       if (insertError) {
         console.error("[MEMBER-INVITATION] Insert error:", insertError);
         throw new Error("Erro ao criar convite");
       }
+      
+      memberId = newMember.id;
     }
 
     console.log("[MEMBER-INVITATION] Member record created/updated with token");
@@ -300,17 +318,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send webhook notification for new member (only for new members, not re-invites)
     if (!existingMember) {
-      await sendMemberWebhook({
+      const webhookPayload: any = {
         event: "user.created",
         system_name: "eonsign",
-        organization_name: organizationName,
         user: {
-          external_id: userId,
+          external_id: memberId,
+          name: normalizedEmail.split("@")[0],
           email: normalizedEmail,
-          role: "user",
-          status: "pending",
+          role: "Usuário",
         },
-      });
+      };
+
+      // Add organization_stripe_id if available
+      if (organizationStripeId) {
+        webhookPayload.user.organization_stripe_id = organizationStripeId;
+      }
+
+      await sendMemberWebhook(webhookPayload);
     }
 
     return new Response(JSON.stringify({ success: true, message: "Convite enviado com sucesso" }), {

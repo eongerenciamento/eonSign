@@ -17,14 +17,14 @@ Deno.serve(async (req) => {
     // Validate API key
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey || apiKey !== EXPECTED_API_KEY) {
-      console.error("Invalid or missing API key");
+      console.error("[GET-USERS-LIST] Invalid or missing API key");
       return new Response(
-        JSON.stringify({ success: false, error: "Unauthorized - Invalid API key" }),
+        JSON.stringify({ error: "Unauthorized - Invalid API key" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("API key validated, fetching users list...");
+    console.log("[GET-USERS-LIST] API key validated, fetching users list...");
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -34,35 +34,17 @@ Deno.serve(async (req) => {
     // Fetch all organization members
     const { data: members, error: membersError } = await supabase
       .from("organization_members")
-      .select("id, organization_id, member_user_id, member_email, role, status, created_at");
+      .select("id, organization_id, member_user_id, member_email, role");
 
     if (membersError) {
-      console.error("Error fetching members:", membersError);
+      console.error("[GET-USERS-LIST] Error fetching members:", membersError);
       return new Response(
-        JSON.stringify({ success: false, error: "Failed to fetch members" }),
+        JSON.stringify({ error: "Failed to fetch members" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Found ${members?.length || 0} members`);
-
-    // Get unique organization IDs to fetch organization names
-    const organizationIds = [...new Set(members?.map(m => m.organization_id) || [])];
-    
-    // Fetch organization settings (company names)
-    const { data: organizations, error: orgsError } = await supabase
-      .from("company_settings")
-      .select("user_id, company_name")
-      .in("user_id", organizationIds);
-
-    if (orgsError) {
-      console.error("Error fetching organizations:", orgsError);
-    }
-
-    // Create a map of organization_id -> company_name
-    const orgMap = new Map(
-      organizations?.map(org => [org.user_id, org.company_name]) || []
-    );
+    console.log(`[GET-USERS-LIST] Found ${members?.length || 0} members`);
 
     // Get unique user IDs to fetch profile names
     const userIds = members?.filter(m => m.member_user_id).map(m => m.member_user_id) || [];
@@ -70,11 +52,11 @@ Deno.serve(async (req) => {
     // Fetch profiles for names
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, nome_completo, email")
+      .select("id, nome_completo")
       .in("id", userIds);
 
     if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
+      console.error("[GET-USERS-LIST] Error fetching profiles:", profilesError);
     }
 
     // Create a map of user_id -> profile
@@ -82,37 +64,31 @@ Deno.serve(async (req) => {
       profiles?.map(p => [p.id, p]) || []
     );
 
-    // Format the response
+    // Format the response according to expected format:
+    // { users: [{ id, name, email, role?, organization_id? }] }
     const users = members?.map(member => {
       const profile = member.member_user_id ? profileMap.get(member.member_user_id) : null;
-      const organizationName = orgMap.get(member.organization_id) || "Unknown Organization";
 
       return {
-        external_id: member.id,
+        id: member.id,
         name: profile?.nome_completo || member.member_email.split("@")[0],
         email: member.member_email,
-        role: member.role === "admin" ? "admin" : "user",
-        status: member.status === "active" ? "active" : "pending",
-        organization_name: organizationName,
-        created_at: member.created_at
+        role: member.role === "admin" ? "Administrador" : "Usuário",
+        organization_id: member.organization_id
       };
     }) || [];
 
-    console.log(`Returning ${users.length} users`);
+    console.log(`[GET-USERS-LIST] Returning ${users.length} users`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        system_name: "eonsign",
-        users
-      }),
+      JSON.stringify({ users }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error) {
-    console.error("Unexpected error:", error);
+    console.error("[GET-USERS-LIST] Unexpected error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
