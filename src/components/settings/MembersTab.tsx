@@ -121,10 +121,15 @@ export function MembersTab() {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from("organization_members")
-        .delete()
-        .eq("id", memberToDelete.id);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase.functions.invoke("delete-member", {
+        body: {
+          memberId: memberToDelete.id,
+          organizationId: user.id
+        }
+      });
 
       if (error) throw error;
 

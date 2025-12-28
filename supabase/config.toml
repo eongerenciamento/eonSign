@@ -83,3 +83,9 @@ verify_jwt = false
 
 [functions.set-member-password]
 verify_jwt = false
+
+[functions.delete-member]
+verify_jwt = true
+
+[functions.send-member-webhook]
+verify_jwt = false
