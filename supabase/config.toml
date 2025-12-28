@@ -95,3 +95,9 @@ verify_jwt = false
 
 [functions.get-users-list]
 verify_jwt = false
+
+[functions.send-ticket-message]
+verify_jwt = true
+
+[functions.receive-ticket-response]
+verify_jwt = false
