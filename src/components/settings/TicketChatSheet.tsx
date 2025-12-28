@@ -84,20 +84,19 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     
     setIsSending(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         toast.error("Você precisa estar autenticado");
         return;
       }
 
-      const { error } = await supabase
-        .from('ticket_messages')
-        .insert({
-          ticket_id: ticket.id,
-          user_id: user.id,
-          message: message.trim(),
-          is_admin: false,
-        });
+      // Call the Edge Function to send message and trigger webhook
+      const { data, error } = await supabase.functions.invoke('send-ticket-message', {
+        body: {
+          ticketId: ticket.id,
+          message: message.trim()
+        }
+      });
 
       if (error) throw error;
       
