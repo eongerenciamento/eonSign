@@ -77,7 +77,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (hasSubscription === false) {
-    return <Navigate to="/planos" replace state={{ from: location }} />;
+    window.location.href = "https://eonhub.com.br/sign";
+    return null;
   }
 
   return <>{children}</>;
