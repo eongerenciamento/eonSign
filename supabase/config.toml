@@ -89,3 +89,9 @@ verify_jwt = true
 
 [functions.send-member-webhook]
 verify_jwt = false
+
+[functions.admin-list-all-tickets]
+verify_jwt = false
+
+[functions.get-users-list]
+verify_jwt = false
