@@ -114,6 +114,7 @@ serve(async (req) => {
       event: 'ticket.created',
       system_name: 'eonsign',
       organization_name: organizationName,
+      customer_email: userEmail,
       ticket: {
         external_id: ticketNumber,
         title,
@@ -123,6 +124,7 @@ serve(async (req) => {
       },
       user: {
         name: userName,
+        email: userEmail,
         customer_email: userEmail,
       },
     };

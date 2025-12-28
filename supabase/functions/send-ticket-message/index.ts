@@ -75,14 +75,23 @@ serve(async (req) => {
       );
     }
 
-    // Get user profile for sender name
+    // Get user profile for sender name / email
     const { data: profile } = await supabase
       .from('profiles')
-      .select('nome_completo')
+      .select('nome_completo, email')
       .eq('id', user.id)
       .single();
 
+    // Get company settings for organization name
+    const { data: companySettings } = await supabase
+      .from('company_settings')
+      .select('company_name')
+      .eq('user_id', user.id)
+      .single();
+
     const senderName = profile?.nome_completo || user.email || 'Cliente';
+    const userEmail = profile?.email || user.email || '';
+    const organizationName = companySettings?.company_name || 'eonSign';
 
     // Insert the message into the database
     const { data: insertedMessage, error: insertError } = await supabase
@@ -120,6 +129,8 @@ serve(async (req) => {
     const webhookPayload = {
       event: 'ticket.message.created',
       system_name: 'eonsign',
+      organization_name: organizationName,
+      customer_email: userEmail,
       ticket: {
         external_id: ticket.ticket_number
       },
