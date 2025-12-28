@@ -126,21 +126,19 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
         return;
       }
 
-      const ticketNumber = generateTicketNumber();
+      // Upload files to storage first (using temporary ticket number for file names)
+      const tempTicketNumber = `#${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      const attachmentPaths = await uploadFilesToStorage(user.id, tempTicketNumber);
 
-      // Upload files to storage
-      const attachmentPaths = await uploadFilesToStorage(user.id, ticketNumber);
-
-      const fullDescription = `Categoria: ${values.category}\nPrioridade: ${values.priority}\n\n${values.description}${
-        attachmentPaths.length > 0 ? `\n\nAnexos: ${attachmentPaths.length}` : ""
-      }`;
-
-      const { error } = await supabase.from("support_tickets").insert({
-        user_id: user.id,
-        title: values.title,
-        description: fullDescription,
-        ticket_number: ticketNumber,
-        status: "aberto",
+      // Call Edge Function to create ticket and send webhook
+      const { data, error } = await supabase.functions.invoke('create-ticket', {
+        body: {
+          title: values.title,
+          category: values.category,
+          priority: values.priority,
+          description: values.description,
+          attachmentPaths,
+        },
       });
 
       if (error) throw error;
