@@ -161,14 +161,15 @@ const handler = async (req: Request): Promise<Response> => {
       // Don't fail the request since password was already set
     }
 
-    // Get organization name for webhook
-    const { data: companyData } = await supabaseAdmin
-      .from("company_settings")
-      .select("company_name")
+    // Get organization's stripe_customer_id
+    const { data: subscriptionData } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("stripe_customer_id")
       .eq("user_id", member.organization_id)
+      .eq("status", "active")
       .single();
 
-    const organizationName = companyData?.company_name || "Organização";
+    const organizationStripeId = subscriptionData?.stripe_customer_id || null;
 
     // Get user profile for name
     const { data: profileData } = await supabaseAdmin
@@ -180,18 +181,23 @@ const handler = async (req: Request): Promise<Response> => {
     const userName = profileData?.nome_completo || email.split("@")[0];
 
     // Send webhook notification for member activation
-    await sendMemberWebhook({
+    const webhookPayload: any = {
       event: "user.updated",
       system_name: "eonsign",
-      organization_name: organizationName,
       user: {
         external_id: member.id,
         name: userName,
         email: email,
-        role: "user",
-        status: "active",
+        role: member.role === "admin" ? "Administrador" : "Usuário",
       },
-    });
+    };
+
+    // Add organization_stripe_id if available
+    if (organizationStripeId) {
+      webhookPayload.user.organization_stripe_id = organizationStripeId;
+    }
+
+    await sendMemberWebhook(webhookPayload);
 
     console.log("Password set successfully for:", email);
 

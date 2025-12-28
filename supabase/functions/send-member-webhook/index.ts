@@ -10,13 +10,12 @@ const WEBHOOK_URL = "https://beyefodsuuftviwthdfe.supabase.co/functions/v1/user-
 interface WebhookPayload {
   event: "user.created" | "user.updated" | "user.deleted";
   system_name: "eonsign";
-  organization_name: string;
   user: {
     external_id: string;
     name?: string;
     email: string;
-    role?: "user" | "admin";
-    status?: "active" | "pending";
+    role?: string;
+    organization_stripe_id?: string;
   };
 }
 
@@ -64,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const payload: WebhookPayload = await req.json();
     
-    if (!payload.event || !payload.organization_name || !payload.user?.email) {
+    if (!payload.event || !payload.user?.email) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
