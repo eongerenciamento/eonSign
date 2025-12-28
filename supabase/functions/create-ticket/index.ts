@@ -98,13 +98,22 @@ serve(async (req) => {
       .eq('id', user.id)
       .single();
 
+    // Get company settings for organization name
+    const { data: companySettings } = await supabaseAdmin
+      .from('company_settings')
+      .select('company_name')
+      .eq('user_id', user.id)
+      .single();
+
     const userName = profile?.nome_completo || user.email?.split('@')[0] || 'Usuário';
     const userEmail = profile?.email || user.email || '';
+    const organizationName = companySettings?.company_name || 'eonSign';
 
     // Send webhook to external system
     const webhookPayload = {
       event: 'ticket.created',
       system_name: 'eonsign',
+      organization_name: organizationName,
       ticket: {
         external_id: ticketNumber,
         title,
@@ -114,7 +123,7 @@ serve(async (req) => {
       },
       user: {
         name: userName,
-        email: userEmail,
+        customer_email: userEmail,
       },
     };
 
