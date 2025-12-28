@@ -6,6 +6,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const WEBHOOK_URL = "https://beyefodsuuftviwthdfe.supabase.co/functions/v1/user-webhook";
+
+async function sendMemberWebhook(payload: object): Promise<void> {
+  const apiKey = Deno.env.get("EONSIGN_WEBHOOK_API_KEY");
+  
+  if (!apiKey) {
+    console.log("[SET-MEMBER-PASSWORD] Webhook API key not configured, skipping");
+    return;
+  }
+
+  try {
+    console.log("[SET-MEMBER-PASSWORD] Sending webhook:", JSON.stringify(payload));
+    
+    const response = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[SET-MEMBER-PASSWORD] Webhook failed:", response.status, errorText);
+    } else {
+      console.log("[SET-MEMBER-PASSWORD] Webhook sent successfully");
+    }
+  } catch (error) {
+    console.error("[SET-MEMBER-PASSWORD] Error sending webhook:", error);
+  }
+}
+
 interface SetPasswordRequest {
   email: string;
   token: string;
@@ -127,6 +160,38 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error updating member status:", updateMemberError);
       // Don't fail the request since password was already set
     }
+
+    // Get organization name for webhook
+    const { data: companyData } = await supabaseAdmin
+      .from("company_settings")
+      .select("company_name")
+      .eq("user_id", member.organization_id)
+      .single();
+
+    const organizationName = companyData?.company_name || "Organização";
+
+    // Get user profile for name
+    const { data: profileData } = await supabaseAdmin
+      .from("profiles")
+      .select("nome_completo")
+      .eq("id", user.id)
+      .single();
+
+    const userName = profileData?.nome_completo || email.split("@")[0];
+
+    // Send webhook notification for member activation
+    await sendMemberWebhook({
+      event: "user.updated",
+      system_name: "eonsign",
+      organization_name: organizationName,
+      user: {
+        external_id: member.id,
+        name: userName,
+        email: email,
+        role: "user",
+        status: "active",
+      },
+    });
 
     console.log("Password set successfully for:", email);
 

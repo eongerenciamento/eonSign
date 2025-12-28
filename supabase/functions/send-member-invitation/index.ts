@@ -7,6 +7,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const WEBHOOK_URL = "https://beyefodsuuftviwthdfe.supabase.co/functions/v1/user-webhook";
+
+async function sendMemberWebhook(payload: object): Promise<void> {
+  const apiKey = Deno.env.get("EONSIGN_WEBHOOK_API_KEY");
+  
+  if (!apiKey) {
+    console.log("[MEMBER-INVITATION] Webhook API key not configured, skipping");
+    return;
+  }
+
+  try {
+    console.log("[MEMBER-INVITATION] Sending webhook:", JSON.stringify(payload));
+    
+    const response = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[MEMBER-INVITATION] Webhook failed:", response.status, errorText);
+    } else {
+      console.log("[MEMBER-INVITATION] Webhook sent successfully");
+    }
+  } catch (error) {
+    console.error("[MEMBER-INVITATION] Error sending webhook:", error);
+  }
+}
+
 interface InvitationRequest {
   memberEmail: string;
   organizationId: string;
@@ -264,6 +297,21 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("[MEMBER-INVITATION] Email sent:", emailResponse);
+
+    // Send webhook notification for new member (only for new members, not re-invites)
+    if (!existingMember) {
+      await sendMemberWebhook({
+        event: "user.created",
+        system_name: "eonsign",
+        organization_name: organizationName,
+        user: {
+          external_id: userId,
+          email: normalizedEmail,
+          role: "user",
+          status: "pending",
+        },
+      });
+    }
 
     return new Response(JSON.stringify({ success: true, message: "Convite enviado com sucesso" }), {
       status: 200,
