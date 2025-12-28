@@ -333,14 +333,14 @@ export function SubscriptionTab() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive"; label: string }> = {
-      active: { variant: "default", label: "Ativo" },
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; className?: string }> = {
+      active: { variant: "outline", label: "Ativo", className: "border-blue-600 text-blue-600 bg-transparent" },
       trialing: { variant: "secondary", label: "Teste" },
       past_due: { variant: "destructive", label: "Vencido" },
       canceled: { variant: "destructive", label: "Cancelado" }
     };
     const config = variants[status] || { variant: "secondary", label: status };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
   if (loading) {
@@ -361,8 +361,8 @@ export function SubscriptionTab() {
                 <p className="text-sm text-muted-foreground">Plano Atual</p>
                 {getStatusBadge(subscription.status)}
               </div>
-              <p className="text-xl font-bold text-foreground mb-1">{subscription.plan_name}</p>
-              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground">
+              <p className="text-xl font-bold text-blue-600 mb-1">{subscription.plan_name}</p>
+              <Button onClick={handleManageSubscription} variant="link" className="p-0 h-auto text-xs text-blue-600 hover:text-blue-700">
                 Extrato de Pagamentos
               </Button>
             </CardContent>
@@ -372,7 +372,7 @@ export function SubscriptionTab() {
           <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Valor</p>
-              <p className="text-xl font-bold text-foreground">
+              <p className="text-xl font-bold text-blue-600">
                 {SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price ? `R$ ${SUBSCRIPTION_TIERS.find(t => t.name === subscription?.plan_name)?.price.toFixed(2).replace(".", ",")}` : "R$ 0,00"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">por mês</p>
@@ -383,7 +383,7 @@ export function SubscriptionTab() {
           <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Renovação</p>
-              <p className="text-xl font-bold text-foreground">
+              <p className="text-xl font-bold text-blue-600">
                 {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString("pt-BR", {
                   day: "2-digit",
                   month: "2-digit",
@@ -397,7 +397,7 @@ export function SubscriptionTab() {
           <Card className="bg-secondary border-0">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Consumo</p>
-              <p className="text-xl font-bold text-foreground mb-3">
+              <p className="text-xl font-bold text-blue-600 mb-3">
                 {usage?.current || 0} / {subscription.document_limit}
               </p>
               <Progress value={usagePercent} className="h-2 bg-muted" />
