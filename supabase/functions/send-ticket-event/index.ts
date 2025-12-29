@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const WEBHOOK_URL = 'https://hook.eonhub.com.br/webhook/eonsign-ticket';
+const WEBHOOK_URL = 'https://beyefodsuuftviwthdfe.supabase.co/functions/v1/ticket-webhook';
 
 interface TicketEventPayload {
   ticketId: string;
@@ -24,14 +24,7 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('EONSIGN_WEBHOOK_API_KEY');
-    if (!apiKey) {
-      console.error('EONSIGN_WEBHOOK_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Webhook API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const apiKey = 'wh-eonsign-1a34-994d-eb07-46c9';
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -131,7 +124,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
+        'x-api-key': apiKey,
       },
       body: JSON.stringify(webhookPayload),
     });
