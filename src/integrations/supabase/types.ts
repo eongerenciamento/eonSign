@@ -677,9 +677,13 @@ export type Database = {
       }
       support_tickets: {
         Row: {
+          closed_at: string | null
           created_at: string
           description: string
           id: string
+          rating: number | null
+          rating_comment: string | null
+          reopened_at: string | null
           status: Database["public"]["Enums"]["ticket_status"]
           ticket_number: string
           title: string
@@ -687,9 +691,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          closed_at?: string | null
           created_at?: string
           description: string
           id?: string
+          rating?: number | null
+          rating_comment?: string | null
+          reopened_at?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           ticket_number: string
           title: string
@@ -697,9 +705,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          closed_at?: string | null
           created_at?: string
           description?: string
           id?: string
+          rating?: number | null
+          rating_comment?: string | null
+          reopened_at?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
           ticket_number?: string
           title?: string
@@ -714,6 +726,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           message: string
+          message_type: string | null
           ticket_id: string
           user_id: string
         }
@@ -722,6 +735,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           message: string
+          message_type?: string | null
           ticket_id: string
           user_id: string
         }
@@ -730,6 +744,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           message?: string
+          message_type?: string | null
           ticket_id?: string
           user_id?: string
         }
