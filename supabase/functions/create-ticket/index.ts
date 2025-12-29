@@ -57,16 +57,41 @@ serve(async (req) => {
       );
     }
 
-    // Generate ticket number
-    const ticketNumber = `#${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    // Create service role client for database operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Generate ticket number in format: 03.YY.NNNN
+    const currentYear = new Date().getFullYear().toString().slice(-2); // "25"
+    const prefix = `03.${currentYear}.`;
+
+    // Find the last ticket number for this year
+    const { data: lastTicket } = await supabaseAdmin
+      .from('support_tickets')
+      .select('ticket_number')
+      .like('ticket_number', `${prefix}%`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    let sequentialNumber = 1;
+    if (lastTicket?.ticket_number) {
+      // Extract the sequential number (last 4 digits after the prefix)
+      const parts = lastTicket.ticket_number.split('.');
+      if (parts.length === 3) {
+        const lastSequential = parseInt(parts[2], 10);
+        if (!isNaN(lastSequential)) {
+          sequentialNumber = lastSequential + 1;
+        }
+      }
+    }
+
+    const ticketNumber = `${prefix}${sequentialNumber.toString().padStart(4, '0')}`;
+    console.log(`Generated ticket number: ${ticketNumber}`);
 
     // Create full description
     const fullDescription = `Categoria: ${category || 'N/A'}\nPrioridade: ${priority || 'N/A'}\n\n${description}${
       attachmentPaths && attachmentPaths.length > 0 ? `\n\nAnexos: ${attachmentPaths.length}` : ""
     }`;
-
-    // Create service role client for database operations
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Insert ticket
     const { data: ticket, error: insertError } = await supabaseAdmin

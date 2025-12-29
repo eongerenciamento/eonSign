@@ -47,10 +47,8 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
     },
   });
 
-  const generateTicketNumber = () => {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `#${timestamp}${random}`;
+  const generateTempId = () => {
+    return crypto.randomUUID();
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
