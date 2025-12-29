@@ -89,7 +89,8 @@ serve(async (req) => {
           organization_name: organizationName,
           customer_email: customerEmail,
           ticket: {
-            external_id: ticket.ticket_number
+            external_id: ticket.ticket_number,
+            title: ticket.title
           },
           rating: {
             score: eventData?.rating || 0,
