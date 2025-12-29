@@ -169,6 +169,29 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
         });
 
       if (ratingMsgError) console.error("Error inserting rating message:", ratingMsgError);
+
+      // Send webhook events to EonHub
+      try {
+        // Send closed event
+        await supabase.functions.invoke('send-ticket-event', {
+          body: {
+            ticketId: ticket.id,
+            eventType: 'closed'
+          }
+        });
+
+        // Send rating event
+        await supabase.functions.invoke('send-ticket-event', {
+          body: {
+            ticketId: ticket.id,
+            eventType: 'rating',
+            eventData: { rating, comment: ratingComment.trim() || null }
+          }
+        });
+      } catch (webhookError) {
+        console.error("Error sending webhook events:", webhookError);
+        // Don't fail the whole operation if webhook fails
+      }
       
       toast.success("Ticket encerrado com sucesso");
       setShowRatingDialog(false);
@@ -215,6 +238,18 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
         });
 
       if (reopenMsgError) console.error("Error inserting reopened message:", reopenMsgError);
+
+      // Send webhook event to EonHub
+      try {
+        await supabase.functions.invoke('send-ticket-event', {
+          body: {
+            ticketId: ticket.id,
+            eventType: 'reopened'
+          }
+        });
+      } catch (webhookError) {
+        console.error("Error sending reopen webhook:", webhookError);
+      }
       
       toast.success("Ticket reaberto");
       refetchMessages();
