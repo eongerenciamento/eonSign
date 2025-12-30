@@ -84,6 +84,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       };
       reader.readAsDataURL(file);
     });
+
+    // Clear input to allow re-selecting the same file
+    e.target.value = "";
   };
 
   const removeFile = (index: number) => {
@@ -93,19 +96,45 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
 
   const uploadFilesToStorage = async (userId: string, ticketNumber: string) => {
     const uploadedPaths: string[] = [];
+    // Sanitize ticket number for file path (remove # and special chars)
+    const sanitizedTicketNumber = ticketNumber.replace(/[^a-zA-Z0-9-]/g, '');
 
     for (const file of uploadedFiles) {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${ticketNumber}-${Date.now()}.${fileExt}`;
+      // Use UUID to guarantee unique file names
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${sanitizedTicketNumber}-${uniqueId}.${fileExt}`;
       const filePath = `${userId}/${fileName}`;
 
+      let uploadError = null;
+      
+      // Try upload
       const { error } = await supabase.storage.from("support-attachments").upload(filePath, file);
-
+      
       if (error) {
-        console.error("Error uploading file:", error);
-        toast.error(`Erro ao enviar ${file.name}`);
+        // If 409 (already exists), retry with new UUID
+        if (error.message?.includes('already exists') || (error as any).statusCode === '409') {
+          const retryUniqueId = crypto.randomUUID();
+          const retryFileName = `${sanitizedTicketNumber}-${retryUniqueId}.${fileExt}`;
+          const retryFilePath = `${userId}/${retryFileName}`;
+          
+          const { error: retryError } = await supabase.storage.from("support-attachments").upload(retryFilePath, file);
+          
+          if (retryError) {
+            uploadError = retryError;
+          } else {
+            uploadedPaths.push(retryFilePath);
+          }
+        } else {
+          uploadError = error;
+        }
       } else {
         uploadedPaths.push(filePath);
+      }
+
+      if (uploadError) {
+        console.error("Error uploading file:", uploadError);
+        throw new Error(`Falha ao enviar ${file.name}`);
       }
     }
 
@@ -125,8 +154,18 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
       }
 
       // Upload files to storage first (using temporary ticket number for file names)
-      const tempTicketNumber = `#${Date.now()}${Math.floor(Math.random() * 1000)}`;
-      const attachmentPaths = await uploadFilesToStorage(user.id, tempTicketNumber);
+      const tempTicketNumber = `TEMP-${Date.now()}`;
+      
+      let attachmentPaths: string[] = [];
+      if (uploadedFiles.length > 0) {
+        try {
+          attachmentPaths = await uploadFilesToStorage(user.id, tempTicketNumber);
+        } catch (uploadError: any) {
+          console.error("Upload error:", uploadError);
+          toast.error(uploadError.message || "Falha ao enviar anexos. Tente novamente.");
+          return;
+        }
+      }
 
       // Call Edge Function to create ticket and send webhook
       const { data, error } = await supabase.functions.invoke('create-ticket', {
