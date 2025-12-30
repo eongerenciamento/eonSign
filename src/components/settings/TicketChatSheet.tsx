@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Check, X, RotateCcw, Star } from "lucide-react";
+import { Send, Check, X, RotateCcw, Star, CheckCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -34,6 +34,7 @@ interface TicketMessage {
   is_admin: boolean;
   created_at: string;
   message_type?: string;
+  read_at?: string | null;
 }
 
 interface TicketChatSheetProps {
@@ -79,6 +80,41 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     },
     enabled: !!ticket && open,
   });
+
+  // Mark admin messages as read when chat is opened
+  const markMessagesAsRead = useCallback(async (messageIds: string[]) => {
+    if (!ticket || messageIds.length === 0) return;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await supabase.functions.invoke('mark-messages-read', {
+        body: {
+          ticketId: ticket.id,
+          messageIds
+        }
+      });
+
+      // Refetch to update UI
+      refetchMessages();
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  }, [ticket, refetchMessages]);
+
+  // Mark unread admin messages as read when sheet opens
+  useEffect(() => {
+    if (open && messages && ticket) {
+      const unreadAdminMessages = messages.filter(
+        msg => msg.is_admin && !msg.read_at && msg.message_type !== 'closed' && msg.message_type !== 'reopened' && msg.message_type !== 'rating'
+      );
+      
+      if (unreadAdminMessages.length > 0) {
+        markMessagesAsRead(unreadAdminMessages.map(m => m.id));
+      }
+    }
+  }, [open, messages, ticket, markMessagesAsRead]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -382,6 +418,11 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     return null;
   };
 
+  // Read receipt component - WhatsApp style double check
+  const ReadReceipt = ({ isRead }: { isRead: boolean }) => (
+    <CheckCheck className={`w-4 h-4 ml-1 inline-block ${isRead ? 'text-blue-300' : 'text-gray-300'}`} />
+  );
+
   const renderChatMessage = (msg: TicketMessage) => {
     // System messages (events)
     if (msg.message_type && msg.message_type !== 'message') {
@@ -389,6 +430,8 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     }
     
     // Regular chat messages
+    const isUserMessage = !msg.is_admin;
+    
     return (
       <div
         key={msg.id}
@@ -402,9 +445,12 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
           }`}
         >
           <p className="text-sm">{msg.message}</p>
-          <p className={`text-xs mt-1 ${msg.is_admin ? 'text-blue-100' : 'text-emerald-100'}`}>
-            {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
-          </p>
+          <div className={`flex items-center justify-end gap-0.5 mt-1 ${msg.is_admin ? 'text-blue-100' : 'text-emerald-100'}`}>
+            <span className="text-xs">
+              {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
+            </span>
+            {isUserMessage && <ReadReceipt isRead={!!msg.read_at} />}
+          </div>
         </div>
       </div>
     );
@@ -458,9 +504,12 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                 <div className="flex justify-end">
                   <div className="max-w-[75%] rounded-lg px-3 py-2 bg-[#273d60] text-white">
                     <p className="text-sm whitespace-pre-wrap">{actualDescription}</p>
-                    <p className="text-xs mt-1 opacity-70 text-right">
-                      {format(new Date(ticket.created_at), "dd/MM HH:mm", { locale: ptBR })}
-                    </p>
+                    <div className="flex items-center justify-end gap-0.5 mt-1 opacity-70">
+                      <span className="text-xs">
+                        {format(new Date(ticket.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                      </span>
+                      <CheckCheck className="w-4 h-4 ml-1 inline-block text-blue-300" />
+                    </div>
                   </div>
                 </div>
               )}
