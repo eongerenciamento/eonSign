@@ -450,24 +450,23 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
             </div>
           </SheetHeader>
 
-          {/* Description Card */}
-          <div className="p-4 border-b">
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-sm font-medium text-gray-600 mb-1">{ticket?.title}</p>
-              <p className="text-sm text-gray-500">{actualDescription}</p>
-            </div>
-          </div>
-
           {/* Chat Area */}
           <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
-              {messages && messages.length > 0 ? (
-                messages.map((msg) => renderChatMessage(msg))
-              ) : (
-                <p className="text-center text-sm text-gray-500">
-                  Nenhuma mensagem ainda. Inicie a conversa!
-                </p>
+              {/* Descrição do chamado como primeira mensagem */}
+              {ticket && actualDescription && (
+                <div className="flex justify-end">
+                  <div className="max-w-[75%] rounded-lg px-3 py-2 bg-[#273d60] text-white">
+                    <p className="text-sm whitespace-pre-wrap">{actualDescription}</p>
+                    <p className="text-xs mt-1 opacity-70 text-right">
+                      {format(new Date(ticket.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                </div>
               )}
+              
+              {/* Mensagens do chat */}
+              {messages && messages.map((msg) => renderChatMessage(msg))}
             </div>
           </ScrollArea>
 
