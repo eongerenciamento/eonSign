@@ -119,33 +119,33 @@ const Settings = () => {
   });
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, {
-      bg: string;
+      border: string;
       text: string;
       label: string;
     }> = {
       aberto: {
-        bg: 'bg-blue-100',
-        text: 'text-blue-800',
+        border: 'border-blue-600',
+        text: 'text-blue-600',
         label: 'Aberto'
       },
       em_andamento: {
-        bg: 'bg-yellow-100',
-        text: 'text-yellow-800',
+        border: 'border-yellow-600',
+        text: 'text-yellow-600',
         label: 'Em Andamento'
       },
       resolvido: {
-        bg: 'bg-green-100',
-        text: 'text-green-800',
+        border: 'border-green-600',
+        text: 'text-green-600',
         label: 'Resolvido'
       },
       fechado: {
-        bg: 'bg-gray-100',
-        text: 'text-gray-800',
+        border: 'border-gray-600',
+        text: 'text-gray-600',
         label: 'Fechado'
       }
     };
     const config = statusConfig[status] || statusConfig.aberto;
-    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-transparent ${config.border} ${config.text}`}>
         {config.label}
       </span>;
   };
