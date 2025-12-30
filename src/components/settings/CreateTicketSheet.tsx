@@ -201,11 +201,11 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background z-[100]">
+                        <SelectItem value="sugestao">Sugestão</SelectItem>
                         <SelectItem value="tecnico">Técnico</SelectItem>
                         <SelectItem value="financeiro">Financeiro</SelectItem>
                         <SelectItem value="duvida">Dúvida</SelectItem>
-                        <SelectItem value="sugestao">Sugestão</SelectItem>
-                        <SelectItem value="outro">Outro</SelectItem>
+                        <SelectItem value="outros">Outros</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -226,9 +226,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background z-[100]">
-                        <SelectItem value="baixa">Baixa</SelectItem>
-                        <SelectItem value="media">Média</SelectItem>
-                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
                         <SelectItem value="urgente">Urgente</SelectItem>
                       </SelectContent>
                     </Select>
@@ -277,31 +275,29 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
 
               {/* Preview uploaded files */}
               {uploadedFiles.length > 0 && (
-                <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="flex flex-col gap-2 mt-3">
                   {uploadedFiles.map((file, index) => (
-                    <div key={index} className="relative group rounded-lg overflow-hidden border border-border">
-                      {file.type.startsWith("image/") ? (
-                        <div className="relative aspect-video bg-muted">
-                          <img src={previewUrls[index]} alt={file.name} className="w-full h-full object-cover" />
-                          <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                            <ImageIcon className="w-3 h-3" />
-                            Imagem
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="aspect-video bg-muted flex flex-col items-center justify-center">
-                          <FileVideo className="w-8 h-8 text-muted-foreground" />
-                          <p className="text-xs text-muted-foreground mt-2">Vídeo</p>
-                        </div>
-                      )}
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {file.type.startsWith("image/") ? (
+                          <ImageIcon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        ) : (
+                          <FileVideo className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <span className="text-sm text-muted-foreground truncate">
+                          {file.name}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeFile(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-muted-foreground hover:text-foreground p-1 flex-shrink-0"
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      <p className="text-xs p-2 truncate">{file.name}</p>
                     </div>
                   ))}
                 </div>
