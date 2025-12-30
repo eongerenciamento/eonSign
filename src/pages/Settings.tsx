@@ -959,7 +959,7 @@ const Settings = () => {
             )}
             {/* Footer */}
             <div className="flex flex-col items-center pt-8 pb-4">
-              <p className="text-sm text-gray-500">eonSign</p>
+              <p className="text-xs font-bold text-gray-500">eonSign</p>
               <p className="text-xs text-gray-400">
                 Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
               </p>
