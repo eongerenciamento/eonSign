@@ -420,7 +420,7 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
 
   // Read receipt component - WhatsApp style double check
   const ReadReceipt = ({ isRead }: { isRead: boolean }) => (
-    <CheckCheck className={`w-4 h-4 ml-1 inline-block ${isRead ? 'text-blue-300' : 'text-gray-300'}`} />
+    <CheckCheck className={`w-4 h-4 ml-1 inline-block ${isRead ? 'text-blue-500' : 'text-gray-300'}`} />
   );
 
   const renderChatMessage = (msg: TicketMessage) => {
@@ -508,7 +508,7 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                       <span className="text-xs">
                         {format(new Date(ticket.created_at), "dd/MM HH:mm", { locale: ptBR })}
                       </span>
-                      <CheckCheck className="w-4 h-4 ml-1 inline-block text-blue-300" />
+                      <CheckCheck className="w-4 h-4 ml-1 inline-block text-blue-500" />
                     </div>
                   </div>
                 </div>
