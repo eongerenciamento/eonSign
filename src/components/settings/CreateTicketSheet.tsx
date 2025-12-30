@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -167,8 +167,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
         className="w-full sm:max-w-[540px] overflow-y-auto rounded-l-2xl"
       >
         <SheetHeader>
-          <SheetTitle className="text-gray-600">Abrir Novo Ticket</SheetTitle>
-          <SheetDescription>Preencha o formulário para abrir um ticket de suporte.</SheetDescription>
+          <SheetTitle className="text-sm text-gray-600">Abrir Novo Ticket</SheetTitle>
         </SheetHeader>
 
         <Form {...form}>
@@ -180,7 +179,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 <FormItem>
                   <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descreva brevemente o problema" className="bg-gray-100 border-0" {...field} />
+                    <Input placeholder="Descreva brevemente o problema" className="bg-gray-100 border-0 text-gray-600" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +195,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                     <FormLabel>Categoria</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-100 border-0">
+                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600">
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
@@ -221,7 +220,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                     <FormLabel>Prioridade</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-100 border-0">
+                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600">
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
@@ -245,7 +244,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Descreva o problema em detalhes..."
-                      className="min-h-[150px] resize-none bg-gray-100 border-0"
+                      className="min-h-[150px] resize-none bg-gray-100 border-0 text-gray-600"
                       {...field}
                     />
                   </FormControl>
