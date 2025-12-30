@@ -727,6 +727,7 @@ export type Database = {
           is_admin: boolean | null
           message: string
           message_type: string | null
+          read_at: string | null
           ticket_id: string
           user_id: string
         }
@@ -736,6 +737,7 @@ export type Database = {
           is_admin?: boolean | null
           message: string
           message_type?: string | null
+          read_at?: string | null
           ticket_id: string
           user_id: string
         }
@@ -745,6 +747,7 @@ export type Database = {
           is_admin?: boolean | null
           message?: string
           message_type?: string | null
+          read_at?: string | null
           ticket_id?: string
           user_id?: string
         }
