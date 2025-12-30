@@ -542,7 +542,7 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                   className={`rounded-full w-10 h-10 p-0 ${
                     !message.trim() || isSending 
                       ? 'bg-gray-200 text-gray-400 hover:bg-gray-200' 
-                      : 'bg-[#273d60] hover:bg-[#273d60]/90 text-white'
+                      : 'bg-gray-600 hover:bg-gray-600 text-white'
                   }`}
                 >
                   <Send className="w-4 h-4" />
