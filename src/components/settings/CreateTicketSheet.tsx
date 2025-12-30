@@ -177,9 +177,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
+                  <FormLabel className="text-gray-600">Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descreva brevemente o problema" className="bg-gray-100 border-0 text-gray-600" {...field} />
+                    <Input placeholder="Descreva brevemente o problema" className="bg-gray-100 border-0 text-gray-600 placeholder:text-gray-500" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,11 +192,11 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria</FormLabel>
+                    <FormLabel className="text-gray-600">Categoria</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600">
-                          <SelectValue placeholder="Selecione" />
+                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600 placeholder:text-gray-500">
+                          <SelectValue placeholder="Selecione" className="text-gray-500" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background z-[100]">
@@ -217,11 +217,11 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prioridade</FormLabel>
+                    <FormLabel className="text-gray-600">Prioridade</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600">
-                          <SelectValue placeholder="Selecione" />
+                        <SelectTrigger className="bg-gray-100 border-0 text-gray-600 placeholder:text-gray-500">
+                          <SelectValue placeholder="Selecione" className="text-gray-500" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-background z-[100]">
@@ -240,11 +240,11 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel className="text-gray-600">Descrição</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Descreva o problema em detalhes..."
-                      className="min-h-[150px] resize-none bg-gray-100 border-0 text-gray-600"
+                      className="min-h-[150px] resize-none bg-gray-100 border-0 text-gray-600 placeholder:text-gray-500"
                       {...field}
                     />
                   </FormControl>
@@ -255,7 +255,7 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
 
             {/* File Upload Section */}
             <div className="space-y-3">
-              <FormLabel>Anexos (Imagens e Vídeos)</FormLabel>
+              <FormLabel className="text-gray-600">Anexos (Imagens e Vídeos)</FormLabel>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                 <input
                   type="file"
@@ -266,9 +266,9 @@ export function CreateTicketSheet({ onTicketCreated }: CreateTicketSheetProps) {
                   className="hidden"
                 />
                 <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                  <Upload className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Clique para selecionar arquivos</p>
-                  <p className="text-xs text-muted-foreground">Máximo 10 arquivos, 20MB cada</p>
+                  <Upload className="w-8 h-8 text-gray-500" />
+                  <p className="text-sm text-gray-500">Clique para selecionar arquivos</p>
+                  <p className="text-xs text-gray-500">Máximo 10 arquivos, 20MB cada</p>
                 </label>
               </div>
 

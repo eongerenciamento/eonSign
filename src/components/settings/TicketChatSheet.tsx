@@ -276,16 +276,17 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
   };
 
   const getPriorityBadge = (priority: string) => {
-    const priorityConfig: Record<string, { bg: string; text: string }> = {
-      baixa: { bg: 'bg-gray-100', text: 'text-gray-700' },
-      media: { bg: 'bg-blue-100', text: 'text-blue-700' },
-      média: { bg: 'bg-blue-100', text: 'text-blue-700' },
-      alta: { bg: 'bg-orange-100', text: 'text-orange-700' },
-      urgente: { bg: 'bg-red-100', text: 'text-red-700' },
+    const priorityConfig: Record<string, { border: string; text: string }> = {
+      baixa: { border: 'border-gray-600', text: 'text-gray-600' },
+      normal: { border: 'border-gray-600', text: 'text-gray-600' },
+      media: { border: 'border-blue-600', text: 'text-blue-600' },
+      média: { border: 'border-blue-600', text: 'text-blue-600' },
+      alta: { border: 'border-orange-600', text: 'text-orange-600' },
+      urgente: { border: 'border-red-600', text: 'text-red-600' },
     };
-    const config = priorityConfig[priority.toLowerCase()] || priorityConfig.media;
+    const config = priorityConfig[priority.toLowerCase()] || priorityConfig.normal;
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${config.bg} ${config.text}`}>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize border bg-transparent ${config.border} ${config.text}`}>
         {priority}
       </span>
     );
@@ -345,16 +346,15 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
           <div key={msg.id} className="flex justify-center my-4">
             <div className="bg-secondary rounded-lg px-4 py-3 text-center max-w-[280px]">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium text-muted-foreground">Avaliação enviada</span>
+                <span className="text-sm font-medium text-gray-500">Avaliação enviada</span>
               </div>
               <div className="flex justify-center mb-2">
                 {renderStars(ratingData.rating)}
               </div>
               {ratingData.comment && (
-                <p className="text-sm text-muted-foreground italic">"{ratingData.comment}"</p>
+                <p className="text-sm text-gray-500 italic">"{ratingData.comment}"</p>
               )}
-              <p className="text-xs text-muted-foreground mt-2">{messageDate}</p>
+              <p className="text-xs text-gray-500 mt-2">{messageDate}</p>
             </div>
           </div>
         );
@@ -418,10 +418,15 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
         <SheetContent className="w-full sm:max-w-[480px] p-0 flex flex-col rounded-l-2xl">
           {/* Header */}
           <SheetHeader className="p-4 border-b">
-            <div className="flex items-center justify-between">
-              <SheetTitle className="text-base font-semibold">
-                Ticket {ticket?.ticket_number}
-              </SheetTitle>
+            <SheetTitle className="text-base font-semibold text-gray-600">
+              Ticket {ticket?.ticket_number}
+            </SheetTitle>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex gap-2">
+                {getCategoryBadge(category)}
+                {getPriorityBadge(priority)}
+                {ticket && getStatusBadge(ticket.status)}
+              </div>
               {!isTicketClosed && (
                 <Button
                   size="sm"
@@ -443,18 +448,13 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                 </Button>
               )}
             </div>
-            <div className="flex gap-2 mt-2">
-              {getCategoryBadge(category)}
-              {getPriorityBadge(priority)}
-              {ticket && getStatusBadge(ticket.status)}
-            </div>
           </SheetHeader>
 
           {/* Description Card */}
           <div className="p-4 border-b">
             <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-sm font-medium text-gray-900 mb-1">{ticket?.title}</p>
-              <p className="text-sm text-gray-600">{actualDescription}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">{ticket?.title}</p>
+              <p className="text-sm text-gray-500">{actualDescription}</p>
             </div>
           </div>
 
