@@ -502,9 +502,9 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
               {/* Descrição do chamado como primeira mensagem */}
               {ticket && actualDescription && (
                 <div className="flex justify-end">
-                  <div className="max-w-[75%] rounded-lg px-3 py-2 bg-[#273d60] text-white">
+                  <div className="max-w-[75%] rounded-lg px-3 py-2 bg-emerald-500 text-white">
                     <p className="text-sm whitespace-pre-wrap">{actualDescription}</p>
-                    <div className="flex items-center justify-end gap-0.5 mt-1 opacity-70">
+                    <div className="flex items-center justify-end gap-0.5 mt-1 text-emerald-100">
                       <span className="text-xs">
                         {format(new Date(ticket.created_at), "dd/MM HH:mm", { locale: ptBR })}
                       </span>
