@@ -513,13 +513,13 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
         <DialogContent className="sm:max-w-[400px]">
           <button
             onClick={() => setShowRatingDialog(false)}
-            className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 focus:outline-none"
+            className="absolute right-4 top-4 rounded-sm opacity-70 focus:outline-none"
           >
             <X className="h-4 w-4 text-gray-500" />
           </button>
           <DialogHeader>
-            <DialogTitle>Como foi o atendimento?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-600">Como foi o atendimento?</DialogTitle>
+            <DialogDescription className="text-gray-500">
               Sua avaliação nos ajuda a melhorar nosso suporte.
             </DialogDescription>
           </DialogHeader>
@@ -532,7 +532,7 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
               placeholder="Deixe um comentário (opcional)"
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
-              className="resize-none"
+              className="resize-none placeholder:text-gray-500"
               rows={3}
             />
           </div>
@@ -545,15 +545,18 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                 setRating(0);
                 setRatingComment("");
               }}
+              className="bg-transparent text-gray-600 hover:bg-transparent hover:text-gray-600"
             >
+              <X className="w-4 h-4 mr-1" />
               Cancelar
             </Button>
             <Button
               onClick={handleCloseTicket}
               disabled={rating === 0}
-              className="bg-[#273d60] hover:bg-[#273d60]/90"
+              className="rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
             >
-              Enviar avaliação
+              <Check className="w-4 h-4 mr-1" />
+              Encerrar
             </Button>
           </DialogFooter>
         </DialogContent>
