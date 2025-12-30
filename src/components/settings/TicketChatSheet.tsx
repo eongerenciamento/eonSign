@@ -291,6 +291,14 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
     );
   };
 
+  const getCategoryBadge = (category: string) => {
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-blue-500 text-blue-500 bg-transparent capitalize">
+        {category}
+      </span>
+    );
+  };
+
   const renderStars = (count: number, interactive: boolean = false) => {
     return (
       <div className="flex gap-1">
@@ -418,18 +426,17 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
                 <Button
                   size="sm"
                   onClick={() => setShowRatingDialog(true)}
-                  className="rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="rounded-full bg-gray-200 text-gray-600 border-0 shadow-none hover:bg-gray-200"
                 >
                   <Check className="w-4 h-4 mr-1" />
-                  Encerrar chamado
+                  Encerrar
                 </Button>
               )}
               {isTicketClosed && (
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={handleReopenTicket}
-                  className="rounded-full text-blue-600 border-blue-300 hover:bg-blue-50"
+                  className="rounded-full bg-gray-200 text-gray-600 border-0 shadow-none hover:bg-gray-200"
                 >
                   <RotateCcw className="w-4 h-4 mr-1" />
                   Reabrir
@@ -437,8 +444,9 @@ export function TicketChatSheet({ ticket, open, onOpenChange, onTicketUpdated }:
               )}
             </div>
             <div className="flex gap-2 mt-2">
-              {ticket && getStatusBadge(ticket.status)}
+              {getCategoryBadge(category)}
               {getPriorityBadge(priority)}
+              {ticket && getStatusBadge(ticket.status)}
             </div>
           </SheetHeader>
 
