@@ -1,16 +1,20 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { MobileNav } from "./MobileNav";
 import { useWhatsAppFailureNotifications } from "@/hooks/useWhatsAppFailureNotifications";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export const Layout = ({
   children
 }: LayoutProps) => {
   // Monitor WhatsApp failures in real-time
   useWhatsAppFailureNotifications();
-  return <>
+  
+  return (
+    <div className="min-h-screen bg-background">
       {/* Mobile Navigation */}
       <MobileNav />
 
@@ -25,7 +29,7 @@ export const Layout = ({
           {/* Main Content */}
           <div className="flex-1 flex flex-col w-full bg-layout-gradient">
             {/* Content Area */}
-            <main className="flex-1 overflow-auto pt-16 md:pt-4 md:pb-4 md:pr-4">
+            <main className="flex-1 overflow-auto md:pt-4 md:pb-4 md:pr-4">
               <div className="bg-card md:rounded-2xl min-h-full overflow-auto">
                 {children}
               </div>
@@ -33,5 +37,6 @@ export const Layout = ({
           </div>
         </div>
       </SidebarProvider>
-    </>;
+    </div>
+  );
 };
