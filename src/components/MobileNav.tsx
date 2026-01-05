@@ -51,8 +51,8 @@ export function MobileNav() {
   };
 
   const navBackground = resolvedTheme === 'dark' 
-    ? 'hsl(220, 10%, 18%)' 
-    : 'linear-gradient(to right, rgba(15, 30, 65, 0.85), rgba(30, 58, 110, 0.85))';
+    ? 'hsla(220, 10%, 18%, 0.75)' 
+    : 'linear-gradient(to right, rgba(15, 30, 65, 0.75), rgba(30, 58, 110, 0.75))';
 
   return (
     <>
@@ -64,9 +64,9 @@ export function MobileNav() {
           style={{ height: 'env(safe-area-inset-top, 0px)' }}
         />
         
-        {/* Nav flutuante */}
+        {/* Nav flutuante com glassmorphism */}
         <nav 
-          className="mx-3 mt-2 rounded-2xl backdrop-blur-md"
+          className="mx-3 mt-2 rounded-full backdrop-blur-xl border border-white/10"
           style={{ background: navBackground }}
         >
           <div className="px-3 py-3 flex items-center justify-center">
