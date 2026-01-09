@@ -49,7 +49,7 @@ serve(async (req) => {
       line_items: [
         {
           price: priceId,
-          quantity: documentLimit, // Tiered pricing: quantity = document limit
+          quantity: 1,
         },
       ],
       mode: "subscription",
