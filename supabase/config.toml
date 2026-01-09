@@ -107,3 +107,6 @@ verify_jwt = false
 
 [functions.mark-messages-read]
 verify_jwt = true
+
+[functions.sync-stripe-subscription]
+verify_jwt = false
