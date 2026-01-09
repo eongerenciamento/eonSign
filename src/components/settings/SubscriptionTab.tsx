@@ -119,17 +119,29 @@ function ComparisonTable({
               {SUBSCRIPTION_TIERS.map(tier => {
                 const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
                 const monthlyPrice = isAnual ? (tier.priceAnual / 12) : tier.price;
+                const { percent } = getAnnualSavings(tier);
+                
+                // Format price in Brazilian format (1.234,56)
+                const formatBRL = (value: number) => {
+                  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+                
                 return (
-                  <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
-                    <div className="flex flex-col items-center gap-0">
+                  <TableHead key={tier.name} className={`text-center border-0 min-w-[120px] ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
+                    <div className="flex flex-col items-center gap-0.5">
                       <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
                       <span className="text-xs text-muted-foreground font-normal">
-                        R$ {monthlyPrice.toFixed(2).replace(".", ",")}/mês
+                        R$ {formatBRL(monthlyPrice)}/mês
                       </span>
                       {isAnual && (
-                        <span className="text-[10px] text-gray-500">
-                          R$ {tier.priceAnual.toFixed(2).replace(".", ",")}/ano
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-gray-500">
+                            R$ {formatBRL(tier.priceAnual)}/ano
+                          </span>
+                          <Badge className="bg-green-100 text-green-600 text-[9px] px-1 py-0 h-4 hover:bg-green-100">
+                            -{percent.toFixed(0)}%
+                          </Badge>
+                        </div>
                       )}
                     </div>
                   </TableHead>
