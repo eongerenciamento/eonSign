@@ -64,7 +64,7 @@ interface ComparisonTableProps {
   currentPlanLimit?: number;
   isFreeTier?: boolean;
   processingCheckout: boolean;
-  onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0]) => void;
+  onUpgrade: (tier: typeof SUBSCRIPTION_TIERS[0], isAnual: boolean) => void;
 }
 
 function ComparisonTable({
@@ -73,6 +73,8 @@ function ComparisonTable({
   processingCheckout,
   onUpgrade
 }: ComparisonTableProps) {
+  const [billingPeriod, setBillingPeriod] = useState<"mensal" | "anual">("mensal");
+  const isAnual = billingPeriod === "anual";
   // Helper para comparar limites considerando -1 como ilimitado
   const compareLimits = (tierLimit: number, userLimit: number | undefined): boolean => {
     if (!userLimit) return false;
@@ -80,29 +82,69 @@ function ComparisonTable({
     return tierLimit === userLimit;
   };
 
+  // Calcular economia anual
+  const getAnnualSavings = (tier: typeof SUBSCRIPTION_TIERS[0]) => {
+    const monthlyTotal = tier.price * 12;
+    const savings = monthlyTotal - tier.priceAnual;
+    const percent = (savings / monthlyTotal) * 100;
+    return { savings, percent };
+  };
+
   return (
-    <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-border">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-0 bg-secondary/50">
-            <TableHead className="w-[200px] font-semibold text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
-              Recurso
-            </TableHead>
-            {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
-              return (
-                <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
-                  <div className="flex flex-col items-center gap-0">
-                    <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      R$ {tier.price.toFixed(2).replace(".", ",")}
-                    </span>
-                  </div>
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-4">
+      {/* Toggle Mensal/Anual */}
+      <div className="flex justify-center items-center gap-2">
+        <Button 
+          variant={billingPeriod === "mensal" ? "default" : "outline"}
+          onClick={() => setBillingPeriod("mensal")}
+          size="sm"
+          className={billingPeriod === "mensal" ? "bg-blue-600 hover:bg-blue-700" : ""}
+        >
+          Mensal
+        </Button>
+        <Button 
+          variant={billingPeriod === "anual" ? "default" : "outline"}
+          onClick={() => setBillingPeriod("anual")}
+          size="sm"
+          className={billingPeriod === "anual" ? "bg-blue-600 hover:bg-blue-700" : ""}
+        >
+          Anual
+          <Badge className="ml-2 bg-green-500 text-white text-[10px] px-1.5 py-0">
+            2 meses grátis
+          </Badge>
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-0 bg-secondary/50">
+              <TableHead className="w-[200px] font-semibold text-xs text-foreground/80 sticky left-0 bg-secondary/50 z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
+                Recurso
+              </TableHead>
+              {SUBSCRIPTION_TIERS.map(tier => {
+                const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
+                const displayPrice = isAnual ? tier.priceAnual : tier.price;
+                const { percent } = getAnnualSavings(tier);
+                return (
+                  <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
+                    <div className="flex flex-col items-center gap-0">
+                      <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        R$ {displayPrice.toFixed(2).replace(".", ",")}
+                        {isAnual && <span className="text-[10px]">/ano</span>}
+                      </span>
+                      {isAnual && (
+                        <span className="text-[10px] text-green-500 font-medium">
+                          -{percent.toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          </TableHeader>
         <TableBody>
           <TableRow className="bg-card border-0">
             <TableCell className="font-medium text-xs text-foreground/80 sticky left-0 bg-card z-10 md:static border-0 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.15)]">
@@ -201,7 +243,7 @@ function ComparisonTable({
                       Atual
                     </Badge>
                   ) : (
-                    <Button onClick={() => onUpgrade(tier)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-blue-500 hover:bg-blue-600 text-white border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
+                    <Button onClick={() => onUpgrade(tier, isAnual)} disabled={processingCheckout} size="sm" className={isDowngrade ? "bg-blue-500 hover:bg-blue-600 text-white border-0" : "bg-blue-600 hover:bg-blue-700 text-white"}>
                       {processingCheckout ? <Loader2 className="h-4 w-4 animate-spin" /> : isDowngrade ? "Downgrade" : "Upgrade"}
                     </Button>
                   )}
@@ -211,6 +253,7 @@ function ComparisonTable({
           </TableRow>
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }
@@ -304,7 +347,7 @@ export function SubscriptionTab() {
     }
   };
 
-  const handleUpgrade = async (tier: (typeof SUBSCRIPTION_TIERS)[0]) => {
+  const handleUpgrade = async (tier: (typeof SUBSCRIPTION_TIERS)[0], isAnual: boolean) => {
     if (tier.priceId === "free") {
       toast.info("Você já está no plano gratuito");
       return;
@@ -316,9 +359,10 @@ export function SubscriptionTab() {
         throw new Error("Email do usuário não encontrado");
       }
       const { data: companyData } = await supabase.from("company_settings").select("company_name").eq("user_id", user.id).single();
+      const priceId = isAnual ? tier.priceIdAnual : tier.priceId;
       const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
-          priceId: tier.priceId,
+          priceId,
           tierName: tier.name,
           documentLimit: tier.limit,
           email: user.email,
