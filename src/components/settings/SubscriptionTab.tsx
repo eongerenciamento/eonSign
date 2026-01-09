@@ -9,47 +9,55 @@ import { Check, Loader2, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { PRICE_IDS_MENSAL, PRICE_IDS_ANUAL } from "@/constants/stripe";
 
-// Single tiered price ID for all paid plans
-const TIERED_PRICE_ID = "price_1SWhQIHRTD5WvpxjPvRHBY18";
-
-const SUBSCRIPTION_TIERS = [{
-  name: "Grátis",
-  limit: 5,
-  price: 0,
-  priceId: "free",
-  description: "Ideal para testes"
-}, {
-  name: "Básico",
-  limit: 20,
-  price: 54.9,
-  priceId: TIERED_PRICE_ID,
-  description: "Para pequenas empresas"
-}, {
-  name: "Profissional",
-  limit: 50,
-  price: 89.9,
-  priceId: TIERED_PRICE_ID,
-  description: "Para empresas em crescimento"
-}, {
-  name: "Empresarial",
-  limit: 100,
-  price: 159.9,
-  priceId: TIERED_PRICE_ID,
-  description: "Para empresas estabelecidas"
-}, {
-  name: "Premium",
-  limit: 150,
-  price: 209.9,
-  priceId: TIERED_PRICE_ID,
-  description: "Para grandes volumes"
-}, {
-  name: "Enterprise",
-  limit: 200,
-  price: 289.9,
-  priceId: TIERED_PRICE_ID,
-  description: "Documentos ilimitados"
-}];
+const SUBSCRIPTION_TIERS = [
+  {
+    name: "Start",
+    limit: 25,
+    price: 54.9,
+    priceAnual: 559.08,
+    priceId: PRICE_IDS_MENSAL.START,
+    priceIdAnual: PRICE_IDS_ANUAL.START,
+    description: "Para pequenas empresas",
+  },
+  {
+    name: "Pro",
+    limit: 50,
+    price: 89.9,
+    priceAnual: 916.80,
+    priceId: PRICE_IDS_MENSAL.PRO,
+    priceIdAnual: PRICE_IDS_ANUAL.PRO,
+    description: "Para empresas em crescimento",
+  },
+  {
+    name: "Empresarial I",
+    limit: 100,
+    price: 159.9,
+    priceAnual: 1631.00,
+    priceId: PRICE_IDS_MENSAL.EMPRESARIAL_I,
+    priceIdAnual: PRICE_IDS_ANUAL.EMPRESARIAL_I,
+    description: "Para empresas estabelecidas",
+  },
+  {
+    name: "Empresarial II",
+    limit: 200,
+    price: 209.9,
+    priceAnual: 2140.98,
+    priceId: PRICE_IDS_MENSAL.EMPRESARIAL_II,
+    priceIdAnual: PRICE_IDS_ANUAL.EMPRESARIAL_II,
+    description: "Para grandes volumes",
+  },
+  {
+    name: "Ultra",
+    limit: -1, // -1 representa ilimitado
+    price: 289.9,
+    priceAnual: 2956.98,
+    priceId: PRICE_IDS_MENSAL.ULTRA,
+    priceIdAnual: PRICE_IDS_ANUAL.ULTRA,
+    description: "Documentos ilimitados",
+  },
+];
 
 // Comparison Table Component
 interface ComparisonTableProps {
@@ -65,6 +73,13 @@ function ComparisonTable({
   processingCheckout,
   onUpgrade
 }: ComparisonTableProps) {
+  // Helper para comparar limites considerando -1 como ilimitado
+  const compareLimits = (tierLimit: number, userLimit: number | undefined): boolean => {
+    if (!userLimit) return false;
+    if (tierLimit === -1 && userLimit === -1) return true;
+    return tierLimit === userLimit;
+  };
+
   return (
     <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-border">
       <Table>
@@ -74,13 +89,13 @@ function ComparisonTable({
               Recurso
             </TableHead>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
                   <div className="flex flex-col items-center gap-0">
                     <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
                     <span className="text-xs text-muted-foreground font-normal">
-                      R$ {tier.price === 0 ? "0" : tier.price.toFixed(2).replace(".", ",")}
+                      R$ {tier.price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
                 </TableHead>
@@ -94,10 +109,10 @@ function ComparisonTable({
               Documentos / Envelopes
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
-                  {tier.limit}
+                  {tier.limit === -1 ? "Ilimitado" : tier.limit}
                 </TableCell>
               );
             })}
@@ -107,7 +122,7 @@ function ComparisonTable({
               Usuários ilimitados
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
@@ -120,7 +135,7 @@ function ComparisonTable({
               Notificações
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
                   <Check className="h-4 w-4 text-green-500 mx-auto" />
@@ -133,10 +148,10 @@ function ComparisonTable({
               Geolocalização
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
-                  {tier.priceId === "free" ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                  <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>
               );
             })}
@@ -146,10 +161,10 @@ function ComparisonTable({
               Eon Drive
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
-                  {tier.priceId === "free" ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                  <Check className="h-4 w-4 text-green-500 mx-auto" />
                 </TableCell>
               );
             })}
@@ -159,10 +174,12 @@ function ComparisonTable({
               Suporte
             </TableCell>
             {SUBSCRIPTION_TIERS.map((tier, index) => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
+              // Suporte disponível a partir do Pro (index >= 1)
+              const hasSupport = index >= 1;
               return (
                 <TableCell key={tier.name} className={`text-center text-xs border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
-                  {tier.priceId === "free" || index === 1 ? <X className="h-4 w-4 text-muted-foreground mx-auto" /> : <Check className="h-4 w-4 text-green-500 mx-auto" />}
+                  {hasSupport ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground mx-auto" />}
                 </TableCell>
               );
             })}
@@ -173,8 +190,10 @@ function ComparisonTable({
               
             </TableCell>
             {SUBSCRIPTION_TIERS.map(tier => {
-              const isCurrentPlan = isFreeTier ? tier.priceId === "free" : tier.limit === currentPlanLimit;
-              const isDowngrade = !isFreeTier && currentPlanLimit && tier.limit < currentPlanLimit;
+              const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
+              // Comparar limites para upgrade/downgrade (considerando -1 como maior que todos)
+              const getTierValue = (limit: number) => limit === -1 ? 999999 : limit;
+              const isDowngrade = !isFreeTier && currentPlanLimit && getTierValue(tier.limit) < getTierValue(currentPlanLimit);
               return (
                 <TableCell key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : ''}`}>
                   {isCurrentPlan ? (

@@ -6,8 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price ID específico do eonSign
-const EONSIGN_PRICE_ID = "price_1SWhQIHRTD5WvpxjPvRHBY18";
+// Lista completa de Price IDs válidos do eonSign
+const ALL_EONSIGN_PRICE_IDS = [
+  // Mensais
+  "price_1SnWXYHRTD5WvpxjKl4TP1T8", // Start
+  "price_1SnWXtHRTD5Wvpxjtgr5tWKJ", // Pro
+  "price_1SnWY9HRTD5Wvpxjyw5KH0cX", // Empresarial I
+  "price_1SnWYPHRTD5WvpxjyWw62Qe0", // Empresarial II
+  "price_1SnWYfHRTD5Wvpxjo3b98A4o", // Ultra
+  // Anuais
+  "price_1SnWZ7HRTD5WvpxjuboSevS5", // Start
+  "price_1SnWZOHRTD5Wvpxj8wRU9vHE", // Pro
+  "price_1SnWZiHRTD5WvpxjVWZnxv0e", // Empresarial I
+  "price_1SnWa4HRTD5WvpxjLSyivW7p", // Empresarial II
+  "price_1SnWaTHRTD5WvpxjoAUEkP0P", // Ultra
+];
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -56,7 +69,7 @@ serve(async (req) => {
     const user = userData.user;
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Busca assinatura ativa do eonSign especificamente
+    // Busca assinatura ativa
     const { data: subscription, error: subError } = await supabaseClient
       .from("user_subscriptions")
       .select("id, plan_name, document_limit, status, stripe_price_id, stripe_subscription_id, current_period_end")
@@ -66,7 +79,7 @@ serve(async (req) => {
 
     logStep("Subscription query result", { subscription, error: subError?.message });
 
-    // Verifica se tem assinatura ativa E se é do eonSign (price_id correto)
+    // Verifica se tem assinatura ativa
     if (!subscription) {
       logStep("No active subscription found");
       return new Response(JSON.stringify({ 
@@ -80,10 +93,9 @@ serve(async (req) => {
     }
 
     // Verifica se o price_id é do eonSign
-    if (subscription.stripe_price_id !== EONSIGN_PRICE_ID) {
+    if (subscription.stripe_price_id && !ALL_EONSIGN_PRICE_IDS.includes(subscription.stripe_price_id)) {
       logStep("Subscription is not from eonSign", { 
-        priceId: subscription.stripe_price_id, 
-        expected: EONSIGN_PRICE_ID 
+        priceId: subscription.stripe_price_id
       });
       return new Response(JSON.stringify({ 
         hasAccess: false, 
