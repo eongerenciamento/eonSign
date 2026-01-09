@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, Loader2, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -93,26 +95,18 @@ function ComparisonTable({
   return (
     <div className="space-y-4">
       {/* Toggle Mensal/Anual */}
-      <div className="flex justify-center items-center gap-2">
-        <Button 
-          variant={billingPeriod === "mensal" ? "default" : "outline"}
-          onClick={() => setBillingPeriod("mensal")}
-          size="sm"
-          className={billingPeriod === "mensal" ? "bg-blue-600 hover:bg-blue-700" : ""}
-        >
+      <div className="flex justify-center items-center gap-3">
+        <Label htmlFor="billing-toggle" className={`text-sm ${!isAnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
           Mensal
-        </Button>
-        <Button 
-          variant={billingPeriod === "anual" ? "default" : "outline"}
-          onClick={() => setBillingPeriod("anual")}
-          size="sm"
-          className={billingPeriod === "anual" ? "bg-blue-600 hover:bg-blue-700" : ""}
-        >
+        </Label>
+        <Switch
+          id="billing-toggle"
+          checked={isAnual}
+          onCheckedChange={(checked) => setBillingPeriod(checked ? "anual" : "mensal")}
+        />
+        <Label htmlFor="billing-toggle" className={`text-sm ${isAnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
           Anual
-          <Badge className="ml-2 bg-green-500 text-white text-[10px] px-1.5 py-0">
-            2 meses grátis
-          </Badge>
-        </Button>
+        </Label>
       </div>
 
       <div className="overflow-x-auto scrollbar-hide rounded-lg max-w-6xl mx-auto border border-border">
@@ -124,19 +118,17 @@ function ComparisonTable({
               </TableHead>
               {SUBSCRIPTION_TIERS.map(tier => {
                 const isCurrentPlan = !isFreeTier && compareLimits(tier.limit, currentPlanLimit);
-                const displayPrice = isAnual ? tier.priceAnual : tier.price;
-                const { percent } = getAnnualSavings(tier);
+                const monthlyPrice = isAnual ? (tier.priceAnual / 12) : tier.price;
                 return (
                   <TableHead key={tier.name} className={`text-center border-0 ${isCurrentPlan ? 'bg-muted' : 'bg-secondary/50'}`}>
                     <div className="flex flex-col items-center gap-0">
                       <span className="font-semibold text-xs text-foreground/80">{tier.name}</span>
                       <span className="text-xs text-muted-foreground font-normal">
-                        R$ {displayPrice.toFixed(2).replace(".", ",")}
-                        {isAnual && <span className="text-[10px]">/ano</span>}
+                        R$ {monthlyPrice.toFixed(2).replace(".", ",")}/mês
                       </span>
                       {isAnual && (
-                        <span className="text-[10px] text-green-500 font-medium">
-                          -{percent.toFixed(0)}%
+                        <span className="text-[10px] text-gray-500">
+                          R$ {tier.priceAnual.toFixed(2).replace(".", ",")}/ano
                         </span>
                       )}
                     </div>
