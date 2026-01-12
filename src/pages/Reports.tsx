@@ -675,32 +675,34 @@ const Reports = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="p-6 bg-secondary border-0 animate-fade-in">
             <h3 className="font-semibold mb-4 text-base text-muted-foreground">Documentos por Status</h3>
-            <div className="flex items-end justify-between gap-4 pt-4">
-              {(documentStatusData || [
-                { label: "Assinados", count: 0, percentage: 0, color: "bg-blue-500" },
-                { label: "Pendentes", count: 0, percentage: 0, color: "bg-blue-300" },
-                { label: "Rejeitados", count: 0, percentage: 0, color: "bg-red-500" },
-                { label: "Expirados", count: 0, percentage: 0, color: "bg-purple-500" },
-                { label: "Cancelados", count: 0, percentage: 0, color: "bg-yellow-500" }
-              ]).map((item, index) => (
-                <div key={item.label} className="flex flex-col items-center flex-1">
-                  <span className="text-lg font-bold text-foreground">{item.count}</span>
-                  <span className="text-xs text-muted-foreground mb-2">{item.percentage}%</span>
-                  <div className="w-full h-24 bg-muted rounded-lg relative overflow-hidden">
-                    <div 
-                      className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
-                      style={{ 
-                        height: animateBars ? `${Math.max(item.percentage, 0)}%` : '0%',
-                        transitionDelay: `${index * 100}ms`
-                      }}
-                    />
+            {documentStatusData && documentStatusData.some(item => item.count > 0) ? (
+              <div className="flex items-end justify-between gap-4 pt-4">
+                {documentStatusData.map((item, index) => (
+                  <div key={item.label} className="flex flex-col items-center flex-1">
+                    <span className="text-lg font-bold text-foreground">{item.count}</span>
+                    <span className="text-xs text-muted-foreground mb-2">{item.percentage}%</span>
+                    <div className="w-full h-24 bg-muted rounded-lg relative overflow-hidden">
+                      <div 
+                        className={`absolute bottom-0 left-0 right-0 ${item.color} rounded-lg transition-all duration-700 ease-out`}
+                        style={{ 
+                          height: animateBars ? `${Math.max(item.percentage, 0)}%` : '0%',
+                          transitionDelay: `${index * 100}ms`
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground mt-2 text-center">
+                      {isMobile ? getAbbreviation(item.label) : item.label}
+                    </span>
                   </div>
-<span className="text-xs text-muted-foreground mt-2 text-center">
-                    {isMobile ? getAbbreviation(item.label) : item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Nenhum documento ainda</p>
+                <p className="text-xs mt-1">As estatísticas aparecerão quando você enviar documentos</p>
+              </div>
+            )}
           </Card>
 
           <Card className="p-6 bg-secondary border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
