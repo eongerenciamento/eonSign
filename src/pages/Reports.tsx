@@ -102,6 +102,99 @@ const Reports = () => {
     }
   });
 
+  // Buscar métricas dinâmicas para os cards
+  const { data: metricsData } = useQuery({
+    queryKey: ["reports-metrics", dateFilter],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      // Buscar documentos do usuário com datas
+      const { data: documents } = await supabase
+        .from("documents")
+        .select("status, created_at, updated_at")
+        .eq("user_id", user.id);
+
+      // Buscar signatários que já assinaram
+      const { data: signedSigners } = await supabase
+        .from("document_signers")
+        .select(`
+          id,
+          signed_at,
+          documents!inner(user_id, created_at)
+        `)
+        .eq("documents.user_id", user.id)
+        .eq("status", "signed");
+
+      const totalDocs = documents?.length || 0;
+      const signedDocs = documents?.filter(d => d.status === "signed" || d.status === "completed").length || 0;
+      const conversionRate = totalDocs > 0 ? Math.round((signedDocs / totalDocs) * 100) : 0;
+      
+      // Calcular tempo médio de assinatura (em dias)
+      let avgTime = 0;
+      if (signedSigners && signedSigners.length > 0) {
+        const validSigners = signedSigners.filter(s => s.signed_at && s.documents?.created_at);
+        if (validSigners.length > 0) {
+          const totalDays = validSigners.reduce((acc, signer) => {
+            const created = new Date(signer.documents.created_at);
+            const signed = new Date(signer.signed_at!);
+            return acc + (signed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+          }, 0);
+          avgTime = totalDays / validSigners.length;
+        }
+      }
+
+      // Contar signatários únicos ativos (que já assinaram)
+      const uniqueSignerEmails = new Set(signedSigners?.map(s => s.id) || []);
+
+      return {
+        conversionRate: `${conversionRate}%`,
+        signedDocs,
+        avgTime: avgTime > 0 ? `${avgTime.toFixed(1)}d` : "0d",
+        activeSigners: uniqueSignerEmails.size
+      };
+    }
+  });
+
+  // Buscar atividade recente
+  const { data: recentActivity } = useQuery({
+    queryKey: ["recent-activity"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { data: documents, error } = await supabase
+        .from("documents")
+        .select(`
+          id,
+          name,
+          status,
+          updated_at,
+          document_signers(name, status)
+        `)
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      return documents?.map(doc => ({
+        doc: doc.name,
+        signers: doc.document_signers?.map((s: { name: string }) => s.name) || [],
+        date: format(new Date(doc.updated_at), "dd/MM/yyyy", { locale: ptBR }),
+        status: doc.status === "signed" || doc.status === "completed" 
+          ? "Assinado" 
+          : doc.status === "pending" 
+          ? "Pendente" 
+          : doc.status === "expired"
+          ? "Expirado"
+          : doc.status === "cancelled"
+          ? "Cancelado"
+          : "Enviado"
+      })) || [];
+    }
+  });
+
   // Buscar top signatários
   const { data: topSignatories } = useQuery({
     queryKey: ["top-signatories"],
@@ -536,7 +629,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">87.5%</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{metricsData?.conversionRate || "0%"}</p>
               </div>
             </div>
           </Card>
@@ -548,7 +641,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Docs Assinados</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">98</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{metricsData?.signedDocs ?? 0}</p>
               </div>
             </div>
           </Card>
@@ -560,7 +653,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tempo Médio</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">2.3d</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{metricsData?.avgTime || "0d"}</p>
               </div>
             </div>
           </Card>
@@ -572,7 +665,7 @@ const Reports = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Signatários Ativos</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">234</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{metricsData?.activeSigners ?? 0}</p>
               </div>
             </div>
           </Card>
@@ -641,81 +734,40 @@ const Reports = () => {
         <Card className="p-6 bg-secondary border-0">
           <h3 className="font-semibold mb-4 text-muted-foreground text-base">Atividade Recente</h3>
           <div className="space-y-3">
-            {[{
-                doc: "Contrato - Cliente A",
-                signers: ["João Silva", "Maria Santos"],
-                date: "18/12/2025",
-                status: "Assinado"
-              }, {
-                doc: "Proposta Comercial",
-                signers: ["Pedro Costa"],
-                date: "17/12/2025",
-                status: "Pendente"
-              }, {
-                doc: "NDA - Parceiro B",
-                signers: ["Ana Oliveira", "Carlos Lima"],
-                date: "16/12/2025",
-                status: "Assinado"
-              }, {
-                doc: "Termo de Adesão",
-                signers: ["Roberto Souza"],
-                date: "15/12/2025",
-                status: "Expirado"
-              }, {
-                doc: "Contrato de Serviços",
-                signers: ["Fernanda Reis", "Lucas Martins"],
-                date: "14/12/2025",
-                status: "Assinado"
-              }, {
-                doc: "Acordo de Parceria",
-                signers: ["Juliana Alves"],
-                date: "14/12/2025",
-                status: "Pendente"
-              }, {
-                doc: "Proposta Técnica",
-                signers: ["Marcos Pereira", "Camila Rocha"],
-                date: "13/12/2025",
-                status: "Assinado"
-              }, {
-                doc: "Termo de Confidencialidade",
-                signers: ["Ricardo Gomes"],
-                date: "13/12/2025",
-                status: "Pendente"
-              }, {
-                doc: "Contrato de Trabalho",
-                signers: ["Patrícia Dias", "Bruno Fernandes"],
-                date: "12/12/2025",
-                status: "Assinado"
-              }, {
-                doc: "Aditivo Contratual",
-                signers: ["Sandra Costa"],
-                date: "12/12/2025",
-                status: "Enviado"
-              }].map((activity, index) => (
-              <div key={index} className="flex items-center gap-4 py-3 border-b border-border last:border-0">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm truncate">{activity.doc}</p>
+            {recentActivity && recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center gap-4 py-3 border-b border-border last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-sm truncate">{activity.doc}</p>
+                  </div>
+                  <div className="w-32 min-w-[128px]">
+                    {activity.signers.map((signer, i) => (
+                      <p key={i} className="text-muted-foreground text-xs truncate">{signer}</p>
+                    ))}
+                  </div>
+                  <div className="w-24 text-right">
+                    <span className="text-muted-foreground text-xs">{activity.date}</span>
+                  </div>
+                  <div className="w-20 text-right">
+                    <span className={`text-xs font-medium ${
+                      activity.status === "Assinado" ? "text-green-600" : 
+                      activity.status === "Pendente" ? "text-yellow-600" : 
+                      activity.status === "Expirado" ? "text-red-600" : 
+                      activity.status === "Cancelado" ? "text-red-600" :
+                      "text-blue-600"
+                    }`}>
+                      {activity.status}
+                    </span>
+                  </div>
                 </div>
-                <div className="w-32 min-w-[128px]">
-                  {activity.signers.map((signer, i) => (
-                    <p key={i} className="text-muted-foreground text-xs truncate">{signer}</p>
-                  ))}
-                </div>
-                <div className="w-24 text-right">
-                  <span className="text-muted-foreground text-xs">{activity.date}</span>
-                </div>
-                <div className="w-20 text-right">
-                  <span className={`text-xs font-medium ${
-                    activity.status === "Assinado" ? "text-green-600" : 
-                    activity.status === "Pendente" ? "text-yellow-600" : 
-                    activity.status === "Expirado" ? "text-red-600" : 
-                    "text-blue-600"
-                  }`}>
-                    {activity.status}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Nenhuma atividade recente</p>
+                <p className="text-xs mt-1">Seus documentos aparecerão aqui após serem enviados</p>
               </div>
-            ))}
+            )}
           </div>
         </Card>
           </TabsContent>
