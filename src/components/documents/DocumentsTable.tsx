@@ -967,7 +967,17 @@ export const DocumentsTable = ({
     }
   };
   return <>
+      {/* Empty State */}
+      {documents.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
+          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          <p className="text-sm font-medium">Nenhum documento encontrado</p>
+          <p className="text-xs mt-1">Seus documentos aparecerão aqui após serem enviados</p>
+        </div>
+      )}
+
       {/* Desktop Table View */}
+      {documents.length > 0 && (
       <div className="hidden md:block rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
@@ -1259,8 +1269,10 @@ export const DocumentsTable = ({
           </TableBody>
         </Table>
       </div>
+      )}
 
       {/* Mobile Card View */}
+      {documents.length > 0 && (
       <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
@@ -1526,6 +1538,7 @@ export const DocumentsTable = ({
             </div>;
       })}
       </div>
+      )}
 
       {/* Envelope Documents Dialog */}
       <EnvelopeDocumentsDialog

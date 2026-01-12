@@ -4,7 +4,7 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, SlidersHorizontal, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, SlidersHorizontal, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download, FileText } from "lucide-react";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -482,7 +482,7 @@ const Drive = () => {
                 )}
               </Button>
             </div>
-            {folders.length > 0 && (
+            {folders.length > 0 ? (
               <FoldersList
                 folders={folders}
                 documents={documents}
@@ -498,6 +498,12 @@ const Drive = () => {
                 allFolders={allFolders}
                 currentFolderId={null}
               />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
+                <FolderIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm font-medium">Nenhuma pasta criada</p>
+                <p className="text-xs mt-1">Clique no botão + para criar sua primeira pasta</p>
+              </div>
             )}
           </div>
         )}
@@ -582,7 +588,7 @@ const Drive = () => {
             )}
             
             {/* Documents List */}
-            {filteredDocuments.length > 0 && (
+            {filteredDocuments.length > 0 ? (
               <DocumentsList
                 documents={filteredDocuments}
                 viewMode={viewMode}
@@ -673,7 +679,13 @@ const Drive = () => {
                 }}
                 allFolders={allFolders}
               />
-            )}
+            ) : folders.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
+                <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm font-medium">Pasta vazia</p>
+                <p className="text-xs mt-1">Mova documentos para esta pasta na página de Documentos</p>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
