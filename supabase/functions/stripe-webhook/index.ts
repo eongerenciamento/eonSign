@@ -109,13 +109,24 @@ serve(async (req) => {
               current_period_end: subscription.current_period_end
             });
 
-            // Convert timestamps safely with fallback to current time + 1 month
+            // Convert timestamps safely with fallback based on subscription interval
             const now = new Date();
-            const oneMonthFromNow = new Date(now);
-            oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+            const interval = subscription.items.data[0]?.price?.recurring?.interval || 'month';
+            const intervalCount = subscription.items.data[0]?.price?.recurring?.interval_count || 1;
+            
+            const fallbackPeriodEnd = new Date(now);
+            if (interval === 'year') {
+              fallbackPeriodEnd.setFullYear(fallbackPeriodEnd.getFullYear() + intervalCount);
+            } else if (interval === 'month') {
+              fallbackPeriodEnd.setMonth(fallbackPeriodEnd.getMonth() + intervalCount);
+            } else if (interval === 'week') {
+              fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + (7 * intervalCount));
+            } else if (interval === 'day') {
+              fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + intervalCount);
+            }
             
             const periodStart = safeTimestampToISO(subscription.current_period_start) || now.toISOString();
-            const periodEnd = safeTimestampToISO(subscription.current_period_end) || oneMonthFromNow.toISOString();
+            const periodEnd = safeTimestampToISO(subscription.current_period_end) || fallbackPeriodEnd.toISOString();
 
             logStep("Period dates calculated", { periodStart, periodEnd });
 
@@ -364,12 +375,24 @@ serve(async (req) => {
           const { data: existingUsers } = await supabaseClient.auth.admin.listUsers();
           const userExists = existingUsers?.users?.find(u => u.email === email);
 
+          // Calculate fallback based on subscription interval
           const now = new Date();
-          const oneMonthFromNow = new Date(now);
-          oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+          const interval = subscription.items.data[0]?.price?.recurring?.interval || 'month';
+          const intervalCount = subscription.items.data[0]?.price?.recurring?.interval_count || 1;
+          
+          const fallbackPeriodEnd = new Date(now);
+          if (interval === 'year') {
+            fallbackPeriodEnd.setFullYear(fallbackPeriodEnd.getFullYear() + intervalCount);
+          } else if (interval === 'month') {
+            fallbackPeriodEnd.setMonth(fallbackPeriodEnd.getMonth() + intervalCount);
+          } else if (interval === 'week') {
+            fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + (7 * intervalCount));
+          } else if (interval === 'day') {
+            fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + intervalCount);
+          }
           
           const periodStart = safeTimestampToISO(subscription.current_period_start) || now.toISOString();
-          const periodEnd = safeTimestampToISO(subscription.current_period_end) || oneMonthFromNow.toISOString();
+          const periodEnd = safeTimestampToISO(subscription.current_period_end) || fallbackPeriodEnd.toISOString();
 
           // Determinar document_limit e plan_name baseado no preço
           const priceId = subscription.items.data[0]?.price?.id;

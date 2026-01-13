@@ -183,13 +183,28 @@ serve(async (req) => {
       // Criar user_subscription
       logStep("Creating user_subscription");
 
-      // Safely convert timestamps
+      // Safely convert timestamps with interval-aware fallback
+      const interval = subscription.items.data[0]?.price?.recurring?.interval || 'month';
+      const intervalCount = subscription.items.data[0]?.price?.recurring?.interval_count || 1;
+      
+      const now = new Date();
+      const fallbackPeriodEnd = new Date(now);
+      if (interval === 'year') {
+        fallbackPeriodEnd.setFullYear(fallbackPeriodEnd.getFullYear() + intervalCount);
+      } else if (interval === 'month') {
+        fallbackPeriodEnd.setMonth(fallbackPeriodEnd.getMonth() + intervalCount);
+      } else if (interval === 'week') {
+        fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + (7 * intervalCount));
+      } else if (interval === 'day') {
+        fallbackPeriodEnd.setDate(fallbackPeriodEnd.getDate() + intervalCount);
+      }
+      
       const periodStart = subscription.current_period_start
         ? new Date(subscription.current_period_start * 1000).toISOString()
-        : new Date().toISOString();
+        : now.toISOString();
       const periodEnd = subscription.current_period_end
         ? new Date(subscription.current_period_end * 1000).toISOString()
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // Default 30 days
+        : fallbackPeriodEnd.toISOString();
 
       const { error: subError } = await supabaseClient
         .from("user_subscriptions")
