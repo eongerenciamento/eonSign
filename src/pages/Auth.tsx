@@ -258,10 +258,10 @@ export default function Auth() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen">
+      <div className="hidden md:flex min-h-screen p-6" style={{ backgroundColor: '#ffffff' }}>
         {/* Left side - Blue gradient with radial glow (40%) */}
-        <div className="relative w-[40%] flex flex-col items-center justify-center rounded-r-2xl overflow-hidden" style={{
-        background: "linear-gradient(to bottom, #273D60, #1a2847)"
+        <div className="relative w-[40%] flex flex-col items-center justify-center rounded-3xl overflow-hidden" style={{
+        background: "linear-gradient(to bottom, #273D60, #0a1525)"
       }}>
           <RadialGlow />
           
@@ -277,7 +277,7 @@ export default function Auth() {
         </div>
 
         {/* Right side - White form (60%) */}
-        <div className="w-[60%] flex flex-col items-center justify-center p-8" style={{
+        <div className="w-[60%] flex flex-col items-center justify-center p-8 rounded-r-3xl" style={{
         backgroundColor: '#ffffff'
       }}>
           <div className="w-full max-w-md">
