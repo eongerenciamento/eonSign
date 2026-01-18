@@ -51,8 +51,8 @@ export function MobileNav() {
   };
 
   const navBackground = resolvedTheme === 'dark' 
-    ? 'hsla(220, 10%, 18%, 0.75)' 
-    : 'linear-gradient(to right, rgba(15, 30, 65, 0.75), rgba(30, 58, 110, 0.75))';
+    ? 'hsla(220, 10%, 18%, 0.65)' 
+    : 'linear-gradient(to right, rgba(15, 30, 65, 0.65) 0%, rgba(30, 58, 110, 0.65) 100%)';
 
   return (
     <>
