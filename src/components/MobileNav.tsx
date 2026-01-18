@@ -69,15 +69,15 @@ export function MobileNav() {
           className="mx-3 mt-2 rounded-full backdrop-blur-xl border border-white/10"
           style={{ background: navBackground }}
         >
-          <div className="px-3 py-3 flex items-center justify-center">
+          <div className="px-2 py-2 flex items-center justify-center">
             {/* Ícones de navegação centralizados */}
-            <div className="flex items-center justify-center gap-2 flex-1">
+            <div className="flex items-center justify-center gap-1.5 flex-1">
               {items.map((item) => (
                 <NavLink
                   key={item.url}
                   to={item.url}
                   end={item.url === "/"}
-                  className={`flex items-center justify-center p-2 rounded-lg transition-colors hover:bg-white/10 ${
+                  className={`flex items-center justify-center p-1.5 rounded-lg transition-colors hover:bg-white/10 ${
                     isActive(item.url) ? "bg-white/20" : ""
                   }`}
                 >
@@ -94,7 +94,7 @@ export function MobileNav() {
               className="flex-shrink-0"
               onClick={() => setProfileSheetOpen(true)}
             >
-              <Avatar className="h-9 w-9 border-2 border-white/20">
+              <Avatar className="h-8 w-8 border-2 border-white/20">
                 {profile?.foto_url && <AvatarImage src={profile.foto_url} />}
                 <AvatarFallback className="bg-gray-200 text-gray-600">
                   {getUserInitials()}
@@ -109,7 +109,7 @@ export function MobileNav() {
       <div 
         className="md:hidden"
         style={{ 
-          height: 'calc(env(safe-area-inset-top, 0px) + 64px)',
+          height: 'calc(env(safe-area-inset-top, 0px) + 52px)',
           paddingTop: 'env(safe-area-inset-top, 0px)'
         }}
       />
