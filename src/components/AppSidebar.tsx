@@ -168,7 +168,7 @@ export function AppSidebar() {
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
             <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
-              <img alt="Éon Sign" className="h-113 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
+              <img alt="Éon Sign" className="h-12,5 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
             </a>
           </div>}
       </div>
