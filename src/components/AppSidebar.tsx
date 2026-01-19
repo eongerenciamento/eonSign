@@ -12,7 +12,6 @@ import { User } from "@supabase/supabase-js";
 import logoSign from "@/assets/logo-sign.png";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 const items = [{
   title: "Dashboard",
   url: "/",
@@ -34,7 +33,6 @@ const items = [{
   url: "/configuracoes",
   icon: Settings
 }];
-
 export function AppSidebar() {
   const {
     state
@@ -53,7 +51,6 @@ export function AppSidebar() {
   const [pendingDocuments, setPendingDocuments] = useState(0);
   const [supportTickets, setSupportTickets] = useState(0);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
-
   useEffect(() => {
     const loadUserData = async () => {
       const {
@@ -131,18 +128,15 @@ export function AppSidebar() {
       supabase.removeChannel(documentsChannel);
     };
   }, []);
-
   const isActive = (path: string) => {
     if (path === "/") return currentPath === path;
     return currentPath.startsWith(path);
   };
-
   const getUserInitials = () => {
     if (name) return name.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
   };
-
   const handleProfileUpdate = async () => {
     const {
       data: {
@@ -160,11 +154,9 @@ export function AppSidebar() {
       }
     }
   };
-
   const handleCertificateRedirect = () => {
     window.open('https://certifica.eonhub.com.br', '_blank');
   };
-
   return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-layout-gradient`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col`}>
@@ -176,7 +168,7 @@ export function AppSidebar() {
         
         {!collapsed && <div className="mt-6 flex justify-center w-full">
             <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
-              <img alt="Éon Sign" className="h-13 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
+              <img alt="Éon Sign" className="h-113 w-auto object-contain cursor-pointer" src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png" />
             </a>
           </div>}
       </div>
