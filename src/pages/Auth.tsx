@@ -258,7 +258,9 @@ export default function Auth() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen p-6" style={{ backgroundColor: '#ffffff' }}>
+      <div className="hidden md:flex min-h-screen p-6" style={{
+      backgroundColor: '#ffffff'
+    }}>
         {/* Left side - Blue gradient with radial glow (40%) */}
         <div className="relative w-[40%] flex flex-col items-center justify-center rounded-3xl overflow-hidden" style={{
         background: "linear-gradient(to bottom, #273D60, #0a1525)"
@@ -286,9 +288,7 @@ export default function Auth() {
               <h1 style={{
               color: '#4b5563'
             }} className="text-2xl font-bold text-gray-600">Login</h1>
-              <p className="mt-1" style={{
-              color: '#6b7280'
-            }}>Bem-vindo de volta!</p>
+              
             </div>
 
             {formContent}
