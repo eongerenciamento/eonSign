@@ -214,7 +214,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto">
-        {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 bg-0 text-sidebar-foreground text-xs bg-muted-foreground font-medium rounded-full opacity-100">
+        {!collapsed && <button onClick={handleCertificateRedirect} className="w-full mb-3 px-4 py-2 bg-0 text-sidebar-foreground text-xs bg-muted-foreground font-medium rounded-full opacity-95">
             Certificado Digital A1 R$109.90    
           </button>}
         
