@@ -1,128 +1,157 @@
 
-## Implementar Formulário de Cadastro Local na Página de Login
+## Integrar Stripe Checkout no Fluxo de Cadastro
 
 ### Situação Atual
-- O link "Criar nova conta" redireciona para `https://eonhub.com.br/sign` (página externa)
-- Já existe a edge function `create-free-account` que cria conta gratuita com:
-  - Email e nome da organização como entrada
-  - Cria usuário no auth
-  - Cria `company_settings` com dados básicos
-  - Cria `user_subscriptions` com plano Gratuito (5 documentos/mês)
-  - Envia email de boas-vindas com senha temporária
+- O formulário de cadastro (`RegisterForm`) coleta email e nome da organização
+- Ao submeter, chama diretamente a edge function `create-free-account` que cria a conta imediatamente
+- O plano Free (`price_1SnWX9HRTD5WvpxjEZHPikV1`) é um plano de R$ 0,00/mês no Stripe
 
-### Solução
-
-Modificar a página `Auth.tsx` para:
-
-1. Adicionar estado para alternar entre Login e Cadastro
-2. Criar formulário de cadastro com campos:
-   - Email
-   - Nome da organização
-3. Ao submeter, chamar a edge function `create-free-account`
-4. Exibir mensagem de sucesso informando que a senha foi enviada por email
-
-### Fluxo do Usuário
+### Novo Fluxo Proposto
 
 ```text
 ┌─────────────────────────────────────────────┐
-│         Página de Login                     │
-│  ┌─────────────────────────────────────┐    │
-│  │  Email: [________________]          │    │
-│  │  Senha: [________________]          │    │
-│  │                                     │    │
-│  │  [    Entrar    ]                   │    │
-│  │                                     │    │
-│  │  Esqueci a senha · Criar nova conta │    │
-│  └─────────────────────────────────────┘    │
-└─────────────────────────────────────────────┘
-              │
-              │ Clica em "Criar nova conta"
-              ▼
-┌─────────────────────────────────────────────┐
 │         Formulário de Cadastro              │
 │  ┌─────────────────────────────────────┐    │
-│  │  Email: [________________]          │    │
-│  │  Nome da Organização: [__________]  │    │
+│  │  E-mail: [________________]         │    │
+│  │  Nome: [____________________]       │    │
+│  │  Organização: [_____________]       │    │
 │  │                                     │    │
 │  │  [    Criar Conta    ]              │    │
-│  │                                     │    │
-│  │  Já tenho conta · Voltar ao login   │    │
 │  └─────────────────────────────────────┘    │
 └─────────────────────────────────────────────┘
               │
               │ Submete formulário
               ▼
 ┌─────────────────────────────────────────────┐
-│  ✓ Conta criada com sucesso!                │
-│                                             │
-│  Enviamos sua senha temporária para o       │
-│  email informado. Verifique sua caixa       │
-│  de entrada.                                │
-│                                             │
-│  [    Fazer Login    ]                      │
+│  Chama create-stripe-checkout com:          │
+│  - priceId: price_1SnWX9HRTD5WvpxjEZHPikV1 │
+│  - email, organizationName                  │
+│  - tierName: "Gratuito"                     │
+│  - documentLimit: 5                         │
+└─────────────────────────────────────────────┘
+              │
+              │ Redireciona para Stripe
+              ▼
+┌─────────────────────────────────────────────┐
+│         Stripe Checkout (R$ 0,00)           │
+│  - Coleta dados de cartão (para futuro)     │
+│  - Confirma assinatura gratuita             │
+└─────────────────────────────────────────────┘
+              │
+              │ Webhook processa
+              ▼
+┌─────────────────────────────────────────────┐
+│  stripe-webhook cria:                       │
+│  - Usuário no Supabase Auth                 │
+│  - company_settings                         │
+│  - user_subscriptions                       │
+│  - Envia email de boas-vindas               │
 └─────────────────────────────────────────────┘
 ```
 
-### Detalhes Técnicos
+### Alterações Necessárias
 
-**Arquivo:** `src/pages/Auth.tsx`
+#### 1. Adicionar campo "Nome" ao formulário de cadastro
 
-**Alterações:**
+**Arquivo:** `src/components/auth/RegisterForm.tsx`
 
-1. Adicionar estado para controlar o modo (login/cadastro):
-```typescript
-const [mode, setMode] = useState<'login' | 'register' | 'success'>('login');
-const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-```
+Adicionar campo para nome do usuário além do email e organização:
 
-2. Criar schema de validação para cadastro:
 ```typescript
 const registerSchema = z.object({
-  email: z.string().email("Informe um e-mail válido"),
-  organizationName: z.string().min(2, "Nome da organização é obrigatório")
+  email: z.string().trim().email("Informe um e-mail válido").max(255, "E-mail muito longo"),
+  name: z.string().trim().min(2, "Nome é obrigatório").max(100, "Nome muito longo"),
+  organizationName: z.string().trim().min(2, "Nome da organização é obrigatório").max(100, "Nome muito longo")
 });
 ```
 
-3. Criar formulário de registro usando react-hook-form
+#### 2. Modificar o handler de submit
 
-4. Handler para criar conta:
+Substituir a chamada para `create-free-account` por `create-stripe-checkout`:
+
 ```typescript
-const handleRegister = async (values) => {
-  setIsCreatingAccount(true);
+const PRICE_ID_FREE = "price_1SnWX9HRTD5WvpxjEZHPikV1";
+
+const handleSubmit = async (values: RegisterFormValues) => {
+  setIsCreating(true);
   try {
-    const { data, error } = await supabase.functions.invoke("create-free-account", {
+    const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
       body: {
+        priceId: PRICE_ID_FREE,
         email: values.email,
-        organizationName: values.organizationName
+        organizationName: values.organizationName,
+        tierName: "Gratuito",
+        documentLimit: 5,
       }
     });
+
     if (error || data?.error) {
-      throw new Error(data?.error || error?.message);
+      throw new Error(data?.error || error?.message || "Erro ao criar checkout");
     }
-    setMode('success'); // Mostra tela de sucesso
+
+    // Redireciona para o Stripe Checkout
+    if (data?.url) {
+      window.location.href = data.url;
+    }
   } catch (error) {
-    toast({ variant: "destructive", title: "Erro ao criar conta", description: error.message });
+    toast({
+      variant: "destructive",
+      title: "Erro ao criar conta",
+      description: error.message
+    });
   } finally {
-    setIsCreatingAccount(false);
+    setIsCreating(false);
   }
 };
 ```
 
-5. Alterar o link "Criar nova conta" de `<a href>` para `<button onClick={() => setMode('register')}>`:
+#### 3. Atualizar o mapeamento no stripe-webhook
+
+**Arquivo:** `supabase/functions/stripe-webhook/index.ts`
+
+Adicionar o price_id do plano Free ao mapeamento `PRICE_ID_TO_PLAN`:
+
 ```typescript
-<button type="button" onClick={() => setMode('register')} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
-  Criar nova conta
-</button>
+const PRICE_ID_TO_PLAN: Record<string, { limit: number; name: string }> = {
+  // Free/Gratuito
+  "price_1SnWX9HRTD5WvpxjEZHPikV1": { limit: 5, name: "Gratuito" },
+  // Mensais
+  "price_1SnWXYHRTD5WvpxjKl4TP1T8": { limit: 25, name: "Start" },
+  // ... resto dos planos
+};
 ```
 
-6. Renderização condicional baseada no `mode`:
-   - `login`: Formulário de login atual
-   - `register`: Formulário de cadastro
-   - `success`: Mensagem de sucesso com botão para voltar ao login
+#### 4. Atualizar constantes de Stripe
 
-### Visual
+**Arquivo:** `src/constants/stripe.ts`
 
-- Manter o mesmo design (cores, fontes, layout) do formulário de login
-- Apenas trocar os campos e textos conforme o modo
-- Header muda de "Login" para "Criar Conta"
-- Subtítulo muda de "Bem-vindo de volta!" para "Comece grátis!"
+Adicionar o price_id do plano gratuito:
+
+```typescript
+export const PRICE_ID_FREE = "price_1SnWX9HRTD5WvpxjEZHPikV1";
+
+export const PRICE_ID_TO_LIMIT: Record<string, number> = {
+  [PRICE_ID_FREE]: 5,
+  // ... resto
+};
+
+export const PRICE_ID_TO_NAME: Record<string, string> = {
+  [PRICE_ID_FREE]: "Gratuito",
+  // ... resto
+};
+```
+
+### Resumo das Alterações
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `src/components/auth/RegisterForm.tsx` | Adicionar campo "Nome", trocar para `create-stripe-checkout` |
+| `src/constants/stripe.ts` | Adicionar price_id do plano Free |
+| `supabase/functions/stripe-webhook/index.ts` | Adicionar mapeamento do plano Free |
+
+### Benefícios desta Abordagem
+
+1. **Centralização**: Toda criação de conta passa pelo Stripe
+2. **Consistência**: Mesmo fluxo para planos pagos e gratuitos
+3. **Rastreabilidade**: Todas as contas têm um customer_id no Stripe desde o início
+4. **Facilidade de upgrade**: Usuários já têm dados de pagamento cadastrados (opcional no plano gratuito)
