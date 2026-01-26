@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PRICE_ID_FREE } from "@/constants/stripe";
 
 const registerSchema = z.object({
   email: z.string().trim().email("Informe um e-mail válido").max(255, "E-mail muito longo"),
+  name: z.string().trim().min(2, "Nome é obrigatório").max(100, "Nome muito longo"),
   organizationName: z.string().trim().min(2, "Nome da organização é obrigatório").max(100, "Nome muito longo")
 });
 
@@ -29,6 +31,7 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
+      name: "",
       organizationName: ""
     }
   });
@@ -39,18 +42,24 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
   const handleSubmit = async (values: RegisterFormValues) => {
     setIsCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-free-account", {
+      const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
         body: {
+          priceId: PRICE_ID_FREE,
           email: values.email,
-          organizationName: values.organizationName
+          organizationName: values.organizationName,
+          tierName: "Gratuito",
+          documentLimit: 5,
         }
       });
 
       if (error || data?.error) {
-        throw new Error(data?.error || error?.message || "Erro ao criar conta");
+        throw new Error(data?.error || error?.message || "Erro ao criar checkout");
       }
 
-      onSuccess();
+      // Redireciona para o Stripe Checkout
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (error) {
       const description = error instanceof Error && error.message ? error.message : "Tente novamente em instantes.";
       toast({
@@ -74,6 +83,20 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
               <FormLabel className={labelClassName}>E-mail</FormLabel>
               <FormControl>
                 <Input {...field} type="email" disabled={isCreating} className={inputClassName} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className={labelClassName}>Nome</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isCreating} className={inputClassName} placeholder="Seu nome completo" />
               </FormControl>
               <FormMessage />
             </FormItem>

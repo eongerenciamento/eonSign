@@ -9,6 +9,8 @@ const logStep = (step: string, details?: any) => {
 
 // Mapeamento de Price IDs para limites e nomes de planos (eonSign)
 const PRICE_ID_TO_PLAN: Record<string, { limit: number; name: string }> = {
+  // Gratuito
+  "price_1SnWX9HRTD5WvpxjEZHPikV1": { limit: 5, name: "Gratuito" },
   // Mensais
   "price_1SnWXYHRTD5WvpxjKl4TP1T8": { limit: 25, name: "Start" },
   "price_1SnWXtHRTD5Wvpxjtgr5tWKJ": { limit: 50, name: "Pro" },

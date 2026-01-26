@@ -1,6 +1,9 @@
 // IDs de Produtos eonSign
 export const EONSIGN_PRODUCT_ID = "prod_TTejAzPxAXvONB";
 
+// Price ID do plano gratuito
+export const PRICE_ID_FREE = "price_1SnWX9HRTD5WvpxjEZHPikV1";
+
 // Price IDs Mensais
 export const PRICE_IDS_MENSAL = {
   START: "price_1SnWXYHRTD5WvpxjKl4TP1T8",
@@ -27,6 +30,8 @@ export const ALL_EONSIGN_PRICE_IDS = [
 
 // Mapeamento de limites por Price ID
 export const PRICE_ID_TO_LIMIT: Record<string, number> = {
+  // Gratuito
+  [PRICE_ID_FREE]: 5,
   // Mensais
   [PRICE_IDS_MENSAL.START]: 25,
   [PRICE_IDS_MENSAL.PRO]: 50,
@@ -43,6 +48,8 @@ export const PRICE_ID_TO_LIMIT: Record<string, number> = {
 
 // Mapeamento de nomes por Price ID
 export const PRICE_ID_TO_NAME: Record<string, string> = {
+  // Gratuito
+  [PRICE_ID_FREE]: "Gratuito",
   // Mensais
   [PRICE_IDS_MENSAL.START]: "Start",
   [PRICE_IDS_MENSAL.PRO]: "Pro",
