@@ -110,8 +110,17 @@ export default function Auth() {
         paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
       }}>
           <RadialGlow />
-          <div className="relative z-20 flex justify-center pt-32">
+          <div className="relative z-20 flex flex-col items-center pt-32">
             <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
+            <a 
+              href="https://certifica.eonhub.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+              className="mt-6 inline-block px-4 py-2 text-white text-sm transition-all hover:opacity-90 font-normal rounded-full"
+            >
+              Certificado Digital <span className="text-xs">R$</span>109.90
+            </a>
           </div>
         </div>
 
