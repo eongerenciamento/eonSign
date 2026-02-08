@@ -24,6 +24,7 @@ export const PRICE_IDS_ANUAL = {
 
 // Lista de todos os Price IDs válidos do eonSign (para validação)
 export const ALL_EONSIGN_PRICE_IDS = [
+  PRICE_ID_FREE,
   ...Object.values(PRICE_IDS_MENSAL),
   ...Object.values(PRICE_IDS_ANUAL),
 ];

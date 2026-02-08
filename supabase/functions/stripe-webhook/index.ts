@@ -2,9 +2,45 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+// Product ID do eonSign - apenas processar eventos deste produto
+const EONSIGN_PRODUCT_ID = "prod_TTejAzPxAXvONB";
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+};
+
+// Helper para extrair product_id de uma checkout session (requer chamada adicional à API)
+const getProductIdFromSession = async (
+  stripe: Stripe, 
+  sessionId: string
+): Promise<string | null> => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items.data.price.product']
+    });
+    
+    const firstItem = session.line_items?.data?.[0];
+    if (!firstItem?.price?.product) return null;
+    
+    // product pode ser string (ID) ou objeto expandido
+    const product = firstItem.price.product;
+    return typeof product === 'string' ? product : (product as Stripe.Product).id;
+  } catch (error) {
+    logStep("Error getting product from session", { error: String(error) });
+    return null;
+  }
+};
+
+// Helper para extrair product_id de uma subscription
+const getProductIdFromSubscription = (
+  subscription: Stripe.Subscription
+): string | null => {
+  const firstItem = subscription.items.data?.[0];
+  if (!firstItem?.price?.product) return null;
+  
+  const product = firstItem.price.product;
+  return typeof product === 'string' ? product : (product as Stripe.Product).id;
 };
 
 // Mapeamento de Price IDs para limites e nomes de planos (eonSign)
@@ -89,6 +125,17 @@ serve(async (req) => {
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
+          
+          // Validar se é produto eonSign antes de processar
+          const sessionProductId = await getProductIdFromSession(stripe, session.id);
+          if (sessionProductId !== EONSIGN_PRODUCT_ID) {
+            logStep("Ignoring checkout - not eonSign product", { 
+              productId: sessionProductId, 
+              expected: EONSIGN_PRODUCT_ID 
+            });
+            break;
+          }
+          
           const productType = session.metadata?.product_type;
           // Fallback para customer_details quando metadata não tem email (LP externa)
           const email = session.metadata?.email || session.customer_details?.email;
@@ -270,6 +317,17 @@ serve(async (req) => {
 
         case "customer.subscription.updated": {
           const subscription = event.data.object as Stripe.Subscription;
+          
+          // Validar se é produto eonSign antes de processar
+          const subProductId = getProductIdFromSubscription(subscription);
+          if (subProductId !== EONSIGN_PRODUCT_ID) {
+            logStep("Ignoring subscription.updated - not eonSign product", { 
+              productId: subProductId, 
+              expected: EONSIGN_PRODUCT_ID 
+            });
+            break;
+          }
+          
           const customerId = subscription.customer as string;
 
           logStep("Processing customer.subscription.updated", { subscriptionId: subscription.id });
@@ -309,6 +367,16 @@ serve(async (req) => {
         case "customer.subscription.deleted": {
           const subscription = event.data.object as Stripe.Subscription;
           
+          // Validar se é produto eonSign antes de processar
+          const delProductId = getProductIdFromSubscription(subscription);
+          if (delProductId !== EONSIGN_PRODUCT_ID) {
+            logStep("Ignoring subscription.deleted - not eonSign product", { 
+              productId: delProductId, 
+              expected: EONSIGN_PRODUCT_ID 
+            });
+            break;
+          }
+          
           logStep("Processing customer.subscription.deleted", { subscriptionId: subscription.id });
 
           await supabaseClient
@@ -325,6 +393,17 @@ serve(async (req) => {
 
         case "customer.subscription.created": {
           const subscription = event.data.object as Stripe.Subscription;
+          
+          // Validar se é produto eonSign antes de processar
+          const createdProductId = getProductIdFromSubscription(subscription);
+          if (createdProductId !== EONSIGN_PRODUCT_ID) {
+            logStep("Ignoring subscription.created - not eonSign product", { 
+              productId: createdProductId, 
+              expected: EONSIGN_PRODUCT_ID 
+            });
+            break;
+          }
+          
           const customerId = subscription.customer as string;
 
           logStep("Processing customer.subscription.created", { 
