@@ -107,7 +107,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
               <FormControl>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input {...field} type="email" placeholder="E-mail" disabled={isSubmitting} className={`${inputClassName} pl-10`} />
+                  <Input {...field} type="email" placeholder="E-mail" disabled={isSubmitting} autoFocus={false} className={`${inputClassName} pl-10`} />
                 </div>
               </FormControl>
               <FormMessage />
