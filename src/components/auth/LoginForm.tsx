@@ -189,7 +189,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           Continuar com Google
         </Button>
 
-        <div className="pt-4 space-y-3">
+        <div className="pt-4">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <button
               type="button"
@@ -218,22 +218,23 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
             </button>
           </div>
           
-          {/* Mobile: Powered by + links legais com mais espacamento */}
-          <div className="md:hidden pt-6 text-center text-xs text-gray-400">
+          {/* Mobile: Powered by a esquerda, links a direita, mais baixo */}
+          <div className="md:hidden pt-8 flex items-center justify-between text-xs text-gray-400">
             <span>
               Powered by{" "}
               <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
                 eonhub
               </a>
             </span>
-            <span className="mx-2">·</span>
-            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
-            <span className="mx-1">·</span>
-            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
+            <div className="flex gap-1">
+              <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+              <span>·</span>
+              <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
+            </div>
           </div>
           
-          {/* Desktop: Apenas Privacidade e Termos centralizados */}
-          <div className="hidden md:flex justify-center gap-2 text-xs text-gray-400">
+          {/* Desktop: Privacidade e Termos mais baixos, alinhados com Powered by da secao azul */}
+          <div className="hidden md:flex justify-center gap-2 text-xs text-gray-400 pt-8">
             <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
             <span>·</span>
             <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
