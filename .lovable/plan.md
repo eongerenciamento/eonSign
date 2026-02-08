@@ -1,64 +1,75 @@
 
 
-## Corrigir Safe Area para Ficar Azul no Mobile
+## Adicionar Botao Certificado Digital no Mobile
 
 ### Problema
 
-O container mobile principal tem fundo branco (`backgroundColor: '#ffffff'`). A seção azul usa `paddingTop` para respeitar a safe area, mas o padding não preenche a safe area com a cor azul - ele apenas cria espaço interno. Isso faz com que a área do status bar (horário, sinal, bateria) fique branca.
+O botao "Certificado Digital R$109.90" existe no desktop dentro do componente `PoweredBy` (linha 145), mas nao foi incluido no layout mobile.
 
 ### Solucao
 
-Mudar a abordagem: ao invés de usar padding na seção azul, vamos:
-1. Mudar o fundo do container mobile para azul (cor do topo do gradiente)
-2. Manter a seção azul preenchendo até a safe area
+Adicionar o botao "Certificado Digital" na secao azul do mobile, abaixo do logo, mantendo a mesma estilizacao do desktop.
 
 ### Alteracoes
 
 #### `src/pages/Auth.tsx` - Layout Mobile
 
-**Mudar o container mobile (linha 105-107):**
+Adicionar o botao na secao azul do mobile, logo abaixo do logo (apos linha 115):
 
-De:
 ```typescript
-<div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
-  backgroundColor: '#ffffff'
+// Secao azul mobile - linha 108-116
+<div className="relative flex-shrink-0 px-6 pb-36" style={{
+  background: "linear-gradient(to bottom, #273D60, #1a2847)",
+  paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
 }}>
+  <RadialGlow />
+  <div className="relative z-20 flex flex-col items-center pt-32">
+    <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
+    
+    {/* Botao Certificado Digital para mobile */}
+    <a 
+      href="https://certifica.eonhub.com.br" 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+      className="mt-6 inline-block px-4 py-2 text-white text-sm transition-all hover:opacity-90 font-normal rounded-full"
+    >
+      Certificado Digital <span className="text-xs">R$</span>109.90
+    </a>
+  </div>
+</div>
 ```
 
-Para:
-```typescript
-<div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
-  backgroundColor: '#273D60'
-}}>
-```
-
-Isso garante que a safe area (que fica fora do conteudo renderizado) terá a cor azul como fundo.
-
-### Resultado Visual Esperado
+### Resultado Visual
 
 ```text
 ┌──────────────────────────┐
-│    12:51     ⟨⟩ 81%      │ <- Safe area AZUL (mesmo tom do header)
-│  sign.eonhub.com.br      │
+│    12:51     ⟨⟩ 81%      │ <- Safe area azul
 │                          │
 │         ēon              │
 │         sign             │
 │                          │
-│        (azul)            │
+│  [Certificado R$109.90]  │ <- Botao adicionado
+│                          │
 ├───────╮                  │
-│       └──────────────────┤ <- Card branco sobrepoe
+│       └──────────────────┤
 │         Login            │
-│    ...                   │
+│    [ E-mail ]            │
+│    [ Senha  ]            │
+│    [ Entrar ]            │
+│    [ Google ]            │
+│                          │
+│ Esqueci · Criar · Instale│
+│ Powered by    Privacidade│
 └──────────────────────────┘
 ```
 
 ### Secao Tecnica
 
 **Arquivo modificado:**
-- `src/pages/Auth.tsx` - mudar backgroundColor do container mobile
+- `src/pages/Auth.tsx`
 
-**Mudanca:**
-- Linha 106: `backgroundColor: '#ffffff'` → `backgroundColor: '#273D60'`
-
-A cor `#273D60` é a mesma cor do topo do gradiente da seção azul, garantindo uma transição visual perfeita.
+**Mudancas:**
+- Linha 113: Mudar `flex justify-center` para `flex flex-col items-center` para empilhar logo + botao
+- Adicionar link do Certificado Digital apos o logo com `mt-6` para espacamento
 
