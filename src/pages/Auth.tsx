@@ -115,12 +115,12 @@ export default function Auth() {
       <div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
       backgroundColor: '#273D60'
     }}>
-        <div className="relative flex-shrink-0 px-6 pb-36" style={{
+        <div className="relative flex-shrink-0 px-6 pb-28" style={{
         background: "linear-gradient(to bottom, #273D60, #1a2847)",
         paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
       }}>
           <RadialGlow />
-          <div className="relative z-20 flex flex-col items-center pt-32">
+          <div className="relative z-20 flex flex-col items-center pt-24">
             <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
           </div>
         </div>
