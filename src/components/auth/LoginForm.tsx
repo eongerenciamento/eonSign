@@ -189,16 +189,6 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           Continuar com Google
         </Button>
 
-        <a
-          href="https://certifica.eonhub.com.br"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full h-10 text-sm font-medium transition-colors"
-        >
-          <Award className="mr-2 h-4 w-4" />
-          Certificado Digital R$109.90
-        </a>
-
         <div className="pt-4 space-y-3">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <button
@@ -228,18 +218,25 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
             </button>
           </div>
           
-          <div className="flex items-center justify-between text-xs text-gray-400">
+          {/* Mobile: Powered by + links legais com mais espacamento */}
+          <div className="md:hidden pt-6 text-center text-xs text-gray-400">
             <span>
               Powered by{" "}
               <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
                 eonhub
               </a>
             </span>
-            <div className="flex gap-2">
-              <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
-              <span>·</span>
-              <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
-            </div>
+            <span className="mx-2">·</span>
+            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+            <span className="mx-1">·</span>
+            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
+          </div>
+          
+          {/* Desktop: Apenas Privacidade e Termos centralizados */}
+          <div className="hidden md:flex justify-center gap-2 text-xs text-gray-400">
+            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+            <span>·</span>
+            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
           </div>
         </div>
       </form>
