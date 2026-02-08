@@ -1,67 +1,119 @@
 
 
-## Ajustar Estilo dos Botoes de Login e Remover Textos
+## Criar Paginas de Politica de Privacidade e Termos de Uso
 
-### Alteracoes Solicitadas
+### Objetivo
 
-1. Botao Google logo abaixo do botao "Entrar"
-2. Ambos os botoes identicos em tamanho
-3. Botoes totalmente redondos (rounded-full) e sem bordas
-4. Manter cores do Google
-5. Remover divisor "ou continue com"
-6. Remover subtitulo "Bem-vindo de volta"
+Criar duas novas paginas seguindo o layout da imagem de referencia:
+- `/privacidade` - Politica de Privacidade
+- `/termos` - Termos e Condicoes de Uso
+
+E adicionar links para elas na pagina de login.
+
+### Layout das Paginas
+
+Baseado na imagem de referencia:
+- Header escuro (#273D60) com seta de voltar e logo eonhub
+- Conteudo em card branco arredondado
+- Texto bem formatado com titulos e listas
+
+### Arquivos a Criar
+
+#### 1. `src/pages/PrivacyPolicy.tsx`
+
+Nova pagina com o conteudo da Politica de Privacidade:
+
+- Header com navegacao de volta
+- Secoes: Coleta de Dados, Uso das Informacoes, Compartilhamento, Direitos
+- Data de atualizacao: 8 de fevereiro de 2026
+- Empresa: eonhub Tecnologia LTDA
+
+#### 2. `src/pages/TermsOfUse.tsx`
+
+Nova pagina com os Termos de Uso:
+
+- Header com navegacao de volta
+- Secoes numeradas: Objeto, Validade Juridica, Responsabilidades, Limitacao, Foro
+- Data de atualizacao: 8 de fevereiro de 2026
 
 ### Arquivos a Modificar
 
-#### 1. `src/pages/Auth.tsx`
+#### 3. `src/App.tsx`
 
-Remover o subtitulo "Bem-vindo de volta!" da funcao `getHeaderText()`:
-
-```typescript
-// Linha 80-84 - Alterar de:
-default:
-  return {
-    title: "Login",
-    subtitle: "Bem-vindo de volta!"
-  };
-
-// Para:
-default:
-  return {
-    title: "Login",
-    subtitle: ""
-  };
-```
-
-#### 2. `src/components/auth/LoginForm.tsx`
-
-Remover o divisor "ou continue com" e ajustar os estilos dos botoes:
-
-- Remover o bloco do divisor (linhas 149-156)
-- Botao "Entrar": adicionar `rounded-full` e remover bordas
-- Botao Google: usar mesmo estilo do "Entrar" mas com cores diferentes (fundo cinza claro, texto escuro)
+Adicionar as novas rotas:
 
 ```typescript
-// Botao Entrar - alterar className para:
-className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white rounded-full"
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 
-// Botao Google - alterar className para:
-className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border-0"
+// Na lista de rotas:
+<Route path="/privacidade" element={<PrivacyPolicy />} />
+<Route path="/termos" element={<TermsOfUse />} />
 ```
 
-### Resultado Visual Esperado
+#### 4. `src/components/auth/LoginForm.tsx`
 
+Adicionar links no rodape do formulario, junto com os outros links existentes:
+
+```typescript
+// Adicionar apos o link "Instale o App":
+<span className="text-gray-300">·</span>
+<a
+  href="/privacidade"
+  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+>
+  Privacidade
+</a>
+<span className="text-gray-300">·</span>
+<a
+  href="/termos"
+  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+>
+  Termos
+</a>
 ```
-+----------------------------------+
-|             Login                |
-|                                  |
-|  [       E-mail input        ]   |
-|  [       Senha input         ]   |
-|                                  |
-|  [         Entrar           ]    |  <- rounded-full, azul
-|  [  G  Continuar com Google ]    |  <- rounded-full, cinza claro
-|                                  |
-|  Esqueci a senha · Criar conta   |
-+----------------------------------+
+
+### Estrutura Visual das Novas Paginas
+
+```text
+┌────────────────────────────────────────────┐
+│  ←                    eonhub               │  <- Header escuro
+├────────────────────────────────────────────┤
+│                                            │
+│   ┌────────────────────────────────────┐   │
+│   │                                    │   │
+│   │   Titulo Principal                 │   │
+│   │                                    │   │
+│   │   1. Secao                         │   │
+│   │   Texto da secao...                │   │
+│   │                                    │   │
+│   │   2. Secao                         │   │
+│   │   • Item 1                         │   │
+│   │   • Item 2                         │   │
+│   │                                    │   │
+│   └────────────────────────────────────┘   │
+│                                            │
+└────────────────────────────────────────────┘
 ```
+
+### Conteudo das Paginas
+
+**Politica de Privacidade:**
+- Coleta de Dados (conta, assinatura, documentos)
+- Uso das Informacoes
+- Compartilhamento de Dados
+- Seus Direitos
+
+**Termos de Uso:**
+1. Objeto do Servico
+2. Validade Juridica
+3. Responsabilidades do Usuario
+4. Limitacao de Responsabilidade
+5. Foro (Belem, Para)
+
+### Resultado Final
+
+- Duas paginas publicas acessiveis sem login
+- Links visiveis na tela de login
+- URLs amigaveis para configurar no Google Cloud Console
 
