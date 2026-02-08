@@ -102,11 +102,12 @@ export default function Auth() {
     colorScheme: 'light'
   }}>
       {/* Mobile Layout */}
-      <div className="md:hidden min-h-screen flex flex-col" style={{
+      <div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
       backgroundColor: '#ffffff'
     }}>
-        <div className="relative flex-shrink-0 pt-[env(safe-area-inset-top)] px-6 pb-36" style={{
-        background: "linear-gradient(to bottom, #273D60, #1a2847)"
+        <div className="relative flex-shrink-0 px-6 pb-36" style={{
+        background: "linear-gradient(to bottom, #273D60, #1a2847)",
+        paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
       }}>
           <RadialGlow />
           <div className="relative z-20 flex justify-center pt-32">
@@ -114,7 +115,7 @@ export default function Auth() {
           </div>
         </div>
 
-        <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col" style={{
+        <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-hidden" style={{
         backgroundColor: '#ffffff'
       }}>
           {mode !== 'success' && <div className="text-center mb-4">
