@@ -103,7 +103,7 @@ export default function Auth() {
   }}>
       {/* Mobile Layout */}
       <div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
-      backgroundColor: '#ffffff'
+      backgroundColor: '#273D60'
     }}>
         <div className="relative flex-shrink-0 px-6 pb-36" style={{
         background: "linear-gradient(to bottom, #273D60, #1a2847)",
