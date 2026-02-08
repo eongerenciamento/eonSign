@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, LogIn, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -104,9 +104,11 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className={labelClassName}>E-mail</FormLabel>
               <FormControl>
-                <Input {...field} type="email" disabled={isSubmitting} className={inputClassName} />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input {...field} type="email" placeholder="E-mail" disabled={isSubmitting} className={`${inputClassName} pl-10`} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,14 +120,15 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className={labelClassName}>Senha</FormLabel>
               <FormControl>
                 <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     {...field}
                     type={showPassword ? "text" : "password"}
+                    placeholder="Senha"
                     disabled={isSubmitting}
-                    className={`${inputClassName} pr-10`}
+                    className={`${inputClassName} pl-10 pr-10`}
                   />
                   <button
                     type="button"
@@ -144,7 +147,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
         />
 
         <Button type="submit" disabled={isSubmitting} className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white rounded-full border-0">
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
           Entrar
         </Button>
 
@@ -186,46 +189,58 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           Continuar com Google
         </Button>
 
-        <div className="flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2">
-          <button
-            type="button"
-            onClick={handleForgotPassword}
-            disabled={isSubmitting || resettingPassword}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center"
-          >
-            {resettingPassword && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-            Esqueci a senha
-          </button>
-          <span className="text-gray-300">·</span>
-          <button
-            type="button"
-            onClick={onRegisterClick}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Criar nova conta
-          </button>
-          <span className="text-gray-300">·</span>
-          <button
-            type="button"
-            onClick={onInstallClick}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Instale o App
-          </button>
-          <span className="text-gray-300">·</span>
-          <a
-            href="/privacidade"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Privacidade
-          </a>
-          <span className="text-gray-300">·</span>
-          <a
-            href="/termos"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Termos
-          </a>
+        <a
+          href="https://certifica.eonhub.com.br"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full h-10 text-sm font-medium transition-colors"
+        >
+          <Award className="mr-2 h-4 w-4" />
+          Certificado Digital R$109.90
+        </a>
+
+        <div className="pt-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={isSubmitting || resettingPassword}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+            >
+              {resettingPassword && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+              Esqueci a senha
+            </button>
+            <span className="text-gray-300">·</span>
+            <button
+              type="button"
+              onClick={onRegisterClick}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Criar conta
+            </button>
+            <span className="text-gray-300">·</span>
+            <button
+              type="button"
+              onClick={onInstallClick}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Instale o App
+            </button>
+          </div>
+          
+          <div className="flex items-center justify-between text-xs text-gray-400">
+            <span>
+              Powered by{" "}
+              <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
+                eonhub
+              </a>
+            </span>
+            <div className="flex gap-2">
+              <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+              <span>·</span>
+              <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
+            </div>
+          </div>
         </div>
       </form>
     </Form>

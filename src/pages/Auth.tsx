@@ -117,33 +117,15 @@ export default function Auth() {
         <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col" style={{
         backgroundColor: '#ffffff'
       }}>
-          {mode !== 'success' && <div className="text-center mb-6">
+          {mode !== 'success' && <div className="text-center mb-4">
               <h1 style={{
-            color: '#111827'
-          }} className="text-2xl font-bold">
+            color: '#4b5563'
+          }} className="text-lg font-semibold">
                 {title}
               </h1>
-              <p className="mt-1" style={{
-            color: '#6b7280'
-          }}>
-                {subtitle}
-              </p>
             </div>}
 
           {renderContent()}
-
-          {mode === 'login' && <div className="flex items-center justify-center py-4 mt-4">
-              <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-full text-sm transition-colors" style={{
-            backgroundColor: '#f3f4f6',
-            color: '#4b5563'
-          }}>
-                Certificado Digital <span className="text-xs">R$</span>109.90
-              </a>
-            </div>}
-
-          <div className="pt-4 mt-auto">
-            <PoweredBySimple />
-          </div>
         </div>
       </div>
 
@@ -167,13 +149,12 @@ export default function Auth() {
         backgroundColor: '#ffffff'
       }}>
           <div className="w-full max-w-md">
-            {mode !== 'success' && <div className="text-center mb-8">
+            {mode !== 'success' && <div className="text-center mb-6">
                 <h1 style={{
               color: '#4b5563'
-            }} className="text-2xl font-bold">
+            }} className="text-lg font-semibold">
                   {title}
                 </h1>
-                {subtitle}
               </div>}
 
             {renderContent()}
