@@ -1,119 +1,152 @@
 
 
-## Criar Paginas de Politica de Privacidade e Termos de Uso
+## Reorganizar Pagina de Login
 
-### Objetivo
+### Alteracoes Solicitadas
 
-Criar duas novas paginas seguindo o layout da imagem de referencia:
-- `/privacidade` - Politica de Privacidade
-- `/termos` - Termos e Condicoes de Uso
-
-E adicionar links para elas na pagina de login.
-
-### Layout das Paginas
-
-Baseado na imagem de referencia:
-- Header escuro (#273D60) com seta de voltar e logo eonhub
-- Conteudo em card branco arredondado
-- Texto bem formatado com titulos e listas
-
-### Arquivos a Criar
-
-#### 1. `src/pages/PrivacyPolicy.tsx`
-
-Nova pagina com o conteudo da Politica de Privacidade:
-
-- Header com navegacao de volta
-- Secoes: Coleta de Dados, Uso das Informacoes, Compartilhamento, Direitos
-- Data de atualizacao: 8 de fevereiro de 2026
-- Empresa: eonhub Tecnologia LTDA
-
-#### 2. `src/pages/TermsOfUse.tsx`
-
-Nova pagina com os Termos de Uso:
-
-- Header com navegacao de volta
-- Secoes numeradas: Objeto, Validade Juridica, Responsabilidades, Limitacao, Foro
-- Data de atualizacao: 8 de fevereiro de 2026
+1. **Titulo "Login"**: Diminuir tamanho e mudar cor para gray-600
+2. **Labels dos inputs**: Remover "E-mail" e "Senha", adicionar icones dentro dos inputs
+3. **Botoes uniformes**: Entrar, Google e Certificado Digital com mesmo tamanho e icones a esquerda
+4. **Rodape**: "Powered by eonhub" a esquerda na mesma linha que Privacidade e Termos
 
 ### Arquivos a Modificar
 
-#### 3. `src/App.tsx`
+#### 1. `src/pages/Auth.tsx`
 
-Adicionar as novas rotas:
-
-```typescript
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfUse from "./pages/TermsOfUse";
-
-// Na lista de rotas:
-<Route path="/privacidade" element={<PrivacyPolicy />} />
-<Route path="/termos" element={<TermsOfUse />} />
-```
-
-#### 4. `src/components/auth/LoginForm.tsx`
-
-Adicionar links no rodape do formulario, junto com os outros links existentes:
+Alterar o titulo para texto menor e cor gray-600:
 
 ```typescript
-// Adicionar apos o link "Instale o App":
-<span className="text-gray-300">·</span>
+// Mobile - linha 121-124:
+<h1 style={{ color: '#4b5563' }} className="text-lg font-semibold">
+  {title}
+</h1>
+
+// Desktop - linha 171-174:
+<h1 style={{ color: '#4b5563' }} className="text-lg font-semibold">
+  {title}
+</h1>
+```
+
+Remover o botao "Certificado Digital" separado do mobile (linhas 135-142), pois sera movido para dentro do LoginForm.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+**Imports**: Adicionar icones `Mail`, `Lock`, `LogIn`, `Award`
+
+**Inputs com icones**:
+- Remover `<FormLabel>` do email e senha
+- Adicionar icone dentro do input com padding-left
+
+```typescript
+// Email input:
+<div className="relative">
+  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+  <Input 
+    {...field} 
+    type="email" 
+    placeholder="E-mail"
+    disabled={isSubmitting} 
+    className={`${inputClassName} pl-10`} 
+  />
+</div>
+
+// Password input:
+<div className="relative">
+  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+  <Input 
+    {...field} 
+    type={showPassword ? "text" : "password"} 
+    placeholder="Senha"
+    disabled={isSubmitting} 
+    className={`${inputClassName} pl-10 pr-10`} 
+  />
+  // botao eye/eyeoff permanece
+</div>
+```
+
+**Botoes com icones uniformes**:
+
+```typescript
+// Botao Entrar com icone:
+<Button type="submit" disabled={isSubmitting} className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white rounded-full border-0">
+  <LogIn className="mr-2 h-4 w-4" />
+  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+  Entrar
+</Button>
+
+// Botao Google (ja tem icone SVG):
+// Manter como esta
+
+// Novo botao Certificado Digital abaixo do Google:
 <a
-  href="/privacidade"
-  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+  href="https://certifica.eonhub.com.br"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full h-10 text-sm font-medium"
 >
-  Privacidade
-</a>
-<span className="text-gray-300">·</span>
-<a
-  href="/termos"
-  className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
->
-  Termos
+  <Award className="mr-2 h-4 w-4" />
+  Certificado Digital R$109.90
 </a>
 ```
 
-### Estrutura Visual das Novas Paginas
+**Rodape reorganizado**:
+
+Criar nova estrutura com duas linhas:
+- Linha 1: Links de acao (Esqueci senha, Criar conta, Instale App)
+- Linha 2: "Powered by eonhub" a esquerda e "Privacidade · Termos" a direita
+
+```typescript
+<div className="pt-4 space-y-3">
+  {/* Links de acao */}
+  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+    <button onClick={handleForgotPassword}>Esqueci a senha</button>
+    <span>·</span>
+    <button onClick={onRegisterClick}>Criar conta</button>
+    <span>·</span>
+    <button onClick={onInstallClick}>Instale o App</button>
+  </div>
+  
+  {/* Powered by + links legais */}
+  <div className="flex items-center justify-between text-xs text-gray-400">
+    <span>
+      Powered by <a href="https://eonhub.com.br" className="font-bold text-gray-600">eonhub</a>
+    </span>
+    <div className="flex gap-2">
+      <a href="/privacidade">Privacidade</a>
+      <span>·</span>
+      <a href="/termos">Termos</a>
+    </div>
+  </div>
+</div>
+```
+
+### Resultado Visual Esperado
 
 ```text
-┌────────────────────────────────────────────┐
-│  ←                    eonhub               │  <- Header escuro
-├────────────────────────────────────────────┤
-│                                            │
-│   ┌────────────────────────────────────┐   │
-│   │                                    │   │
-│   │   Titulo Principal                 │   │
-│   │                                    │   │
-│   │   1. Secao                         │   │
-│   │   Texto da secao...                │   │
-│   │                                    │   │
-│   │   2. Secao                         │   │
-│   │   • Item 1                         │   │
-│   │   • Item 2                         │   │
-│   │                                    │   │
-│   └────────────────────────────────────┘   │
-│                                            │
-└────────────────────────────────────────────┘
+          login            <- menor, gray-600
+
+  [  @  E-mail             ]  <- icone dentro
+  [  🔒  Senha          👁 ]  <- icone dentro
+
+  [  →  Entrar             ]  <- icone a esquerda
+  [  G  Continuar com Google]
+  [  🏆  Certificado Digital]  <- novo, mesmo tamanho
+
+  Esqueci a senha · Criar conta · Instale o App
+
+  Powered by eonhub        Privacidade · Termos
 ```
 
-### Conteudo das Paginas
+### Secao Tecnica
 
-**Politica de Privacidade:**
-- Coleta de Dados (conta, assinatura, documentos)
-- Uso das Informacoes
-- Compartilhamento de Dados
-- Seus Direitos
+**Icones Lucide utilizados:**
+- `Mail` - icone de carta para email
+- `Lock` - icone de cadeado para senha
+- `LogIn` - icone de seta para botao entrar
+- `Award` - icone de certificado/medalha
 
-**Termos de Uso:**
-1. Objeto do Servico
-2. Validade Juridica
-3. Responsabilidades do Usuario
-4. Limitacao de Responsabilidade
-5. Foro (Belem, Para)
-
-### Resultado Final
-
-- Duas paginas publicas acessiveis sem login
-- Links visiveis na tela de login
-- URLs amigaveis para configurar no Google Cloud Console
+**Classes CSS importantes:**
+- `pl-10` - padding left para inputs com icone
+- `text-xs` - texto menor para rodape
+- `justify-between` - powered by a esquerda, links a direita
 
