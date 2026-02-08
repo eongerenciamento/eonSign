@@ -1,75 +1,76 @@
 
+## Objetivo (mobile)
+1) O botão **“Certificado Digital”** deve ficar **embaixo do botão Google** (não mais no header azul).
+2) Ele deve ter **as mesmas características visuais de botão** (mesmo estilo do botão Google).
+3) O **fundo da safe area** (status bar/notch) deve ficar **azul** (não branco).
 
-## Adicionar Botao Certificado Digital no Mobile
+---
 
-### Problema
+## Diagnóstico rápido do que está acontecendo hoje
+- O “Certificado Digital” está atualmente sendo renderizado **no header azul** do mobile em `src/pages/Auth.tsx` (linhas ~113–123). Por isso ele não está relacionado ao layout do formulário.
+- O “Google” é um `<Button>` dentro de `src/components/auth/LoginForm.tsx`.
+- A safe area continuar branca, mesmo com o container mobile (`md:hidden ...`) com `backgroundColor: '#273D60'`, normalmente acontece porque **a área “atrás” da safe area está herdando o background do `body/html`**, não do container interno.
 
-O botao "Certificado Digital R$109.90" existe no desktop dentro do componente `PoweredBy` (linha 145), mas nao foi incluido no layout mobile.
+---
 
-### Solucao
+## Implementação proposta (passo a passo)
 
-Adicionar o botao "Certificado Digital" na secao azul do mobile, abaixo do logo, mantendo a mesma estilizacao do desktop.
+### 1) Mover “Certificado Digital” para baixo do Google (mobile)
+**Arquivos:**  
+- `src/pages/Auth.tsx`  
+- `src/components/auth/LoginForm.tsx`
 
-### Alteracoes
+**Mudanças:**
+1. **Remover** o `<a href="https://certifica.eonhub.com.br"...>` do header mobile em `src/pages/Auth.tsx` (o link que está logo abaixo do logo).
+2. **Adicionar** um novo botão “Certificado Digital” **dentro do `LoginForm`**, imediatamente **abaixo** do botão “Continuar com Google”.
+3. Esse botão deve aparecer **somente no mobile**, então usar `className="md:hidden ..."`.
 
-#### `src/pages/Auth.tsx` - Layout Mobile
+**Como garantir “mesmas características” do botão Google:**
+- Usar o mesmo componente `<Button>` com as mesmas classes do Google:
+  - `w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border-0`
+- Para ser link (abrir `certifica.eonhub.com.br`), usar `Button` com `asChild` e renderizar um `<a>` por dentro:
+  - `target="_blank" rel="noopener noreferrer"`
 
-Adicionar o botao na secao azul do mobile, logo abaixo do logo (apos linha 115):
+Resultado esperado: na tela de login mobile, a ordem fica:
+1) Entrar  
+2) Continuar com Google  
+3) Certificado Digital (mesmo visual do Google)
 
-```typescript
-// Secao azul mobile - linha 108-116
-<div className="relative flex-shrink-0 px-6 pb-36" style={{
-  background: "linear-gradient(to bottom, #273D60, #1a2847)",
-  paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
-}}>
-  <RadialGlow />
-  <div className="relative z-20 flex flex-col items-center pt-32">
-    <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
-    
-    {/* Botao Certificado Digital para mobile */}
-    <a 
-      href="https://certifica.eonhub.com.br" 
-      target="_blank" 
-      rel="noopener noreferrer" 
-      style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-      className="mt-6 inline-block px-4 py-2 text-white text-sm transition-all hover:opacity-90 font-normal rounded-full"
-    >
-      Certificado Digital <span className="text-xs">R$</span>109.90
-    </a>
-  </div>
-</div>
-```
+Observação: isso afeta **apenas o modo login**, porque o Google button só existe no `LoginForm`. No modo “Criar conta”, não aparece.
 
-### Resultado Visual
+---
 
-```text
-┌──────────────────────────┐
-│    12:51     ⟨⟩ 81%      │ <- Safe area azul
-│                          │
-│         ēon              │
-│         sign             │
-│                          │
-│  [Certificado R$109.90]  │ <- Botao adicionado
-│                          │
-├───────╮                  │
-│       └──────────────────┤
-│         Login            │
-│    [ E-mail ]            │
-│    [ Senha  ]            │
-│    [ Entrar ]            │
-│    [ Google ]            │
-│                          │
-│ Esqueci · Criar · Instale│
-│ Powered by    Privacidade│
-└──────────────────────────┘
-```
+### 2) Corrigir safe area ainda branca no iOS/mobile
+**Arquivos:**  
+- `src/pages/Auth.tsx` (mesmo arquivo)
 
-### Secao Tecnica
+**Mudanças:**
+1. Manter o `backgroundColor: '#273D60'` do container mobile (já está).
+2. Adicionar um ajuste explícito para o background do `html`/`body` enquanto a rota `/auth` estiver montada:
+   - No `useEffect` do `Auth`, salvar os backgrounds atuais (`document.documentElement.style.backgroundColor` e `document.body.style.backgroundColor`)
+   - Setar ambos para `#273D60` ao montar
+   - No cleanup (return do useEffect), restaurar os valores anteriores
 
-**Arquivo modificado:**
+Isso costuma ser o que resolve quando a safe area/status bar “mostra” o background global, e não o do container interno.
+
+---
+
+## Checklist de validação (após implementar)
+1. Abrir `/auth` no iPhone/Safari (ou simulação iOS):
+   - Safe area (topo/status bar) deve estar azul.
+2. Verificar login no mobile:
+   - “Certificado Digital” aparece logo abaixo do Google, com o mesmo estilo.
+   - Tocar no botão abre `certifica.eonhub.com.br` em nova aba.
+3. Verificar desktop:
+   - Desktop continua com “Certificado Digital” no PoweredBy da sidebar (não muda).
+4. Verificar register/success:
+   - Não aparece botão extra indevido no fluxo de cadastro.
+
+---
+
+## Arquivos que serão alterados
 - `src/pages/Auth.tsx`
-
-**Mudancas:**
-- Linha 113: Mudar `flex justify-center` para `flex flex-col items-center` para empilhar logo + botao
-- Adicionar link do Certificado Digital apos o logo com `mt-6` para espacamento
-
+  - Remover link “Certificado Digital” do header mobile
+  - Setar background do `html/body` enquanto estiver em `/auth`
+- `src/components/auth/LoginForm.tsx`
+  - Adicionar botão “Certificado Digital” (mobile-only) abaixo do Google, como `<Button asChild><a /></Button>`
