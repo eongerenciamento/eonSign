@@ -212,6 +212,20 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           >
             Instale o App
           </button>
+          <span className="text-gray-300">·</span>
+          <a
+            href="/privacidade"
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Privacidade
+          </a>
+          <span className="text-gray-300">·</span>
+          <a
+            href="/termos"
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Termos
+          </a>
         </div>
       </form>
     </Form>

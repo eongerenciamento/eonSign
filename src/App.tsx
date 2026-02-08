@@ -16,6 +16,8 @@ import NewDocument from "./pages/NewDocument";
 import SignDocument from "./pages/SignDocument";
 import ValidateDocument from "./pages/ValidateDocument";
 import SetPassword from "./pages/SetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -26,6 +28,8 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/install" element={<Install />} />
       <Route path="/definir-senha" element={<SetPassword />} />
+      <Route path="/privacidade" element={<PrivacyPolicy />} />
+      <Route path="/termos" element={<TermsOfUse />} />
       
       <Route path="/assinar/:documentId" element={<SignDocument />} />
       <Route path="/validar/:documentId" element={<ValidateDocument />} />
