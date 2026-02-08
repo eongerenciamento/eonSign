@@ -189,6 +189,17 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           Continuar com Google
         </Button>
 
+        {/* Certificado Digital - Mobile only */}
+        <Button
+          type="button"
+          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border-0 md:hidden"
+          asChild
+        >
+          <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer">
+            Certificado Digital <span className="text-xs ml-1">R$</span>109.90
+          </a>
+        </Button>
+
         <div className="pt-4">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <button

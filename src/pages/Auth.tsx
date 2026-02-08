@@ -43,6 +43,12 @@ export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>('login');
   useEffect(() => {
+    // Fix safe area background color on mobile
+    const originalHtmlBg = document.documentElement.style.backgroundColor;
+    const originalBodyBg = document.body.style.backgroundColor;
+    document.documentElement.style.backgroundColor = '#273D60';
+    document.body.style.backgroundColor = '#273D60';
+
     const checkSession = async () => {
       const {
         data: {
@@ -63,7 +69,11 @@ export default function Auth() {
         navigate("/dashboard");
       }
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      document.documentElement.style.backgroundColor = originalHtmlBg;
+      document.body.style.backgroundColor = originalBodyBg;
+    };
   }, [navigate]);
   const getHeaderText = () => {
     switch (mode) {
@@ -112,15 +122,6 @@ export default function Auth() {
           <RadialGlow />
           <div className="relative z-20 flex flex-col items-center pt-32">
             <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
-            <a 
-              href="https://certifica.eonhub.com.br" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-              className="mt-6 inline-block px-4 py-2 text-white text-sm transition-all hover:opacity-90 font-normal rounded-full"
-            >
-              Certificado Digital <span className="text-xs">R$</span>109.90
-            </a>
           </div>
         </div>
 
