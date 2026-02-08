@@ -233,12 +233,6 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
             </div>
           </div>
           
-          {/* Desktop: Privacidade e Termos mais baixos, alinhados com Powered by da secao azul */}
-          <div className="hidden md:flex justify-center gap-2 text-xs text-gray-400 pt-8">
-            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
-            <span>·</span>
-            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
-          </div>
         </div>
       </form>
     </Form>

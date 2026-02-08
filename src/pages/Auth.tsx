@@ -145,7 +145,7 @@ export default function Auth() {
           </div>
         </div>
 
-        <div className="w-[60%] flex flex-col items-center justify-center p-8 rounded-r-3xl" style={{
+        <div className="w-[60%] flex flex-col items-center justify-center p-8 rounded-r-3xl relative" style={{
         backgroundColor: '#ffffff'
       }}>
           <div className="w-full max-w-md">
@@ -158,6 +158,13 @@ export default function Auth() {
               </div>}
 
             {renderContent()}
+          </div>
+          
+          {/* Links legais posicionados na mesma altura do Powered by */}
+          <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 text-xs text-gray-400">
+            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+            <span>·</span>
+            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
           </div>
         </div>
       </div>
