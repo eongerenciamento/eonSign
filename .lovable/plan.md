@@ -1,97 +1,64 @@
 
 
-## Ajustes Mobile na Pagina de Login
+## Corrigir Safe Area para Ficar Azul no Mobile
 
-### Objetivo
+### Problema
 
-1. Pagina fixa sem scroll vertical
-2. Inputs sem autofocus ao entrar
-3. Parte azul ocupando a safe area (estendendo ate o topo)
+O container mobile principal tem fundo branco (`backgroundColor: '#ffffff'`). A seção azul usa `paddingTop` para respeitar a safe area, mas o padding não preenche a safe area com a cor azul - ele apenas cria espaço interno. Isso faz com que a área do status bar (horário, sinal, bateria) fique branca.
+
+### Solucao
+
+Mudar a abordagem: ao invés de usar padding na seção azul, vamos:
+1. Mudar o fundo do container mobile para azul (cor do topo do gradiente)
+2. Manter a seção azul preenchendo até a safe area
 
 ### Alteracoes
 
-#### 1. `src/pages/Auth.tsx` - Layout Mobile
+#### `src/pages/Auth.tsx` - Layout Mobile
 
-**Remover scroll e fixar altura:**
-Mudar de `min-h-screen flex flex-col` para `h-screen flex flex-col overflow-hidden` no container mobile.
+**Mudar o container mobile (linha 105-107):**
 
-**Estender parte azul para ocupar safe area:**
-Atualmente a parte azul tem `pt-[env(safe-area-inset-top)]` que adiciona padding. Para ocupar toda a safe area (como no screenshot), a parte azul deve:
-- Remover o padding-top da safe area
-- Adicionar padding interno para o conteudo nao ficar atras do notch
-
+De:
 ```typescript
-// Container mobile - linha 105
 <div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
   backgroundColor: '#ffffff'
 }}>
+```
 
-// Parte azul - linha 108
-<div className="relative flex-shrink-0 px-6 pb-36" style={{
-  background: "linear-gradient(to bottom, #273D60, #1a2847)",
-  paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
+Para:
+```typescript
+<div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
+  backgroundColor: '#273D60'
 }}>
 ```
 
-**Ajustar parte branca para nao ter scroll:**
-```typescript
-// Linha 117 - usar overflow-hidden
-<div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-hidden" ...>
-```
-
-#### 2. `src/components/auth/LoginForm.tsx` - Remover Autofocus
-
-Os inputs do react-hook-form nao tem autofocus por padrao, mas para garantir, podemos adicionar `autoFocus={false}` explicitamente ou usar `tabIndex={-1}` no primeiro input.
-
-Adicionar ao input de email:
-```typescript
-<Input 
-  {...field} 
-  type="email" 
-  placeholder="E-mail" 
-  disabled={isSubmitting} 
-  autoFocus={false}
-  className={`${inputClassName} pl-10`} 
-/>
-```
+Isso garante que a safe area (que fica fora do conteudo renderizado) terá a cor azul como fundo.
 
 ### Resultado Visual Esperado
 
 ```text
-┌──────────────────────────┐ <- Safe area (parte azul)
-│       (notch/hora)       │
+┌──────────────────────────┐
+│    12:51     ⟨⟩ 81%      │ <- Safe area AZUL (mesmo tom do header)
+│  sign.eonhub.com.br      │
 │                          │
-│         LOGO             │
+│         ēon              │
+│         sign             │
+│                          │
 │        (azul)            │
 ├───────╮                  │
 │       └──────────────────┤ <- Card branco sobrepoe
 │         Login            │
-│                          │
-│    [ E-mail ]            │
-│    [ Senha  ]            │
-│                          │
-│    [ Entrar ]            │
-│    [ Google ]            │
-│                          │
-│ Esqueci · Criar · Instale│
-│                          │
-│ Powered by    Privacidade│
-│ eonhub           · Termos│
+│    ...                   │
 └──────────────────────────┘
-   (sem scroll, tela fixa)
 ```
 
 ### Secao Tecnica
 
-**Arquivos modificados:**
-- `src/pages/Auth.tsx` - layout mobile fixo
-- `src/components/auth/LoginForm.tsx` - desabilitar autofocus
+**Arquivo modificado:**
+- `src/pages/Auth.tsx` - mudar backgroundColor do container mobile
 
-**Classes CSS:**
-- `h-screen` - altura fixa da viewport
-- `overflow-hidden` - impede scroll
-- `paddingTop: calc(env(safe-area-inset-top) + 2rem)` - safe area + espaco para conteudo
+**Mudanca:**
+- Linha 106: `backgroundColor: '#ffffff'` → `backgroundColor: '#273D60'`
 
-**Propriedades HTML:**
-- `autoFocus={false}` - previne foco automatico no input
+A cor `#273D60` é a mesma cor do topo do gradiente da seção azul, garantindo uma transição visual perfeita.
 
