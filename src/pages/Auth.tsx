@@ -80,7 +80,7 @@ export default function Auth() {
       default:
         return {
           title: "Login",
-          subtitle: "Bem-vindo de volta!"
+          subtitle: ""
         };
     }
   };

@@ -143,23 +143,13 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           )}
         />
 
-        <Button type="submit" disabled={isSubmitting} className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white">
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white rounded-full border-0">
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Entrar
         </Button>
 
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-400">ou continue com</span>
-          </div>
-        </div>
-
         <Button
           type="button"
-          variant="outline"
           disabled={isSubmitting}
           onClick={async () => {
             const { error } = await lovable.auth.signInWithOAuth("google", {
@@ -173,7 +163,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
               });
             }
           }}
-          className="w-full border-gray-200 text-gray-700 hover:bg-gray-50"
+          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border-0"
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path
