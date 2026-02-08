@@ -90,10 +90,11 @@ serve(async (req) => {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           const productType = session.metadata?.product_type;
-          const email = session.metadata?.email;
-          const organizationName = session.metadata?.organization_name;
+          // Fallback para customer_details quando metadata não tem email (LP externa)
+          const email = session.metadata?.email || session.customer_details?.email;
+          const organizationName = session.metadata?.organization_name || session.customer_details?.name;
           const userId = session.metadata?.user_id;
-          const tierName = session.metadata?.tier_name;
+          const tierName = session.metadata?.tier_name || getPlanFromPriceId(session.metadata?.price_id || null).name;
           const documentLimit = parseInt(session.metadata?.document_limit || "5");
           
           logStep("Processing checkout.session.completed", { email, organizationName, userId, tierName, documentLimit, mode: session.mode, productType });
