@@ -1,100 +1,99 @@
 
 
-## Corrigir Login Google - Sessao nao detectada apos redirecionamento
+## Corrigir Login Google no Dominio Customizado
 
-### Causa Raiz
+### Problema
 
-O problema tem duas partes:
+O app roda em `sign.eonhub.com.br` (dominio customizado). O `lovable.auth.signInWithOAuth` usa o auth-bridge do Lovable que so funciona em dominios `*.lovable.app`. Em dominios customizados, o fluxo OAuth precisa ser feito diretamente via cliente de autenticacao, contornando o auth-bridge.
 
-1. **`redirect_uri` incorreto**: Mudamos para `/auth`, mas a infraestrutura do Lovable Cloud espera `window.location.origin` (raiz `/`). Os tokens OAuth sao passados na URL e o cliente Supabase os processa automaticamente, mas somente quando o `redirect_uri` e o padrao documentado.
+### Solucao
 
-2. **Race condition no `ProtectedRoute`**: O `getSession()` resolve com `null` ANTES do cliente Supabase processar os tokens da URL. Isso faz o `ProtectedRoute` redirecionar para `/auth` prematuramente, perdendo os tokens.
+Modificar o botao de login Google para detectar se esta rodando em dominio customizado. Se sim, usar o fluxo direto com `supabase.auth.signInWithOAuth` e `skipBrowserRedirect: true`. Se nao, manter o fluxo atual via `lovable.auth.signInWithOAuth`.
 
-### Fluxo do Problema
+### Configuracao Google Cloud Console
 
-```text
-Google OAuth completa
-       |
-       v
-Redireciona para /auth (redirect_uri atual)
-       |
-       v
-Infra Lovable Cloud nao envia tokens corretamente para /auth
-       |
-       v
-Auth.tsx nao encontra sessao -> fica na tela de login
-```
+A configuracao atual esta correta:
+- Origem JavaScript: `https://sign.eonhub.com.br` -- OK
+- URL de redirecionamento: `https://sign.eonhub.com.br/~oauth/callback` -- Precisa verificar se o callback correto do Lovable Cloud esta configurado tambem. Pode ser necessario adicionar a URL de callback do backend de autenticacao (visivel nas configuracoes de autenticacao do Lovable Cloud).
 
-### Fluxo Corrigido
+### Alteracao
 
-```text
-Google OAuth completa
-       |
-       v
-Redireciona para / (redirect_uri padrao)
-       |
-       v
-Supabase client processa tokens da URL automaticamente
-       |
-       v
-ProtectedRoute aguarda onAuthStateChange (INITIAL_SESSION)
-       |
-       v
-Sessao detectada -> mostra Dashboard
-```
+#### `src/components/auth/LoginForm.tsx`
 
-### Alteracoes
+Substituir o bloco do botao Google para incluir logica de dominio customizado:
 
-#### 1. `src/components/auth/LoginForm.tsx`
-
-Reverter `redirect_uri` para o valor padrao documentado:
-
-**De:**
 ```typescript
-redirect_uri: `${window.location.origin}/auth`,
-```
+onClick={async () => {
+  const isCustomDomain =
+    !window.location.hostname.includes("lovable.app") &&
+    !window.location.hostname.includes("lovableproject.com");
 
-**Para:**
-```typescript
-redirect_uri: window.location.origin,
-```
+  if (isCustomDomain) {
+    // Custom domain: bypass auth-bridge, use direct OAuth
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+        skipBrowserRedirect: true,
+      },
+    });
 
-#### 2. `src/components/ProtectedRoute.tsx`
-
-Remover a chamada separada a `getSession()` e usar apenas `onAuthStateChange`. O evento `INITIAL_SESSION` do Supabase so dispara APOS processar tokens da URL, eliminando a race condition.
-
-**Codigo atual:**
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      setSession(session);
-      setIsLoading(false);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer login com Google",
+        description: error.message || "Tente novamente em instantes.",
+      });
+      return;
     }
-  );
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    setSession(session);
-    setIsLoading(false);
-  });
-  return () => subscription.unsubscribe();
-}, []);
-```
 
-**Codigo corrigido:**
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      setSession(session);
-      setIsLoading(false);
+    if (data?.url) {
+      // Validate OAuth URL before redirecting
+      const oauthUrl = new URL(data.url);
+      const allowedHosts = ["accounts.google.com"];
+      if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
+        toast({
+          variant: "destructive",
+          title: "Erro de seguranca",
+          description: "URL de autenticacao invalida.",
+        });
+        return;
+      }
+      window.location.href = data.url;
     }
-  );
-  return () => subscription.unsubscribe();
-}, []);
+  } else {
+    // Lovable domains: use managed auth-bridge
+    const { error } = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer login com Google",
+        description: error.message || "Tente novamente em instantes.",
+      });
+    }
+  }
+}}
 ```
 
-A diferenca e remover o bloco `getSession().then(...)` que causava a race condition. O `onAuthStateChange` com o evento `INITIAL_SESSION` ja fornece o estado inicial da autenticacao de forma segura e correta.
+### Configuracao necessaria no Google Cloud Console
 
-### Arquivos alterados
-- `src/components/auth/LoginForm.tsx` (1 linha - reverter redirect_uri)
-- `src/components/ProtectedRoute.tsx` (remover chamada getSession)
+Voce precisa adicionar tambem a URL de callback do backend de autenticacao do Lovable Cloud nos URIs de redirecionamento autorizados. Alem de `https://sign.eonhub.com.br/~oauth/callback`, adicione:
+
+`https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback`
+
+Essa URL e o endpoint real do backend que processa o retorno do Google e estabelece a sessao.
+
+### Resumo das URLs no Google Cloud Console
+
+**Origens JavaScript autorizadas:**
+- `https://sign.eonhub.com.br`
+
+**URIs de redirecionamento autorizados:**
+- `https://sign.eonhub.com.br/~oauth/callback`
+- `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback`
+
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (bloco do botao Google)
+
