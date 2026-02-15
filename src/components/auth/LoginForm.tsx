@@ -155,15 +155,52 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
           type="button"
           disabled={isSubmitting}
           onClick={async () => {
-            const { error } = await lovable.auth.signInWithOAuth("google", {
-              redirect_uri: window.location.origin,
-            });
-            if (error) {
-              toast({
-                variant: "destructive",
-                title: "Erro ao fazer login com Google",
-                description: error.message || "Tente novamente em instantes.",
+            const isCustomDomain =
+              !window.location.hostname.includes("lovable.app") &&
+              !window.location.hostname.includes("lovableproject.com");
+
+            if (isCustomDomain) {
+              const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: {
+                  redirectTo: `${window.location.origin}/dashboard`,
+                  skipBrowserRedirect: true,
+                },
               });
+
+              if (error) {
+                toast({
+                  variant: "destructive",
+                  title: "Erro ao fazer login com Google",
+                  description: error.message || "Tente novamente em instantes.",
+                });
+                return;
+              }
+
+              if (data?.url) {
+                const oauthUrl = new URL(data.url);
+                const allowedHosts = ["accounts.google.com"];
+                if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
+                  toast({
+                    variant: "destructive",
+                    title: "Erro de segurança",
+                    description: "URL de autenticação inválida.",
+                  });
+                  return;
+                }
+                window.location.href = data.url;
+              }
+            } else {
+              const { error } = await lovable.auth.signInWithOAuth("google", {
+                redirect_uri: window.location.origin,
+              });
+              if (error) {
+                toast({
+                  variant: "destructive",
+                  title: "Erro ao fazer login com Google",
+                  description: error.message || "Tente novamente em instantes.",
+                });
+              }
             }
           }}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border-0"
