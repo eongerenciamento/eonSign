@@ -1,48 +1,100 @@
 
 
-## Corrigir redirecionamento apos login Google
+## Corrigir Login Google - Sessao nao detectada apos redirecionamento
 
-### Problema
+### Causa Raiz
 
-Apos o login com Google, o usuario e redirecionado de volta para a pagina de autenticacao em vez de entrar no sistema. Isso acontece porque:
+O problema tem duas partes:
 
-1. O `redirect_uri` esta configurado como `window.location.origin` (ou seja, a raiz `/`)
-2. A rota `/` e protegida pelo `ProtectedRoute`, que verifica a sessao imediatamente
-3. A sessao ainda nao foi estabelecida nesse momento, entao o `ProtectedRoute` redireciona para `/auth`
-4. Quando a sessao finalmente e detectada em `/auth`, o listener `onAuthStateChange` deveria redirecionar para `/dashboard`, mas o timing pode falhar
+1. **`redirect_uri` incorreto**: Mudamos para `/auth`, mas a infraestrutura do Lovable Cloud espera `window.location.origin` (raiz `/`). Os tokens OAuth sao passados na URL e o cliente Supabase os processa automaticamente, mas somente quando o `redirect_uri` e o padrao documentado.
 
-### Solucao
+2. **Race condition no `ProtectedRoute`**: O `getSession()` resolve com `null` ANTES do cliente Supabase processar os tokens da URL. Isso faz o `ProtectedRoute` redirecionar para `/auth` prematuramente, perdendo os tokens.
 
-Alterar o `redirect_uri` no botao de Google para `${window.location.origin}/auth` em vez de `window.location.origin`. Assim, apos o OAuth, o usuario volta para `/auth`, onde o listener `onAuthStateChange` ja esta configurado e vai detectar a nova sessao e redirecionar para `/dashboard`.
+### Fluxo do Problema
 
-### Alteracao
-
-#### `src/components/auth/LoginForm.tsx`
-
-Mudar a linha do `redirect_uri`:
-
-**De:**
-```typescript
-redirect_uri: window.location.origin,
+```text
+Google OAuth completa
+       |
+       v
+Redireciona para /auth (redirect_uri atual)
+       |
+       v
+Infra Lovable Cloud nao envia tokens corretamente para /auth
+       |
+       v
+Auth.tsx nao encontra sessao -> fica na tela de login
 ```
 
-**Para:**
+### Fluxo Corrigido
+
+```text
+Google OAuth completa
+       |
+       v
+Redireciona para / (redirect_uri padrao)
+       |
+       v
+Supabase client processa tokens da URL automaticamente
+       |
+       v
+ProtectedRoute aguarda onAuthStateChange (INITIAL_SESSION)
+       |
+       v
+Sessao detectada -> mostra Dashboard
+```
+
+### Alteracoes
+
+#### 1. `src/components/auth/LoginForm.tsx`
+
+Reverter `redirect_uri` para o valor padrao documentado:
+
+**De:**
 ```typescript
 redirect_uri: `${window.location.origin}/auth`,
 ```
 
-### Por que isso resolve
-
-```text
-Fluxo atual (quebrado):
-Google -> /~oauth -> / (ProtectedRoute) -> sem sessao -> /auth -> sessao chega tarde
-
-Fluxo corrigido:
-Google -> /~oauth -> /auth -> onAuthStateChange detecta sessao -> /dashboard
+**Para:**
+```typescript
+redirect_uri: window.location.origin,
 ```
 
-A pagina `/auth` ja tem o codigo que monitora mudancas de autenticacao e redireciona automaticamente para `/dashboard` quando uma sessao e detectada. Ao redirecionar para la apos o OAuth, garantimos que o fluxo funcione de forma consistente.
+#### 2. `src/components/ProtectedRoute.tsx`
 
-### Arquivo alterado
-- `src/components/auth/LoginForm.tsx` (1 linha)
+Remover a chamada separada a `getSession()` e usar apenas `onAuthStateChange`. O evento `INITIAL_SESSION` do Supabase so dispara APOS processar tokens da URL, eliminando a race condition.
 
+**Codigo atual:**
+```typescript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setSession(session);
+      setIsLoading(false);
+    }
+  );
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setSession(session);
+    setIsLoading(false);
+  });
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+**Codigo corrigido:**
+```typescript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setSession(session);
+      setIsLoading(false);
+    }
+  );
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+A diferenca e remover o bloco `getSession().then(...)` que causava a race condition. O `onAuthStateChange` com o evento `INITIAL_SESSION` ja fornece o estado inicial da autenticacao de forma segura e correta.
+
+### Arquivos alterados
+- `src/components/auth/LoginForm.tsx` (1 linha - reverter redirect_uri)
+- `src/components/ProtectedRoute.tsx` (remover chamada getSession)
