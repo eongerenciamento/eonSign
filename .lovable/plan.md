@@ -1,72 +1,44 @@
 
-
-## Ajustar Altura da Secao Azul no Mobile
+## Corrigir erro "State verification failed" no login Google
 
 ### Problema
 
-Na imagem, o conteudo do formulario de login (botoes e footer) esta sendo cortado pela barra de navegacao do Safari. Isso acontece porque:
+O erro "Authorization failed - State verification failed - Error code: invalid_request" acontece porque o **service worker do PWA** esta interceptando a rota de callback OAuth (`/~oauth`) e servindo uma versao cacheada em vez de deixar a requisicao ir para o servidor.
 
-1. A secao azul do header tem `pt-32` (8rem = 128px) de padding interno no container do logo
-2. A secao azul tem `pb-36` (9rem = 144px) de padding bottom
-3. Isso empurra o card branco muito para baixo, nao deixando espaco suficiente para todo o conteudo
+Quando o Google redireciona de volta para o app apos a autenticacao, o service worker captura essa navegacao e retorna o HTML cacheado do app, perdendo os parametros de estado OAuth. Isso causa a falha na verificacao de estado.
 
 ### Solucao
 
-Reduzir a altura da secao azul diminuindo:
-- O `pt-32` para `pt-24` (de 8rem para 6rem) - logo fica um pouco mais alto
-- O `pb-36` para `pb-28` (de 9rem para 7rem) - menos espaco entre logo e card branco
-
-Isso faz o card branco comecar mais acima, dando mais espaco para o formulario e o footer.
+Adicionar `/~oauth` na `navigateFallbackDenylist` do Workbox no `vite.config.ts`. Isso garante que o service worker **nunca** intercepte rotas de OAuth, permitindo que o fluxo de autenticacao funcione corretamente.
 
 ### Alteracoes
 
-#### `src/pages/Auth.tsx` - Layout Mobile
+#### `vite.config.ts`
 
-**Linha 118**: Mudar `pb-36` para `pb-28`
+Adicionar `navigateFallbackDenylist: [/^\/~oauth/]` dentro da configuracao do `workbox`:
+
 ```typescript
-<div className="relative flex-shrink-0 px-6 pb-28" style={{...}}>
+workbox: {
+  navigateFallbackDenylist: [/^\/~oauth/],  // ADICIONAR esta linha
+  globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+  // ... resto da config existente
+}
 ```
 
-**Linha 123**: Mudar `pt-32` para `pt-24`
-```typescript
-<div className="relative z-20 flex flex-col items-center pt-24">
-```
+### Por que isso resolve
 
-### Resultado Visual Esperado
-
-```text
-┌──────────────────────────┐
-│    13:53     ⟨⟩ 71%      │ <- Safe area azul
-│  sign.eonhub.com.br      │
-│                          │
-│         ēon              │  <- Logo mais acima
-│         sign             │
-│                          │
-├───────╮                  │  <- Card branco comeca mais cedo
-│       └──────────────────┤
-│         Login            │
-│    [ E-mail ]            │
-│    [ Senha  ]            │
-│    [ Entrar ]            │
-│    [ Google ]            │
-│    [ Certificado ]       │
-│                          │
-│ Esqueci · Criar · Instale│
-│                          │
-│ Powered by    Privacidade│  <- Footer visivel acima da barra
-│──────────────────────────│
-│  <   >   ⬆  📖  📋       │  <- Barra Safari
-└──────────────────────────┘
-```
+1. O Google OAuth redireciona para `oauth.lovable.app` apos a autenticacao
+2. O Lovable Cloud redireciona de volta para o app na rota `/~oauth` com os tokens
+3. Sem o `navigateFallbackDenylist`, o service worker intercepta `/~oauth` e serve o `index.html` cacheado
+4. O `index.html` cacheado nao tem os parametros de estado, causando "State verification failed"
+5. Com a correcao, o service worker ignora `/~oauth` e deixa a requisicao ir direto para o servidor
 
 ### Secao Tecnica
 
 **Arquivo modificado:**
-- `src/pages/Auth.tsx`
+- `vite.config.ts` (linha 43, dentro do bloco `workbox`)
 
-**Mudancas:**
-- Linha 118: `pb-36` para `pb-28` (reduz padding bottom da secao azul)
-- Linha 123: `pt-32` para `pt-24` (reduz padding top interno do container do logo)
+**Mudanca:**
+- Adicionar `navigateFallbackDenylist: [/^\/~oauth/]` como primeira propriedade do objeto `workbox`
 
-A reducao total e de aproximadamente 4rem (64px), o que deve ser suficiente para que o footer apareca acima da barra de navegacao do Safari.
-
+**Nota importante:** Apos a publicacao, os usuarios que ja tem o service worker antigo cacheado podem precisar limpar o cache do navegador ou aguardar a atualizacao automatica do service worker (configurado como `autoUpdate`).
