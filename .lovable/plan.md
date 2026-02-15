@@ -1,44 +1,48 @@
 
-## Corrigir erro "State verification failed" no login Google
+
+## Corrigir redirecionamento apos login Google
 
 ### Problema
 
-O erro "Authorization failed - State verification failed - Error code: invalid_request" acontece porque o **service worker do PWA** esta interceptando a rota de callback OAuth (`/~oauth`) e servindo uma versao cacheada em vez de deixar a requisicao ir para o servidor.
+Apos o login com Google, o usuario e redirecionado de volta para a pagina de autenticacao em vez de entrar no sistema. Isso acontece porque:
 
-Quando o Google redireciona de volta para o app apos a autenticacao, o service worker captura essa navegacao e retorna o HTML cacheado do app, perdendo os parametros de estado OAuth. Isso causa a falha na verificacao de estado.
+1. O `redirect_uri` esta configurado como `window.location.origin` (ou seja, a raiz `/`)
+2. A rota `/` e protegida pelo `ProtectedRoute`, que verifica a sessao imediatamente
+3. A sessao ainda nao foi estabelecida nesse momento, entao o `ProtectedRoute` redireciona para `/auth`
+4. Quando a sessao finalmente e detectada em `/auth`, o listener `onAuthStateChange` deveria redirecionar para `/dashboard`, mas o timing pode falhar
 
 ### Solucao
 
-Adicionar `/~oauth` na `navigateFallbackDenylist` do Workbox no `vite.config.ts`. Isso garante que o service worker **nunca** intercepte rotas de OAuth, permitindo que o fluxo de autenticacao funcione corretamente.
+Alterar o `redirect_uri` no botao de Google para `${window.location.origin}/auth` em vez de `window.location.origin`. Assim, apos o OAuth, o usuario volta para `/auth`, onde o listener `onAuthStateChange` ja esta configurado e vai detectar a nova sessao e redirecionar para `/dashboard`.
 
-### Alteracoes
+### Alteracao
 
-#### `vite.config.ts`
+#### `src/components/auth/LoginForm.tsx`
 
-Adicionar `navigateFallbackDenylist: [/^\/~oauth/]` dentro da configuracao do `workbox`:
+Mudar a linha do `redirect_uri`:
 
+**De:**
 ```typescript
-workbox: {
-  navigateFallbackDenylist: [/^\/~oauth/],  // ADICIONAR esta linha
-  globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-  // ... resto da config existente
-}
+redirect_uri: window.location.origin,
+```
+
+**Para:**
+```typescript
+redirect_uri: `${window.location.origin}/auth`,
 ```
 
 ### Por que isso resolve
 
-1. O Google OAuth redireciona para `oauth.lovable.app` apos a autenticacao
-2. O Lovable Cloud redireciona de volta para o app na rota `/~oauth` com os tokens
-3. Sem o `navigateFallbackDenylist`, o service worker intercepta `/~oauth` e serve o `index.html` cacheado
-4. O `index.html` cacheado nao tem os parametros de estado, causando "State verification failed"
-5. Com a correcao, o service worker ignora `/~oauth` e deixa a requisicao ir direto para o servidor
+```text
+Fluxo atual (quebrado):
+Google -> /~oauth -> / (ProtectedRoute) -> sem sessao -> /auth -> sessao chega tarde
 
-### Secao Tecnica
+Fluxo corrigido:
+Google -> /~oauth -> /auth -> onAuthStateChange detecta sessao -> /dashboard
+```
 
-**Arquivo modificado:**
-- `vite.config.ts` (linha 43, dentro do bloco `workbox`)
+A pagina `/auth` ja tem o codigo que monitora mudancas de autenticacao e redireciona automaticamente para `/dashboard` quando uma sessao e detectada. Ao redirecionar para la apos o OAuth, garantimos que o fluxo funcione de forma consistente.
 
-**Mudanca:**
-- Adicionar `navigateFallbackDenylist: [/^\/~oauth/]` como primeira propriedade do objeto `workbox`
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha)
 
-**Nota importante:** Apos a publicacao, os usuarios que ja tem o service worker antigo cacheado podem precisar limpar o cache do navegador ou aguardar a atualizacao automatica do service worker (configurado como `autoUpdate`).
