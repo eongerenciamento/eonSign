@@ -21,11 +21,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
