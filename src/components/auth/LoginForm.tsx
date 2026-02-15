@@ -179,7 +179,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
 
               if (data?.url) {
                 const oauthUrl = new URL(data.url);
-                const allowedHosts = ["accounts.google.com"];
+                const allowedHosts = ["accounts.google.com", "lbyoniuealghclfuahko.supabase.co"];
                 if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
                   toast({
                     variant: "destructive",
