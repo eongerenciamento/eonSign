@@ -1426,7 +1426,7 @@ export const DocumentsTable = ({
                     ) : (
                       <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                     )}
-                    <p className="font-medium text-foreground">{doc.name}</p>
+                    <p className="font-medium text-muted-foreground/70">{doc.name}</p>
                     {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
                       <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                         {doc.documentCount} docs
