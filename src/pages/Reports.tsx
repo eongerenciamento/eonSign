@@ -705,7 +705,7 @@ const Reports = () => {
             )}
           </Card>
 
-          <Card className="p-6 bg-secondary border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <Card className="p-6 bg-card border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
             <h3 className="font-semibold mb-4 text-base text-muted-foreground">Top Signatários</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {(topSignatories && topSignatories.length > 0 ? topSignatories : [
