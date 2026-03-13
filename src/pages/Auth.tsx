@@ -128,7 +128,7 @@ export default function Auth() {
         <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-hidden" style={{
         backgroundColor: '#ffffff'
       }}>
-          {mode !== 'success' && <div className="text-center mb-4">
+          {mode !== 'success' && mode !== 'login' && <div className="text-center mb-4">
               <h1 style={{
             color: '#4b5563'
           }} className="text-lg font-semibold">
