@@ -175,7 +175,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-card-foreground text-base">
                 Pendentes
