@@ -993,7 +993,7 @@ export const DocumentsTable = ({
             const statusInfo = statusConfig[doc.status];
             const progressPercentage = doc.signedBy / doc.signers * 100;
             const prescriptionBg = isPrescription(doc) ? 'bg-purple-50 dark:bg-purple-900/20' : '';
-            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-card' : 'bg-secondary/50')} hover:opacity-80`}>
+            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-card' : 'bg-gray-50 dark:bg-muted/50')} hover:opacity-80`}> hover:opacity-80`}>
                   <TableCell>
                     <div 
                       className={`flex items-center gap-2 ${doc.isEnvelope ? 'cursor-pointer hover:opacity-70' : ''}`}
