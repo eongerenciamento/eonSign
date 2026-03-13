@@ -622,7 +622,7 @@ const Reports = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 bg-secondary border-0 shadow-md">
+          <Card className="p-6 bg-card border-0 shadow-md">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
                 <TrendingUp className="w-5 h-5 text-muted-foreground" />
