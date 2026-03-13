@@ -122,9 +122,3 @@ All colors MUST be HSL.
   }
 }
 
-/* Custom utility for layout gradient */
-@layer utilities {
-  .bg-layout-gradient {
-    background: linear-gradient(to bottom, hsl(var(--layout-gradient-from)), hsl(var(--layout-gradient-to)));
-  }
-}
