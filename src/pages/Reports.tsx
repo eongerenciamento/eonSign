@@ -622,7 +622,7 @@ const Reports = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 bg-secondary border-0 shadow-md">
+          <Card className="p-6 bg-card border-0 shadow-md">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
                 <TrendingUp className="w-5 h-5 text-muted-foreground" />
@@ -634,7 +634,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6 bg-secondary border-0 shadow-md">
+          <Card className="p-6 bg-card border-0 shadow-md">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
                 <FileCheck className="w-5 h-5 text-muted-foreground" />
@@ -646,7 +646,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6 bg-secondary border-0 shadow-md">
+          <Card className="p-6 bg-card border-0 shadow-md">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
                 <Clock className="w-5 h-5 text-muted-foreground" />
@@ -658,7 +658,7 @@ const Reports = () => {
             </div>
           </Card>
 
-          <Card className="p-6 bg-secondary border-0 shadow-md">
+          <Card className="p-6 bg-card border-0 shadow-md">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
                 <Users className="w-5 h-5 text-muted-foreground" />
@@ -673,7 +673,7 @@ const Reports = () => {
 
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 bg-secondary border-0 animate-fade-in">
+          <Card className="p-6 bg-card border-0 animate-fade-in">
             <h3 className="font-semibold mb-4 text-base text-muted-foreground">Documentos por Status</h3>
             {documentStatusData && documentStatusData.some(item => item.count > 0) ? (
               <div className="flex items-end justify-between gap-4 pt-4">
@@ -705,7 +705,7 @@ const Reports = () => {
             )}
           </Card>
 
-          <Card className="p-6 bg-secondary border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <Card className="p-6 bg-card border-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
             <h3 className="font-semibold mb-4 text-base text-muted-foreground">Top Signatários</h3>
             <div className="flex items-end justify-between gap-4 pt-4">
               {(topSignatories && topSignatories.length > 0 ? topSignatories : [
@@ -733,7 +733,7 @@ const Reports = () => {
         </div>
 
         {/* Activity Timeline */}
-        <Card className="p-6 bg-secondary border-0">
+        <Card className="p-6 bg-card border-0">
           <h3 className="font-semibold mb-4 text-muted-foreground text-base">Atividade Recente</h3>
           <div className="space-y-3">
             {recentActivity && recentActivity.length > 0 ? (
@@ -854,7 +854,7 @@ const Reports = () => {
               </div>}
 
             {/* Table / Cards */}
-            <Card className="p-6 bg-secondary border-0">
+            <Card className="p-6 bg-card border-0">
               <h3 className="text-sm md:text-lg font-semibold mb-4 text-muted-foreground">Relatório de Signatários</h3>
               {isLoading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : !signatories || signatories.length === 0 ? <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div> : isMobile ? (/* Mobile view - Cards */
             <div className="space-y-4 -mx-8">

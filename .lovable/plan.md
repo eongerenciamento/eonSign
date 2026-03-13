@@ -1,31 +1,86 @@
 
 
-## Cards com Fundo Branco
+## Resolver Login Google Definitivamente
 
-### Problema
-Todos os `Card` components usam `bg-secondary` (cinza) em vez de `bg-card` (branco), fazendo com que nao haja contraste com o fundo cinza da pagina.
+### Problema Atual
 
-### Solucao
-Substituir `bg-secondary` por `bg-card` em todos os Cards, em 6 arquivos:
+O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
 
-#### 1. `src/pages/Dashboard.tsx` (2 cards)
-- Linhas 166, 178: `bg-secondary` → `bg-card`
+1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
+2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
 
-#### 2. `src/pages/Reports.tsx` (8 cards)
-- Linhas 625, 637, 649, 661, 676, 708, 736, 857: `bg-secondary` → `bg-card`
+### Fluxo OAuth Direto (dominio customizado)
 
-#### 3. `src/pages/Settings.tsx` (1 card)
-- Linha 457: `bg-secondary dark:bg-card` → `bg-card`
+```text
+App chama supabase.auth.signInWithOAuth
+       |
+       v
+Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
+       |
+       v
+Backend redireciona para Google
+       |
+       v
+Usuario autoriza no Google
+       |
+       v
+Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
+       |
+       v
+Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
+       |
+       v
+Supabase client no frontend processa os tokens da URL
+       |
+       v
+onAuthStateChange detecta sessao -> Dashboard
+```
 
-#### 4. `src/components/settings/ContactsTab.tsx` (1 card)
-- Linha 126: `bg-secondary` → `bg-card`
+### Alteracoes Necessarias
 
-#### 5. `src/components/settings/MembersTab.tsx` (1 card)
-- Linha 163: `bg-secondary` → `bg-card`
+#### 1. Configuracao no Google Cloud Console (acao do usuario)
 
-#### 6. `src/components/settings/SubscriptionTab.tsx` (4 cards)
-- Linhas 425, 439, 450, 464: `bg-secondary` → `bg-card`
+Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
 
-### Resultado
-Cards brancos sobre fundo cinza, criando o contraste visual do eonGerenciamento.
+```
+https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
+```
+
+Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
+
+**De:**
+```typescript
+redirectTo: `${window.location.origin}/dashboard`,
+```
+
+**Para:**
+```typescript
+redirectTo: window.location.origin,
+```
+
+Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
+
+#### 3. Nenhuma outra alteracao de codigo necessaria
+
+O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
+
+### Resumo
+
+| Item | Status |
+|------|--------|
+| allowedHosts inclui backend | Ja corrigido |
+| ProtectedRoute sem getSession | Ja corrigido |
+| PWA denylist para /~oauth | Ja configurado |
+| redirectTo para raiz (/) | Precisa alterar |
+| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
+
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
+
+### Acao do usuario (obrigatoria)
+- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
 

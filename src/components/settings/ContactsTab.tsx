@@ -123,7 +123,7 @@ export function ContactsTab() {
 
   return (
     <div className="space-y-6 mt-6">
-      <Card className="bg-secondary shadow-md border-0">
+      <Card className="bg-card shadow-md border-0">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-muted-foreground text-sm">Contatos Salvos</CardTitle>
           <Button 
