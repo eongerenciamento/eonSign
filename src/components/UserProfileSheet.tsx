@@ -425,7 +425,8 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
                 <Button
                   type="button"
                   onClick={handlePasswordChange}
-                  className="w-full rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
+                  variant="sheet-primary"
+                  className="w-full"
                 >
                   <Check className="mr-2 h-4 w-4" />
                   Confirmar Alteração
