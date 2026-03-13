@@ -177,7 +177,7 @@ const Dashboard = () => {
 
           <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-card-foreground text-base">
+              <CardTitle className="text-muted-foreground/70 text-base">
                 Pendentes
               </CardTitle>
               <p className="text-muted-foreground text-xs">Signatários Externos</p>
