@@ -1722,7 +1722,7 @@ const NewDocument = () => {
               <X className="w-4 h-4" />
               Cancelar
             </Button>
-            <Button variant="confirm" className="flex-1 gap-2" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
+            <Button variant="sheet-primary" className="flex-1 gap-2" onClick={handleSubmit} disabled={showLimitDialog || isSubmitting}>
               <AnimatePresence mode="wait" initial={false}>
                 {isSubmitting ? <motion.div key="loader" initial={{
                 opacity: 0,
