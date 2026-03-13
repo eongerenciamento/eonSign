@@ -160,7 +160,7 @@ export default function Auth() {
         backgroundColor: '#ffffff'
       }}>
           <div className="w-full max-w-md">
-            {mode !== 'success' && <div className="text-center mb-6">
+            {mode !== 'success' && mode !== 'login' && <div className="text-center mb-6">
                 <h1 style={{
               color: '#4b5563'
             }} className="text-lg font-semibold">
