@@ -1276,7 +1276,7 @@ export const DocumentsTable = ({
       <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
         {documents.map(doc => {
         const statusInfo = statusConfig[doc.status];
-        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100 dark:bg-purple-900/20' : 'bg-secondary';
+        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100 dark:bg-purple-900/20' : 'bg-card';
         return <div key={doc.id} className={`${prescriptionBg} rounded-lg p-4 space-y-3`} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
             <div className="space-y-3">
                 {/* Date and Action Buttons on same line - ABOVE document name */}
