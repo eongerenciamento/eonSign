@@ -1006,7 +1006,7 @@ export const DocumentsTable = ({
                       )}
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-foreground/80">{doc.name}</span>
+                          <span className="font-medium text-muted-foreground/70">{doc.name}</span>
                           {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
                             <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
                               {doc.documentCount} docs
