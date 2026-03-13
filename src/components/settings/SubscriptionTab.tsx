@@ -461,7 +461,7 @@ export function SubscriptionTab() {
           </Card>
 
           {/* Card 4: Consumo */}
-          <Card className="bg-secondary border-0">
+          <Card className="bg-card border-0">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Consumo</p>
               <p className="text-xl font-bold text-blue-600 mb-3">

@@ -854,7 +854,7 @@ const Reports = () => {
               </div>}
 
             {/* Table / Cards */}
-            <Card className="p-6 bg-secondary border-0">
+            <Card className="p-6 bg-card border-0">
               <h3 className="text-sm md:text-lg font-semibold mb-4 text-muted-foreground">Relatório de Signatários</h3>
               {isLoading ? <div className="text-center py-8 text-muted-foreground">Carregando...</div> : !signatories || signatories.length === 0 ? <div className="text-center py-8 text-muted-foreground">Nenhum signatário encontrado</div> : isMobile ? (/* Mobile view - Cards */
             <div className="space-y-4 -mx-8">
