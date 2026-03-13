@@ -17,6 +17,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         cancel: "bg-transparent text-gray-600 hover:bg-transparent hover:text-gray-600 border-0 rounded-full",
         confirm: "bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600 border-0 rounded-full",
+        "sheet-primary": "bg-primary hover:bg-primary/90 text-primary-foreground rounded-full border-none shadow-none",
+        "sheet-cancel": "bg-transparent hover:bg-transparent text-destructive hover:text-destructive border-none rounded-full shadow-none",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -1,44 +1,86 @@
 
 
-## Alteracao de Design: Background Cinza + Cards Brancos + Botoes de Confirmacao Azuis
+## Resolver Login Google Definitivamente
+
+### Problema Atual
+
+O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
+
+1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
+2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
+
+### Fluxo OAuth Direto (dominio customizado)
+
+```text
+App chama supabase.auth.signInWithOAuth
+       |
+       v
+Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
+       |
+       v
+Backend redireciona para Google
+       |
+       v
+Usuario autoriza no Google
+       |
+       v
+Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
+       |
+       v
+Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
+       |
+       v
+Supabase client no frontend processa os tokens da URL
+       |
+       v
+onAuthStateChange detecta sessao -> Dashboard
+```
+
+### Alteracoes Necessarias
+
+#### 1. Configuracao no Google Cloud Console (acao do usuario)
+
+Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
+
+```
+https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
+```
+
+Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
+
+**De:**
+```typescript
+redirectTo: `${window.location.origin}/dashboard`,
+```
+
+**Para:**
+```typescript
+redirectTo: window.location.origin,
+```
+
+Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
+
+#### 3. Nenhuma outra alteracao de codigo necessaria
+
+O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
 
 ### Resumo
 
-Alinhar o design do eonSign com o eonGerenciamento: paginas com fundo cinza (em vez do gradiente escuro atual), cards sempre com fundo branco, e criar variante de botao de confirmacao azul com fonte branca.
+| Item | Status |
+|------|--------|
+| allowedHosts inclui backend | Ja corrigido |
+| ProtectedRoute sem getSession | Ja corrigido |
+| PWA denylist para /~oauth | Ja configurado |
+| redirectTo para raiz (/) | Precisa alterar |
+| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
 
-### Alteracoes
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
 
-#### 1. `src/index.css` - Remover gradiente e ajustar background
-
-- Remover a utility class `.bg-layout-gradient` (gradiente escuro)
-- O `--background` ja e `210 20% 98%` (cinza claro) no light mode e `220 10% 25%` no dark mode, o que e correto
-- O `--card` ja e `0 0% 100%` (branco) no light mode e `220 10% 28%` no dark mode, correto
-- Remover as variaveis `--layout-gradient-from` e `--layout-gradient-to` que nao serao mais usadas
-
-#### 2. `src/components/Layout.tsx` - Remover gradiente do layout
-
-Substituir `bg-layout-gradient` por `bg-background` na div principal do conteudo. Isso faz o fundo das paginas ser cinza claro (light) ou cinza escuro (dark) em vez do gradiente azul escuro.
-
-**De:**
-```
-<div className="flex-1 flex flex-col w-full bg-layout-gradient">
-```
-**Para:**
-```
-<div className="flex-1 flex flex-col w-full bg-background">
-```
-
-#### 3. `src/components/ui/button.tsx` - Adicionar variantes de botao
-
-Adicionar duas variantes inspiradas no eonGerenciamento:
-
-- `"sheet-primary"`: `"bg-blue-600 hover:bg-blue-700 text-white rounded-full border-none shadow-none"` - Botao de confirmacao azul com fonte branca
-- `"sheet-cancel"`: `"bg-transparent hover:bg-transparent text-red-500 hover:text-red-500 border-none rounded-full shadow-none"` - Botao de cancelamento
-
-Manter as variantes existentes (`cancel`, `confirm`) para compatibilidade.
-
-### Arquivos alterados
-- `src/index.css` (remover gradient utility e variaveis)
-- `src/components/Layout.tsx` (1 linha)
-- `src/components/ui/button.tsx` (adicionar 2 variantes)
+### Acao do usuario (obrigatoria)
+- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
 
