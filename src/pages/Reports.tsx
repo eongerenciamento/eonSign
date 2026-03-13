@@ -673,7 +673,7 @@ const Reports = () => {
 
         {/* Detailed Reports */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 bg-secondary border-0 animate-fade-in">
+          <Card className="p-6 bg-card border-0 animate-fade-in">
             <h3 className="font-semibold mb-4 text-base text-muted-foreground">Documentos por Status</h3>
             {documentStatusData && documentStatusData.some(item => item.count > 0) ? (
               <div className="flex items-end justify-between gap-4 pt-4">
