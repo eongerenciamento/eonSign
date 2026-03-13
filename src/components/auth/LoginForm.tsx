@@ -21,7 +21,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 interface LoginFormProps {
   onSuccess: () => void;
   onRegisterClick: () => void;
-  onInstallClick: () => void;
 }
 
 export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginFormProps) {
