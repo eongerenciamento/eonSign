@@ -163,7 +163,7 @@ const Dashboard = () => {
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-card-foreground text-base">
                 Pendentes
@@ -175,7 +175,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
+          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-card-foreground text-base">
                 Pendentes
@@ -195,7 +195,9 @@ const Dashboard = () => {
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
+          <Card className="bg-card border-none rounded-lg">
+            <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
+          </Card>
         </div>
       </div>
     </Layout>;
