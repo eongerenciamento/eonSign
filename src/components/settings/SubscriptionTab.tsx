@@ -447,7 +447,7 @@ export function SubscriptionTab() {
           </Card>
 
           {/* Card 3: Data de Renovação */}
-          <Card className="bg-secondary border-0">
+          <Card className="bg-card border-0">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Renovação</p>
               <p className="text-xl font-bold text-blue-600">
