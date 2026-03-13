@@ -1528,7 +1528,7 @@ const NewDocument = () => {
           <div className="flex items-center justify-center gap-4">
                   <FileText className="w-8 h-8 text-gray-500" />
                   <div className="flex-1 text-left">
-                    <p className="font-medium text-sm text-gray-600">{files[0].name}</p>
+                    <p className="font-medium text-sm text-gray-600 break-all">{files[0].name}</p>
                     <p className="text-sm text-muted-foreground">
                       {(files[0].size / 1024 / 1024).toFixed(2)} MB
                     </p>
@@ -1557,7 +1557,7 @@ const NewDocument = () => {
                   {files.map((file, index) => <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                       <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left">
-                        <p className="font-medium text-sm md:text-base text-gray-600 truncate">{file.name}</p>
+                        <p className="font-medium text-sm md:text-base text-gray-600 break-all">{file.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
