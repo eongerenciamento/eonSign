@@ -163,7 +163,7 @@ const Dashboard = () => {
 
         {/* Pending Documents Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-secondary border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
+          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow shadow-md rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
             <CardHeader className="pb-2 px-6">
               <CardTitle className="text-card-foreground text-base">
                 Pendentes
