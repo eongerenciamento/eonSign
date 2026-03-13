@@ -195,7 +195,9 @@ const Dashboard = () => {
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
+          <Card className="bg-card border-none rounded-lg">
+            <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
+          </Card>
         </div>
       </div>
     </Layout>;
