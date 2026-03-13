@@ -105,7 +105,7 @@ export default function Auth() {
       case 'success':
         return <SuccessMessage onLoginClick={() => setMode('login')} />;
       default:
-        return <LoginForm onSuccess={() => navigate("/dashboard")} onRegisterClick={() => setMode('register')} onInstallClick={() => navigate("/install")} />;
+        return <LoginForm onSuccess={() => navigate("/dashboard")} onRegisterClick={() => setMode('register')} />;
     }
   };
   return <div className="light" style={{

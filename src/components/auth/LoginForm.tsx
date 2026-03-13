@@ -253,15 +253,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
               onClick={onRegisterClick}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Criar conta
-            </button>
-            <span className="text-gray-300">·</span>
-            <button
-              type="button"
-              onClick={onInstallClick}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Instale o App
+              Criar conta <span className="text-gray-400">(5 assinaturas grátis)</span>
             </button>
           </div>
           
