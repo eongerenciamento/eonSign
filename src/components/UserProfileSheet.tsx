@@ -437,8 +437,8 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant="ghost"
-                className="flex-1 rounded-full text-gray-600 hover:bg-transparent hover:text-gray-600"
+                variant="sheet-cancel"
+                className="flex-1"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
