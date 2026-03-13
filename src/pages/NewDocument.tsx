@@ -1528,7 +1528,7 @@ const NewDocument = () => {
           <div className="flex items-center justify-center gap-4">
                   <FileText className="w-8 h-8 text-gray-500" />
                   <div className="flex-1 text-left">
-                    <p className="font-medium text-sm text-gray-600">{files[0].name}</p>
+                    <p className="font-medium text-sm text-gray-600 break-all">{files[0].name}</p>
                     <p className="text-sm text-muted-foreground">
                       {(files[0].size / 1024 / 1024).toFixed(2)} MB
                     </p>
