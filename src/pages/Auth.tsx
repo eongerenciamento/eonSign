@@ -105,7 +105,7 @@ export default function Auth() {
       case 'success':
         return <SuccessMessage onLoginClick={() => setMode('login')} />;
       default:
-        return <LoginForm onSuccess={() => navigate("/dashboard")} onRegisterClick={() => setMode('register')} onInstallClick={() => navigate("/install")} />;
+        return <LoginForm onSuccess={() => navigate("/dashboard")} onRegisterClick={() => setMode('register')} />;
     }
   };
   return <div className="light" style={{
@@ -128,7 +128,7 @@ export default function Auth() {
         <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-hidden" style={{
         backgroundColor: '#ffffff'
       }}>
-          {mode !== 'success' && <div className="text-center mb-4">
+          {mode !== 'success' && mode !== 'login' && <div className="text-center mb-4">
               <h1 style={{
             color: '#4b5563'
           }} className="text-lg font-semibold">
@@ -160,7 +160,7 @@ export default function Auth() {
         backgroundColor: '#ffffff'
       }}>
           <div className="w-full max-w-md">
-            {mode !== 'success' && <div className="text-center mb-6">
+            {mode !== 'success' && mode !== 'login' && <div className="text-center mb-6">
                 <h1 style={{
               color: '#4b5563'
             }} className="text-lg font-semibold">

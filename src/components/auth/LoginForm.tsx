@@ -21,10 +21,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 interface LoginFormProps {
   onSuccess: () => void;
   onRegisterClick: () => void;
-  onInstallClick: () => void;
 }
 
-export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginFormProps) {
+export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
@@ -38,7 +37,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
   });
 
   const isSubmitting = form.formState.isSubmitting;
-  const inputClassName = "bg-gray-100 border-gray-200 text-gray-900 placeholder:text-gray-400";
+  const inputClassName = "bg-gray-100 border-0 text-gray-900 placeholder:text-gray-400";
   const labelClassName = "text-gray-700";
 
   const handleSubmit = async (values: LoginFormValues) => {
@@ -254,15 +253,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
               onClick={onRegisterClick}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Criar conta
-            </button>
-            <span className="text-gray-300">·</span>
-            <button
-              type="button"
-              onClick={onInstallClick}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Instale o App
+              Criar conta <span className="text-gray-400">(5 assinaturas grátis)</span>
             </button>
           </div>
           
