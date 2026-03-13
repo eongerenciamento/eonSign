@@ -99,9 +99,6 @@ All colors MUST be HSL.
     --sidebar-border: 220 10% 20%;
     --sidebar-ring: 214 95% 55%;
 
-    /* Layout gradient colors - dark mode with blue-gray tones */
-    --layout-gradient-from: 220 10% 18%;
-    --layout-gradient-to: 220 10% 16%;
   }
 }
 
