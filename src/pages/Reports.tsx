@@ -733,7 +733,7 @@ const Reports = () => {
         </div>
 
         {/* Activity Timeline */}
-        <Card className="p-6 bg-secondary border-0">
+        <Card className="p-6 bg-card border-0">
           <h3 className="font-semibold mb-4 text-muted-foreground text-base">Atividade Recente</h3>
           <div className="space-y-3">
             {recentActivity && recentActivity.length > 0 ? (
