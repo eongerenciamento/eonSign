@@ -425,7 +425,8 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
                 <Button
                   type="button"
                   onClick={handlePasswordChange}
-                  className="w-full rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
+                  variant="sheet-primary"
+                  className="w-full"
                 >
                   <Check className="mr-2 h-4 w-4" />
                   Confirmar Alteração
@@ -436,8 +437,8 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant="ghost"
-                className="flex-1 rounded-full text-gray-600 hover:bg-transparent hover:text-gray-600"
+                variant="sheet-cancel"
+                className="flex-1"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -445,7 +446,8 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
               </Button>
               <Button
                 type="submit"
-                className="flex-1 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-600"
+                variant="sheet-primary"
+                className="flex-1"
                 disabled={updateProfileMutation.isPending}
               >
                 {updateProfileMutation.isPending ? (
