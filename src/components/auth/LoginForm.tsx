@@ -38,7 +38,7 @@ export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginF
   });
 
   const isSubmitting = form.formState.isSubmitting;
-  const inputClassName = "bg-gray-100 border-gray-200 text-gray-900 placeholder:text-gray-400";
+  const inputClassName = "bg-gray-100 border-0 text-gray-900 placeholder:text-gray-400";
   const labelClassName = "text-gray-700";
 
   const handleSubmit = async (values: LoginFormValues) => {
