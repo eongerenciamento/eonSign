@@ -422,7 +422,7 @@ export function SubscriptionTab() {
         {/* Grid com 4 cards de informação */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {/* Card 1: Plano Atual */}
-          <Card className="bg-secondary border-0">
+          <Card className="bg-card border-0">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-muted-foreground">Plano Atual</p>
