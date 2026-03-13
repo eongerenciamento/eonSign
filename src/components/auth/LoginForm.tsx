@@ -23,7 +23,7 @@ interface LoginFormProps {
   onRegisterClick: () => void;
 }
 
-export function LoginForm({ onSuccess, onRegisterClick, onInstallClick }: LoginFormProps) {
+export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
