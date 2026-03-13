@@ -1,38 +1,86 @@
 
 
-## Corrigir Background Cinza Visivel + Cards Brancos
+## Resolver Login Google Definitivamente
 
-### Problema
+### Problema Atual
 
-O `--background` atual e `210 20% 98%` (quase branco), praticamente igual ao `--card: 0 0% 100%`. Por isso nao ha contraste visivel entre fundo e cards. No eonGerenciamento, o layout usa `bg-gray-100` (um cinza mais visivel) em vez da variavel CSS.
+O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
 
-### Solucao
+1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
+2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
 
-Replicar exatamente o padrao do eonGerenciamento:
+### Fluxo OAuth Direto (dominio customizado)
 
-#### 1. `src/components/Layout.tsx`
-
-Trocar `bg-background` por `bg-gray-100 dark:bg-background` no container principal e na div de conteudo, e remover o wrapper `bg-card` dos children (os cards individuais dentro das paginas ja usam `bg-card`):
-
-```tsx
-// Mobile wrapper
-<div className="min-h-screen bg-gray-100 dark:bg-background">
-
-// Desktop main content div
-<div className="flex-1 flex flex-col w-full bg-gray-100 dark:bg-background">
-
-// Main content area - remover bg-card wrapper
-<main className="flex-1 overflow-auto md:p-4">
-  {children}
-</main>
+```text
+App chama supabase.auth.signInWithOAuth
+       |
+       v
+Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
+       |
+       v
+Backend redireciona para Google
+       |
+       v
+Usuario autoriza no Google
+       |
+       v
+Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
+       |
+       v
+Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
+       |
+       v
+Supabase client no frontend processa os tokens da URL
+       |
+       v
+onAuthStateChange detecta sessao -> Dashboard
 ```
 
-Isso faz o fundo ser cinza visivel (gray-100 = `#f3f4f6`) no light mode e manter o dark mode com a variavel escura. Os cards (`bg-card`) dentro das paginas aparecerao brancos sobre o fundo cinza.
+### Alteracoes Necessarias
 
-#### 2. Verificar paginas que dependem do wrapper `bg-card`
+#### 1. Configuracao no Google Cloud Console (acao do usuario)
 
-As paginas que nao usam `<Card>` internamente podem precisar de ajuste para que seu conteudo fique dentro de cards brancos. Vou verificar as principais paginas para garantir consistencia.
+Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
 
-### Arquivos alterados
-- `src/components/Layout.tsx`
+```
+https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
+```
+
+Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
+
+**De:**
+```typescript
+redirectTo: `${window.location.origin}/dashboard`,
+```
+
+**Para:**
+```typescript
+redirectTo: window.location.origin,
+```
+
+Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
+
+#### 3. Nenhuma outra alteracao de codigo necessaria
+
+O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
+
+### Resumo
+
+| Item | Status |
+|------|--------|
+| allowedHosts inclui backend | Ja corrigido |
+| ProtectedRoute sem getSession | Ja corrigido |
+| PWA denylist para /~oauth | Ja configurado |
+| redirectTo para raiz (/) | Precisa alterar |
+| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
+
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
+
+### Acao do usuario (obrigatoria)
+- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
 

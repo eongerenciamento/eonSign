@@ -14,7 +14,7 @@ export const Layout = ({
   useWhatsAppFailureNotifications();
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-100 dark:bg-background">
       {/* Mobile Navigation */}
       <MobileNav />
 
@@ -27,12 +27,10 @@ export const Layout = ({
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col w-full bg-background">
+          <div className="flex-1 flex flex-col w-full bg-gray-100 dark:bg-background">
             {/* Content Area */}
-            <main className="flex-1 overflow-auto md:pt-4 md:pb-4 md:pr-4">
-              <div className="bg-card md:rounded-2xl min-h-full overflow-auto">
-                {children}
-              </div>
+            <main className="flex-1 overflow-auto md:p-4">
+              {children}
             </main>
           </div>
         </div>
