@@ -12,18 +12,18 @@ export const CadastrosTab = ({ isAdmin }: CadastrosTabProps) => {
   return (
     <div className="space-y-6 mt-6">
       <Tabs defaultValue={isAdmin ? "members" : "contacts"} className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} rounded-full p-1 h-10`}>
           {isAdmin && (
-            <TabsTrigger value="members" className="gap-2">
+            <TabsTrigger value="members" className="rounded-full gap-2">
               <Users className="h-4 w-4" />
               <span>Membros</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="contacts" className="gap-2">
+          <TabsTrigger value="contacts" className="rounded-full gap-2">
             <BookUser className="h-4 w-4" />
             <span>Signatários</span>
           </TabsTrigger>
-          <TabsTrigger value="groups" className="gap-2">
+          <TabsTrigger value="groups" className="rounded-full gap-2">
             <UsersRound className="h-4 w-4" />
             <span>Grupos</span>
           </TabsTrigger>

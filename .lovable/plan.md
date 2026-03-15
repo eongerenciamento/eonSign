@@ -1,38 +1,86 @@
 
 
-## Padronizar menus de guias (Tabs) em todas as páginas
+## Resolver Login Google Definitivamente
 
-### Problema
-Cada página usa classes diferentes no `TabsList`, causando tamanhos e alinhamentos inconsistentes:
-- **Documents**: `grid w-full grid-cols-3 h-10` — ocupa largura total, centralizado
-- **Reports**: `h-10 mx-auto` — sem `w-full`, fica alinhado à esquerda (inline-flex)
-- **Settings**: `grid w-full grid-cols-N` — sem `h-10`
-- **CadastrosTab**: `grid w-full grid-cols-N` — sem `h-10`
+### Problema Atual
 
-### Solução
-Padronizar todas as `TabsList` para usar `grid w-full h-10 rounded-full p-1` + `grid-cols-N` adequado, e todos os `TabsTrigger` com `rounded-full`. Isso garante mesma altura, largura total e alinhamento.
+O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
 
-### Alterações
+1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
+2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
 
-**1. `src/pages/Reports.tsx` (linha 584)**
-- De: `className="h-10 items-center mx-auto"`
-- Para: `className="grid w-full grid-cols-2 rounded-full p-1 h-10"`
-- TabsTriggers: adicionar `className="rounded-full"` (remover py-1.5 e flex items-center gap-2 pois o grid já centraliza)
+### Fluxo OAuth Direto (dominio customizado)
 
-**2. `src/pages/Settings.tsx` (linha 437)**
-- De: `` className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`} ``
-- Para: `` className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} rounded-full p-1 h-10`} ``
-- TabsTriggers: adicionar `rounded-full`
+```text
+App chama supabase.auth.signInWithOAuth
+       |
+       v
+Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
+       |
+       v
+Backend redireciona para Google
+       |
+       v
+Usuario autoriza no Google
+       |
+       v
+Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
+       |
+       v
+Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
+       |
+       v
+Supabase client no frontend processa os tokens da URL
+       |
+       v
+onAuthStateChange detecta sessao -> Dashboard
+```
 
-**3. `src/components/settings/CadastrosTab.tsx` (linha 15)**
-- De: `` className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`} ``
-- Para: `` className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} rounded-full p-1 h-10`} ``
-- TabsTriggers: adicionar `rounded-full`
+### Alteracoes Necessarias
 
-**4. `src/pages/Documents.tsx`** — Já está correto (`grid w-full grid-cols-3 rounded-full p-1 h-10`), sem alteração.
+#### 1. Configuracao no Google Cloud Console (acao do usuario)
 
-### Arquivos alterados
-- `src/pages/Reports.tsx`
-- `src/pages/Settings.tsx`
-- `src/components/settings/CadastrosTab.tsx`
+Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
+
+```
+https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
+```
+
+Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
+
+**De:**
+```typescript
+redirectTo: `${window.location.origin}/dashboard`,
+```
+
+**Para:**
+```typescript
+redirectTo: window.location.origin,
+```
+
+Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
+
+#### 3. Nenhuma outra alteracao de codigo necessaria
+
+O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
+
+### Resumo
+
+| Item | Status |
+|------|--------|
+| allowedHosts inclui backend | Ja corrigido |
+| ProtectedRoute sem getSession | Ja corrigido |
+| PWA denylist para /~oauth | Ja configurado |
+| redirectTo para raiz (/) | Precisa alterar |
+| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
+
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
+
+### Acao do usuario (obrigatoria)
+- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
 
