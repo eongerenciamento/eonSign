@@ -813,7 +813,7 @@ const Reports = () => {
               setDateFilter(value);
               setCurrentPage(1);
             }}>
-                  <SelectTrigger className="w-[180px] border-0 bg-secondary">
+                  <SelectTrigger className="w-[180px] border-0 bg-white dark:bg-white/10">
                     <SelectValue placeholder="Período" />
                   </SelectTrigger>
                   <SelectContent>
