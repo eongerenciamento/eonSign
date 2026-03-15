@@ -555,7 +555,7 @@ const Drive = () => {
                 </div>
                 <div className="flex gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1 border-none bg-gray-100">
+                    <SelectTrigger className="flex-1 border-none bg-white dark:bg-white/10">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>

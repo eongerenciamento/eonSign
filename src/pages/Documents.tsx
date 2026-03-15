@@ -570,7 +570,7 @@ const Documents = () => {
                     </SelectContent>
                   </Select>
                   <Select value={signatureModeFilter} onValueChange={setSignatureModeFilter}>
-                    <SelectTrigger className="border-none bg-gray-100">
+                    <SelectTrigger className="border-none bg-white dark:bg-white/10">
                       <SelectValue placeholder="Modo de Assinatura" />
                     </SelectTrigger>
                     <SelectContent>

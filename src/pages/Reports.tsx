@@ -841,7 +841,7 @@ const Reports = () => {
               setItemsPerPage(parseInt(value));
               setCurrentPage(1);
             }}>
-                  <SelectTrigger className="w-[140px] border-0 bg-secondary">
+                  <SelectTrigger className="w-[140px] border-0 bg-white dark:bg-white/10">
                     <SelectValue placeholder="Por página" />
                   </SelectTrigger>
                   <SelectContent>
