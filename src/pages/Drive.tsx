@@ -515,9 +515,9 @@ const Drive = () => {
                 );
               }
               if (sortBy === "recent") {
-                displayFolders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                displayFolders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
               } else if (sortBy === "oldest") {
-                displayFolders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                displayFolders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
               } else if (sortBy === "name") {
                 displayFolders.sort((a, b) => a.name.localeCompare(b.name));
               }
