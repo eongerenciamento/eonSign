@@ -482,9 +482,48 @@ const Drive = () => {
                 )}
               </Button>
             </div>
-            {folders.length > 0 ? (
+            {showFilters && (
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar pastas..."
+                    className="pl-10 border-none bg-white dark:bg-white/10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1 border-none bg-white dark:bg-white/10">
+                      <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            {(() => {
+              let displayFolders = [...folders];
+              if (searchQuery) {
+                displayFolders = displayFolders.filter(f =>
+                  f.name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+              }
+              if (sortBy === "recent") {
+                displayFolders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+              } else if (sortBy === "oldest") {
+                displayFolders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+              } else if (sortBy === "name") {
+                displayFolders.sort((a, b) => a.name.localeCompare(b.name));
+              }
+              return displayFolders.length > 0 ? (
               <FoldersList
-                folders={folders}
+                folders={displayFolders}
                 documents={documents}
                 viewMode={viewMode}
                 onFolderClick={setSelectedFolder}
