@@ -516,7 +516,7 @@ const Documents = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal border-none bg-gray-100 hover:bg-gray-100 hover:text-gray-500",
+                          "justify-start text-left font-normal border-none bg-white hover:bg-white hover:text-gray-500 dark:bg-white/10 dark:hover:bg-white/10",
                           !dateFrom && "text-muted-foreground"
                         )}
                       >
