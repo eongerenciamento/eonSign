@@ -581,12 +581,12 @@ const Reports = () => {
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="h-10 items-center mx-auto">
-            <TabsTrigger value="overview" className="flex items-center gap-2 py-1.5">
+          <TabsList className="grid w-full grid-cols-2 rounded-full p-1 h-10">
+            <TabsTrigger value="overview" className="rounded-full gap-2">
               <BarChart3 className="w-4 h-4" />
               Visão Geral
             </TabsTrigger>
-            <TabsTrigger value="signatories" className="flex items-center gap-2 py-1.5">
+            <TabsTrigger value="signatories" className="rounded-full gap-2">
               <Users className="w-4 h-4" />
               Signatários
             </TabsTrigger>
