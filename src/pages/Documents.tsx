@@ -371,7 +371,7 @@ const Documents = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="border-none bg-gray-100">
+                    <SelectTrigger className="border-none bg-white dark:bg-white/10">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
