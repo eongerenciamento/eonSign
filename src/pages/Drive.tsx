@@ -548,14 +548,14 @@ const Drive = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar documentos..."
-                    className="pl-10 border-none bg-gray-100"
+                    className="pl-10 border-none bg-white dark:bg-white/10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-4">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex-1 border-none bg-gray-100">
+                    <SelectTrigger className="flex-1 border-none bg-white dark:bg-white/10">
                       <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
