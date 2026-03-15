@@ -1496,7 +1496,7 @@ export const DocumentsTable = ({
                         <ChevronDown className="w-4 h-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
                       {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
                         <div 
                           key={folder.id}
