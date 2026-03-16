@@ -181,6 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Colors
     const gray800 = rgb(31 / 255, 41 / 255, 55 / 255);
+    const gray700 = rgb(55 / 255, 65 / 255, 81 / 255);
     const gray600 = rgb(102 / 255, 107 / 255, 120 / 255);
     const greenColor = rgb(22 / 255, 163 / 255, 74 / 255);
     const darkGreen = rgb(22 / 255, 101 / 255, 52 / 255);
