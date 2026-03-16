@@ -1289,15 +1289,6 @@ export const DocumentsTable = ({
                       variant="ghost" 
                       size="icon" 
                       className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
-                      title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
-                    >
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
                       onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
                       title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
                     >
