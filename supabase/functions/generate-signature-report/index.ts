@@ -234,11 +234,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (logoImage) {
       const logoOrigW = logoImage.width;
       const logoOrigH = logoImage.height;
-      const logoHeight = 30;
+      const logoHeight = 35;
       const logoWidth = (logoOrigW / logoOrigH) * logoHeight;
       page.drawImage(logoImage, {
         x: margin,
-        y: pageHeight - 55,
+        y: pageHeight - 57,
         width: logoWidth,
         height: logoHeight,
       });
