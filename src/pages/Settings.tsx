@@ -879,7 +879,6 @@ const Settings = () => {
           </TabsContent>
 
           </Tabs>
-        </div>
       </div>
 
       {/* Ticket Chat Sheet */}
