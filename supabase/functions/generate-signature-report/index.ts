@@ -212,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
     let yPos = pageHeight;
 
     // Header background - medium gray
-    const headerBg = rgb(156 / 255, 163 / 255, 175 / 255); // medium gray
+    const headerBg = gray700;
     page.drawRectangle({
       x: 0,
       y: pageHeight - 70,
