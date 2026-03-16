@@ -286,7 +286,7 @@ const Documents = () => {
               variant="ghost"
               size="icon"
               onClick={() => setShowFilters(!showFilters)}
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full hover:bg-muted active:bg-muted"
             >
               <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
             </Button>
