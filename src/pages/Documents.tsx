@@ -281,16 +281,16 @@ const Documents = () => {
           <div>
             <h1 className="text-sm font-bold text-muted-foreground">Documentos</h1>
           </div>
-          <div className="flex flex-col items-end gap-0">
-            <UploadDialog />
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowFilters(!showFilters)}
-              className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent -mb-4"
+              className="w-10 h-10 rounded-full"
             >
               <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
             </Button>
+            <UploadDialog />
           </div>
         </div>
 
