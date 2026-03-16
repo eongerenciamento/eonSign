@@ -458,12 +458,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Signed status badge with check icon
       if (signer.status === "signed") {
-        const checkCircleRadius = 5;
+        const checkCircleRadius = 6;
         const assinadoText = "Assinado";
         const assinadoFontSize = 8;
-        const assinadoTextWidth = helveticaBold.widthOfTextAtSize(assinadoText, assinadoFontSize);
+        const assinadoTextWidth = helveticaFont.widthOfTextAtSize(assinadoText, assinadoFontSize);
         const totalWidth = checkCircleRadius * 2 + 4 + assinadoTextWidth;
-        const startX = pageWidth - margin - totalWidth;
+        const startX = pageWidth - margin - totalWidth - 15;
         
         // Green circle
         const cx = startX + checkCircleRadius;
@@ -472,21 +472,21 @@ const handler = async (req: Request): Promise<Response> => {
           x: cx,
           y: cy,
           size: checkCircleRadius,
-          color: lightGreen,
+          color: greenColor,
         });
         
         // Checkmark lines inside circle
         page.drawLine({
-          start: { x: cx - 2.5, y: cy },
-          end: { x: cx - 0.5, y: cy - 2.5 },
-          thickness: 1.5,
-          color: darkGreen,
+          start: { x: cx - 3, y: cy },
+          end: { x: cx - 0.5, y: cy - 3 },
+          thickness: 1,
+          color: white,
         });
         page.drawLine({
-          start: { x: cx - 0.5, y: cy - 2.5 },
-          end: { x: cx + 3, y: cy + 2 },
-          thickness: 1.5,
-          color: darkGreen,
+          start: { x: cx - 0.5, y: cy - 3 },
+          end: { x: cx + 3.5, y: cy + 2.5 },
+          thickness: 1,
+          color: white,
         });
         
         // "Assinado" text
@@ -494,7 +494,7 @@ const handler = async (req: Request): Promise<Response> => {
           x: startX + checkCircleRadius * 2 + 4,
           y: cy - assinadoFontSize / 2 + 1,
           size: assinadoFontSize,
-          font: helveticaBold,
+          font: helveticaFont,
           color: greenColor,
         });
       }
