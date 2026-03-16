@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 
 const Drive = () => {
+  const navigate = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
