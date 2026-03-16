@@ -177,11 +177,7 @@ serve(async (req) => {
 
     console.log(`Total signed signers: ${totalSignersCount}, displaying: ${signersToDisplay.length} (truncated: ${!showAllSigners})`);
 
-    // === LAYOUT: TWO COLUMNS ON RIGHT MARGIN ===
-    // Column 1 (leftmost): Validation link - X = 25
-    // Column 2 (middle): Metadata text - X = 12
-    
-    const validationColumnX = 25;  // Validation link (leftmost)
+    // === LAYOUT: SINGLE COLUMN ON RIGHT MARGIN ===
     const metadataColumnX = 12;    // Signer metadata
     const startY = 35;             // Start closer to footer
 
@@ -198,10 +194,8 @@ serve(async (req) => {
         const logoDisplaySize = 25;
         const logoDims = logoImage.scale(logoDisplaySize / logoImage.height);
         
-        const logoColumnX = (validationColumnX + metadataColumnX) / 2;
-        
         page.drawImage(logoImage, {
-          x: width - logoColumnX + (logoDims.height / 2),
+          x: width - metadataColumnX + (logoDims.height / 2),
           y: startY,
           width: logoDims.width,
           height: logoDims.height,
@@ -212,7 +206,7 @@ serve(async (req) => {
 
       let currentY = signaturesStartY;
 
-      // 2. Draw each signature with metadata
+      // 2. Draw each signature with metadata (name bold, rest regular)
       for (const signer of signersToDisplay) {
         const displayName = getDisplayName(signer.typed_signature || signer.name);
         const cpfFormatted = formatCPF(signer.cpf);
@@ -253,28 +247,27 @@ serve(async (req) => {
           securityIndicators.push("Biometria");
         }
 
-        // Build metadata text: Nome - CPF - Assinado em DD/MM/YYYY às HH:MM [Geo | IP | Biometria]
-        let metadataText = displayName;
+        // Build metadata suffix: - CPF - date [indicators]
+        let metadataSuffix = "";
         if (cpfFormatted) {
-          metadataText += ` - ${cpfFormatted}`;
+          metadataSuffix += ` - ${cpfFormatted}`;
         }
-        metadataText += ` - ${signDate}`;
-        
-        // Add security indicators if any
+        metadataSuffix += ` - ${signDate}`;
         if (securityIndicators.length > 0) {
-          metadataText += ` [${securityIndicators.join(" | ")}]`;
+          metadataSuffix += ` [${securityIndicators.join(" | ")}]`;
         }
-        
-        metadataText = normalizeText(metadataText);
+        metadataSuffix = normalizeText(metadataSuffix);
 
-        // Adjust font size based on text length
-        let fontSize = 6;
-        if (metadataText.length > 70) fontSize = 4.5;
-        else if (metadataText.length > 55) fontSize = 5;
-        else if (metadataText.length > 45) fontSize = 5.5;
+        const fullText = displayName + metadataSuffix;
 
-        // Draw metadata text
-        page.drawText(metadataText, {
+        // Adjust font size based on total text length (increased base)
+        let fontSize = 7;
+        if (fullText.length > 70) fontSize = 5.5;
+        else if (fullText.length > 55) fontSize = 6;
+        else if (fullText.length > 45) fontSize = 6.5;
+
+        // Draw name in bold
+        page.drawText(displayName, {
           x: width - metadataColumnX,
           y: currentY,
           size: fontSize,
@@ -283,28 +276,23 @@ serve(async (req) => {
           rotate: degrees(90),
         });
 
-        // Move up for next signature
-        const textWidth = helveticaBold.widthOfTextAtSize(metadataText, fontSize);
-        currentY += textWidth + 15;
-      }
+        // Calculate offset for the rest (rotated 90°, so offset is on Y axis)
+        const nameWidth = helveticaBold.widthOfTextAtSize(displayName, fontSize);
 
-      // 3. Draw validation link (leftmost column)
-      let validationText = `Verifique em: sign.eonhub.com.br/validar/${documentId}`;
-      if (!showAllSigners) {
-        validationText += ` / verifique todos os signatarios na pagina de assinaturas`;
+        // Draw metadata suffix in regular font
+        page.drawText(metadataSuffix, {
+          x: width - metadataColumnX,
+          y: currentY + nameWidth,
+          size: fontSize,
+          font: helveticaFont,
+          color: rgb(0.22, 0.25, 0.32),
+          rotate: degrees(90),
+        });
+
+        // Move up for next signature
+        const totalTextWidth = nameWidth + helveticaFont.widthOfTextAtSize(metadataSuffix, fontSize);
+        currentY += totalTextWidth + 15;
       }
-      validationText = normalizeText(validationText);
-      
-      const validationFontSize = showAllSigners ? 5 : 4.5;
-      
-      page.drawText(validationText, {
-        x: width - validationColumnX,
-        y: signaturesStartY,
-        size: validationFontSize,
-        font: helveticaFont,
-        color: rgb(0.42, 0.45, 0.50),
-        rotate: degrees(90),
-      });
 
       console.log(`Page ${pageIndex + 1}/${totalPages}: Applied ${signersToDisplay.length} signatures`);
     }
