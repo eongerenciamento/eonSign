@@ -427,7 +427,7 @@ const handler = async (req: Request): Promise<Response> => {
         y: badgeRectY,
         width: badgeW,
         height: badgeH,
-        color: gray800,
+        color: gray700,
       });
 
       const badgeText = normalizeText(`Signatário ${i + 1}`);
