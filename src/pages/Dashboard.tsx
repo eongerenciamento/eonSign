@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
-import { Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -156,7 +156,7 @@ const Dashboard = () => {
             </p>
           </div>
           <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
-            <Upload className="w-5 h-5 md:mr-2 text-white" />
+            <Plus className="w-5 h-5 md:mr-2 text-white" />
             <span className="hidden md:inline text-white">Documento</span>
           </Button>
         </div>
