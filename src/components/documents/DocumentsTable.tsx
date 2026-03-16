@@ -20,8 +20,8 @@ import {
   ChevronRight,
   ChevronDown,
   Check,
-  Folder,
-} from "lucide-react";
+  Folder } from
+"lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -81,43 +81,43 @@ interface DocumentsTableProps {
 const statusConfig = {
   pending: {
     label: "Pendente",
-    className: "bg-yellow-700 text-white hover:bg-yellow-700",
+    className: "bg-yellow-700 text-white hover:bg-yellow-700"
   },
   in_progress: {
     label: "Em Andamento",
-    className: "bg-blue-700 text-white hover:bg-blue-700",
+    className: "bg-blue-700 text-white hover:bg-blue-700"
   },
   signed: {
     label: "Assinado",
-    className: "bg-green-700 text-white hover:bg-green-700",
+    className: "bg-green-700 text-white hover:bg-green-700"
   },
   expired: {
     label: "Expirado",
-    className: "bg-red-700 text-white hover:bg-red-700",
+    className: "bg-red-700 text-white hover:bg-red-700"
   },
   cancelled: {
     label: "Cancelado",
-    className: "bg-red-700 text-white hover:bg-red-700",
-  },
+    className: "bg-red-700 text-white hover:bg-red-700"
+  }
 };
 
 const signatureModeConfig = {
   SIMPLE: {
     label: "Simples",
-    className: "bg-transparent border border-blue-700 text-blue-700",
+    className: "bg-transparent border border-blue-700 text-blue-700"
   },
   ADVANCED: {
     label: "Avançada",
-    className: "bg-transparent border border-green-600 text-green-600",
+    className: "bg-transparent border border-green-600 text-green-600"
   },
   QUALIFIED: {
     label: "ICP-Brasil",
-    className: "bg-transparent border border-green-600 text-green-600",
+    className: "bg-transparent border border-green-600 text-green-600"
   },
   PRESCRIPTION: {
     label: "Prescrição",
-    className: "bg-transparent border border-pink-500 text-pink-500",
-  },
+    className: "bg-transparent border border-pink-500 text-pink-500"
+  }
 };
 
 // Map prescription doc types to readable labels
@@ -130,11 +130,11 @@ const prescriptionDocTypeLabels: Record<string, string> = {
   ATENDIMENTO_CLINICO: "Atendimento",
   DISPENSACAO_MEDICAMENTO: "Dispensação",
   VACINACAO: "Vacina",
-  RELATORIO_MEDICO: "Relatório",
+  RELATORIO_MEDICO: "Relatório"
 };
 
 // Check if document is a prescription (by signature mode OR prescription doc type)
-const isPrescription = (doc: { signatureMode?: string | null; prescriptionDocType?: string | null }) => {
+const isPrescription = (doc: {signatureMode?: string | null;prescriptionDocType?: string | null;}) => {
   return doc.signatureMode === "PRESCRIPTION" || !!doc.prescriptionDocType;
 };
 const getInitials = (name: string) => {
@@ -151,15 +151,15 @@ export const DocumentsTable = ({
   allFolders = [],
   onDocumentMoved,
   showFolderActions = true,
-  onRefresh,
+  onRefresh
 }: DocumentsTableProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Envelope documents dialog state
   const [envelopeDialogOpen, setEnvelopeDialogOpen] = useState(false);
-  const [selectedEnvelope, setSelectedEnvelope] = useState<{ title: string; documents: EnvelopeDocument[] } | null>(
-    null,
+  const [selectedEnvelope, setSelectedEnvelope] = useState<{title: string;documents: EnvelopeDocument[];} | null>(
+    null
   );
 
   // BRy signing dialog state
@@ -175,7 +175,7 @@ export const DocumentsTable = ({
     if (doc.isEnvelope && doc.envelopeDocuments && doc.envelopeDocuments.length > 0) {
       setSelectedEnvelope({
         title: doc.name,
-        documents: doc.envelopeDocuments,
+        documents: doc.envelopeDocuments
       });
       setEnvelopeDialogOpen(true);
     }
@@ -216,7 +216,7 @@ export const DocumentsTable = ({
   // Organize folders hierarchically with visibility based on expanded state
   const organizeHierarchicalFolders = () => {
     const parentFolders = folders.filter((f) => !f.parent_folder_id);
-    const result: Array<{ folder: Folder; level: number; hasChildren: boolean; isVisible: boolean }> = [];
+    const result: Array<{folder: Folder;level: number;hasChildren: boolean;isVisible: boolean;}> = [];
 
     parentFolders.forEach((parent) => {
       const hasChildren = folderHasChildren(parent.id);
@@ -240,26 +240,26 @@ export const DocumentsTable = ({
     try {
       // Buscar o link BRy do signatário da empresa
       const {
-        data: { user },
+        data: { user }
       } = await supabase.auth.getUser();
       if (!user) {
         navigate(`/assinar/${documentId}`);
         return;
       }
 
-      const { data: companyData } = await supabase
-        .from("company_settings")
-        .select("admin_email")
-        .eq("user_id", user.id)
-        .single();
+      const { data: companyData } = await supabase.
+      from("company_settings").
+      select("admin_email").
+      eq("user_id", user.id).
+      single();
 
       if (companyData?.admin_email) {
-        const { data: signerData } = await supabase
-          .from("document_signers")
-          .select("bry_signer_link")
-          .eq("document_id", documentId)
-          .eq("email", companyData.admin_email)
-          .single();
+        const { data: signerData } = await supabase.
+        from("document_signers").
+        select("bry_signer_link").
+        eq("document_id", documentId).
+        eq("email", companyData.admin_email).
+        single();
 
         if (signerData?.bry_signer_link) {
           // Abrir modal com iframe BRy
@@ -288,17 +288,17 @@ export const DocumentsTable = ({
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    const { data, error } = await supabase
-      .from("documents")
-      .select("file_url, status, bry_envelope_uuid, bry_signed_file_url")
-      .eq("id", documentId)
-      .single();
+    const { data, error } = await supabase.
+    from("documents").
+    select("file_url, status, bry_envelope_uuid, bry_signed_file_url").
+    eq("id", documentId).
+    single();
 
     if (error || !data) {
       toast({
         title: "Erro ao visualizar documento",
         description: "Não foi possível carregar o documento.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -315,7 +315,7 @@ export const DocumentsTable = ({
         toast({
           title: "Erro ao visualizar documento",
           description: "URL do documento inválida.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -324,21 +324,21 @@ export const DocumentsTable = ({
       toast({
         title: "Erro ao visualizar documento",
         description: "URL do documento não encontrada.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
 
     // Generate signed URL for private bucket
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from("documents")
-      .createSignedUrl(filePath, 3600); // Valid for 1 hour
+    const { data: signedData, error: signedError } = await supabase.storage.
+    from("documents").
+    createSignedUrl(filePath, 3600); // Valid for 1 hour
 
     if (signedError || !signedData?.signedUrl) {
       toast({
         title: "Erro ao visualizar documento",
         description: "Não foi possível gerar link de acesso.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -350,17 +350,17 @@ export const DocumentsTable = ({
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
 
-    const { data, error } = await supabase
-      .from("documents")
-      .select("file_url, name, status, bry_envelope_uuid, bry_signed_file_url")
-      .eq("id", documentId)
-      .single();
+    const { data, error } = await supabase.
+    from("documents").
+    select("file_url, name, status, bry_envelope_uuid, bry_signed_file_url").
+    eq("id", documentId).
+    single();
 
     if (error || !data) {
       toast({
         title: "Erro ao baixar documento",
         description: "Não foi possível carregar o documento.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -378,12 +378,12 @@ export const DocumentsTable = ({
         // Baixar documento assinado do BRy
         toast({
           title: "Baixando documento assinado...",
-          description: "Obtendo documento do BRy.",
+          description: "Obtendo documento do BRy."
         });
 
         try {
           const { data: bryData, error: bryError } = await supabase.functions.invoke("bry-download-signed", {
-            body: { documentId },
+            body: { documentId }
           });
 
           if (bryError) {
@@ -405,7 +405,7 @@ export const DocumentsTable = ({
 
             toast({
               title: "Download concluído",
-              description: "Documento assinado baixado com sucesso.",
+              description: "Documento assinado baixado com sucesso."
             });
             return;
           }
@@ -417,7 +417,7 @@ export const DocumentsTable = ({
           toast({
             title: "Erro ao baixar documento assinado",
             description: err.message || "Não foi possível obter o documento assinado do BRy.",
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
@@ -428,7 +428,7 @@ export const DocumentsTable = ({
         toast({
           title: "Erro ao baixar documento",
           description: "URL do documento não encontrada.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -439,7 +439,7 @@ export const DocumentsTable = ({
         toast({
           title: "Erro ao baixar documento",
           description: "URL do documento inválida.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -447,15 +447,15 @@ export const DocumentsTable = ({
     }
 
     // Generate signed URL for private bucket
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from("documents")
-      .createSignedUrl(filePath, 3600); // Valid for 1 hour
+    const { data: signedData, error: signedError } = await supabase.storage.
+    from("documents").
+    createSignedUrl(filePath, 3600); // Valid for 1 hour
 
     if (signedError || !signedData?.signedUrl) {
       toast({
         title: "Erro ao baixar documento",
         description: "Não foi possível gerar link de download.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -474,13 +474,13 @@ export const DocumentsTable = ({
 
       toast({
         title: "Download iniciado",
-        description: "O documento está sendo baixado.",
+        description: "O documento está sendo baixado."
       });
     } catch (err) {
       toast({
         title: "Erro ao baixar documento",
         description: "Não foi possível baixar o documento.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -488,19 +488,19 @@ export const DocumentsTable = ({
   const handleCancelDocument = async (doc: Document) => {
     const hasSignatures = doc.signedBy > 0;
 
-    const confirmMessage = hasSignatures
-      ? `Este documento já possui ${doc.signedBy} assinatura(s). Ao cancelar, os signatários pendentes serão notificados e o link de assinatura será invalidado. Deseja continuar?`
-      : "Tem certeza que deseja excluir este documento?";
+    const confirmMessage = hasSignatures ?
+    `Este documento já possui ${doc.signedBy} assinatura(s). Ao cancelar, os signatários pendentes serão notificados e o link de assinatura será invalidado. Deseja continuar?` :
+    "Tem certeza que deseja excluir este documento?";
 
     if (!confirm(confirmMessage)) return;
 
     try {
       // Buscar signatários pendentes para notificar
-      const { data: pendingSigners } = await supabase
-        .from("document_signers")
-        .select("*")
-        .eq("document_id", doc.id)
-        .eq("status", "pending");
+      const { data: pendingSigners } = await supabase.
+      from("document_signers").
+      select("*").
+      eq("document_id", doc.id).
+      eq("status", "pending");
 
       if (hasSignatures) {
         // Atualizar status do documento para 'cancelled'
@@ -510,7 +510,7 @@ export const DocumentsTable = ({
           toast({
             title: "Erro ao cancelar documento",
             description: error.message,
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
@@ -522,8 +522,8 @@ export const DocumentsTable = ({
               body: {
                 documentId: doc.id,
                 documentName: doc.name,
-                signers: pendingSigners,
-              },
+                signers: pendingSigners
+              }
             });
           } catch (e) {
             console.error("Erro ao notificar signatários:", e);
@@ -533,9 +533,9 @@ export const DocumentsTable = ({
         toast({
           title: "Documento cancelado",
           description:
-            hasSignatures && pendingSigners && pendingSigners.length > 0
-              ? "Os signatários pendentes foram notificados."
-              : "O documento foi cancelado com sucesso.",
+          hasSignatures && pendingSigners && pendingSigners.length > 0 ?
+          "Os signatários pendentes foram notificados." :
+          "O documento foi cancelado com sucesso."
         });
       } else {
         // Documento sem assinaturas - excluir normalmente
@@ -545,14 +545,14 @@ export const DocumentsTable = ({
           toast({
             title: "Erro ao excluir documento",
             description: error.message,
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
 
         toast({
           title: "Documento excluído",
-          description: "O documento foi excluído com sucesso.",
+          description: "O documento foi excluído com sucesso."
         });
       }
 
@@ -564,27 +564,27 @@ export const DocumentsTable = ({
       toast({
         title: "Erro",
         description: error.message || "Erro ao processar solicitação",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
-    const { error } = await supabase
-      .from("documents")
-      .update({
-        folder_id: folderId,
-      })
-      .eq("id", documentId);
+    const { error } = await supabase.
+    from("documents").
+    update({
+      folder_id: folderId
+    }).
+    eq("id", documentId);
     if (error) {
       toast({
         title: "Erro ao mover documento",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Documento movido",
-        description: "O documento foi movido para a pasta com sucesso.",
+        description: "O documento foi movido para a pasta com sucesso."
       });
       if (onDocumentMoved) {
         onDocumentMoved();
@@ -592,22 +592,22 @@ export const DocumentsTable = ({
     }
   };
   const handleRemoveFromFolder = async (documentId: string) => {
-    const { error } = await supabase
-      .from("documents")
-      .update({
-        folder_id: null,
-      })
-      .eq("id", documentId);
+    const { error } = await supabase.
+    from("documents").
+    update({
+      folder_id: null
+    }).
+    eq("id", documentId);
     if (error) {
       toast({
         title: "Erro ao remover documento",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Documento removido da pasta",
-        description: "O documento foi removido da pasta com sucesso.",
+        description: "O documento foi removido da pasta com sucesso."
       });
       if (onDocumentMoved) {
         onDocumentMoved();
@@ -625,9 +625,9 @@ export const DocumentsTable = ({
 
   // Helper to get resend icon state based on WhatsApp read statuses
   const getResendIconState = (doc: Document) => {
-    const pendingSigners: { name: string; phone: string; whatsappStatus: string | null }[] = [];
-    const readSigners: { name: string; phone: string }[] = [];
-    const unreadSigners: { name: string; phone: string }[] = [];
+    const pendingSigners: {name: string;phone: string;whatsappStatus: string | null;}[] = [];
+    const readSigners: {name: string;phone: string;}[] = [];
+    const unreadSigners: {name: string;phone: string;}[] = [];
 
     doc.signerStatuses?.forEach((status, idx) => {
       if (status === "pending") {
@@ -659,25 +659,25 @@ export const DocumentsTable = ({
     return { color: "text-muted-foreground", disabled: false, readSigners, unreadSigners };
   };
 
-  const handleResendNotifications = async (documentId: string, signersToResend?: { name: string; phone: string }[]) => {
+  const handleResendNotifications = async (documentId: string, signersToResend?: {name: string;phone: string;}[]) => {
     try {
       const {
-        data: { user },
+        data: { user }
       } = await supabase.auth.getUser();
       if (!user) return;
 
       // Get document details and signers
-      const { data: documentData } = await supabase
-        .from("documents")
-        .select("*, document_signers(*)")
-        .eq("id", documentId)
-        .single();
+      const { data: documentData } = await supabase.
+      from("documents").
+      select("*, document_signers(*)").
+      eq("id", documentId).
+      single();
 
       if (!documentData) {
         toast({
           title: "Erro",
           description: "Documento não encontrado.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -689,7 +689,7 @@ export const DocumentsTable = ({
         toast({
           title: "Erro",
           description: "Configurações da empresa não encontradas.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -706,14 +706,14 @@ export const DocumentsTable = ({
       if (pendingSigners.length === 0) {
         toast({
           title: "Nenhum signatário pendente",
-          description: "Todos os signatários já assinaram ou leram a mensagem.",
+          description: "Todos os signatários já assinaram ou leram a mensagem."
         });
         return;
       }
 
       toast({
         title: "Reenviando notificações",
-        description: `Enviando para ${pendingSigners.length} signatário(s)...`,
+        description: `Enviando para ${pendingSigners.length} signatário(s)...`
       });
 
       // Send to each pending signer
@@ -728,8 +728,8 @@ export const DocumentsTable = ({
               documentId: documentData.id,
               organizationName: companyData.company_name,
               userId: user.id,
-              brySignerLink: signer.bry_signer_link,
-            },
+              brySignerLink: signer.bry_signer_link
+            }
           });
         }
 
@@ -743,22 +743,22 @@ export const DocumentsTable = ({
               documentId: documentData.id,
               organizationName: companyData.company_name,
               isCompleted: false,
-              brySignerLink: signer.bry_signer_link,
-            },
+              brySignerLink: signer.bry_signer_link
+            }
           });
         }
       }
 
       toast({
         title: "Notificações reenviadas",
-        description: `Email e WhatsApp enviados para ${pendingSigners.length} signatário(s).`,
+        description: `Email e WhatsApp enviados para ${pendingSigners.length} signatário(s).`
       });
     } catch (error) {
       console.error("Error resending notifications:", error);
       toast({
         title: "Erro ao reenviar",
         description: "Não foi possível reenviar as notificações.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -768,7 +768,7 @@ export const DocumentsTable = ({
     try {
       // Use edge function for consistency with email attachment
       const { data: result, error } = await supabase.functions.invoke("download-complete-document", {
-        body: { documentId },
+        body: { documentId }
       });
 
       if (error || result?.error) {
@@ -797,14 +797,14 @@ export const DocumentsTable = ({
 
       toast({
         title: "Relatório baixado",
-        description: "Relatório de assinaturas baixado com sucesso.",
+        description: "Relatório de assinaturas baixado com sucesso."
       });
     } catch (error: any) {
       console.error("Error downloading certificate:", error);
       toast({
         title: "Erro ao baixar relatório",
         description: error.message || "Não foi possível gerar o relatório.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setDownloadingCertificateId(null);
@@ -815,11 +815,11 @@ export const DocumentsTable = ({
     try {
       toast({
         title: "Baixando relatório...",
-        description: "Obtendo relatório de evidências do BRy.",
+        description: "Obtendo relatório de evidências do BRy."
       });
 
       const response = await supabase.functions.invoke("bry-download-report", {
-        body: { documentId },
+        body: { documentId }
       });
 
       if (response.error) {
@@ -842,14 +842,14 @@ export const DocumentsTable = ({
 
       toast({
         title: "Download concluído",
-        description: "Relatório de evidências baixado com sucesso.",
+        description: "Relatório de evidências baixado com sucesso."
       });
     } catch (error: any) {
       console.error("Error downloading report:", error);
       toast({
         title: "Erro ao baixar relatório",
         description: error.message || "Não foi possível baixar o relatório de evidências.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -857,11 +857,11 @@ export const DocumentsTable = ({
   const handleOpenValidation = async (documentId: string) => {
     try {
       toast({
-        title: "Obtendo link de validação...",
+        title: "Obtendo link de validação..."
       });
 
       const { data, error } = await supabase.functions.invoke("bry-get-validation-url", {
-        body: { documentId },
+        body: { documentId }
       });
 
       if (error) {
@@ -878,7 +878,7 @@ export const DocumentsTable = ({
       toast({
         title: "Erro ao obter validação",
         description: error.message || "Não foi possível obter o link de validação.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -894,7 +894,7 @@ export const DocumentsTable = ({
     try {
       toast({
         title: "Preparando download...",
-        description: `Baixando ${doc.envelopeDocuments.length} documentos...`,
+        description: `Baixando ${doc.envelopeDocuments.length} documentos...`
       });
 
       const zip = new JSZip();
@@ -915,9 +915,9 @@ export const DocumentsTable = ({
         if (!filePath) continue;
 
         // Get signed URL
-        const { data: signedData, error: signedError } = await supabase.storage
-          .from("documents")
-          .createSignedUrl(filePath, 3600);
+        const { data: signedData, error: signedError } = await supabase.storage.
+        from("documents").
+        createSignedUrl(filePath, 3600);
 
         if (signedError || !signedData?.signedUrl) continue;
 
@@ -943,14 +943,14 @@ export const DocumentsTable = ({
 
       toast({
         title: "Download concluído",
-        description: `ZIP com ${doc.envelopeDocuments.length} documentos baixado com sucesso.`,
+        description: `ZIP com ${doc.envelopeDocuments.length} documentos baixado com sucesso.`
       });
     } catch (error: any) {
       console.error("Error downloading envelope:", error);
       toast({
         title: "Erro ao baixar envelope",
         description: error.message || "Não foi possível baixar os documentos.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -972,17 +972,17 @@ export const DocumentsTable = ({
   return (
     <>
       {/* Empty State */}
-      {documents.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
+      {documents.length === 0 &&
+      <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
           <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p className="text-sm font-medium">Nenhum documento encontrado</p>
           <p className="text-xs mt-1">Seus documentos aparecerão aqui após serem enviados</p>
         </div>
-      )}
+      }
 
       {/* Desktop Table View */}
-      {documents.length > 0 && (
-        <div className="hidden md:block rounded-xl overflow-hidden">
+      {documents.length > 0 &&
+      <div className="hidden md:block rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="border-none bg-card hover:bg-card">
@@ -994,83 +994,83 @@ export const DocumentsTable = ({
             </TableHeader>
             <TableBody>
               {documents.map((doc, index) => {
-                const statusInfo = statusConfig[doc.status];
-                const progressPercentage = (doc.signedBy / doc.signers) * 100;
-                const prescriptionBg = isPrescription(doc) ? "bg-purple-50 dark:bg-purple-900/20" : "";
-                return (
-                  <TableRow
-                    key={doc.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, doc.id)}
-                    onDragEnd={handleDragEnd}
-                    className={`border-none ${prescriptionBg || (index % 2 === 0 ? "bg-card" : "bg-gray-50 dark:bg-muted/50")} hover:opacity-80`}
-                  >
+              const statusInfo = statusConfig[doc.status];
+              const progressPercentage = doc.signedBy / doc.signers * 100;
+              const prescriptionBg = isPrescription(doc) ? "bg-purple-50 dark:bg-purple-900/20" : "";
+              return (
+                <TableRow
+                  key={doc.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, doc.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`border-none ${prescriptionBg || (index % 2 === 0 ? "bg-card" : "bg-gray-50 dark:bg-muted/50")} hover:opacity-80`}>
+                  
                     <TableCell>
                       <div
-                        className={`flex items-center gap-2 ${doc.isEnvelope ? "cursor-pointer hover:opacity-70" : ""}`}
-                        onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
-                      >
-                        {doc.isEnvelope ? (
-                          <FolderOpen className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                        ) : (
-                          <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                        )}
+                      className={`flex items-center gap-2 ${doc.isEnvelope ? "cursor-pointer hover:opacity-70" : ""}`}
+                      onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}>
+                      
+                        {doc.isEnvelope ?
+                      <FolderOpen className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} /> :
+
+                      <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                      }
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-muted-foreground/70">{doc.name}</span>
-                            {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                              <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
+                            {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 &&
+                          <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
                                 {doc.documentCount} docs
                               </span>
-                            )}
+                          }
                           </div>
                           {/* Patient name for prescriptions */}
-                          {isPrescription(doc) && doc.patientName && (
-                            <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
-                          )}
+                          {isPrescription(doc) && doc.patientName &&
+                        <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
+                        }
                           <div className="flex items-center gap-2">
                             <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
                             {/* For prescriptions, show prescription doc type instead of signature mode */}
-                            {isPrescription(doc) && doc.prescriptionDocType ? (
-                              <Badge
-                                variant="outline"
-                                className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0"
-                              >
+                            {isPrescription(doc) && doc.prescriptionDocType ?
+                          <Badge
+                            variant="outline"
+                            className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
+                            
                                 {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                              </Badge>
-                            ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                              <Badge
-                                variant="outline"
-                                className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}
-                              >
+                              </Badge> :
+                          doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
+                          <Badge
+                            variant="outline"
+                            className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
+                            
                                 {signatureModeConfig[doc.signatureMode].label}
-                              </Badge>
-                            ) : null}
+                              </Badge> :
+                          null}
                           </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {/* Hide signer badges for prescriptions */}
-                      {!isPrescription(doc) && (
-                        <TooltipProvider>
+                      {!isPrescription(doc) &&
+                    <TooltipProvider>
                           <div className="flex items-center gap-1">
                             {doc.signerNames?.map((name, idx) => {
-                              const status = doc.signerStatuses?.[idx] || "pending";
-                              const email = doc.signerEmails?.[idx] || "";
-                              const phone = doc.signerPhones?.[idx] || "";
-                              const bgColor =
-                                status === "signed"
-                                  ? "bg-blue-700"
-                                  : status === "rejected"
-                                    ? "bg-red-700"
-                                    : "bg-gray-400";
-                              return (
-                                <Tooltip key={idx}>
+                          const status = doc.signerStatuses?.[idx] || "pending";
+                          const email = doc.signerEmails?.[idx] || "";
+                          const phone = doc.signerPhones?.[idx] || "";
+                          const bgColor =
+                          status === "signed" ?
+                          "bg-blue-700" :
+                          status === "rejected" ?
+                          "bg-red-700" :
+                          "bg-gray-400";
+                          return (
+                            <Tooltip key={idx}>
                                   <TooltipTrigger asChild>
                                     <div
-                                      className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}
-                                    >
+                                  className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}>
+                                  
                                       {getInitials(name)}
                                     </div>
                                   </TooltipTrigger>
@@ -1079,12 +1079,12 @@ export const DocumentsTable = ({
                                     {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
                                     <p className="text-xs text-muted-foreground">{email}</p>
                                   </TooltipContent>
-                                </Tooltip>
-                              );
-                            })}
+                                </Tooltip>);
+
+                        })}
                           </div>
                         </TooltipProvider>
-                      )}
+                    }
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-4">
@@ -1092,45 +1092,45 @@ export const DocumentsTable = ({
                           <div className="relative w-12 h-12 flex items-center justify-center">
                             <svg className="w-12 h-12 transform -rotate-90 absolute inset-0">
                               <circle
-                                cx="24"
-                                cy="24"
-                                r="20"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                                className="text-muted/50"
-                              />
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              className="text-muted/50" />
+                            
                               <circle
-                                cx="24"
-                                cy="24"
-                                r="20"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                                strokeDasharray={`${2 * Math.PI * 20}`}
-                                strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`}
-                                className={doc.status === "expired" ? "text-red-500" : "text-blue-500"}
-                                strokeLinecap="round"
-                                style={{
-                                  transition: "stroke-dashoffset 1s ease-in-out",
-                                }}
-                              />
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              strokeDasharray={`${2 * Math.PI * 20}`}
+                              strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`}
+                              className={doc.status === "expired" ? "text-red-500" : "text-blue-500"}
+                              strokeLinecap="round"
+                              style={{
+                                transition: "stroke-dashoffset 1s ease-in-out"
+                              }} />
+                            
                             </svg>
                             <span className="text-[11px] font-bold relative z-10 text-foreground">
                               {doc.signedBy}/{doc.signers}
                             </span>
                           </div>
                         </div>
-                        {showFolderActions && folders && folders.length > 0 && (
-                          <Popover
-                            open={openFolderPopovers[doc.id] || false}
-                            onOpenChange={(open) => setOpenFolderPopovers((prev) => ({ ...prev, [doc.id]: open }))}
-                          >
+                        {showFolderActions && folders && folders.length > 0 &&
+                      <Popover
+                        open={openFolderPopovers[doc.id] || false}
+                        onOpenChange={(open) => setOpenFolderPopovers((prev) => ({ ...prev, [doc.id]: open }))}>
+                        
                             <PopoverTrigger asChild>
                               <Button
-                                variant="ghost"
-                                className="w-[180px] justify-between bg-secondary/50 backdrop-blur-sm border-none hover:bg-secondary text-muted-foreground hover:text-foreground"
-                              >
+                            variant="ghost"
+                            className="w-[180px] justify-between bg-secondary/50 backdrop-blur-sm border-none hover:bg-secondary text-muted-foreground hover:text-foreground">
+                            
                                 <span className="flex items-center gap-2">
                                   <Folder className="w-4 h-4" />
                                   Selecionar pasta
@@ -1139,415 +1139,415 @@ export const DocumentsTable = ({
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
-                              {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                                <div
-                                  key={folder.id}
-                                  className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
-                                  style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-                                >
-                                  {hasChildren ? (
-                                    <span
-                                      onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                      className="cursor-pointer hover:bg-accent rounded p-0.5"
-                                    >
-                                      {expandedFolders.has(folder.id) ? (
-                                        <ChevronDown className="w-3 h-3" />
-                                      ) : (
-                                        <ChevronRight className="w-3 h-3" />
-                                      )}
-                                    </span>
-                                  ) : (
-                                    <span className="w-4" />
-                                  )}
+                              {hierarchicalFolders.map(({ folder, level, hasChildren }) =>
+                          <div
+                            key={folder.id}
+                            className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
+                            style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}>
+                            
+                                  {hasChildren ?
+                            <span
+                              onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                              className="cursor-pointer hover:bg-accent rounded p-0.5">
+                              
+                                      {expandedFolders.has(folder.id) ?
+                              <ChevronDown className="w-3 h-3" /> :
+
+                              <ChevronRight className="w-3 h-3" />
+                              }
+                                    </span> :
+
+                            <span className="w-4" />
+                            }
                                   {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
                                   <span className="flex-1 cursor-default">{folder.name}</span>
                                   <span
-                                    onClick={() => handleFolderSelect(doc.id, folder.id)}
-                                    className="cursor-pointer hover:bg-accent rounded p-0.5"
-                                    title="Mover para esta pasta"
-                                  >
+                              onClick={() => handleFolderSelect(doc.id, folder.id)}
+                              className="cursor-pointer hover:bg-accent rounded p-0.5"
+                              title="Mover para esta pasta">
+                              
                                     <Check className="w-3 h-3 text-muted-foreground" />
                                   </span>
                                 </div>
-                              ))}
+                          )}
                             </PopoverContent>
                           </Popover>
-                        )}
+                      }
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 justify-end">
-                        {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() => handleSignDocument(doc.id, doc.name)}
-                            title="Assinar documento"
-                          >
+                        {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() => handleSignDocument(doc.id, doc.name)}
+                        title="Assinar documento">
+                        
                             <PenTool className="w-4 h-4 text-muted-foreground" />
                           </Button>
-                        )}
+                      }
+                        
+
+
+
+
+
+
+
+
+
+                      
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent"
-                          onClick={() =>
-                            doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)
-                          }
-                          title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
-                        >
-                          <Eye className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent"
-                          onClick={() =>
-                            doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
-                          }
-                          title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
-                        >
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() =>
+                        doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
+                        }
+                        title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}>
+                        
                           <Download className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() => handleDownloadCertificatePDF(doc.id)}
-                            title="Baixar documento assinado"
-                            disabled={downloadingCertificateId === doc.id}
-                          >
-                            {downloadingCertificateId === doc.id ? (
-                              <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                            ) : (
-                              <FileDown className="w-4 h-4 text-muted-foreground" />
-                            )}
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() => handleDownloadCertificatePDF(doc.id)}
+                        title="Baixar documento assinado"
+                        disabled={downloadingCertificateId === doc.id}>
+                        
+                            {downloadingCertificateId === doc.id ?
+                        <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> :
+
+                        <FileDown className="w-4 h-4 text-muted-foreground" />
+                        }
                           </Button>
-                        )}
-                        {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() =>
-                              doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
-                            }
-                            title="Baixar PDF com evidências das assinaturas coletadas"
-                          >
+                      }
+                        {doc.bryEnvelopeUuid && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() =>
+                        doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                        }
+                        title="Baixar PDF com evidências das assinaturas coletadas">
+                        
                             <FileCheck className="w-4 h-4 text-muted-foreground" />
                           </Button>
-                        )}
-                        {doc.bryEnvelopeUuid && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() => handleOpenValidation(doc.id)}
-                            title="Validar assinaturas no portal BRy"
-                          >
+                      }
+                        {doc.bryEnvelopeUuid &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() => handleOpenValidation(doc.id)}
+                        title="Validar assinaturas no portal BRy">
+                        
                             <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                           </Button>
-                        )}
-                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
-                            title="Visualizar certificado de validação"
-                          >
+                      }
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
+                        title="Visualizar certificado de validação">
+                        
                             <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                           </Button>
-                        )}
+                      }
                         {doc.status !== "signed" &&
-                          (() => {
-                            const iconState = getResendIconState(doc);
-                            return (
-                              <Tooltip>
+                      (() => {
+                        const iconState = getResendIconState(doc);
+                        return (
+                          <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full hover:bg-transparent"
-                                    onClick={() =>
-                                      !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
-                                    }
-                                    disabled={iconState.disabled}
-                                  >
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full hover:bg-transparent"
+                                onClick={() =>
+                                !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                                }
+                                disabled={iconState.disabled}>
+                                
                                     <Mail className={`w-4 h-4 ${iconState.color}`} />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs">
-                                  {iconState.readSigners.length > 0 && (
-                                    <div className="text-green-600 mb-1">
+                                  {iconState.readSigners.length > 0 &&
+                              <div className="text-green-600 mb-1">
                                       <p className="font-semibold text-xs">✓ Leram:</p>
-                                      {iconState.readSigners.map((s, i) => (
-                                        <p key={i} className="text-xs">
+                                      {iconState.readSigners.map((s, i) =>
+                                <p key={i} className="text-xs">
                                           {s.name}
                                         </p>
-                                      ))}
+                                )}
                                     </div>
-                                  )}
-                                  {iconState.unreadSigners.length > 0 && (
-                                    <div className="text-yellow-600">
+                              }
+                                  {iconState.unreadSigners.length > 0 &&
+                              <div className="text-yellow-600">
                                       <p className="font-semibold text-xs">⏳ Pendentes:</p>
-                                      {iconState.unreadSigners.map((s, i) => (
-                                        <p key={i} className="text-xs">
+                                      {iconState.unreadSigners.map((s, i) =>
+                                <p key={i} className="text-xs">
                                           {s.name}
                                         </p>
-                                      ))}
+                                )}
                                     </div>
-                                  )}
-                                  {iconState.disabled && (
-                                    <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
-                                  )}
-                                  {!iconState.disabled && iconState.unreadSigners.length > 0 && (
-                                    <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
-                                  )}
+                              }
+                                  {iconState.disabled &&
+                              <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
+                              }
+                                  {!iconState.disabled && iconState.unreadSigners.length > 0 &&
+                              <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
+                              }
                                 </TooltipContent>
-                              </Tooltip>
-                            );
-                          })()}
-                        {doc.status !== "signed" && doc.status !== "cancelled" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-transparent"
-                            onClick={() => handleCancelDocument(doc)}
-                            title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}
-                          >
+                              </Tooltip>);
+
+                      })()}
+                        {doc.status !== "signed" && doc.status !== "cancelled" &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent"
+                        onClick={() => handleCancelDocument(doc)}
+                        title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
+                        
                             <Trash2 className="w-4 h-4 text-muted-foreground" />
                           </Button>
-                        )}
+                      }
                       </div>
                     </TableCell>
-                  </TableRow>
-                );
-              })}
+                  </TableRow>);
+
+            })}
             </TableBody>
           </Table>
         </div>
-      )}
+      }
 
       {/* Mobile Card View */}
-      {documents.length > 0 && (
-        <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
+      {documents.length > 0 &&
+      <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
           {documents.map((doc) => {
-            const statusInfo = statusConfig[doc.status];
-            const prescriptionBg = isPrescription(doc) ? "bg-purple-100 dark:bg-purple-900/20" : "bg-card";
-            return (
-              <div
-                key={doc.id}
-                className={`${prescriptionBg} rounded-lg p-4 space-y-3`}
-                draggable
-                onDragStart={(e) => handleDragStart(e, doc.id)}
-                onDragEnd={handleDragEnd}
-              >
+          const statusInfo = statusConfig[doc.status];
+          const prescriptionBg = isPrescription(doc) ? "bg-purple-100 dark:bg-purple-900/20" : "bg-card";
+          return (
+            <div
+              key={doc.id}
+              className={`${prescriptionBg} rounded-lg p-4 space-y-3`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, doc.id)}
+              onDragEnd={handleDragEnd}>
+              
                 <div className="space-y-3">
                   {/* Date and Action Buttons on same line - ABOVE document name */}
                   <div className="flex items-center justify-between">
                     <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
                     <div className="flex gap-1">
-                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() => handleSignDocument(doc.id, doc.name)}
-                          title="Assinar documento"
-                        >
+                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => handleSignDocument(doc.id, doc.name)}
+                      title="Assinar documento">
+                      
                           <PenTool className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                      )}
+                    }
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-transparent h-8 w-8"
-                        onClick={() => (doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id))}
-                        title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
-                      >
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)}
+                      title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}>
+                      
                         <Eye className="w-4 h-4 text-muted-foreground" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full hover:bg-transparent h-8 w-8"
-                        onClick={() =>
-                          doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
-                        }
-                        title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
-                      >
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() =>
+                      doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
+                      }
+                      title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}>
+                      
                         <Download className="w-4 h-4 text-muted-foreground" />
                       </Button>
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() => handleDownloadCertificatePDF(doc.id)}
-                          title="Baixar certificado de validação (PDF)"
-                          disabled={downloadingCertificateId === doc.id}
-                        >
-                          {downloadingCertificateId === doc.id ? (
-                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                          ) : (
-                            <FileDown className="w-4 h-4 text-muted-foreground" />
-                          )}
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => handleDownloadCertificatePDF(doc.id)}
+                      title="Baixar certificado de validação (PDF)"
+                      disabled={downloadingCertificateId === doc.id}>
+                      
+                          {downloadingCertificateId === doc.id ?
+                      <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> :
+
+                      <FileDown className="w-4 h-4 text-muted-foreground" />
+                      }
                         </Button>
-                      )}
-                      {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() =>
-                            doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
-                          }
-                          title="Baixar PDF com evidências das assinaturas coletadas"
-                        >
+                    }
+                      {doc.bryEnvelopeUuid && doc.signedBy > 0 &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() =>
+                      doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                      }
+                      title="Baixar PDF com evidências das assinaturas coletadas">
+                      
                           <FileCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                      )}
-                      {doc.bryEnvelopeUuid && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() => handleOpenValidation(doc.id)}
-                          title="Validar assinaturas no portal BRy"
-                        >
+                    }
+                      {doc.bryEnvelopeUuid &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => handleOpenValidation(doc.id)}
+                      title="Validar assinaturas no portal BRy">
+                      
                           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                      )}
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
-                          title="Visualizar certificado de validação"
-                        >
+                    }
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
+                      title="Visualizar certificado de validação">
+                      
                           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                      )}
+                    }
                       {doc.status !== "signed" &&
-                        (() => {
-                          const iconState = getResendIconState(doc);
-                          return (
-                            <Tooltip>
+                    (() => {
+                      const iconState = getResendIconState(doc);
+                      return (
+                        <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="rounded-full hover:bg-transparent h-8 w-8"
-                                  onClick={() =>
-                                    !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
-                                  }
-                                  disabled={iconState.disabled}
-                                >
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full hover:bg-transparent h-8 w-8"
+                              onClick={() =>
+                              !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                              }
+                              disabled={iconState.disabled}>
+                              
                                   <Mail className={`w-4 h-4 ${iconState.color}`} />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                {iconState.readSigners.length > 0 && (
-                                  <div className="text-green-600 mb-1">
+                                {iconState.readSigners.length > 0 &&
+                            <div className="text-green-600 mb-1">
                                     <p className="font-semibold text-xs">✓ Leram:</p>
-                                    {iconState.readSigners.map((s, i) => (
-                                      <p key={i} className="text-xs">
+                                    {iconState.readSigners.map((s, i) =>
+                              <p key={i} className="text-xs">
                                         {s.name}
                                       </p>
-                                    ))}
+                              )}
                                   </div>
-                                )}
-                                {iconState.unreadSigners.length > 0 && (
-                                  <div className="text-yellow-600">
+                            }
+                                {iconState.unreadSigners.length > 0 &&
+                            <div className="text-yellow-600">
                                     <p className="font-semibold text-xs">⏳ Pendentes:</p>
-                                    {iconState.unreadSigners.map((s, i) => (
-                                      <p key={i} className="text-xs">
+                                    {iconState.unreadSigners.map((s, i) =>
+                              <p key={i} className="text-xs">
                                         {s.name}
                                       </p>
-                                    ))}
+                              )}
                                   </div>
-                                )}
-                                {iconState.disabled && (
-                                  <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
-                                )}
-                                {!iconState.disabled && iconState.unreadSigners.length > 0 && (
-                                  <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
-                                )}
+                            }
+                                {iconState.disabled &&
+                            <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
+                            }
+                                {!iconState.disabled && iconState.unreadSigners.length > 0 &&
+                            <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
+                            }
                               </TooltipContent>
-                            </Tooltip>
-                          );
-                        })()}
-                      {doc.status !== "signed" && doc.status !== "cancelled" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full hover:bg-transparent h-8 w-8"
-                          onClick={() => handleCancelDocument(doc)}
-                          title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}
-                        >
+                            </Tooltip>);
+
+                    })()}
+                      {doc.status !== "signed" && doc.status !== "cancelled" &&
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-transparent h-8 w-8"
+                      onClick={() => handleCancelDocument(doc)}
+                      title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
+                      
                           <Trash2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                      )}
+                    }
                     </div>
                   </div>
 
                   {/* Document Name */}
                   <div
-                    className={`space-y-2 ${doc.isEnvelope ? "cursor-pointer" : ""}`}
-                    onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
-                  >
+                  className={`space-y-2 ${doc.isEnvelope ? "cursor-pointer" : ""}`}
+                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}>
+                  
                     <div className="flex items-center gap-2 flex-wrap">
-                      {doc.isEnvelope ? (
-                        <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                      ) : (
-                        <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                      )}
+                      {doc.isEnvelope ?
+                    <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} /> :
+
+                    <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                    }
                       <p className="font-medium text-muted-foreground/70">{doc.name}</p>
-                      {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                        <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                      {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 &&
+                    <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                           {doc.documentCount} docs
                         </span>
-                      )}
+                    }
                     </div>
                     {/* Patient name for prescriptions */}
-                    {isPrescription(doc) && doc.patientName && (
-                      <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
-                    )}
+                    {isPrescription(doc) && doc.patientName &&
+                  <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
+                  }
                     {/* For prescriptions, show prescription doc type instead of signature mode */}
-                    {isPrescription(doc) && doc.prescriptionDocType ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit"
-                      >
+                    {isPrescription(doc) && doc.prescriptionDocType ?
+                  <Badge
+                    variant="outline"
+                    className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit">
+                    
                         {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                      </Badge>
-                    ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                      <Badge
-                        variant="outline"
-                        className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}
-                      >
+                      </Badge> :
+                  doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
+                  <Badge
+                    variant="outline"
+                    className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
+                    
                         {signatureModeConfig[doc.signatureMode].label}
-                      </Badge>
-                    ) : null}
+                      </Badge> :
+                  null}
 
                     {/* Signer Badges below document name - hide for prescriptions */}
-                    {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) && (
-                      <TooltipProvider>
+                    {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) &&
+                  <TooltipProvider>
                         <div className="flex gap-1 justify-end">
                           {doc.signerStatuses?.map((status, idx) => {
-                            const name = doc.signerNames?.[idx] || "";
-                            const email = doc.signerEmails?.[idx] || "";
-                            const phone = doc.signerPhones?.[idx] || "";
-                            return (
-                              <Tooltip key={idx}>
+                        const name = doc.signerNames?.[idx] || "";
+                        const email = doc.signerEmails?.[idx] || "";
+                        const phone = doc.signerPhones?.[idx] || "";
+                        return (
+                          <Tooltip key={idx}>
                                 <TooltipTrigger asChild>
                                   <div
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}
-                                  >
+                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}>
+                                
                                     {name ? getInitials(name) : idx + 1}
                                   </div>
                                 </TooltipTrigger>
@@ -1556,29 +1556,29 @@ export const DocumentsTable = ({
                                   {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
                                   <p className="text-xs text-muted-foreground">{email}</p>
                                 </TooltipContent>
-                              </Tooltip>
-                            );
-                          })}
+                              </Tooltip>);
+
+                      })}
                         </div>
                       </TooltipProvider>
-                    )}
+                  }
                   </div>
                 </div>
 
                 {/* Folder selection */}
-                {showFolderActions && folders && folders.length > 0 && (
-                  <div className="pt-2">
+                {showFolderActions && folders && folders.length > 0 &&
+              <div className="pt-2">
                     <Popover
-                      open={openFolderPopovers[`mobile-${doc.id}`] || false}
-                      onOpenChange={(open) =>
-                        setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: open }))
-                      }
-                    >
+                  open={openFolderPopovers[`mobile-${doc.id}`] || false}
+                  onOpenChange={(open) =>
+                  setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: open }))
+                  }>
+                  
                       <PopoverTrigger asChild>
                         <Button
-                          variant="ghost"
-                          className="w-full justify-between bg-muted/50 backdrop-blur-sm border-none hover:bg-muted text-muted-foreground hover:text-foreground"
-                        >
+                      variant="ghost"
+                      className="w-full justify-between bg-muted/50 backdrop-blur-sm border-none hover:bg-muted text-muted-foreground hover:text-foreground">
+                      
                           <span className="flex items-center gap-2">
                             <Folder className="w-4 h-4" />
                             Selecionar pasta
@@ -1587,57 +1587,57 @@ export const DocumentsTable = ({
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
-                        {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                          <div
-                            key={folder.id}
-                            className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
-                            style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-                          >
-                            {hasChildren ? (
-                              <span
-                                onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                className="cursor-pointer hover:bg-accent rounded p-0.5"
-                              >
-                                {expandedFolders.has(folder.id) ? (
-                                  <ChevronDown className="w-3 h-3" />
-                                ) : (
-                                  <ChevronRight className="w-3 h-3" />
-                                )}
-                              </span>
-                            ) : (
-                              <span className="w-4" />
-                            )}
+                        {hierarchicalFolders.map(({ folder, level, hasChildren }) =>
+                    <div
+                      key={folder.id}
+                      className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
+                      style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}>
+                      
+                            {hasChildren ?
+                      <span
+                        onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                        className="cursor-pointer hover:bg-accent rounded p-0.5">
+                        
+                                {expandedFolders.has(folder.id) ?
+                        <ChevronDown className="w-3 h-3" /> :
+
+                        <ChevronRight className="w-3 h-3" />
+                        }
+                              </span> :
+
+                      <span className="w-4" />
+                      }
                             {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
                             <span className="flex-1 cursor-default">{folder.name}</span>
                             <span
-                              onClick={() => {
-                                handleFolderSelect(doc.id, folder.id);
-                                setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: false }));
-                              }}
-                              className="cursor-pointer hover:bg-accent rounded p-0.5"
-                              title="Mover para esta pasta"
-                            >
+                        onClick={() => {
+                          handleFolderSelect(doc.id, folder.id);
+                          setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: false }));
+                        }}
+                        className="cursor-pointer hover:bg-accent rounded p-0.5"
+                        title="Mover para esta pasta">
+                        
                               <Check className="w-3 h-3 text-muted-foreground" />
                             </span>
                           </div>
-                        ))}
+                    )}
                       </PopoverContent>
                     </Popover>
                   </div>
-                )}
-              </div>
-            );
-          })}
+              }
+              </div>);
+
+        })}
         </div>
-      )}
+      }
 
       {/* Envelope Documents Dialog */}
       <EnvelopeDocumentsDialog
         open={envelopeDialogOpen}
         onOpenChange={setEnvelopeDialogOpen}
         envelopeTitle={selectedEnvelope?.title || ""}
-        documents={selectedEnvelope?.documents || []}
-      />
+        documents={selectedEnvelope?.documents || []} />
+      
 
       {/* BRy Signing Dialog */}
       <BrySigningDialog
@@ -1646,8 +1646,8 @@ export const DocumentsTable = ({
         signingUrl={signingUrl}
         documentName={signingDocumentName}
         documentId={signingDocumentId}
-        onSigningComplete={handleSigningComplete}
-      />
-    </>
-  );
+        onSigningComplete={handleSigningComplete} />
+      
+    </>);
+
 };
