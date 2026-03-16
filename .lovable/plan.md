@@ -1,16 +1,33 @@
 
 
-## Análise: Botões já estão idênticos
+## Mover botão de filtro abaixo do botão "Novo Documento"
 
-Após inspecionar o código e capturar screenshots das páginas Dashboard e Relatórios, os botões já estão **idênticos** em todas as páginas:
+### Mudança
 
-- **Mesmo código**: `bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal`
-- **Mesma posição**: Dentro de `flex items-center justify-between` com container `p-8 space-y-6`
-- **Mesmo tamanho**: Confirmado visualmente nos screenshots
+**Arquivo:** `src/pages/Documents.tsx` (linhas 280-295)
 
-A única diferença visual entre as páginas é que o Dashboard tem um subtítulo (dia/data) abaixo do título, mas isso não afeta a posição do botão — ele permanece alinhado ao topo direito em todas as páginas.
+Separar o botão de filtro do header e colocá-lo em uma nova linha abaixo, justificado à direita. O botão "Novo Documento" permanece no header ao lado do título.
 
-Se você está vendo uma diferença, pode ser cache do navegador. Tente um hard refresh (Ctrl+Shift+R / Cmd+Shift+R).
+**De:**
+```
+<div flex items-center justify-between>
+  <h1>Documentos</h1>
+  <div flex items-center gap-2>
+    [Botão Filtro] [Botão Novo Documento]
+  </div>
+</div>
+```
 
-**Nenhuma alteração de código é necessária.**
+**Para:**
+```
+<div flex items-center justify-between>
+  <h1>Documentos</h1>
+  <UploadDialog />
+</div>
+<div flex justify-end>
+  [Botão Filtro]
+</div>
+```
+
+O botão de filtro fica sozinho na linha abaixo, alinhado à direita.
 
