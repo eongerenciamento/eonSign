@@ -191,7 +191,7 @@ export function AppSidebar() {
             <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer">
               <img
                 alt="Éon Sign"
-                className="h-11,5 w-auto object-contain cursor-pointer"
+                className="h-11 w-auto object-contain cursor-pointer"
                 src="/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png"
               />
             </a>
