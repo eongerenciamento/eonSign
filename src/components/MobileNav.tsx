@@ -105,14 +105,6 @@ export function MobileNav() {
         </nav>
       </div>
 
-      {/* Spacer para evitar que conteúdo fique escondido */}
-      <div 
-        className="md:hidden"
-        style={{ 
-          height: 'calc(env(safe-area-inset-top, 0px) + 52px)',
-          paddingTop: 'env(safe-area-inset-top, 0px)'
-        }}
-      />
 
       <UserProfileSheet 
         open={profileSheetOpen} 

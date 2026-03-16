@@ -30,7 +30,7 @@ export const Layout = ({
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto md:m-3 bg-gray-100 dark:bg-background md:rounded-2xl md:shadow-lg">
+          <main className="flex-1 overflow-y-auto md:m-3 bg-gray-100 dark:bg-background md:rounded-2xl md:shadow-lg pt-[calc(env(safe-area-inset-top,0px)+60px)] md:pt-0">
             {children}
           </main>
         </div>
