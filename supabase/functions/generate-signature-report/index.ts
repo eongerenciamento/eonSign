@@ -234,11 +234,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (logoImage) {
       const logoOrigW = logoImage.width;
       const logoOrigH = logoImage.height;
-      const logoHeight = 30;
+      const logoHeight = 35;
       const logoWidth = (logoOrigW / logoOrigH) * logoHeight;
       page.drawImage(logoImage, {
         x: margin,
-        y: pageHeight - 55,
+        y: pageHeight - 57,
         width: logoWidth,
         height: logoHeight,
       });
@@ -255,9 +255,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Title - white for contrast with dark header
     page.drawText("RELATÓRIO DE ASSINATURAS", {
-      x: pageWidth - margin - helveticaBold.widthOfTextAtSize("RELATÓRIO DE ASSINATURAS", 16),
+      x: pageWidth - margin - helveticaBold.widthOfTextAtSize("RELATÓRIO DE ASSINATURAS", 13),
       y: pageHeight - 45,
-      size: 16,
+      size: 13,
       font: helveticaBold,
       color: white,
     });

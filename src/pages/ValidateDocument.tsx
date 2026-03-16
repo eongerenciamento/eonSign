@@ -226,7 +226,7 @@ const ValidateDocument = () => {
         logoImg.onerror = () => reject();
         logoImg.src = "/email-assets/logobranca-6.png";
       });
-      const logoHeight = 8;
+      const logoHeight = 10;
       const logoWidth = (logoImg.naturalWidth / logoImg.naturalHeight) * logoHeight;
       doc.addImage(logoImg, "PNG", (pageWidth - logoWidth) / 2, 25, logoWidth, logoHeight);
     } catch {
