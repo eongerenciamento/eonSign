@@ -150,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Fetch document
     const { data: document, error: docError } = await supabase
       .from("documents")
-      .select("id, name, status, created_at, updated_at, user_id")
+      .select("id, name, status, created_at, updated_at, user_id, file_url")
       .eq("id", documentId)
       .single();
 
