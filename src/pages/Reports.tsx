@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown, BarChart3 } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown, BarChart3, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -32,6 +33,7 @@ const getAbbreviation = (text: string) => {
 };
 
 const Reports = () => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [dateFilter, setDateFilter] = useState("30");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -578,6 +580,10 @@ const Reports = () => {
           <div>
             <h1 className="text-sm font-bold text-muted-foreground">Relatórios</h1>
           </div>
+          <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
+            <Upload className="w-5 h-5 md:mr-2 text-white" />
+            <span className="hidden md:inline text-white">Documento</span>
+          </Button>
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
