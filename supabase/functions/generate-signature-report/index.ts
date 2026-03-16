@@ -727,15 +727,6 @@ const handler = async (req: Request): Promise<Response> => {
           height: qrSize,
         });
 
-        // QR code label below
-        const validLabel = normalizeText("Validacao");
-        lastPage.drawText(validLabel, {
-          x: qrX + qrSize / 2 - helveticaBold.widthOfTextAtSize(validLabel, 7) / 2,
-          y: qrY - 10,
-          size: 7,
-          font: helveticaBold,
-          color: gray600,
-        });
       }
     } catch (e) {
       console.log("Could not generate QR code:", e);
