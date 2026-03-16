@@ -51,8 +51,8 @@ export function MobileNav() {
   };
 
   const navBackground = resolvedTheme === 'dark' 
-    ? 'hsla(220, 10%, 18%, 0.65)' 
-    : 'linear-gradient(to right, rgba(15, 30, 65, 0.65) 0%, rgba(30, 58, 110, 0.65) 100%)';
+    ? 'hsla(220, 10%, 18%, 0.40)' 
+    : 'linear-gradient(to right, rgba(15, 30, 65, 0.40) 0%, rgba(30, 58, 110, 0.40) 100%)';
 
   return (
     <>
@@ -60,13 +60,13 @@ export function MobileNav() {
       <div className="fixed top-0 left-0 right-0 z-50 md:hidden">
         {/* Safe area para notch/dynamic island */}
         <div 
-          className="bg-background"
+          className="bg-transparent"
           style={{ height: 'env(safe-area-inset-top, 0px)' }}
         />
         
         {/* Nav flutuante com glassmorphism */}
         <nav 
-          className="mx-3 mt-2 rounded-full backdrop-blur-xl border border-white/10"
+          className="mx-3 mt-2 rounded-full backdrop-blur-xl backdrop-saturate-150 border border-white/10"
           style={{ background: navBackground }}
         >
           <div className="px-2 py-2 relative flex items-center justify-center">
