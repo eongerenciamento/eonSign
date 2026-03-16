@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const UploadDialog = () => {
