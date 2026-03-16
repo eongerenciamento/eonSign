@@ -122,3 +122,7 @@ All colors MUST be HSL.
   }
 }
 
+[data-sidebar="sidebar"] {
+  background: var(--gradient-sidebar) !important;
+}
+
