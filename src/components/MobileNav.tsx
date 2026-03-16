@@ -69,9 +69,9 @@ export function MobileNav() {
           className="mx-3 mt-2 rounded-full backdrop-blur-xl border border-white/10"
           style={{ background: navBackground }}
         >
-          <div className="px-2 py-2 flex items-center justify-center">
+          <div className="px-2 py-2 relative flex items-center justify-center">
             {/* Ícones de navegação centralizados */}
-            <div className="flex items-center justify-center gap-1.5 flex-1">
+            <div className="flex items-center justify-center gap-1.5">
               {items.map((item) => (
                 <NavLink
                   key={item.url}
@@ -91,7 +91,7 @@ export function MobileNav() {
 
             {/* Avatar para abrir o UserProfileSheet */}
             <button 
-              className="flex-shrink-0"
+              className="absolute right-2"
               onClick={() => setProfileSheetOpen(true)}
             >
               <Avatar className="h-8 w-8 border-2 border-white/20">
