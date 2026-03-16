@@ -5,7 +5,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown, Check, Folder } from "lucide-react";
+import {
+  Eye,
+  Download,
+  PenTool,
+  Trash2,
+  Mail,
+  FileCheck,
+  ShieldCheck,
+  FolderOpen,
+  FileText,
+  FileDown,
+  Loader2,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  Folder,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -65,64 +81,64 @@ interface DocumentsTableProps {
 const statusConfig = {
   pending: {
     label: "Pendente",
-    className: "bg-yellow-700 text-white hover:bg-yellow-700"
+    className: "bg-yellow-700 text-white hover:bg-yellow-700",
   },
   in_progress: {
     label: "Em Andamento",
-    className: "bg-blue-700 text-white hover:bg-blue-700"
+    className: "bg-blue-700 text-white hover:bg-blue-700",
   },
   signed: {
     label: "Assinado",
-    className: "bg-green-700 text-white hover:bg-green-700"
+    className: "bg-green-700 text-white hover:bg-green-700",
   },
   expired: {
     label: "Expirado",
-    className: "bg-red-700 text-white hover:bg-red-700"
+    className: "bg-red-700 text-white hover:bg-red-700",
   },
   cancelled: {
     label: "Cancelado",
-    className: "bg-red-700 text-white hover:bg-red-700"
-  }
+    className: "bg-red-700 text-white hover:bg-red-700",
+  },
 };
 
 const signatureModeConfig = {
   SIMPLE: {
     label: "Simples",
-    className: "bg-transparent border border-blue-700 text-blue-700"
+    className: "bg-transparent border border-blue-700 text-blue-700",
   },
   ADVANCED: {
     label: "Avançada",
-    className: "bg-transparent border border-green-600 text-green-600"
+    className: "bg-transparent border border-green-600 text-green-600",
   },
   QUALIFIED: {
     label: "ICP-Brasil",
-    className: "bg-transparent border border-green-600 text-green-600"
+    className: "bg-transparent border border-green-600 text-green-600",
   },
   PRESCRIPTION: {
     label: "Prescrição",
-    className: "bg-transparent border border-pink-500 text-pink-500"
-  }
+    className: "bg-transparent border border-pink-500 text-pink-500",
+  },
 };
 
 // Map prescription doc types to readable labels
 const prescriptionDocTypeLabels: Record<string, string> = {
-  'MEDICAMENTO': 'Medicamento',
-  'ATESTADO': 'Atestado',
-  'SOLICITACAO_EXAME': 'Exame',
-  'LAUDO': 'Laudo',
-  'SUMARIA_ALTA': 'Alta',
-  'ATENDIMENTO_CLINICO': 'Atendimento',
-  'DISPENSACAO_MEDICAMENTO': 'Dispensação',
-  'VACINACAO': 'Vacina',
-  'RELATORIO_MEDICO': 'Relatório',
+  MEDICAMENTO: "Medicamento",
+  ATESTADO: "Atestado",
+  SOLICITACAO_EXAME: "Exame",
+  LAUDO: "Laudo",
+  SUMARIA_ALTA: "Alta",
+  ATENDIMENTO_CLINICO: "Atendimento",
+  DISPENSACAO_MEDICAMENTO: "Dispensação",
+  VACINACAO: "Vacina",
+  RELATORIO_MEDICO: "Relatório",
 };
 
 // Check if document is a prescription (by signature mode OR prescription doc type)
 const isPrescription = (doc: { signatureMode?: string | null; prescriptionDocType?: string | null }) => {
-  return doc.signatureMode === 'PRESCRIPTION' || !!doc.prescriptionDocType;
+  return doc.signatureMode === "PRESCRIPTION" || !!doc.prescriptionDocType;
 };
 const getInitials = (name: string) => {
-  const names = name.trim().split(' ');
+  const names = name.trim().split(" ");
   if (names.length >= 2) {
     return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   }
@@ -135,23 +151,23 @@ export const DocumentsTable = ({
   allFolders = [],
   onDocumentMoved,
   showFolderActions = true,
-  onRefresh
+  onRefresh,
 }: DocumentsTableProps) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   // Envelope documents dialog state
   const [envelopeDialogOpen, setEnvelopeDialogOpen] = useState(false);
-  const [selectedEnvelope, setSelectedEnvelope] = useState<{ title: string; documents: EnvelopeDocument[] } | null>(null);
-  
+  const [selectedEnvelope, setSelectedEnvelope] = useState<{ title: string; documents: EnvelopeDocument[] } | null>(
+    null,
+  );
+
   // BRy signing dialog state
   const [signingDialogOpen, setSigningDialogOpen] = useState(false);
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
   const [signingDocumentName, setSigningDocumentName] = useState("");
   const [signingDocumentId, setSigningDocumentId] = useState<string | null>(null);
-  
+
   // Loading state for certificate download
   const [downloadingCertificateId, setDownloadingCertificateId] = useState<string | null>(null);
 
@@ -167,7 +183,7 @@ export const DocumentsTable = ({
 
   // State for expanded folders in dropdown
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-  
+
   // State for open folder popovers (keyed by document id)
   const [openFolderPopovers, setOpenFolderPopovers] = useState<Record<string, boolean>>({});
 
@@ -175,7 +191,7 @@ export const DocumentsTable = ({
   const toggleFolderExpansion = (folderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setExpandedFolders(prev => {
+    setExpandedFolders((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(folderId)) {
         newSet.delete(folderId);
@@ -189,32 +205,32 @@ export const DocumentsTable = ({
   // Handle folder selection (move document to folder)
   const handleFolderSelect = (documentId: string, folderId: string) => {
     handleMoveToFolder(documentId, folderId);
-    setOpenFolderPopovers(prev => ({ ...prev, [documentId]: false }));
+    setOpenFolderPopovers((prev) => ({ ...prev, [documentId]: false }));
   };
 
   // Check if folder has children
   const folderHasChildren = (folderId: string) => {
-    return folders.some(f => f.parent_folder_id === folderId);
+    return folders.some((f) => f.parent_folder_id === folderId);
   };
 
   // Organize folders hierarchically with visibility based on expanded state
   const organizeHierarchicalFolders = () => {
-    const parentFolders = folders.filter(f => !f.parent_folder_id);
+    const parentFolders = folders.filter((f) => !f.parent_folder_id);
     const result: Array<{ folder: Folder; level: number; hasChildren: boolean; isVisible: boolean }> = [];
-    
-    parentFolders.forEach(parent => {
+
+    parentFolders.forEach((parent) => {
       const hasChildren = folderHasChildren(parent.id);
       result.push({ folder: parent, level: 0, hasChildren, isVisible: true });
-      
+
       // Only add children if parent is expanded
       if (expandedFolders.has(parent.id)) {
-        const children = folders.filter(f => f.parent_folder_id === parent.id);
-        children.forEach(child => {
+        const children = folders.filter((f) => f.parent_folder_id === parent.id);
+        children.forEach((child) => {
           result.push({ folder: child, level: 1, hasChildren: false, isVisible: true });
         });
       }
     });
-    
+
     return result;
   };
 
@@ -223,24 +239,26 @@ export const DocumentsTable = ({
   const handleSignDocument = async (documentId: string, documentName: string) => {
     try {
       // Buscar o link BRy do signatário da empresa
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         navigate(`/assinar/${documentId}`);
         return;
       }
 
       const { data: companyData } = await supabase
-        .from('company_settings')
-        .select('admin_email')
-        .eq('user_id', user.id)
+        .from("company_settings")
+        .select("admin_email")
+        .eq("user_id", user.id)
         .single();
 
       if (companyData?.admin_email) {
         const { data: signerData } = await supabase
-          .from('document_signers')
-          .select('bry_signer_link')
-          .eq('document_id', documentId)
-          .eq('email', companyData.admin_email)
+          .from("document_signers")
+          .select("bry_signer_link")
+          .eq("document_id", documentId)
+          .eq("email", companyData.admin_email)
           .single();
 
         if (signerData?.bry_signer_link) {
@@ -256,7 +274,7 @@ export const DocumentsTable = ({
       // Fallback para método antigo
       navigate(`/assinar/${documentId}`);
     } catch (error) {
-      console.error('Error getting BRy link:', error);
+      console.error("Error getting BRy link:", error);
       navigate(`/assinar/${documentId}`);
     }
   };
@@ -288,11 +306,11 @@ export const DocumentsTable = ({
     let filePath: string;
 
     // Se é documento BRy assinado com arquivo já salvo
-    if (data.bry_envelope_uuid && data.status === 'signed' && data.bry_signed_file_url) {
+    if (data.bry_envelope_uuid && data.status === "signed" && data.bry_signed_file_url) {
       filePath = data.bry_signed_file_url;
     } else if (data.file_url) {
       // Extract path from URL for signed URL generation
-      const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+      const urlParts = data.file_url.split("/storage/v1/object/public/documents/");
       if (urlParts.length < 2) {
         toast({
           title: "Erro ao visualizar documento",
@@ -312,9 +330,8 @@ export const DocumentsTable = ({
     }
 
     // Generate signed URL for private bucket
-    const { data: signedData, error: signedError } = await supabase
-      .storage
-      .from('documents')
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("documents")
       .createSignedUrl(filePath, 3600); // Valid for 1 hour
 
     if (signedError || !signedData?.signedUrl) {
@@ -352,11 +369,11 @@ export const DocumentsTable = ({
     let downloadFileName = data.name;
 
     // Se é documento BRy assinado
-    if (data.bry_envelope_uuid && data.status === 'signed') {
+    if (data.bry_envelope_uuid && data.status === "signed") {
       // Se já temos o arquivo assinado salvo
       if (data.bry_signed_file_url) {
         filePath = data.bry_signed_file_url;
-        downloadFileName = data.name.replace('.pdf', '_assinado.pdf');
+        downloadFileName = data.name.replace(".pdf", "_assinado.pdf");
       } else {
         // Baixar documento assinado do BRy
         toast({
@@ -365,7 +382,7 @@ export const DocumentsTable = ({
         });
 
         try {
-          const { data: bryData, error: bryError } = await supabase.functions.invoke('bry-download-signed', {
+          const { data: bryData, error: bryError } = await supabase.functions.invoke("bry-download-signed", {
             body: { documentId },
           });
 
@@ -380,7 +397,7 @@ export const DocumentsTable = ({
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = data.name.replace('.pdf', '_assinado.pdf');
+            link.download = data.name.replace(".pdf", "_assinado.pdf");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -394,9 +411,9 @@ export const DocumentsTable = ({
           }
 
           filePath = bryData?.signedFileUrl;
-          downloadFileName = data.name.replace('.pdf', '_assinado.pdf');
+          downloadFileName = data.name.replace(".pdf", "_assinado.pdf");
         } catch (err: any) {
-          console.error('Error downloading BRy signed document:', err);
+          console.error("Error downloading BRy signed document:", err);
           toast({
             title: "Erro ao baixar documento assinado",
             description: err.message || "Não foi possível obter o documento assinado do BRy.",
@@ -417,7 +434,7 @@ export const DocumentsTable = ({
       }
 
       // Extract path from URL for signed URL generation
-      const urlParts = data.file_url.split('/storage/v1/object/public/documents/');
+      const urlParts = data.file_url.split("/storage/v1/object/public/documents/");
       if (urlParts.length < 2) {
         toast({
           title: "Erro ao baixar documento",
@@ -430,9 +447,8 @@ export const DocumentsTable = ({
     }
 
     // Generate signed URL for private bucket
-    const { data: signedData, error: signedError } = await supabase
-      .storage
-      .from('documents')
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("documents")
       .createSignedUrl(filePath, 3600); // Valid for 1 hour
 
     if (signedError || !signedData?.signedUrl) {
@@ -455,7 +471,7 @@ export const DocumentsTable = ({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Download iniciado",
         description: "O documento está sendo baixado.",
@@ -471,11 +487,11 @@ export const DocumentsTable = ({
 
   const handleCancelDocument = async (doc: Document) => {
     const hasSignatures = doc.signedBy > 0;
-    
+
     const confirmMessage = hasSignatures
       ? `Este documento já possui ${doc.signedBy} assinatura(s). Ao cancelar, os signatários pendentes serão notificados e o link de assinatura será invalidado. Deseja continuar?`
       : "Tem certeza que deseja excluir este documento?";
-    
+
     if (!confirm(confirmMessage)) return;
 
     try {
@@ -488,10 +504,7 @@ export const DocumentsTable = ({
 
       if (hasSignatures) {
         // Atualizar status do documento para 'cancelled'
-        const { error } = await supabase
-          .from("documents")
-          .update({ status: "cancelled" })
-          .eq("id", doc.id);
+        const { error } = await supabase.from("documents").update({ status: "cancelled" }).eq("id", doc.id);
 
         if (error) {
           toast({
@@ -509,8 +522,8 @@ export const DocumentsTable = ({
               body: {
                 documentId: doc.id,
                 documentName: doc.name,
-                signers: pendingSigners
-              }
+                signers: pendingSigners,
+              },
             });
           } catch (e) {
             console.error("Erro ao notificar signatários:", e);
@@ -519,16 +532,14 @@ export const DocumentsTable = ({
 
         toast({
           title: "Documento cancelado",
-          description: hasSignatures && pendingSigners && pendingSigners.length > 0
-            ? "Os signatários pendentes foram notificados."
-            : "O documento foi cancelado com sucesso."
+          description:
+            hasSignatures && pendingSigners && pendingSigners.length > 0
+              ? "Os signatários pendentes foram notificados."
+              : "O documento foi cancelado com sucesso.",
         });
       } else {
         // Documento sem assinaturas - excluir normalmente
-        const { error } = await supabase
-          .from("documents")
-          .delete()
-          .eq("id", doc.id);
+        const { error } = await supabase.from("documents").delete().eq("id", doc.id);
 
         if (error) {
           toast({
@@ -558,21 +569,22 @@ export const DocumentsTable = ({
     }
   };
   const handleMoveToFolder = async (documentId: string, folderId: string) => {
-    const {
-      error
-    } = await supabase.from("documents").update({
-      folder_id: folderId
-    }).eq("id", documentId);
+    const { error } = await supabase
+      .from("documents")
+      .update({
+        folder_id: folderId,
+      })
+      .eq("id", documentId);
     if (error) {
       toast({
         title: "Erro ao mover documento",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } else {
       toast({
         title: "Documento movido",
-        description: "O documento foi movido para a pasta com sucesso."
+        description: "O documento foi movido para a pasta com sucesso.",
       });
       if (onDocumentMoved) {
         onDocumentMoved();
@@ -580,21 +592,22 @@ export const DocumentsTable = ({
     }
   };
   const handleRemoveFromFolder = async (documentId: string) => {
-    const {
-      error
-    } = await supabase.from("documents").update({
-      folder_id: null
-    }).eq("id", documentId);
+    const { error } = await supabase
+      .from("documents")
+      .update({
+        folder_id: null,
+      })
+      .eq("id", documentId);
     if (error) {
       toast({
         title: "Erro ao remover documento",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } else {
       toast({
         title: "Documento removido da pasta",
-        description: "O documento foi removido da pasta com sucesso."
+        description: "O documento foi removido da pasta com sucesso.",
       });
       if (onDocumentMoved) {
         onDocumentMoved();
@@ -610,21 +623,21 @@ export const DocumentsTable = ({
     e.currentTarget.classList.remove("opacity-50");
   };
 
-// Helper to get resend icon state based on WhatsApp read statuses
+  // Helper to get resend icon state based on WhatsApp read statuses
   const getResendIconState = (doc: Document) => {
     const pendingSigners: { name: string; phone: string; whatsappStatus: string | null }[] = [];
     const readSigners: { name: string; phone: string }[] = [];
     const unreadSigners: { name: string; phone: string }[] = [];
 
     doc.signerStatuses?.forEach((status, idx) => {
-      if (status === 'pending') {
-        const name = doc.signerNames?.[idx] || '';
-        const phone = doc.signerPhones?.[idx] || '';
+      if (status === "pending") {
+        const name = doc.signerNames?.[idx] || "";
+        const phone = doc.signerPhones?.[idx] || "";
         const whatsappStatus = doc.signerWhatsAppStatuses?.[idx] || null;
-        
+
         pendingSigners.push({ name, phone, whatsappStatus });
-        
-        if (whatsappStatus === 'read') {
+
+        if (whatsappStatus === "read") {
           readSigners.push({ name, phone });
         } else {
           unreadSigners.push({ name, phone });
@@ -634,28 +647,30 @@ export const DocumentsTable = ({
 
     // All pending signers have read -> green, disabled
     if (pendingSigners.length > 0 && readSigners.length === pendingSigners.length) {
-      return { color: 'text-green-600', disabled: true, readSigners, unreadSigners };
+      return { color: "text-green-600", disabled: true, readSigners, unreadSigners };
     }
 
     // At least one has read -> blue, resend only to unread
     if (readSigners.length > 0) {
-      return { color: 'text-blue-700', disabled: false, readSigners, unreadSigners };
+      return { color: "text-blue-700", disabled: false, readSigners, unreadSigners };
     }
 
     // No one has read -> default color
-    return { color: 'text-muted-foreground', disabled: false, readSigners, unreadSigners };
+    return { color: "text-muted-foreground", disabled: false, readSigners, unreadSigners };
   };
 
   const handleResendNotifications = async (documentId: string, signersToResend?: { name: string; phone: string }[]) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       // Get document details and signers
       const { data: documentData } = await supabase
-        .from('documents')
-        .select('*, document_signers(*)')
-        .eq('id', documentId)
+        .from("documents")
+        .select("*, document_signers(*)")
+        .eq("id", documentId)
         .single();
 
       if (!documentData) {
@@ -668,11 +683,7 @@ export const DocumentsTable = ({
       }
 
       // Get company settings
-      const { data: companyData } = await supabase
-        .from('company_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data: companyData } = await supabase.from("company_settings").select("*").eq("user_id", user.id).single();
 
       if (!companyData) {
         toast({
@@ -684,16 +695,12 @@ export const DocumentsTable = ({
       }
 
       // Send emails and WhatsApp to pending signers
-      let pendingSigners = documentData.document_signers.filter(
-        (signer: any) => signer.status === 'pending'
-      );
+      let pendingSigners = documentData.document_signers.filter((signer: any) => signer.status === "pending");
 
       // If specific signers to resend were provided, filter by them
       if (signersToResend && signersToResend.length > 0) {
-        const namesToResend = signersToResend.map(s => s.name);
-        pendingSigners = pendingSigners.filter((signer: any) => 
-          namesToResend.includes(signer.name)
-        );
+        const namesToResend = signersToResend.map((s) => s.name);
+        pendingSigners = pendingSigners.filter((signer: any) => namesToResend.includes(signer.name));
       }
 
       if (pendingSigners.length === 0) {
@@ -713,7 +720,7 @@ export const DocumentsTable = ({
       for (const signer of pendingSigners) {
         // Send email only if signer has email
         if (signer.email) {
-          await supabase.functions.invoke('send-signature-email', {
+          await supabase.functions.invoke("send-signature-email", {
             body: {
               signerEmail: signer.email,
               signerName: signer.name,
@@ -728,7 +735,7 @@ export const DocumentsTable = ({
 
         // Send WhatsApp only if signer has phone
         if (signer.phone) {
-          await supabase.functions.invoke('send-whatsapp-message', {
+          await supabase.functions.invoke("send-whatsapp-message", {
             body: {
               signerName: signer.name,
               signerPhone: signer.phone,
@@ -760,27 +767,26 @@ export const DocumentsTable = ({
     setDownloadingCertificateId(documentId);
     try {
       // Use edge function for consistency with email attachment
-      const { data: result, error } = await supabase.functions.invoke(
-        "download-complete-document",
-        { body: { documentId } }
-      );
+      const { data: result, error } = await supabase.functions.invoke("download-complete-document", {
+        body: { documentId },
+      });
 
       if (error || result?.error) {
-        throw new Error(result?.error || error?.message || 'Erro ao gerar documento completo');
+        throw new Error(result?.error || error?.message || "Erro ao gerar documento completo");
       }
 
       if (!result?.pdfBytes) {
-        throw new Error('Nenhum PDF gerado');
+        throw new Error("Nenhum PDF gerado");
       }
 
       // Convert bytes array to blob
       const uint8Array = new Uint8Array(result.pdfBytes);
-      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const blob = new Blob([uint8Array], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      
+
       // Use filename from response or fallback
-      const fileName = result.fileName || 'documento_completo.pdf';
-      
+      const fileName = result.fileName || "documento_completo.pdf";
+
       const link = document.createElement("a");
       link.href = url;
       link.download = fileName;
@@ -812,23 +818,23 @@ export const DocumentsTable = ({
         description: "Obtendo relatório de evidências do BRy.",
       });
 
-      const response = await supabase.functions.invoke('bry-download-report', {
+      const response = await supabase.functions.invoke("bry-download-report", {
         body: { documentId },
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao baixar relatório');
+        throw new Error(response.error.message || "Erro ao baixar relatório");
       }
 
       // O response.data é um ArrayBuffer do PDF
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      
-      const doc = documents.find(d => d.id === documentId);
-      link.download = `${doc?.name || 'documento'}_evidencias.pdf`;
-      
+
+      const doc = documents.find((d) => d.id === documentId);
+      link.download = `${doc?.name || "documento"}_evidencias.pdf`;
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -854,18 +860,18 @@ export const DocumentsTable = ({
         title: "Obtendo link de validação...",
       });
 
-      const { data, error } = await supabase.functions.invoke('bry-get-validation-url', {
+      const { data, error } = await supabase.functions.invoke("bry-get-validation-url", {
         body: { documentId },
       });
 
       if (error) {
-        throw new Error(error.message || 'Erro ao obter URL de validação');
+        throw new Error(error.message || "Erro ao obter URL de validação");
       }
 
       if (data?.validationUrl) {
-        window.open(data.validationUrl, '_blank');
+        window.open(data.validationUrl, "_blank");
       } else {
-        throw new Error('URL de validação não disponível');
+        throw new Error("URL de validação não disponível");
       }
     } catch (error: any) {
       console.error("Error getting validation URL:", error);
@@ -896,11 +902,11 @@ export const DocumentsTable = ({
       for (const envDoc of doc.envelopeDocuments) {
         // Determine file path (signed or original)
         let filePath: string | null = null;
-        
+
         if (envDoc.bry_signed_file_url) {
           filePath = envDoc.bry_signed_file_url;
         } else if (envDoc.file_url) {
-          const urlParts = envDoc.file_url.split('/storage/v1/object/public/documents/');
+          const urlParts = envDoc.file_url.split("/storage/v1/object/public/documents/");
           if (urlParts.length >= 2) {
             filePath = urlParts[1];
           }
@@ -909,9 +915,8 @@ export const DocumentsTable = ({
         if (!filePath) continue;
 
         // Get signed URL
-        const { data: signedData, error: signedError } = await supabase
-          .storage
-          .from('documents')
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from("documents")
           .createSignedUrl(filePath, 3600);
 
         if (signedError || !signedData?.signedUrl) continue;
@@ -921,18 +926,16 @@ export const DocumentsTable = ({
         const blob = await response.blob();
 
         // Add to ZIP with cleaned name
-        const fileName = envDoc.bry_signed_file_url 
-          ? envDoc.name.replace('.pdf', '_assinado.pdf')
-          : envDoc.name;
-        zip.file(fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`, blob);
+        const fileName = envDoc.bry_signed_file_url ? envDoc.name.replace(".pdf", "_assinado.pdf") : envDoc.name;
+        zip.file(fileName.endsWith(".pdf") ? fileName : `${fileName}.pdf`, blob);
       }
 
       // Generate and download ZIP
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipBlob = await zip.generateAsync({ type: "blob" });
       const url = window.URL.createObjectURL(zipBlob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `${doc.name.split(' - ')[0]}_documentos.zip`;
+      link.download = `${doc.name.split(" - ")[0]}_documentos.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -966,7 +969,8 @@ export const DocumentsTable = ({
       handleViewDocument(doc.id);
     }
   };
-  return <>
+  return (
+    <>
       {/* Empty State */}
       {documents.length === 0 && (
         <div className="text-center py-12 text-muted-foreground bg-secondary/30 rounded-xl">
@@ -978,186 +982,410 @@ export const DocumentsTable = ({
 
       {/* Desktop Table View */}
       {documents.length > 0 && (
-      <div className="hidden md:block rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-none bg-card hover:bg-card">
-              <TableHead className="text-foreground/70">Nome do Documento</TableHead>
-              <TableHead className="text-foreground/70">Status</TableHead>
-              <TableHead className="text-foreground/70">Assinaturas</TableHead>
-              <TableHead className="w-[200px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {documents.map((doc, index) => {
-            const statusInfo = statusConfig[doc.status];
-            const progressPercentage = doc.signedBy / doc.signers * 100;
-            const prescriptionBg = isPrescription(doc) ? 'bg-purple-50 dark:bg-purple-900/20' : '';
-            return <TableRow key={doc.id} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd} className={`border-none ${prescriptionBg || (index % 2 === 0 ? 'bg-card' : 'bg-gray-50 dark:bg-muted/50')} hover:opacity-80`}>
-                  <TableCell>
-                    <div 
-                      className={`flex items-center gap-2 ${doc.isEnvelope ? 'cursor-pointer hover:opacity-70' : ''}`}
-                      onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
-                    >
-                      {doc.isEnvelope ? (
-                        <FolderOpen className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                      ) : (
-                        <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                      )}
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-muted-foreground/70">{doc.name}</span>
-                          {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                            <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
-                              {doc.documentCount} docs
-                            </span>
-                          )}
-                        </div>
-                        {/* Patient name for prescriptions */}
-                        {isPrescription(doc) && doc.patientName && (
-                          <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
+        <div className="hidden md:block rounded-xl overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-none bg-card hover:bg-card">
+                <TableHead className="text-foreground/70">Nome do Documento</TableHead>
+                <TableHead className="text-foreground/70">Status</TableHead>
+                <TableHead className="text-foreground/70">Assinaturas</TableHead>
+                <TableHead className="w-[200px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {documents.map((doc, index) => {
+                const statusInfo = statusConfig[doc.status];
+                const progressPercentage = (doc.signedBy / doc.signers) * 100;
+                const prescriptionBg = isPrescription(doc) ? "bg-purple-50 dark:bg-purple-900/20" : "";
+                return (
+                  <TableRow
+                    key={doc.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, doc.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`border-none ${prescriptionBg || (index % 2 === 0 ? "bg-card" : "bg-gray-50 dark:bg-muted/50")} hover:opacity-80`}
+                  >
+                    <TableCell>
+                      <div
+                        className={`flex items-center gap-2 ${doc.isEnvelope ? "cursor-pointer hover:opacity-70" : ""}`}
+                        onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
+                      >
+                        {doc.isEnvelope ? (
+                          <FolderOpen className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                        ) : (
+                          <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                         )}
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
-                          {/* For prescriptions, show prescription doc type instead of signature mode */}
-                          {isPrescription(doc) && doc.prescriptionDocType ? (
-                            <Badge variant="outline" className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
-                              {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                            </Badge>
-                          ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                            <Badge variant="outline" className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
-                              {signatureModeConfig[doc.signatureMode].label}
-                            </Badge>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {/* Hide signer badges for prescriptions */}
-                    {!isPrescription(doc) && (
-                    <TooltipProvider>
-                      <div className="flex items-center gap-1">
-                        {doc.signerNames?.map((name, idx) => {
-                          const status = doc.signerStatuses?.[idx] || 'pending';
-                          const email = doc.signerEmails?.[idx] || '';
-                          const phone = doc.signerPhones?.[idx] || '';
-                          const bgColor = status === 'signed' ? 'bg-blue-700' : status === 'rejected' ? 'bg-red-700' : 'bg-gray-400';
-                          return (
-                            <Tooltip key={idx}>
-                              <TooltipTrigger asChild>
-                                <div className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}>
-                                  {getInitials(name)}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="flex flex-col gap-0.5">
-                                <p className="font-medium">{name}</p>
-                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                <p className="text-xs text-muted-foreground">{email}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </div>
-                    </TooltipProvider>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 flex items-center justify-center">
-                          <svg className="w-12 h-12 transform -rotate-90 absolute inset-0">
-                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" className="text-muted/50" />
-                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={`${2 * Math.PI * 20}`} strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`} className={doc.status === "expired" ? "text-red-500" : "text-blue-500"} strokeLinecap="round" style={{
-                          transition: 'stroke-dashoffset 1s ease-in-out'
-                        }} />
-                          </svg>
-                          <span className="text-[11px] font-bold relative z-10 text-foreground">
-                            {doc.signedBy}/{doc.signers}
-                          </span>
-                        </div>
-                      </div>
-                      {showFolderActions && folders && folders.length > 0 && (
-                        <Popover 
-                          open={openFolderPopovers[doc.id] || false} 
-                          onOpenChange={(open) => setOpenFolderPopovers(prev => ({ ...prev, [doc.id]: open }))}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              className="w-[180px] justify-between bg-secondary/50 backdrop-blur-sm border-none hover:bg-secondary text-muted-foreground hover:text-foreground"
-                            >
-                              <span className="flex items-center gap-2">
-                                <Folder className="w-4 h-4" />
-                                Selecionar pasta
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-muted-foreground/70">{doc.name}</span>
+                            {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
+                              <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">
+                                {doc.documentCount} docs
                               </span>
-                              <ChevronDown className="w-4 h-4 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
-                            {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                              <div 
-                                key={folder.id}
-                                className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
-                                style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                            )}
+                          </div>
+                          {/* Patient name for prescriptions */}
+                          {isPrescription(doc) && doc.patientName && (
+                            <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
+                            {/* For prescriptions, show prescription doc type instead of signature mode */}
+                            {isPrescription(doc) && doc.prescriptionDocType ? (
+                              <Badge
+                                variant="outline"
+                                className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0"
                               >
-                                {hasChildren ? (
-                                  <span 
-                                    onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                                    className="cursor-pointer hover:bg-accent rounded p-0.5"
-                                  >
-                                    {expandedFolders.has(folder.id) ? (
-                                      <ChevronDown className="w-3 h-3" />
-                                    ) : (
-                                      <ChevronRight className="w-3 h-3" />
-                                    )}
-                                  </span>
-                                ) : (
-                                  <span className="w-4" />
-                                )}
-                                {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
-                                <span className="flex-1 cursor-default">{folder.name}</span>
-                                <span 
-                                  onClick={() => handleFolderSelect(doc.id, folder.id)}
-                                  className="cursor-pointer hover:bg-accent rounded p-0.5"
-                                  title="Mover para esta pasta"
-                                >
-                                  <Check className="w-3 h-3 text-muted-foreground" />
-                                </span>
-                              </div>
-                            ))}
-                          </PopoverContent>
-                        </Popover>
+                                {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                              </Badge>
+                            ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
+                              <Badge
+                                variant="outline"
+                                className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}
+                              >
+                                {signatureModeConfig[doc.signatureMode].label}
+                              </Badge>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {/* Hide signer badges for prescriptions */}
+                      {!isPrescription(doc) && (
+                        <TooltipProvider>
+                          <div className="flex items-center gap-1">
+                            {doc.signerNames?.map((name, idx) => {
+                              const status = doc.signerStatuses?.[idx] || "pending";
+                              const email = doc.signerEmails?.[idx] || "";
+                              const phone = doc.signerPhones?.[idx] || "";
+                              const bgColor =
+                                status === "signed"
+                                  ? "bg-blue-700"
+                                  : status === "rejected"
+                                    ? "bg-red-700"
+                                    : "bg-gray-400";
+                              return (
+                                <Tooltip key={idx}>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}
+                                    >
+                                      {getInitials(name)}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="flex flex-col gap-0.5">
+                                    <p className="font-medium">{name}</p>
+                                    {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                    <p className="text-xs text-muted-foreground">{email}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            })}
+                          </div>
+                        </TooltipProvider>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 justify-end">
-                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
-                        <Button 
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-12 h-12 flex items-center justify-center">
+                            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0">
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                className="text-muted/50"
+                              />
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 20}`}
+                                strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercentage / 100)}`}
+                                className={doc.status === "expired" ? "text-red-500" : "text-blue-500"}
+                                strokeLinecap="round"
+                                style={{
+                                  transition: "stroke-dashoffset 1s ease-in-out",
+                                }}
+                              />
+                            </svg>
+                            <span className="text-[11px] font-bold relative z-10 text-foreground">
+                              {doc.signedBy}/{doc.signers}
+                            </span>
+                          </div>
+                        </div>
+                        {showFolderActions && folders && folders.length > 0 && (
+                          <Popover
+                            open={openFolderPopovers[doc.id] || false}
+                            onOpenChange={(open) => setOpenFolderPopovers((prev) => ({ ...prev, [doc.id]: open }))}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="w-[180px] justify-between bg-secondary/50 backdrop-blur-sm border-none hover:bg-secondary text-muted-foreground hover:text-foreground"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Folder className="w-4 h-4" />
+                                  Selecionar pasta
+                                </span>
+                                <ChevronDown className="w-4 h-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
+                              {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
+                                <div
+                                  key={folder.id}
+                                  className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
+                                  style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                                >
+                                  {hasChildren ? (
+                                    <span
+                                      onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                                      className="cursor-pointer hover:bg-accent rounded p-0.5"
+                                    >
+                                      {expandedFolders.has(folder.id) ? (
+                                        <ChevronDown className="w-3 h-3" />
+                                      ) : (
+                                        <ChevronRight className="w-3 h-3" />
+                                      )}
+                                    </span>
+                                  ) : (
+                                    <span className="w-4" />
+                                  )}
+                                  {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
+                                  <span className="flex-1 cursor-default">{folder.name}</span>
+                                  <span
+                                    onClick={() => handleFolderSelect(doc.id, folder.id)}
+                                    className="cursor-pointer hover:bg-accent rounded p-0.5"
+                                    title="Mover para esta pasta"
+                                  >
+                                    <Check className="w-3 h-3 text-muted-foreground" />
+                                  </span>
+                                </div>
+                              ))}
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-end">
+                        {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() => handleSignDocument(doc.id, doc.name)}
+                            title="Assinar documento"
+                          >
+                            <PenTool className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                        <Button
                           variant="ghost"
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
+                          size="icon"
+                          className="rounded-full hover:bg-transparent"
+                          onClick={() =>
+                            doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)
+                          }
+                          title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
+                        >
+                          <Eye className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent"
+                          onClick={() =>
+                            doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
+                          }
+                          title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
+                        >
+                          <Download className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() => handleDownloadCertificatePDF(doc.id)}
+                            title="Baixar documento assinado"
+                            disabled={downloadingCertificateId === doc.id}
+                          >
+                            {downloadingCertificateId === doc.id ? (
+                              <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+                            ) : (
+                              <FileDown className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        )}
+                        {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() =>
+                              doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                            }
+                            title="Baixar PDF com evidências das assinaturas coletadas"
+                          >
+                            <FileCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                        {doc.bryEnvelopeUuid && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() => handleOpenValidation(doc.id)}
+                            title="Validar assinaturas no portal BRy"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
+                            title="Visualizar certificado de validação"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                        {doc.status !== "signed" &&
+                          (() => {
+                            const iconState = getResendIconState(doc);
+                            return (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full hover:bg-transparent"
+                                    onClick={() =>
+                                      !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                                    }
+                                    disabled={iconState.disabled}
+                                  >
+                                    <Mail className={`w-4 h-4 ${iconState.color}`} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  {iconState.readSigners.length > 0 && (
+                                    <div className="text-green-600 mb-1">
+                                      <p className="font-semibold text-xs">✓ Leram:</p>
+                                      {iconState.readSigners.map((s, i) => (
+                                        <p key={i} className="text-xs">
+                                          {s.name}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {iconState.unreadSigners.length > 0 && (
+                                    <div className="text-yellow-600">
+                                      <p className="font-semibold text-xs">⏳ Pendentes:</p>
+                                      {iconState.unreadSigners.map((s, i) => (
+                                        <p key={i} className="text-xs">
+                                          {s.name}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {iconState.disabled && (
+                                    <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
+                                  )}
+                                  {!iconState.disabled && iconState.unreadSigners.length > 0 && (
+                                    <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
+                                  )}
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })()}
+                        {doc.status !== "signed" && doc.status !== "cancelled" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full hover:bg-transparent"
+                            onClick={() => handleCancelDocument(doc)}
+                            title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}
+                          >
+                            <Trash2 className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Mobile Card View */}
+      {documents.length > 0 && (
+        <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
+          {documents.map((doc) => {
+            const statusInfo = statusConfig[doc.status];
+            const prescriptionBg = isPrescription(doc) ? "bg-purple-100 dark:bg-purple-900/20" : "bg-card";
+            return (
+              <div
+                key={doc.id}
+                className={`${prescriptionBg} rounded-lg p-4 space-y-3`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, doc.id)}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="space-y-3">
+                  {/* Date and Action Buttons on same line - ABOVE document name */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
+                    <div className="flex gap-1">
+                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
                           onClick={() => handleSignDocument(doc.id, doc.name)}
                           title="Assinar documento"
                         >
                           <PenTool className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent" 
-                        onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => (doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id))}
+                        title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
+                      >
+                        <Eye className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() =>
+                          doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
+                        }
                         title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
                       >
                         <Download className="w-4 h-4 text-muted-foreground" />
                       </Button>
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
                           onClick={() => handleDownloadCertificatePDF(doc.id)}
                           title="Baixar certificado de validação (PDF)"
                           disabled={downloadingCertificateId === doc.id}
@@ -1170,363 +1398,244 @@ export const DocumentsTable = ({
                         </Button>
                       )}
                       {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
-                          onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
+                          onClick={() =>
+                            doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                          }
                           title="Baixar PDF com evidências das assinaturas coletadas"
                         >
                           <FileCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                       {doc.bryEnvelopeUuid && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
                           onClick={() => handleOpenValidation(doc.id)}
                           title="Validar assinaturas no portal BRy"
                         >
                           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="rounded-full hover:bg-transparent" 
-                          onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
+                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
+                          onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
                           title="Visualizar certificado de validação"
                         >
                           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
-                      {doc.status !== 'signed' && (() => {
-                        const iconState = getResendIconState(doc);
-                        return (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="rounded-full hover:bg-transparent" 
-                                onClick={() => !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)}
-                                disabled={iconState.disabled}
-                              >
-                                <Mail className={`w-4 h-4 ${iconState.color}`} />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              {iconState.readSigners.length > 0 && (
-                                <div className="text-green-600 mb-1">
-                                  <p className="font-semibold text-xs">✓ Leram:</p>
-                                  {iconState.readSigners.map((s, i) => (
-                                    <p key={i} className="text-xs">{s.name}</p>
-                                  ))}
-                                </div>
-                              )}
-                              {iconState.unreadSigners.length > 0 && (
-                                <div className="text-yellow-600">
-                                  <p className="font-semibold text-xs">⏳ Pendentes:</p>
-                                  {iconState.unreadSigners.map((s, i) => (
-                                    <p key={i} className="text-xs">{s.name}</p>
-                                  ))}
-                                </div>
-                              )}
-                              {iconState.disabled && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Todos já leram a mensagem
-                                </p>
-                              )}
-                              {!iconState.disabled && iconState.unreadSigners.length > 0 && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Clique para reenviar
-                                </p>
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })()}
-                      {doc.status !== 'signed' && doc.status !== 'cancelled' && (
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" onClick={() => handleCancelDocument(doc)} title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
+                      {doc.status !== "signed" &&
+                        (() => {
+                          const iconState = getResendIconState(doc);
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="rounded-full hover:bg-transparent h-8 w-8"
+                                  onClick={() =>
+                                    !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                                  }
+                                  disabled={iconState.disabled}
+                                >
+                                  <Mail className={`w-4 h-4 ${iconState.color}`} />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                {iconState.readSigners.length > 0 && (
+                                  <div className="text-green-600 mb-1">
+                                    <p className="font-semibold text-xs">✓ Leram:</p>
+                                    {iconState.readSigners.map((s, i) => (
+                                      <p key={i} className="text-xs">
+                                        {s.name}
+                                      </p>
+                                    ))}
+                                  </div>
+                                )}
+                                {iconState.unreadSigners.length > 0 && (
+                                  <div className="text-yellow-600">
+                                    <p className="font-semibold text-xs">⏳ Pendentes:</p>
+                                    {iconState.unreadSigners.map((s, i) => (
+                                      <p key={i} className="text-xs">
+                                        {s.name}
+                                      </p>
+                                    ))}
+                                  </div>
+                                )}
+                                {iconState.disabled && (
+                                  <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
+                                )}
+                                {!iconState.disabled && iconState.unreadSigners.length > 0 && (
+                                  <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
+                                )}
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })()}
+                      {doc.status !== "signed" && doc.status !== "cancelled" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent h-8 w-8"
+                          onClick={() => handleCancelDocument(doc)}
+                          title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}
+                        >
                           <Trash2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       )}
                     </div>
-                  </TableCell>
-                </TableRow>;
-          })}
-          </TableBody>
-        </Table>
-      </div>
-      )}
+                  </div>
 
-      {/* Mobile Card View */}
-      {documents.length > 0 && (
-      <div className="md:hidden space-y-4 rounded-xl overflow-hidden">
-        {documents.map(doc => {
-        const statusInfo = statusConfig[doc.status];
-        const prescriptionBg = isPrescription(doc) ? 'bg-purple-100 dark:bg-purple-900/20' : 'bg-card';
-        return <div key={doc.id} className={`${prescriptionBg} rounded-lg p-4 space-y-3`} draggable onDragStart={e => handleDragStart(e, doc.id)} onDragEnd={handleDragEnd}>
-            <div className="space-y-3">
-                {/* Date and Action Buttons on same line - ABOVE document name */}
-                <div className="flex items-center justify-between">
-                  <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
-                  <div className="flex gap-1">
-                    {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) && (
-                      <Button 
-                        variant="ghost"
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleSignDocument(doc.id, doc.name)}
-                        title="Assinar documento"
-                      >
-                        <PenTool className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
-                      title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
-                    >
-                      <Download className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleDownloadCertificatePDF(doc.id)}
-                        title="Baixar certificado de validação (PDF)"
-                        disabled={downloadingCertificateId === doc.id}
-                      >
-                        {downloadingCertificateId === doc.id ? (
-                          <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                        ) : (
-                          <FileDown className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </Button>
-                    )}
-                    {doc.bryEnvelopeUuid && doc.signedBy > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)}
-                        title="Baixar PDF com evidências das assinaturas coletadas"
-                      >
-                        <FileCheck className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                    {doc.bryEnvelopeUuid && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => handleOpenValidation(doc.id)}
-                        title="Validar assinaturas no portal BRy"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                    {!doc.bryEnvelopeUuid && doc.signatureMode === 'SIMPLE' && doc.signedBy > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent h-8 w-8" 
-                        onClick={() => window.open(`/validar/${doc.id}`, '_blank')}
-                        title="Visualizar certificado de validação"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                    {doc.status !== 'signed' && (() => {
-                      const iconState = getResendIconState(doc);
-                      return (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="rounded-full hover:bg-transparent h-8 w-8" 
-                              onClick={() => !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)}
-                              disabled={iconState.disabled}
-                            >
-                              <Mail className={`w-4 h-4 ${iconState.color}`} />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            {iconState.readSigners.length > 0 && (
-                              <div className="text-green-600 mb-1">
-                                <p className="font-semibold text-xs">✓ Leram:</p>
-                                {iconState.readSigners.map((s, i) => (
-                                  <p key={i} className="text-xs">{s.name}</p>
-                                ))}
-                              </div>
-                            )}
-                            {iconState.unreadSigners.length > 0 && (
-                              <div className="text-yellow-600">
-                                <p className="font-semibold text-xs">⏳ Pendentes:</p>
-                                {iconState.unreadSigners.map((s, i) => (
-                                  <p key={i} className="text-xs">{s.name}</p>
-                                ))}
-                              </div>
-                            )}
-                            {iconState.disabled && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Todos já leram a mensagem
-                              </p>
-                            )}
-                            {!iconState.disabled && iconState.unreadSigners.length > 0 && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Clique para reenviar
-                              </p>
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })()}
-                    {doc.status !== 'signed' && doc.status !== 'cancelled' && (
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent h-8 w-8" onClick={() => handleCancelDocument(doc)} title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
-                        <Trash2 className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Document Name */}
-                <div 
-                  className={`space-y-2 ${doc.isEnvelope ? 'cursor-pointer' : ''}`}
-                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
-                >
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {doc.isEnvelope ? (
-                      <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                    ) : (
-                      <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                    )}
-                    <p className="font-medium text-muted-foreground/70">{doc.name}</p>
-                    {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
-                      <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                        {doc.documentCount} docs
-                      </span>
-                    )}
-                  </div>
-                  {/* Patient name for prescriptions */}
-                  {isPrescription(doc) && doc.patientName && (
-                    <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
-                  )}
-                  {/* For prescriptions, show prescription doc type instead of signature mode */}
-                  {isPrescription(doc) && doc.prescriptionDocType ? (
-                    <Badge variant="outline" className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit">
-                      {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                    </Badge>
-                  ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
-                    <Badge variant="outline" className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
-                      {signatureModeConfig[doc.signatureMode].label}
-                    </Badge>
-                  ) : null}
-                  
-                  {/* Signer Badges below document name - hide for prescriptions */}
-                  {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) && (
-                    <TooltipProvider>
-                      <div className="flex gap-1 justify-end">
-                        {doc.signerStatuses?.map((status, idx) => {
-                          const name = doc.signerNames?.[idx] || '';
-                          const email = doc.signerEmails?.[idx] || '';
-                          const phone = doc.signerPhones?.[idx] || '';
-                          return (
-                            <Tooltip key={idx}>
-                              <TooltipTrigger asChild>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}>
-                                  {name ? getInitials(name) : idx + 1}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent className="flex flex-col gap-0.5">
-                                <p className="font-medium">{name}</p>
-                                {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                <p className="text-xs text-muted-foreground">{email}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </div>
-                    </TooltipProvider>
-                  )}
-                </div>
-              </div>
-              
-              {/* Folder selection */}
-              {showFolderActions && folders && folders.length > 0 && (
-                <div className="pt-2">
-                  <Popover 
-                    open={openFolderPopovers[`mobile-${doc.id}`] || false} 
-                    onOpenChange={(open) => setOpenFolderPopovers(prev => ({ ...prev, [`mobile-${doc.id}`]: open }))}
+                  {/* Document Name */}
+                  <div
+                    className={`space-y-2 ${doc.isEnvelope ? "cursor-pointer" : ""}`}
+                    onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}
                   >
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-between bg-muted/50 backdrop-blur-sm border-none hover:bg-muted text-muted-foreground hover:text-foreground"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Folder className="w-4 h-4" />
-                          Selecionar pasta
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {doc.isEnvelope ? (
+                        <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                      ) : (
+                        <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                      )}
+                      <p className="font-medium text-muted-foreground/70">{doc.name}</p>
+                      {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 && (
+                        <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                          {doc.documentCount} docs
                         </span>
-                        <ChevronDown className="w-4 h-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
-                      {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
-                        <div 
-                          key={folder.id}
-                          className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
-                          style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-                        >
-                          {hasChildren ? (
-                            <span 
-                              onClick={(e) => toggleFolderExpansion(folder.id, e)}
-                              className="cursor-pointer hover:bg-accent rounded p-0.5"
-                            >
-                              {expandedFolders.has(folder.id) ? (
-                                <ChevronDown className="w-3 h-3" />
-                              ) : (
-                                <ChevronRight className="w-3 h-3" />
-                              )}
-                            </span>
-                          ) : (
-                            <span className="w-4" />
-                          )}
-                          {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
-                          <span className="flex-1 cursor-default">{folder.name}</span>
-                          <span 
-                            onClick={() => {
-                              handleFolderSelect(doc.id, folder.id);
-                              setOpenFolderPopovers(prev => ({ ...prev, [`mobile-${doc.id}`]: false }));
-                            }}
-                            className="cursor-pointer hover:bg-accent rounded p-0.5"
-                            title="Mover para esta pasta"
-                          >
-                            <Check className="w-3 h-3 text-muted-foreground" />
-                          </span>
+                      )}
+                    </div>
+                    {/* Patient name for prescriptions */}
+                    {isPrescription(doc) && doc.patientName && (
+                      <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
+                    )}
+                    {/* For prescriptions, show prescription doc type instead of signature mode */}
+                    {isPrescription(doc) && doc.prescriptionDocType ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit"
+                      >
+                        {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                      </Badge>
+                    ) : doc.signatureMode && signatureModeConfig[doc.signatureMode] ? (
+                      <Badge
+                        variant="outline"
+                        className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}
+                      >
+                        {signatureModeConfig[doc.signatureMode].label}
+                      </Badge>
+                    ) : null}
+
+                    {/* Signer Badges below document name - hide for prescriptions */}
+                    {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) && (
+                      <TooltipProvider>
+                        <div className="flex gap-1 justify-end">
+                          {doc.signerStatuses?.map((status, idx) => {
+                            const name = doc.signerNames?.[idx] || "";
+                            const email = doc.signerEmails?.[idx] || "";
+                            const phone = doc.signerPhones?.[idx] || "";
+                            return (
+                              <Tooltip key={idx}>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}
+                                  >
+                                    {name ? getInitials(name) : idx + 1}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="flex flex-col gap-0.5">
+                                  <p className="font-medium">{name}</p>
+                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                  <p className="text-xs text-muted-foreground">{email}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
                         </div>
-                      ))}
-                    </PopoverContent>
-                  </Popover>
+                      </TooltipProvider>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>;
-      })}
-      </div>
+
+                {/* Folder selection */}
+                {showFolderActions && folders && folders.length > 0 && (
+                  <div className="pt-2">
+                    <Popover
+                      open={openFolderPopovers[`mobile-${doc.id}`] || false}
+                      onOpenChange={(open) =>
+                        setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: open }))
+                      }
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between bg-muted/50 backdrop-blur-sm border-none hover:bg-muted text-muted-foreground hover:text-foreground"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Folder className="w-4 h-4" />
+                            Selecionar pasta
+                          </span>
+                          <ChevronDown className="w-4 h-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 bg-popover/95 backdrop-blur-sm border-border z-50">
+                        {hierarchicalFolders.map(({ folder, level, hasChildren }) => (
+                          <div
+                            key={folder.id}
+                            className="flex items-center gap-1 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-accent"
+                            style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+                          >
+                            {hasChildren ? (
+                              <span
+                                onClick={(e) => toggleFolderExpansion(folder.id, e)}
+                                className="cursor-pointer hover:bg-accent rounded p-0.5"
+                              >
+                                {expandedFolders.has(folder.id) ? (
+                                  <ChevronDown className="w-3 h-3" />
+                                ) : (
+                                  <ChevronRight className="w-3 h-3" />
+                                )}
+                              </span>
+                            ) : (
+                              <span className="w-4" />
+                            )}
+                            {level > 0 && <span className="text-muted-foreground mr-1">└─</span>}
+                            <span className="flex-1 cursor-default">{folder.name}</span>
+                            <span
+                              onClick={() => {
+                                handleFolderSelect(doc.id, folder.id);
+                                setOpenFolderPopovers((prev) => ({ ...prev, [`mobile-${doc.id}`]: false }));
+                              }}
+                              className="cursor-pointer hover:bg-accent rounded p-0.5"
+                              title="Mover para esta pasta"
+                            >
+                              <Check className="w-3 h-3 text-muted-foreground" />
+                            </span>
+                          </div>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* Envelope Documents Dialog */}
       <EnvelopeDocumentsDialog
         open={envelopeDialogOpen}
         onOpenChange={setEnvelopeDialogOpen}
-        envelopeTitle={selectedEnvelope?.title || ''}
+        envelopeTitle={selectedEnvelope?.title || ""}
         documents={selectedEnvelope?.documents || []}
       />
 
@@ -1539,5 +1648,6 @@ export const DocumentsTable = ({
         documentId={signingDocumentId}
         onSigningComplete={handleSigningComplete}
       />
-    </>;
+    </>
+  );
 };
