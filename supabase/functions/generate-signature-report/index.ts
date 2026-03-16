@@ -659,8 +659,10 @@ const handler = async (req: Request): Promise<Response> => {
       thickness: 1,
     });
 
-    // Footer texts (left side)
-    const textStartY = footerTopY - 16;
+    // Footer texts (left side) - vertically centered with QR code
+    const footerCenterY = footerY + footerHeight / 2;
+    const textBlockHeight = 28; // 3 lines: 9 + 13 spacing + 9 + 13 spacing + 8 ≈ 28px
+    const textStartY = footerCenterY + textBlockHeight / 2;
 
     // Line 1: "Documento validado pelo sistema eonSign"
     const footerText1Part1 = "Documento validado pelo sistema ";
