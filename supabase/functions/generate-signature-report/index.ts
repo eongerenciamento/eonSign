@@ -600,10 +600,74 @@ const handler = async (req: Request): Promise<Response> => {
       yPos -= cardHeight + 15;
     }
 
-    // Get the last page for footer and QR code
+    // Get the last page for footer
     const lastPage = pdfDoc.getPage(pdfDoc.getPageCount() - 1);
 
-    // Try to add QR code
+    // Footer configuration
+    const footerHeight = 80;
+    const footerY = 15;
+    const footerTopY = footerY + footerHeight;
+
+    // Footer background
+    lastPage.drawRectangle({
+      x: margin,
+      y: footerY,
+      width: pageWidth - margin * 2,
+      height: footerHeight,
+      color: lightGray,
+      borderColor: borderGray,
+      borderWidth: 1,
+    });
+
+    // Footer texts (left side)
+    const textStartY = footerTopY - 16;
+
+    // Line 1: "Documento validado pelo sistema eonSign"
+    const footerText1Part1 = "Documento validado pelo sistema ";
+    const footerText1Part2 = "eonSign";
+    lastPage.drawText(footerText1Part1, {
+      x: margin + 10,
+      y: textStartY,
+      size: 9,
+      font: helveticaFont,
+      color: gray600,
+    });
+    lastPage.drawText(footerText1Part2, {
+      x: margin + 10 + helveticaFont.widthOfTextAtSize(footerText1Part1, 9),
+      y: textStartY,
+      size: 9,
+      font: helveticaBold,
+      color: gray600,
+    });
+
+    // Line 2: "Powered by eonhub"
+    const footerText2Part1 = "Powered by ";
+    const footerText2Part2 = "eonhub";
+    lastPage.drawText(footerText2Part1, {
+      x: margin + 10,
+      y: textStartY - 13,
+      size: 9,
+      font: helveticaFont,
+      color: gray600,
+    });
+    lastPage.drawText(footerText2Part2, {
+      x: margin + 10 + helveticaFont.widthOfTextAtSize(footerText2Part1, 9),
+      y: textStartY - 13,
+      size: 9,
+      font: helveticaBold,
+      color: gray600,
+    });
+
+    // Line 3: Legal validity
+    lastPage.drawText(normalizeText("Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001"), {
+      x: margin + 10,
+      y: textStartY - 28,
+      size: 8,
+      font: helveticaFont,
+      color: gray600,
+    });
+
+    // QR code inside footer (right side)
     try {
       const validationUrl = `${APP_URL}/validar/${documentId}`;
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&format=png&data=${encodeURIComponent(validationUrl)}`;
@@ -612,9 +676,9 @@ const handler = async (req: Request): Promise<Response> => {
         const qrBytes = await qrResponse.arrayBuffer();
         const qrImage = await pdfDoc.embedPng(new Uint8Array(qrBytes));
 
-        const qrSize = 56;
-        const qrX = pageWidth - margin - qrSize;
-        const qrY = 55;
+        const qrSize = 52;
+        const qrX = pageWidth - margin - qrSize - 10;
+        const qrY = footerY + (footerHeight - qrSize) / 2;
 
         lastPage.drawImage(qrImage, {
           x: qrX,
@@ -623,81 +687,19 @@ const handler = async (req: Request): Promise<Response> => {
           height: qrSize,
         });
 
-        // QR code label
-        lastPage.drawText("Validação", {
-          x: qrX + qrSize / 2 - helveticaBold.widthOfTextAtSize("Validação", 8) / 2,
-          y: qrY - 12,
-          size: 8,
-          font: helveticaBold,
-          color: gray600,
-        });
-
-        lastPage.drawText("Escaneie o QR Code", {
-          x: qrX + qrSize / 2 - helveticaFont.widthOfTextAtSize("Escaneie o QR Code", 7) / 2,
-          y: qrY - 22,
+        // QR code label below
+        const validLabel = normalizeText("Validacao");
+        lastPage.drawText(validLabel, {
+          x: qrX + qrSize / 2 - helveticaBold.widthOfTextAtSize(validLabel, 7) / 2,
+          y: qrY - 10,
           size: 7,
-          font: helveticaFont,
+          font: helveticaBold,
           color: gray600,
         });
       }
     } catch (e) {
       console.log("Could not generate QR code:", e);
     }
-
-    // Footer
-    const footerY = 45;
-
-    lastPage.drawLine({
-      start: { x: margin, y: footerY + 15 },
-      end: { x: pageWidth - margin - 80, y: footerY + 15 },
-      thickness: 1,
-      color: cardBorderGray,
-    });
-
-    // Footer line 1: "Documento validado pelo sistema eonSign" - only eonSign bold
-    const footerText1Part1 = "Documento validado pelo sistema ";
-    const footerText1Part2 = "eonSign";
-    lastPage.drawText(footerText1Part1, {
-      x: margin,
-      y: footerY,
-      size: 9,
-      font: helveticaFont,
-      color: gray600,
-    });
-    lastPage.drawText(footerText1Part2, {
-      x: margin + helveticaFont.widthOfTextAtSize(footerText1Part1, 9),
-      y: footerY,
-      size: 9,
-      font: helveticaBold,
-      color: gray600,
-    });
-
-    // Footer line 2: "Powered by eonhub" - only eonhub bold
-    const footerText2Part1 = "Powered by ";
-    const footerText2Part2 = "eonhub";
-    lastPage.drawText(footerText2Part1, {
-      x: margin,
-      y: footerY - 12,
-      size: 9,
-      font: helveticaFont,
-      color: gray600,
-    });
-    lastPage.drawText(footerText2Part2, {
-      x: margin + helveticaFont.widthOfTextAtSize(footerText2Part1, 9),
-      y: footerY - 12,
-      size: 9,
-      font: helveticaBold,
-      color: gray600,
-    });
-
-    // Footer line 3: Legal validity
-    lastPage.drawText("Este documento possui validade juridica conforme Lei n. 14.063/2020 e MP 2.200-2/2001", {
-      x: margin,
-      y: footerY - 24,
-      size: 8,
-      font: helveticaFont,
-      color: gray600,
-    });
 
     // Save PDF
     const pdfBytes = await pdfDoc.save();
