@@ -432,7 +432,6 @@ const Settings = () => {
           </div>
         </div>
 
-        <div className="w-full mx-auto max-w-5xl">
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} rounded-full p-1 h-10`}>
             <TabsTrigger value="company" className="rounded-full gap-2">
@@ -880,7 +879,6 @@ const Settings = () => {
           </TabsContent>
 
           </Tabs>
-        </div>
       </div>
 
       {/* Ticket Chat Sheet */}
