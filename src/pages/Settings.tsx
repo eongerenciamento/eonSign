@@ -414,25 +414,25 @@ const Settings = () => {
   }, [user]);
   return <Layout>
       <div className="p-8 pb-20 space-y-6 w-full overflow-hidden">
-        <div className="w-full mx-auto max-w-5xl">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-sm font-bold text-muted-foreground">Configurações</h1>
-            <div className="flex items-center gap-4">
-              {/* Theme Switch */}
-              {mounted && (
-                <div className="flex items-center gap-2">
-                  <Sun className="h-4 w-4 text-muted-foreground" />
-                  <Switch
-                    checked={isDark}
-                    onCheckedChange={toggleTheme}
-                    className="data-[state=checked]:bg-muted-foreground"
-                  />
-                  <Moon className="h-4 w-4 text-muted-foreground" />
-                </div>
-              )}
-            </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-sm font-bold text-muted-foreground">Configurações</h1>
+          <div className="flex items-center gap-4">
+            {/* Theme Switch */}
+            {mounted && (
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4 text-muted-foreground" />
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={toggleTheme}
+                  className="data-[state=checked]:bg-muted-foreground"
+                />
+                <Moon className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
           </div>
+        </div>
 
+        <div className="w-full mx-auto max-w-5xl">
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} rounded-full p-1 h-10`}>
             <TabsTrigger value="company" className="rounded-full gap-2">
