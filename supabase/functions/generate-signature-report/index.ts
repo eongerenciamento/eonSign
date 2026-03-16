@@ -651,15 +651,12 @@ const handler = async (req: Request): Promise<Response> => {
     const footerY = 15;
     const footerTopY = footerY + footerHeight;
 
-    // Footer background
-    lastPage.drawRectangle({
-      x: margin,
-      y: footerY,
-      width: pageWidth - margin * 2,
-      height: footerHeight,
-      color: lightGray,
-      borderColor: borderGray,
-      borderWidth: 1,
+    // Footer separator line
+    lastPage.drawLine({
+      start: { x: margin, y: footerTopY },
+      end: { x: pageWidth - margin, y: footerTopY },
+      color: borderGray,
+      thickness: 1,
     });
 
     // Footer texts (left side)
