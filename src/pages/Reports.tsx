@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown, BarChart3, Upload } from "lucide-react";
+import { Download, TrendingUp, Users, FileCheck, Clock, ChevronLeft, ChevronRight, Search, FileText, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, FileDown, BarChart3, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
