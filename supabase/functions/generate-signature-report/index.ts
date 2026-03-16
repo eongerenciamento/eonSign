@@ -218,14 +218,40 @@ const handler = async (req: Request): Promise<Response> => {
       color: headerBg,
     });
 
-    // Draw "eonSign" text as logo
-    page.drawText("eonSign", {
-      x: margin,
-      y: pageHeight - 45,
-      size: 20,
-      font: helveticaBold,
-      color: white,
-    });
+    // Draw logo image in header
+    let logoImage = null;
+    try {
+      const logoUrl = `${supabaseUrl}/storage/v1/object/public/email-assets/logobranca-6.png`;
+      const logoResponse = await fetch(logoUrl);
+      if (logoResponse.ok) {
+        const logoBytes = await logoResponse.arrayBuffer();
+        logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
+      }
+    } catch (e) {
+      console.log("Could not load logo image:", e);
+    }
+
+    if (logoImage) {
+      const logoOrigW = logoImage.width;
+      const logoOrigH = logoImage.height;
+      const logoHeight = 30;
+      const logoWidth = (logoOrigW / logoOrigH) * logoHeight;
+      page.drawImage(logoImage, {
+        x: margin,
+        y: pageHeight - 55,
+        width: logoWidth,
+        height: logoHeight,
+      });
+    } else {
+      // Fallback to text if logo fails to load
+      page.drawText("eonSign", {
+        x: margin,
+        y: pageHeight - 45,
+        size: 20,
+        font: helveticaBold,
+        color: white,
+      });
+    }
 
     // Title - white for contrast with dark header
     page.drawText("RELATÓRIO DE ASSINATURAS", {
