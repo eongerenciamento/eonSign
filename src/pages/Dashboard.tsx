@@ -82,6 +82,9 @@ const Dashboard = () => {
     displayItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const recentItems = displayItems.slice(0, 5);
 
+    // Load company settings for fallback
+    const { data: companyData } = await supabase.from("company_settings").select("admin_name, admin_email, admin_phone").eq("user_id", userData.user.id).single();
+
     // Load signers for each item
     const documentsWithSigners = await Promise.all(recentItems.map(async item => {
       // For envelopes, use the first document's signers (they share signers)
@@ -91,10 +94,24 @@ const Dashboard = () => {
       } = await supabase.from("document_signers").select("*").eq("document_id", docIdForSigners).order("is_company_signer", {
         ascending: false
       });
-      const signerNames = (signersData || []).map(s => s.name);
-      const signerEmails = (signersData || []).map(s => s.email);
-      const signerPhones = (signersData || []).map(s => s.phone);
-      const signerStatuses = (signersData || []).map(s => s.status as "pending" | "signed" | "rejected");
+
+      let finalSigners = signersData || [];
+
+      // Fallback: if signers count in DB is less than document.signers, add internal signer from company_settings
+      if (finalSigners.length < item.signers && companyData) {
+        const hasInternal = finalSigners.some(s => s.is_company_signer);
+        if (!hasInternal) {
+          finalSigners = [
+            { name: companyData.admin_name, email: companyData.admin_email, phone: companyData.admin_phone, status: 'signed', is_company_signer: true } as any,
+            ...finalSigners
+          ];
+        }
+      }
+
+      const signerNames = finalSigners.map(s => s.name);
+      const signerEmails = finalSigners.map(s => s.email);
+      const signerPhones = finalSigners.map(s => s.phone);
+      const signerStatuses = finalSigners.map(s => s.status as "pending" | "signed" | "rejected");
 
       // Format envelope documents for the dialog
       const envelopeDocuments = item.envelopeDocuments?.map((doc: any) => ({
