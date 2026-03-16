@@ -52,7 +52,7 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 20% 98%;
     --sidebar-border: 215 25% 22%;
     --sidebar-ring: 214 95% 45%;
-
+    --gradient-sidebar: linear-gradient(to top, hsl(218 50% 12%) 0%, hsl(216 48% 30%) 70%);
   }
 
   .dark {
