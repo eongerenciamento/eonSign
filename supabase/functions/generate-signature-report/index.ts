@@ -181,6 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Colors
     const gray800 = rgb(31 / 255, 41 / 255, 55 / 255);
+    const gray700 = rgb(55 / 255, 65 / 255, 81 / 255);
     const gray600 = rgb(102 / 255, 107 / 255, 120 / 255);
     const greenColor = rgb(22 / 255, 163 / 255, 74 / 255);
     const darkGreen = rgb(22 / 255, 101 / 255, 52 / 255);
@@ -211,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
     let yPos = pageHeight;
 
     // Header background - medium gray
-    const headerBg = rgb(156 / 255, 163 / 255, 175 / 255); // medium gray
+    const headerBg = gray700;
     page.drawRectangle({
       x: 0,
       y: pageHeight - 70,
@@ -426,7 +427,7 @@ const handler = async (req: Request): Promise<Response> => {
         y: badgeRectY,
         width: badgeW,
         height: badgeH,
-        color: gray800,
+        color: gray700,
       });
 
       const badgeText = normalizeText(`Signatário ${i + 1}`);
@@ -457,12 +458,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Signed status badge with check icon
       if (signer.status === "signed") {
-        const checkCircleRadius = 5;
+        const checkCircleRadius = 6;
         const assinadoText = "Assinado";
         const assinadoFontSize = 8;
-        const assinadoTextWidth = helveticaBold.widthOfTextAtSize(assinadoText, assinadoFontSize);
+        const assinadoTextWidth = helveticaFont.widthOfTextAtSize(assinadoText, assinadoFontSize);
         const totalWidth = checkCircleRadius * 2 + 4 + assinadoTextWidth;
-        const startX = pageWidth - margin - totalWidth;
+        const startX = pageWidth - margin - totalWidth - 15;
         
         // Green circle
         const cx = startX + checkCircleRadius;
@@ -471,21 +472,21 @@ const handler = async (req: Request): Promise<Response> => {
           x: cx,
           y: cy,
           size: checkCircleRadius,
-          color: lightGreen,
+          color: greenColor,
         });
         
         // Checkmark lines inside circle
         page.drawLine({
-          start: { x: cx - 2.5, y: cy },
-          end: { x: cx - 0.5, y: cy - 2.5 },
-          thickness: 1.5,
-          color: darkGreen,
+          start: { x: cx - 3, y: cy },
+          end: { x: cx - 0.5, y: cy - 3 },
+          thickness: 1,
+          color: white,
         });
         page.drawLine({
-          start: { x: cx - 0.5, y: cy - 2.5 },
-          end: { x: cx + 3, y: cy + 2 },
-          thickness: 1.5,
-          color: darkGreen,
+          start: { x: cx - 0.5, y: cy - 3 },
+          end: { x: cx + 3.5, y: cy + 2.5 },
+          thickness: 1,
+          color: white,
         });
         
         // "Assinado" text
@@ -493,7 +494,7 @@ const handler = async (req: Request): Promise<Response> => {
           x: startX + checkCircleRadius * 2 + 4,
           y: cy - assinadoFontSize / 2 + 1,
           size: assinadoFontSize,
-          font: helveticaBold,
+          font: helveticaFont,
           color: greenColor,
         });
       }
@@ -650,15 +651,12 @@ const handler = async (req: Request): Promise<Response> => {
     const footerY = 15;
     const footerTopY = footerY + footerHeight;
 
-    // Footer background
-    lastPage.drawRectangle({
-      x: margin,
-      y: footerY,
-      width: pageWidth - margin * 2,
-      height: footerHeight,
-      color: lightGray,
-      borderColor: borderGray,
-      borderWidth: 1,
+    // Footer separator line
+    lastPage.drawLine({
+      start: { x: margin, y: footerTopY },
+      end: { x: pageWidth - margin, y: footerTopY },
+      color: borderGray,
+      thickness: 1,
     });
 
     // Footer texts (left side)
@@ -729,15 +727,6 @@ const handler = async (req: Request): Promise<Response> => {
           height: qrSize,
         });
 
-        // QR code label below
-        const validLabel = normalizeText("Validacao");
-        lastPage.drawText(validLabel, {
-          x: qrX + qrSize / 2 - helveticaBold.widthOfTextAtSize(validLabel, 7) / 2,
-          y: qrY - 10,
-          size: 7,
-          font: helveticaBold,
-          color: gray600,
-        });
       }
     } catch (e) {
       console.log("Could not generate QR code:", e);
