@@ -281,17 +281,17 @@ const Documents = () => {
           <div>
             <h1 className="text-sm font-bold text-muted-foreground">Documentos</h1>
           </div>
-          <UploadDialog />
-        </div>
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
-          >
-            <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <UploadDialog />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-10 h-10 rounded-full hover:bg-transparent active:bg-transparent focus:bg-transparent"
+            >
+              <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
