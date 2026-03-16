@@ -4,7 +4,8 @@ import { DocumentsTable, Document } from "@/components/documents/DocumentsTable"
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, SlidersHorizontal, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download, FileText } from "lucide-react";
+import { Search, ChevronLeft, LayoutGrid, List, Folder as FolderIcon, SlidersHorizontal, CalendarIcon, Plus, ChevronDown, ChevronUp, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download, FileText, Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { FoldersList, Folder } from "@/components/documents/FoldersList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
