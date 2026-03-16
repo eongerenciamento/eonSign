@@ -1368,7 +1368,7 @@ export const DocumentsTable = ({
                       onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)}
                       title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}>
                       
-                        <Eye className="w-4 h-4 text-muted-foreground" />
+                        <Eye className="w-4 h-4 text-foreground" />
                       </Button>
                       <Button
                       variant="ghost"
