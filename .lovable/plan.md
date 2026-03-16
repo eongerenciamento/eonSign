@@ -1,86 +1,31 @@
 
 
-## Resolver Login Google Definitivamente
+## Problema
 
-### Problema Atual
+A transparência não funciona porque o conteúdo da página rola **dentro** do `<main>` (com `overflow-y-auto`), e não atrás da nav. A nav fixa está sobre o `bg-gray-100` estático do container externo — nunca há conteúdo passando por trás dela para o `backdrop-blur` atuar.
 
-O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
+## Solução
 
-1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
-2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
+Mudar a estrutura mobile para que o scroll aconteça no nível da página inteira, não dentro do `<main>`:
 
-### Fluxo OAuth Direto (dominio customizado)
+### 1. `src/components/Layout.tsx`
+- No mobile, o `<main>` não deve ter `overflow-y-auto` — o scroll deve ser do body/container externo
+- Adicionar `padding-top` no mobile para compensar a nav fixa (em vez do spacer separado)
 
-```text
-App chama supabase.auth.signInWithOAuth
-       |
-       v
-Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
-       |
-       v
-Backend redireciona para Google
-       |
-       v
-Usuario autoriza no Google
-       |
-       v
-Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
-       |
-       v
-Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
-       |
-       v
-Supabase client no frontend processa os tokens da URL
-       |
-       v
-onAuthStateChange detecta sessao -> Dashboard
+### 2. `src/components/MobileNav.tsx`  
+- Remover o spacer div (linhas 108-115) — o padding será aplicado no Layout
+
+### 3. `src/index.css` ou Layout
+- Garantir que no mobile o container permita scroll no nível correto para o conteúdo passar por trás da nav fixa
+
+**Mudanças concretas:**
+
+**Layout.tsx** — No mobile, trocar a estrutura para scroll no nível do container externo:
+```tsx
+<main className="flex-1 overflow-y-auto md:m-3 bg-gray-100 dark:bg-background md:rounded-2xl md:shadow-lg pt-[calc(env(safe-area-inset-top,0px)+60px)] md:pt-0">
 ```
 
-### Alteracoes Necessarias
+**MobileNav.tsx** — Remover o spacer (linhas 108-115).
 
-#### 1. Configuracao no Google Cloud Console (acao do usuario)
-
-Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
-
-```
-https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
-```
-
-Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
-
-#### 2. `src/components/auth/LoginForm.tsx`
-
-Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
-
-**De:**
-```typescript
-redirectTo: `${window.location.origin}/dashboard`,
-```
-
-**Para:**
-```typescript
-redirectTo: window.location.origin,
-```
-
-Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
-
-#### 3. Nenhuma outra alteracao de codigo necessaria
-
-O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
-
-### Resumo
-
-| Item | Status |
-|------|--------|
-| allowedHosts inclui backend | Ja corrigido |
-| ProtectedRoute sem getSession | Ja corrigido |
-| PWA denylist para /~oauth | Ja configurado |
-| redirectTo para raiz (/) | Precisa alterar |
-| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
-
-### Arquivo alterado
-- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
-
-### Acao do usuario (obrigatoria)
-- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
+Resultado: o conteúdo rola por baixo da nav, o `backdrop-blur-xl` captura esse movimento e cria o efeito glassmorphism real.
 
