@@ -427,25 +427,32 @@ const Drive = () => {
       <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedFolder(null)}
-              className="text-sm text-blue-700 hover:underline"
-            >
-              Drive
-            </button>
-            {selectedFolder && getBreadcrumbPath().map((folder, index, arr) => (
-              <button
-                key={folder.id}
-                onClick={() => setSelectedFolder(folder.id)}
-                className={cn(
-                  "text-sm hover:underline",
-                  index === arr.length - 1 ? "text-gray-500" : "text-blue-700"
-                )}
-              >
-                {folder.name}
-              </button>
-            ))}
+          <div>
+            <h1 className="text-sm font-bold text-muted-foreground">Drive</h1>
+            {selectedFolder && (
+              <div className="flex items-center gap-1 mt-1">
+                <button
+                  onClick={() => setSelectedFolder(null)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Drive
+                </button>
+                {getBreadcrumbPath().map((folder, index, arr) => (
+                  <span key={folder.id} className="flex items-center gap-1">
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                    <button
+                      onClick={() => setSelectedFolder(folder.id)}
+                      className={cn(
+                        "text-xs hover:underline",
+                        index === arr.length - 1 ? "text-muted-foreground" : "text-primary"
+                      )}
+                    >
+                      {folder.name}
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

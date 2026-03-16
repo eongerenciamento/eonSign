@@ -146,7 +146,7 @@ const Dashboard = () => {
     loadDocuments();
   }, [loadDocuments]);
   return <Layout>
-      <div className="p-8 space-y-8">
+      <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
