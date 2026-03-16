@@ -1488,8 +1488,8 @@ export const DocumentsTable = ({
 
                   {/* Document Name */}
                   <div
-                  className={`space-y-2 ${doc.isEnvelope ? "cursor-pointer" : ""}`}
-                  onClick={() => doc.isEnvelope && handleOpenEnvelopeDialog(doc)}>
+                  className="space-y-2 cursor-pointer"
+                  onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)}>
                   
                     <div className="flex items-center gap-2 flex-wrap">
                       {doc.isEnvelope ?
@@ -1497,7 +1497,7 @@ export const DocumentsTable = ({
 
                     <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                     }
-                      <p className="font-medium text-foreground">{doc.name}</p>
+                      <p className="font-medium text-primary">{doc.name}</p>
                       {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 &&
                     <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                           {doc.documentCount} docs
