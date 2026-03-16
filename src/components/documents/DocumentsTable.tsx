@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown, Check, Folder } from "lucide-react";
+import { Download, PenTool, Trash2, Mail, FileCheck, ShieldCheck, FolderOpen, FileText, FileDown, Loader2, ChevronRight, ChevronDown, Check, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -1148,15 +1148,6 @@ export const DocumentsTable = ({
                         variant="ghost" 
                         size="icon" 
                         className="rounded-full hover:bg-transparent" 
-                        onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
-                        title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
-                      >
-                        <Eye className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-transparent" 
                         onClick={() => doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)} 
                         title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
                       >
@@ -1294,15 +1285,6 @@ export const DocumentsTable = ({
                         <PenTool className="w-4 h-4 text-muted-foreground" />
                       </Button>
                     )}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-transparent h-8 w-8" 
-                      onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)} 
-                      title={doc.isEnvelope ? "Ver documentos do envelope" : "Visualizar documento"}
-                    >
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 

@@ -1,26 +1,86 @@
 
 
-## Substituir texto "eonSign" por logo no PDF e remover botão de visualizar documento
+## Resolver Login Google Definitivamente
 
-### Alterações
+### Problema Atual
 
-**1. Copiar a logo enviada para o projeto**
-- Copiar `user-uploads://logobranca-6.png` para `public/email-assets/logobranca-6.png` (logo branca no fundo transparente, ideal para header escuro do PDF).
+O fluxo OAuth Google no dominio customizado (`sign.eonhub.com.br`) falha porque:
 
-**2. `supabase/functions/generate-signature-report/index.ts`** — Substituir texto "eonSign" por imagem da logo
-- Buscar a logo PNG de uma URL pública (ex: `${supabaseUrl}/storage/v1/object/public/email-assets/logobranca-6.png` ou diretamente do domínio público do app).
-- Embutir a imagem PNG no PDF usando `pdfDoc.embedPng()` e `page.drawImage()` no lugar do `page.drawText("eonSign", ...)` (linhas 221-228).
-- A logo será posicionada no mesmo local (header, canto esquerdo), dimensionada para ~120x30px para manter proporção.
+1. O Google Cloud Console so tem `sign.eonhub.com.br/~oauth/callback` como URL de redirecionamento, mas o fluxo direto (que usamos para dominios customizados) redireciona via backend, exigindo uma URL diferente
+2. O `redirectTo` aponta para `/dashboard` (rota protegida), o que pode causar problemas de timing no processamento dos tokens
 
-**3. `src/pages/ValidateDocument.tsx`** — Substituir texto "eonSign" por imagem da logo no PDF gerado no frontend
-- Carregar a logo como imagem base64 e usar `doc.addImage()` do jsPDF no lugar de `doc.text("eonSign", ...)` (linha 222).
-- A logo substituirá o texto no header do certificado de validação.
+### Fluxo OAuth Direto (dominio customizado)
 
-**4. `src/components/documents/DocumentsTable.tsx`** — Remover botão de visualizar documento (ícone Eye)
-- Remover o `<Button>` com `<Eye>` que aparece nas duas views (desktop ~linhas 1147-1155 e mobile ~linhas 1297-1305).
-- Remover `Eye` do import de lucide-react (se não for usado em nenhum outro lugar do arquivo).
+```text
+App chama supabase.auth.signInWithOAuth
+       |
+       v
+Redireciona para backend: lbyoniuealghclfuahko.supabase.co/auth/v1/authorize
+       |
+       v
+Backend redireciona para Google
+       |
+       v
+Usuario autoriza no Google
+       |
+       v
+Google redireciona para: lbyoniuealghclfuahko.supabase.co/auth/v1/callback  <-- PRECISA ESTAR NO GOOGLE CONSOLE
+       |
+       v
+Backend processa tokens e redireciona para: sign.eonhub.com.br/#access_token=...
+       |
+       v
+Supabase client no frontend processa os tokens da URL
+       |
+       v
+onAuthStateChange detecta sessao -> Dashboard
+```
 
-### Notas
-- A logo precisa estar acessível via URL pública para a edge function poder baixá-la. Será hospedada no bucket `email-assets` do storage ou referenciada diretamente do domínio público.
-- O `EnvelopeDocumentsDialog.tsx` também tem botão Eye para visualizar documentos individuais do envelope — esse será mantido, pois a solicitação refere-se à listagem principal de documentos.
+### Alteracoes Necessarias
+
+#### 1. Configuracao no Google Cloud Console (acao do usuario)
+
+Adicionar esta URL nos **URIs de redirecionamento autorizados** do Google Cloud Console:
+
+```
+https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback
+```
+
+Manter tambem a URL existente (`https://sign.eonhub.com.br/~oauth/callback`) para compatibilidade.
+
+#### 2. `src/components/auth/LoginForm.tsx`
+
+Alterar o `redirectTo` de `/dashboard` para a raiz `/`:
+
+**De:**
+```typescript
+redirectTo: `${window.location.origin}/dashboard`,
+```
+
+**Para:**
+```typescript
+redirectTo: window.location.origin,
+```
+
+Motivo: Redirecionar para `/` (que e uma rota protegida via ProtectedRoute) garante que o Supabase client processe os tokens do hash ANTES do ProtectedRoute avaliar a sessao. O Auth.tsx ja tem listener de `onAuthStateChange` que envia para `/dashboard` quando detecta sessao. Se o usuario ja esta autenticado, o ProtectedRoute renderiza o Dashboard diretamente.
+
+#### 3. Nenhuma outra alteracao de codigo necessaria
+
+O `allowedHosts` ja foi corrigido na edicao anterior para incluir `lbyoniuealghclfuahko.supabase.co`. O `ProtectedRoute` ja usa apenas `onAuthStateChange` (sem `getSession`). O PWA ja tem o `navigateFallbackDenylist` para `/~oauth`.
+
+### Resumo
+
+| Item | Status |
+|------|--------|
+| allowedHosts inclui backend | Ja corrigido |
+| ProtectedRoute sem getSession | Ja corrigido |
+| PWA denylist para /~oauth | Ja configurado |
+| redirectTo para raiz (/) | Precisa alterar |
+| Google Console com callback do backend | Precisa adicionar (acao do usuario) |
+
+### Arquivo alterado
+- `src/components/auth/LoginForm.tsx` (1 linha - redirectTo)
+
+### Acao do usuario (obrigatoria)
+- Adicionar `https://lbyoniuealghclfuahko.supabase.co/auth/v1/callback` nos URIs de redirecionamento autorizados no Google Cloud Console
 

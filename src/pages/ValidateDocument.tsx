@@ -217,9 +217,23 @@ const ValidateDocument = () => {
     doc.setFont("helvetica", "bold");
     doc.text("CERTIFICADO DE VALIDAÇÃO", pageWidth / 2, 20, { align: "center" });
 
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text("eonSign", pageWidth / 2, 30, { align: "center" });
+    // Add logo image instead of "eonSign" text
+    try {
+      const logoImg = new Image();
+      logoImg.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        logoImg.onload = () => resolve();
+        logoImg.onerror = () => reject();
+        logoImg.src = "/email-assets/logobranca-6.png";
+      });
+      const logoHeight = 8;
+      const logoWidth = (logoImg.naturalWidth / logoImg.naturalHeight) * logoHeight;
+      doc.addImage(logoImg, "PNG", (pageWidth - logoWidth) / 2, 25, logoWidth, logoHeight);
+    } catch {
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text("eonSign", pageWidth / 2, 30, { align: "center" });
+    }
 
     doc.setFontSize(10);
     doc.text(`Emitido por: ${organization.name}`, pageWidth / 2, 38, { align: "center" });
