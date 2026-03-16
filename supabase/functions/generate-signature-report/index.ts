@@ -374,20 +374,31 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       // Signer number badge
+      const badgeW = 70;
+      const badgeH = 25;
+      const badgeRectX = margin;
+      const badgeRectY = yPos - badgeH;
+      
       page.drawRectangle({
-        x: margin,
-        y: yPos - 25,
-        width: 70,
-        height: 25,
-        color: gray300,
+        x: badgeRectX,
+        y: badgeRectY,
+        width: badgeW,
+        height: badgeH,
+        color: gray800,
       });
 
-      page.drawText(`Signatário ${i + 1}`, {
-        x: margin + 8,
-        y: yPos - 17,
-        size: 8,
+      const badgeText = normalizeText(`Signatário ${i + 1}`);
+      const badgeFontSize = 8;
+      const badgeTextWidth = helveticaBold.widthOfTextAtSize(badgeText, badgeFontSize);
+      const badgeTextX = badgeRectX + (badgeW - badgeTextWidth) / 2;
+      const badgeTextY = badgeRectY + (badgeH - badgeFontSize) / 2;
+
+      page.drawText(badgeText, {
+        x: badgeTextX,
+        y: badgeTextY,
+        size: badgeFontSize,
         font: helveticaBold,
-        color: gray600,
+        color: white,
       });
 
       // Truncate signer name to fit within card
@@ -402,12 +413,44 @@ const handler = async (req: Request): Promise<Response> => {
         color: gray600,
       });
 
-      // Signed status badge
+      // Signed status badge with check icon
       if (signer.status === "signed") {
-        page.drawText("Assinado", {
-          x: pageWidth - margin - 50,
-          y: yPos - 17,
-          size: 8,
+        const checkCircleRadius = 5;
+        const assinadoText = "Assinado";
+        const assinadoFontSize = 8;
+        const assinadoTextWidth = helveticaBold.widthOfTextAtSize(assinadoText, assinadoFontSize);
+        const totalWidth = checkCircleRadius * 2 + 4 + assinadoTextWidth;
+        const startX = pageWidth - margin - totalWidth;
+        
+        // Green circle
+        const cx = startX + checkCircleRadius;
+        const cy = yPos - 15;
+        page.drawCircle({
+          x: cx,
+          y: cy,
+          size: checkCircleRadius,
+          color: lightGreen,
+        });
+        
+        // Checkmark lines inside circle
+        page.drawLine({
+          start: { x: cx - 2.5, y: cy },
+          end: { x: cx - 0.5, y: cy - 2.5 },
+          thickness: 1.5,
+          color: darkGreen,
+        });
+        page.drawLine({
+          start: { x: cx - 0.5, y: cy - 2.5 },
+          end: { x: cx + 3, y: cy + 2 },
+          thickness: 1.5,
+          color: darkGreen,
+        });
+        
+        // "Assinado" text
+        page.drawText(assinadoText, {
+          x: startX + checkCircleRadius * 2 + 4,
+          y: cy - assinadoFontSize / 2 + 1,
+          size: assinadoFontSize,
           font: helveticaBold,
           color: greenColor,
         });
