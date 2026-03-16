@@ -456,45 +456,45 @@ const Drive = () => {
               </div>
             )}
           </div>
-          <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
-            <Plus className="w-5 h-5 md:mr-2 text-white" />
-            <span className="hidden md:inline text-white">Documento</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCreateFolderInline}
+              className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+            >
+              <Plus className="w-5 h-5 text-muted-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+            >
+              <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+              className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
+            >
+              {viewMode === "grid" ? (
+                <List className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+              )}
+            </Button>
+            <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
+              <Plus className="w-5 h-5 md:mr-2 text-white" />
+              <span className="hidden md:inline text-white">Documento</span>
+            </Button>
+          </div>
         </div>
 
         {/* Folders Section */}
         {!selectedFolder && (
           <div className="space-y-4">
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCreateFolderInline}
-                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-              >
-                <Plus className="w-5 h-5 text-muted-foreground" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowFilters(!showFilters)}
-                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-              >
-                <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
-              >
-                {viewMode === "grid" ? (
-                  <List className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <LayoutGrid className="w-5 h-5 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
             {showFilters && (
               <div className="flex flex-col gap-4">
                 <div className="relative flex-1">
