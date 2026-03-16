@@ -180,9 +180,11 @@ const handler = async (req: Request): Promise<Response> => {
     const margin = 40;
 
     // Colors
-    const gray300 = rgb(212 / 255, 215 / 255, 219 / 255);
+    const gray800 = rgb(31 / 255, 41 / 255, 55 / 255);
     const gray600 = rgb(102 / 255, 107 / 255, 120 / 255);
     const greenColor = rgb(22 / 255, 163 / 255, 74 / 255);
+    const darkGreen = rgb(22 / 255, 101 / 255, 52 / 255);
+    const lightGreen = rgb(187 / 255, 247 / 255, 208 / 255);
     const white = rgb(1, 1, 1);
     const lightGray = rgb(250 / 255, 250 / 255, 250 / 255);
     const borderGray = rgb(230 / 255, 230 / 255, 230 / 255);
