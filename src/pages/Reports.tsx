@@ -33,6 +33,7 @@ const getAbbreviation = (text: string) => {
 };
 
 const Reports = () => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [dateFilter, setDateFilter] = useState("30");
   const [statusFilter, setStatusFilter] = useState("all");
