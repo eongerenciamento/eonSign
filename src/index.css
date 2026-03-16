@@ -98,7 +98,7 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 220 10% 20%;
     --sidebar-ring: 214 95% 55%;
-
+    --gradient-sidebar: linear-gradient(to top, hsl(220 15% 6%), hsl(220 10% 18%));
   }
 }
 
