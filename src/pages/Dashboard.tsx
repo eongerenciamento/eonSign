@@ -191,7 +191,7 @@ const Dashboard = () => {
         {/* Recent Documents */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm text-muted-foreground">
+            <h2 className="text-sm text-foreground">
               Documentos Recentes
             </h2>
           </div>
