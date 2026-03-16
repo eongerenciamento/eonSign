@@ -20,19 +20,19 @@ export const Layout = ({
 
       {/* Desktop Layout with Sidebar */}
       <SidebarProvider defaultOpen={false}>
-        <div className="min-h-screen flex w-full">
+        <div
+          className="flex flex-1 h-screen w-full overflow-hidden"
+          style={{ background: "var(--gradient-sidebar)" }}
+        >
           {/* Desktop Sidebar */}
           <div className="hidden md:block">
             <AppSidebar />
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col w-full bg-gray-100 dark:bg-background">
-            {/* Content Area */}
-            <main className="flex-1 overflow-auto md:p-4">
-              {children}
-            </main>
-          </div>
+          <main className="flex-1 overflow-y-auto md:m-3 bg-gray-100 dark:bg-background md:rounded-2xl md:shadow-lg">
+            {children}
+          </main>
         </div>
       </SidebarProvider>
     </div>
