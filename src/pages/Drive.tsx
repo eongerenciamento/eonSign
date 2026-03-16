@@ -456,6 +456,10 @@ const Drive = () => {
               </div>
             )}
           </div>
+          <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
+            <Upload className="w-5 h-5 md:mr-2 text-white" />
+            <span className="hidden md:inline text-white">Documento</span>
+          </Button>
         </div>
 
         {/* Folders Section */}
