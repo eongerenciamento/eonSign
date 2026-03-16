@@ -255,9 +255,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Title - white for contrast with dark header
     page.drawText("RELATÓRIO DE ASSINATURAS", {
-      x: pageWidth - margin - helveticaBold.widthOfTextAtSize("RELATÓRIO DE ASSINATURAS", 16),
+      x: pageWidth - margin - helveticaBold.widthOfTextAtSize("RELATÓRIO DE ASSINATURAS", 13),
       y: pageHeight - 45,
-      size: 16,
+      size: 13,
       font: helveticaBold,
       color: white,
     });
