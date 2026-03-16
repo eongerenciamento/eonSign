@@ -157,7 +157,7 @@ export function AppSidebar() {
   const handleCertificateRedirect = () => {
     window.open('https://certifica.eonhub.com.br', '_blank');
   };
-  return <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-layout-gradient`} collapsible="icon">
+  return <Sidebar className={`${collapsed ? "w-16" : "w-64"}`} collapsible="icon">
       {/* Header com Toggle */}
       <div className={`${collapsed ? "px-3 py-4" : "p-6"} flex flex-col`}>
         <div className={`flex ${collapsed ? "justify-center" : "justify-end"} w-full`}>
