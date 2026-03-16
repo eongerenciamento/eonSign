@@ -261,10 +261,10 @@ serve(async (req) => {
         const fullText = displayName + metadataSuffix;
 
         // Adjust font size based on total text length (increased base)
-        let fontSize = 7;
-        if (fullText.length > 70) fontSize = 5.5;
-        else if (fullText.length > 55) fontSize = 6;
-        else if (fullText.length > 45) fontSize = 6.5;
+        let fontSize = 8;
+        if (fullText.length > 70) fontSize = 6.5;
+        else if (fullText.length > 55) fontSize = 7;
+        else if (fullText.length > 45) fontSize = 7.5;
 
         // Draw name in bold
         page.drawText(displayName, {
