@@ -150,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Fetch document
     const { data: document, error: docError } = await supabase
       .from("documents")
-      .select("id, name, status, created_at, updated_at, user_id")
+      .select("id, name, status, created_at, updated_at, user_id, file_url")
       .eq("id", documentId)
       .single();
 
@@ -277,8 +277,42 @@ const handler = async (req: Request): Promise<Response> => {
 
     yPos -= 25;
 
+    // Count original document pages
+    let originalPageCount = 0;
+    try {
+      if (document.file_url) {
+        let fileData: ArrayBuffer | null = null;
+        
+        // Try to download from storage
+        if (document.file_url.includes('/documents/')) {
+          const urlParts = document.file_url.split('/documents/');
+          const filePath = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]);
+          const { data, error } = await supabase.storage.from("documents").download(filePath);
+          if (!error && data) {
+            fileData = await data.arrayBuffer();
+          }
+        }
+        
+        if (!fileData) {
+          // Try direct fetch
+          const resp = await fetch(document.file_url);
+          if (resp.ok) {
+            fileData = await resp.arrayBuffer();
+          }
+        }
+        
+        if (fileData) {
+          const originalPdf = await PDFDocument.load(new Uint8Array(fileData), { ignoreEncryption: true });
+          originalPageCount = originalPdf.getPageCount();
+          console.log("Original document page count:", originalPageCount);
+        }
+      }
+    } catch (e) {
+      console.log("Could not count original document pages:", e);
+    }
+
     // Info box
-    const infoBoxHeight = 70;
+    const infoBoxHeight = 85;
     page.drawRectangle({
       x: margin,
       y: yPos - infoBoxHeight,
@@ -311,9 +345,17 @@ const handler = async (req: Request): Promise<Response> => {
       color: gray600,
     });
 
-    page.drawText(`Data de conclusão: ${completedAt ? formatDate(completedAt) : "Pendente"}`, {
+    page.drawText(`Paginas do documento: ${originalPageCount > 0 ? originalPageCount : "N/A"}`, {
       x: margin + 10,
       y: yPos - 50,
+      size: 9,
+      font: helveticaFont,
+      color: gray600,
+    });
+
+    page.drawText(`Data de conclusao: ${completedAt ? formatDate(completedAt) : "Pendente"}`, {
+      x: margin + 10,
+      y: yPos - 65,
       size: 9,
       font: helveticaFont,
       color: gray600,
