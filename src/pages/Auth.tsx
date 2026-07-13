@@ -16,20 +16,13 @@ const RadialGlow = () => <motion.div className="absolute inset-0" animate={{
 }} style={{
   filter: "blur(40px)"
 }} />;
-const PoweredBy = () => <div className="text-center space-y-3">
-    <a href="https://certifica.eonhub.com.br" target="_blank" rel="noopener noreferrer" style={{
-    backgroundColor: "rgba(255, 255, 255, 0.1)"
-  }} className="inline-block px-4 py-2 text-white text-sm transition-all hover:opacity-90 font-normal rounded-full">
-      Certificado Digital <span className="text-xs">R$</span>109.90
-    </a>
-    <div>
-      <span className="text-gray-400 text-sm">
-        Powered by{" "}
-        <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-300 hover:text-gray-400 transition-colors">
-          eonhub
-        </a>
-      </span>
-    </div>
+const PoweredBy = () => <div className="text-center">
+    <span className="text-gray-400 text-sm">
+      Powered by{" "}
+      <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-300 hover:text-gray-400 transition-colors">
+        eonhub
+      </a>
+    </span>
   </div>;
 const PoweredBySimple = () => <div className="text-center">
     <span className="text-gray-400 text-sm font-normal">

@@ -126,6 +126,11 @@ export default {
           "40%": { transform: "translate(30px, 25px) scale(1.08)" },
           "80%": { transform: "translate(-25px, -20px) scale(0.92)" },
         },
+        "shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%, 60%": { transform: "translateX(-4px)" },
+          "40%, 80%": { transform: "translateX(4px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -134,6 +139,7 @@ export default {
         "float1": "float1 4s ease-in-out infinite",
         "float2": "float2 5s ease-in-out infinite",
         "float3": "float3 6s ease-in-out infinite",
+        "shake": "shake 0.4s ease-in-out",
       },
     },
   },
