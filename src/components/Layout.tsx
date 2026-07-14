@@ -20,10 +20,7 @@ export const Layout = ({
 
       {/* Desktop Layout with Sidebar */}
       <SidebarProvider defaultOpen={false}>
-        <div
-          className="flex flex-1 h-screen w-full overflow-hidden"
-          style={{ background: "var(--gradient-sidebar)" }}
-        >
+        <div className="flex flex-1 h-screen w-full overflow-hidden bg-background md:[background:var(--gradient-sidebar)]">
           {/* Desktop Sidebar */}
           <div className="hidden md:block">
             <AppSidebar />

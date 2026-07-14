@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2, Mail, Lock, LogIn } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -94,7 +94,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-2">
         <FormField
           control={form.control}
           name="email"
@@ -144,7 +144,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
 
         <div className="flex gap-3">
           <Button type="submit" disabled={isSubmitting} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full border-0">
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Entrar
           </Button>
 
@@ -230,7 +230,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
           </div>
           
           {/* Mobile: Powered by a esquerda, links a direita, mais baixo */}
-          <div className="md:hidden pt-8 flex items-center justify-between text-xs text-gray-400">
+          <div className="md:hidden pt-10 flex items-center justify-between text-[11px] text-gray-400">
             <span>
               Powered by{" "}
               <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">

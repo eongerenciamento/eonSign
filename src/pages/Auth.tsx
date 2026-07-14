@@ -16,18 +16,10 @@ const RadialGlow = () => <motion.div className="absolute inset-0" animate={{
 }} style={{
   filter: "blur(40px)"
 }} />;
-const PoweredBy = () => <div className="text-center">
-    <span className="text-gray-400 text-sm">
+const PoweredBy = () => <div className="text-center mt-1">
+    <span className="text-gray-400 text-xs">
       Powered by{" "}
       <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-300 hover:text-gray-400 transition-colors">
-        eonhub
-      </a>
-    </span>
-  </div>;
-const PoweredBySimple = () => <div className="text-center">
-    <span className="text-gray-400 text-sm font-normal">
-      Powered by{" "}
-      <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
         eonhub
       </a>
     </span>
@@ -144,7 +136,7 @@ export default function Auth() {
           <div className="relative z-10">
             <img src={LOGO_URL} alt="Logo" className="h-24 w-auto" />
           </div>
-          <div className="absolute bottom-8 left-0 right-0 z-10">
+          <div className="absolute bottom-6 left-0 right-0 z-10">
             <PoweredBy />
           </div>
         </div>
@@ -165,7 +157,7 @@ export default function Auth() {
           </div>
           
           {/* Links legais posicionados na mesma altura do Powered by */}
-          <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 text-xs text-gray-400">
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 text-xs text-gray-400">
             <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
             <span>·</span>
             <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
