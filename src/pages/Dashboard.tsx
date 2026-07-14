@@ -175,8 +175,10 @@ const Dashboard = () => {
       <div className="space-y-6">
         {/* Mobile header: gradient greeting + glass metric cards */}
         <div
-          className="relative px-4 pb-8 pt-6 text-white lg:hidden"
+          className="relative px-4 pb-8 text-white lg:hidden"
           style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.5rem)",
+            marginTop: "calc(env(safe-area-inset-top, 0px) * -1)",
             backgroundImage:
               "radial-gradient(120% 70% at 85% 110%, hsl(var(--background)) 0%, hsl(var(--background) / 0) 55%), linear-gradient(to bottom, hsl(218 55% 10%) 0%, hsl(217 50% 18%) 18%, hsl(216 45% 32%) 38%, hsl(214 38% 55%) 58%, hsl(210 30% 80%) 80%, hsl(var(--background)) 100%)",
           }}
