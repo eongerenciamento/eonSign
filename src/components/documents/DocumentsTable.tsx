@@ -982,7 +982,7 @@ export const DocumentsTable = ({
   // botões de ícone individuais por um único botão que abre um popover com as opções.
   const renderActionMenuItems = (doc: any) => {
     const menuItemClass =
-      "w-full flex items-center gap-2 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-muted disabled:opacity-50 disabled:pointer-events-none";
+      "w-full flex items-center justify-start gap-2 px-2 py-1.5 text-left text-sm text-foreground/80 rounded hover:bg-muted disabled:opacity-50 disabled:pointer-events-none";
     const items: JSX.Element[] = [];
 
     if (doc.signerStatuses?.[0] === "pending" && !isPrescription(doc)) {
@@ -1022,7 +1022,7 @@ export const DocumentsTable = ({
           ) : (
             <FileDown className="w-4 h-4 text-muted-foreground" />
           )}
-          Baixar documento assinado
+          Baixar doc. assinado
         </button>
       );
     }
@@ -1061,7 +1061,7 @@ export const DocumentsTable = ({
           onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
         >
           <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-          Visualizar certificado de validação
+          Certificado de validação
         </button>
       );
     }
