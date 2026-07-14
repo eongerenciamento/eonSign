@@ -98,6 +98,28 @@ async function downloadBryReport(
   }
 }
 
+// Detecta se um path aponta para uma imagem (documentos SIMPLE podem ser enviados como foto)
+function getImageType(path: string): "jpg" | "png" | null {
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+  if (lower.endsWith(".png")) return "png";
+  return null;
+}
+
+// Envolve uma imagem (JPG/PNG) em um PDF de uma página, para poder mesclar com o relatório
+async function imageToPdf(imageBytes: ArrayBuffer, imageType: "jpg" | "png"): Promise<ArrayBuffer> {
+  const pdfDoc = await PDFDocument.create();
+  const image = imageType === "jpg" ? await pdfDoc.embedJpg(imageBytes) : await pdfDoc.embedPng(imageBytes);
+
+  const page = pdfDoc.addPage([image.width, image.height]);
+  page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+
+  const bytes = await pdfDoc.save();
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
+}
+
 // Merge two PDFs
 async function mergeTwoPdfs(signedPdfBytes: ArrayBuffer, reportPdfBytes: ArrayBuffer): Promise<Uint8Array> {
   const mergedPdf = await PDFDocument.create();
@@ -166,8 +188,15 @@ async function getDocumentCompletePdf(
       return null;
     }
 
-    const signedPdfBytes = await signedFileData.arrayBuffer();
+    let signedPdfBytes = await signedFileData.arrayBuffer();
     console.log(`Document ${document.id} signed PDF: ${signedPdfBytes.byteLength} bytes`);
+
+    // Documento enviado como foto (JPG/PNG) em vez de PDF: envolve em um PDF de 1 página
+    const imageType = getImageType(signedFilePath);
+    if (imageType) {
+      console.log(`Document ${document.id} is a ${imageType} image, converting to PDF`);
+      signedPdfBytes = await imageToPdf(signedPdfBytes, imageType);
+    }
 
     // Generate local signature report
     const { data: reportResult, error: reportError } = await supabase.functions.invoke(
