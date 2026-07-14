@@ -15,6 +15,18 @@ function sanitizeFilename(filename: string): string {
     .replace(/[^a-zA-Z0-9._-]/g, '_'); // Substitui caracteres especiais por _
 }
 
+// file_url \u00e9 salvo como URL p\u00fablica completa (ver src/pages/NewDocument.tsx:1028);
+// o Storage SDK precisa do path relativo dentro do bucket, n\u00e3o da URL inteira.
+function extractStoragePath(fileUrl: string): string | null {
+  const marker = "/storage/v1/object/public/documents/";
+  const idx = fileUrl.indexOf(marker);
+  if (idx === -1) {
+    // j\u00e1 \u00e9 um path relativo (ex: bry_signed_file_url)
+    return fileUrl;
+  }
+  return fileUrl.slice(idx + marker.length);
+}
+
 // Get BRy access token
 async function getBryToken(): Promise<string | null> {
   const clientId = Deno.env.get("BRY_CLIENT_ID");
@@ -134,9 +146,14 @@ async function getDocumentCompletePdf(
 
   if (isSimpleMode) {
     // SIMPLE mode: download signed doc + merge with local report
-    const signedFilePath = document.bry_signed_file_url || document.file_url;
-    if (!signedFilePath) {
+    const rawFilePath = document.bry_signed_file_url || document.file_url;
+    if (!rawFilePath) {
       console.error(`No file path for document ${document.id}`);
+      return null;
+    }
+    const signedFilePath = extractStoragePath(rawFilePath);
+    if (!signedFilePath) {
+      console.error(`Could not resolve storage path for document ${document.id}: ${rawFilePath}`);
       return null;
     }
 
