@@ -435,19 +435,19 @@ const Settings = () => {
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} rounded-full p-1 h-10`}>
             <TabsTrigger value="company" className="rounded-full gap-2">
-              <Building2 className="h-4 w-4" />
+              <Building2 className="h-4 w-4" strokeWidth={1.5} />
               <span className="hidden md:inline">Empresa</span>
             </TabsTrigger>
             <TabsTrigger value="cadastros" className="rounded-full gap-2">
-              <ClipboardList className="h-4 w-4" />
+              <ClipboardList className="h-4 w-4" strokeWidth={1.5} />
               <span className="hidden md:inline">Cadastros</span>
             </TabsTrigger>
             {isAdmin && <TabsTrigger value="subscription" className="rounded-full gap-2">
-                <CreditCard className="h-4 w-4" />
+                <CreditCard className="h-4 w-4" strokeWidth={1.5} />
                 <span className="hidden md:inline">Assinatura</span>
               </TabsTrigger>}
             <TabsTrigger value="support" className="rounded-full gap-2">
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
               <span className="hidden md:inline">Suporte</span>
             </TabsTrigger>
           </TabsList>

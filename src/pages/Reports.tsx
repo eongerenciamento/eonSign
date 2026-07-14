@@ -589,11 +589,11 @@ const Reports = () => {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-2 rounded-full p-1 h-10">
             <TabsTrigger value="overview" className="rounded-full gap-2">
-              <BarChart3 className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" strokeWidth={1.5} />
               Visão Geral
             </TabsTrigger>
             <TabsTrigger value="signatories" className="rounded-full gap-2">
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4" strokeWidth={1.5} />
               Signatários
             </TabsTrigger>
           </TabsList>

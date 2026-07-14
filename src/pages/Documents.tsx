@@ -297,14 +297,17 @@ const Documents = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 rounded-full p-1 h-10">
-            <TabsTrigger value="signed" className="rounded-full">
-              <CheckCircle className="w-4 h-4" />
+            <TabsTrigger value="signed" className="rounded-full gap-2">
+              <CheckCircle className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden md:inline">Assinados</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-internal" className="rounded-full">
-              <User className="w-4 h-4" />
+            <TabsTrigger value="pending-internal" className="rounded-full gap-2">
+              <User className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden md:inline">Sua Assinatura</span>
             </TabsTrigger>
-            <TabsTrigger value="pending-external" className="rounded-full">
-              <Users className="w-4 h-4" />
+            <TabsTrigger value="pending-external" className="rounded-full gap-2">
+              <Users className="w-4 h-4" strokeWidth={1.5} />
+              <span className="hidden md:inline">Signatários Externos</span>
             </TabsTrigger>
           </TabsList>
 
@@ -396,13 +399,14 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable 
+            <DocumentsTable
               documents={filteredDocuments}
               folders={folders}
               allFolders={allFolders}
               onDocumentMoved={loadSignedDocuments}
               showFolderActions={true}
               onRefresh={loadSignedDocuments}
+              hideHeader
             />
           </TabsContent>
 
@@ -494,7 +498,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader />
           </TabsContent>
 
           <TabsContent value="pending-external" className="mt-6 space-y-6">
@@ -585,7 +589,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader />
           </TabsContent>
         </Tabs>
       </div>

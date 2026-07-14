@@ -463,7 +463,7 @@ const Drive = () => {
               onClick={handleCreateFolderInline}
               className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
             >
-              <Plus className="w-5 h-5 text-muted-foreground" />
+              <Plus className="w-5 h-5 text-blue-600" />
             </Button>
             <Button
               variant="ghost"
@@ -571,7 +571,7 @@ const Drive = () => {
                 onClick={handleCreateSubfolder}
                 className="hover:bg-transparent active:bg-transparent focus:bg-transparent h-auto w-auto p-0"
               >
-                <Plus className="w-5 h-5 text-gray-600" />
+                <Plus className="w-5 h-5 text-blue-600" />
               </Button>
               <Button
                 variant="ghost"
