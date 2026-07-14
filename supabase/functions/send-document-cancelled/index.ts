@@ -63,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.log("Sending cancellation email to:", signer.email);
         
         const emailResponse = await resend.emails.send({
-          from: "EON Sign <noreply@eonsign.com.br>",
+          from: "eonSign <noreply@eonhub.com.br>",
           to: [signer.email],
           subject: `Documento cancelado - ${documentName}`,
           html: `
