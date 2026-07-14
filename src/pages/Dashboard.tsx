@@ -206,7 +206,7 @@ const Dashboard = () => {
                 <span className="h-2 w-2 rounded-full bg-blue-300" />
                 <span className="text-[11px] font-light uppercase tracking-wide text-white/80">Pendentes</span>
               </div>
-              <p className="mt-1 text-[11px] font-light text-white/70">Sua Assinatura</p>
+              <p className="mt-1 truncate text-[11px] font-light text-white/70">Sua Assinatura</p>
               <p className="mt-2 truncate text-lg font-semibold text-white tabular-nums">{pendingByOwner}</p>
             </div>
 
@@ -218,7 +218,7 @@ const Dashboard = () => {
                 <span className="h-2 w-2 rounded-full bg-blue-300" />
                 <span className="text-[11px] font-light uppercase tracking-wide text-white/80">Pendentes</span>
               </div>
-              <p className="mt-1 text-[11px] font-light text-white/70">Signatários Externos</p>
+              <p className="mt-1 truncate text-[11px] font-light text-white/70">Signatários Externos</p>
               <p className="mt-2 truncate text-lg font-semibold text-white tabular-nums">{pendingByExternal}</p>
             </div>
           </div>
