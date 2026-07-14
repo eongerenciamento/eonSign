@@ -173,9 +173,6 @@ export function AppSidebar() {
       }
     }
   };
-  const handleCertificateRedirect = () => {
-    window.open("https://certifica.eonhub.com.br", "_blank");
-  };
   return (
     <Sidebar className={`${collapsed ? "w-16" : "w-64"}`} collapsible="icon">
       {/* Header com Toggle */}
@@ -264,15 +261,6 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-4 mt-auto">
-        {!collapsed && (
-          <button
-            onClick={handleCertificateRedirect}
-            className="w-full mb-3 px-4 py-2 bg-0 text-sidebar-foreground text-xs bg-muted-foreground font-medium rounded-full opacity-95"
-          >
-            Certificado Digital A1 R$109.90
-          </button>
-        )}
-
         {!collapsed ? (
           <button
             onClick={() => setProfileSheetOpen(true)}

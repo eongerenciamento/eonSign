@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
     const isBrySignature = !!finalBrySignerLink;
     const instructionText = isBrySignature
       ? "Clique no botão abaixo para visualizar e assinar o documento digitalmente com certificado ICP-Brasil."
-      : "Clique no botão abaixo para visualizar e assinar o documento. Você precisará informar seu CPF/CNPJ para concluir a assinatura.";
+      : "Clique no botão abaixo para visualizar e assinar o documento.";
 
     const emailResponse = await resend.emails.send({
       from: "eonSign <noreply@eonhub.com.br>",
@@ -116,12 +116,12 @@ const handler = async (req: Request): Promise<Response> => {
               ${instructionText}
             </p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${signatureUrl}" 
-                 style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                        color: white; 
-                        padding: 15px 40px; 
-                        text-decoration: none; 
-                        border-radius: 8px;
+              <a href="${signatureUrl}"
+                 style="background: #2563eb;
+                        color: white;
+                        padding: 16px 48px;
+                        text-decoration: none;
+                        border-radius: 9999px;
                         font-weight: bold;
                         display: inline-block;">
                 Assinar Documento
@@ -134,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           <div style="background: #f9f9f9; padding: 20px; text-align: center;">
             <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Éon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+              © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
             </p>
           </div>
         </div>

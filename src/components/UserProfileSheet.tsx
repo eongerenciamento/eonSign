@@ -5,14 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import { formatTelefone } from "@/lib/masks";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
-  Sheet,
-  SheetContent,
-} from "@/components/ui/sheet";
+  StandardSheet,
+  standardInputClass,
+  standardLabelClass,
+  standardFieldGroupClass,
+} from "@/components/ui/standard-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Upload, LogOut, Check, Eye, EyeOff } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff, LogOut, User as UserIcon } from "lucide-react";
 
 interface UserProfileSheetProps {
   open: boolean;
@@ -25,7 +26,6 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [localPhotoUrl, setLocalPhotoUrl] = useState<string | null>(null);
-  const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -52,7 +52,7 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
         .select("*")
         .eq("id", user.id)
         .single();
-      
+
       // Se o perfil não existir, criar um novo automaticamente
       if (error && error.code === 'PGRST116') {
         const newProfile = {
@@ -60,19 +60,19 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
           email: user.email || "",
           nome_completo: user.user_metadata?.nome_completo || user.user_metadata?.name || "",
         };
-        
+
         const { data: createdProfile, error: insertError } = await supabase
           .from("profiles")
           .insert(newProfile)
           .select()
           .single();
-        
+
         if (insertError) {
           console.error("Erro ao criar perfil:", insertError);
           // Retornar um perfil mínimo com dados do auth
-          return { 
-            id: user.id, 
-            email: user.email || "", 
+          return {
+            id: user.id,
+            email: user.email || "",
             nome_completo: "",
             telefone: null,
             cargo: null,
@@ -82,10 +82,10 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
             updated_at: new Date().toISOString()
           };
         }
-        
+
         return createdProfile;
       }
-      
+
       return data;
     },
   });
@@ -117,9 +117,23 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
         .eq("id", profile.id);
 
       if (error) throw error;
+
+      if (passwordData.newPassword) {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+          throw new Error("As senhas não coincidem");
+        }
+        if (passwordData.newPassword.length < 6) {
+          throw new Error("A senha deve ter pelo menos 6 caracteres");
+        }
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: passwordData.newPassword,
+        });
+        if (passwordError) throw passwordError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      setPasswordData({ newPassword: "", confirmPassword: "" });
       toast({
         title: "Perfil atualizado",
         description: "Suas informações foram salvas com sucesso",
@@ -135,17 +149,12 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
     },
   });
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (file: File) => {
     if (!profile?.id) return;
-    
-    const file = event.target.files?.[0];
-    if (!file) return;
 
     setUploading(true);
 
     try {
-      console.log("Uploading photo for user:", profile.id);
-      
       const fileExt = file.name.split(".").pop();
       const fileName = `${profile.id}/${Date.now()}.${fileExt}`;
 
@@ -153,38 +162,24 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
         .from("profile-photos")
         .upload(fileName, file, { upsert: true });
 
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from("profile-photos")
         .getPublicUrl(fileName);
 
-      // Add cache-busting timestamp to prevent browser caching
       const publicUrlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
-      
-      console.log("Upload successful, updating profile with URL:", publicUrlWithCacheBust);
 
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ foto_url: publicUrl })
         .eq("id", profile.id);
 
-      if (updateError) {
-        console.error("Update error:", updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      // Update local state immediately for instant UI feedback
       setLocalPhotoUrl(publicUrlWithCacheBust);
-
-      // Force immediate refetch of profile data
       await queryClient.refetchQueries({ queryKey: ["profile"] });
-      
-      console.log("Photo update complete");
-      
+
       toast({
         title: "Foto atualizada",
         description: "Sua foto de perfil foi atualizada com sucesso",
@@ -201,56 +196,9 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
     }
   };
 
-  const handlePasswordChange = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "As senhas não coincidem",
-      });
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Senha alterada",
-        description: "Sua senha foi atualizada com sucesso",
-      });
-
-      setShowPasswordFields(false);
-      setPasswordData({ newPassword: "", confirmPassword: "" });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao alterar senha",
-        description: error.message,
-      });
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        description: <LogOut className="h-5 w-5 mx-auto animate-[scale-in_0.3s_ease-out]" strokeWidth={2.5} />,
-        className: "bg-gray-500 text-white border-none justify-center p-2 min-h-0 w-10 h-10 rounded-full",
-        duration: 1500
-      });
       navigate("/auth");
     } catch (error: any) {
       toast({
@@ -261,206 +209,133 @@ export function UserProfileSheet({ open, onOpenChange }: UserProfileSheetProps) 
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateProfileMutation.mutate(formData);
-  };
-
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatTelefone(e.target.value);
     setFormData({ ...formData, telefone: formatted });
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto sm:rounded-l-2xl border-l">
-        <div className="flex items-center justify-between mb-6">
-          <span className="text-sm text-muted-foreground">Perfil do Usuário</span>
+    <StandardSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={formData.nome_completo || "Usuário"}
+      subtitle={formData.cargo}
+      avatar={{
+        src: localPhotoUrl || profile?.foto_url || "",
+        alt: formData.nome_completo,
+        fallback: <UserIcon className="h-5 w-5" />,
+        onUpload: handlePhotoUpload,
+      }}
+      footer={
+        <>
+          <Button type="button" variant="sheet-cancel" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sair
+          </Button>
+          <Button
+            type="button"
+            variant="sheet-primary"
+            onClick={() => updateProfileMutation.mutate(formData)}
+            disabled={updateProfileMutation.isPending}
+          >
+            {updateProfileMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
+            Salvar
+          </Button>
+        </>
+      }
+    >
+      <div className={standardFieldGroupClass}>
+        <Label className={standardLabelClass}>Nome</Label>
+        <Input
+          className={standardInputClass}
+          value={formData.nome_completo}
+          onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
+          required
+        />
+      </div>
+
+      <div className={standardFieldGroupClass}>
+        <Label className={standardLabelClass}>E-mail</Label>
+        <Input className={standardInputClass} type="email" value={formData.email} disabled />
+      </div>
+
+      <div className={standardFieldGroupClass}>
+        <Label className={standardLabelClass}>Telefone</Label>
+        <Input
+          className={standardInputClass}
+          value={formData.telefone}
+          onChange={handleTelefoneChange}
+          placeholder="(00)00000-0000"
+          inputMode="numeric"
+        />
+      </div>
+
+      <div className={standardFieldGroupClass}>
+        <Label className={standardLabelClass}>Cargo</Label>
+        <Input
+          className={standardInputClass}
+          value={formData.cargo}
+          onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+          placeholder="Ex: Gerente de Projetos"
+        />
+      </div>
+
+      <div className={standardFieldGroupClass}>
+        <Label className={standardLabelClass}>Organização</Label>
+        <Input
+          className={standardInputClass}
+          value={formData.organizacao}
+          onChange={(e) => setFormData({ ...formData, organizacao: e.target.value })}
+          placeholder="Ex: Empresa XYZ"
+        />
+      </div>
+
+      <div className="grid gap-3 rounded-2xl bg-muted/60 p-3">
+        <div className={standardFieldGroupClass}>
+          <Label className={standardLabelClass}>Nova senha</Label>
           <div className="relative">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={localPhotoUrl || profile?.foto_url || ""} />
-              <AvatarFallback 
-                className="text-lg font-medium bg-gray-200 text-gray-600"
-              >
-                {profile?.nome_completo?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-            
-            <Label 
-              htmlFor="photo-upload" 
-              className="absolute -bottom-1 -right-1 cursor-pointer rounded-full p-1.5 hover:opacity-90 transition-opacity bg-transparent"
-            >
-              {uploading ? (
-                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-              ) : (
-                <Upload className="h-3 w-3 text-muted-foreground" />
-              )}
-              <Input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoUpload}
-                disabled={uploading}
-              />
-            </Label>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <div className="space-y-2">
-            <Label htmlFor="nome_completo">Nome</Label>
             <Input
-              id="nome_completo"
-              value={formData.nome_completo}
-              onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
-              required
-              className="bg-muted border-0"
+              className={`${standardInputClass} pr-10`}
+              type={showNewPassword ? "text" : "password"}
+              value={passwordData.newPassword}
+              maxLength={72}
+              placeholder="Digite a nova senha"
+              onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              disabled
-              className="bg-muted border-0"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              value={formData.telefone}
-              onChange={handleTelefoneChange}
-              placeholder="(00)00000-0000"
-              inputMode="numeric"
-              className="bg-muted border-0"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cargo">Cargo</Label>
-            <Input
-              id="cargo"
-              value={formData.cargo}
-              onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-              placeholder="Ex: Gerente de Projetos"
-              className="bg-muted border-0"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="organizacao">Organização</Label>
-            <Input
-              id="organizacao"
-              value={formData.organizacao}
-              onChange={(e) => setFormData({ ...formData, organizacao: e.target.value })}
-              placeholder="Ex: Empresa XYZ"
-              className="bg-muted border-0"
-            />
-          </div>
-
-          <div className="space-y-3">
             <button
               type="button"
-              className="w-full text-left text-sm text-muted-foreground bg-transparent border-0 p-0 cursor-pointer hover:text-foreground transition-colors"
-              onClick={() => setShowPasswordFields(!showPasswordFields)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowNewPassword(!showNewPassword)}
             >
-              Alterar Senha
+              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
-            
-            {showPasswordFields && (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">Nova Senha</Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showNewPassword ? "text" : "password"}
-                      value={passwordData.newPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, newPassword: e.target.value })
-                      }
-                      placeholder="Digite a nova senha"
-                      className="bg-muted border-0 pr-10"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                    >
-                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={passwordData.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                      }
-                      placeholder="Confirme a nova senha"
-                      className="bg-muted border-0 pr-10"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  onClick={handlePasswordChange}
-                  variant="sheet-primary"
-                  className="w-full"
-                >
-                  <Check className="mr-2 h-4 w-4" />
-                  Confirmar Alteração
-                </Button>
-              </div>
-            )}
-            
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="sheet-cancel"
-                className="flex-1"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Button>
-              <Button
-                type="submit"
-                variant="sheet-primary"
-                className="flex-1"
-                disabled={updateProfileMutation.isPending}
-              >
-                {updateProfileMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-2 h-4 w-4" />
-                )}
-                Salvar
-              </Button>
-            </div>
           </div>
-        </form>
-      </SheetContent>
-    </Sheet>
+        </div>
+        <div className={standardFieldGroupClass}>
+          <Label className={standardLabelClass}>Confirmar senha</Label>
+          <div className="relative">
+            <Input
+              className={`${standardInputClass} pr-10`}
+              type={showConfirmPassword ? "text" : "password"}
+              value={passwordData.confirmPassword}
+              maxLength={72}
+              placeholder="Confirme a nova senha"
+              onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </StandardSheet>
   );
 }

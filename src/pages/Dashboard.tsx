@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { DocumentsTable, Document } from "@/components/documents/DocumentsTable";
-import { Plus } from "lucide-react";
+import { Plus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useBryStatusSync } from "@/hooks/useBryStatusSync";
@@ -12,6 +11,7 @@ const Dashboard = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [pendingByOwner, setPendingByOwner] = useState(0);
   const [pendingByExternal, setPendingByExternal] = useState(0);
+  const [displayName, setDisplayName] = useState("");
   const currentDate = new Date();
   const weekDay = currentDate.toLocaleDateString('pt-BR', {
     weekday: 'long'
@@ -22,6 +22,14 @@ const Dashboard = () => {
     year: 'numeric'
   });
   const subtitle = `${weekDay.charAt(0).toUpperCase() + weekDay.slice(1)}, ${date}`;
+  const rawFullDate = currentDate.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  const dateLabel = rawFullDate.charAt(0).toUpperCase() + rawFullDate.slice(1);
+  const firstName = displayName.trim().split(" ")[0] || "Usuário";
   const loadDocuments = useCallback(async () => {
     const {
       data: userData
@@ -84,6 +92,7 @@ const Dashboard = () => {
 
     // Load company settings for fallback
     const { data: companyData } = await supabase.from("company_settings").select("admin_name, admin_email, admin_phone").eq("user_id", userData.user.id).single();
+    setDisplayName(companyData?.admin_name || userData.user.user_metadata?.name || "");
 
     // Load signers for each item
     const documentsWithSigners = await Promise.all(recentItems.map(async item => {
@@ -163,56 +172,107 @@ const Dashboard = () => {
     loadDocuments();
   }, [loadDocuments]);
   return <Layout>
-      <div className="p-8 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-sm font-bold text-muted-foreground">Dashboard</h1>
-            <p className="text-xs text-muted-foreground/70 mt-1">
-              {subtitle}
-            </p>
+      <div className="space-y-6">
+        {/* Mobile header: gradient greeting + glass metric cards */}
+        <div
+          className="relative px-4 pb-8 pt-6 text-white lg:hidden"
+          style={{
+            backgroundImage:
+              "radial-gradient(120% 70% at 85% 110%, hsl(var(--background)) 0%, hsl(var(--background) / 0) 55%), linear-gradient(to bottom, hsl(218 55% 10%) 0%, hsl(217 50% 18%) 18%, hsl(216 45% 32%) 38%, hsl(214 38% 55%) 58%, hsl(210 30% 80%) 80%, hsl(var(--background)) 100%)",
+          }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold text-white">Bem-vindo, {firstName}</p>
+              <p className="truncate text-xs font-light text-white/70">{dateLabel}</p>
+            </div>
+            <button
+              type="button"
+              aria-label="Notificações"
+              className="relative shrink-0 bg-transparent p-0 text-white outline-none focus:outline-none focus-visible:outline-none hover:bg-transparent active:bg-transparent border-0"
+            >
+              <Bell className="h-5 w-5" strokeWidth={1.25} />
+            </button>
           </div>
-          <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full w-12 h-12 p-0 md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-full font-normal">
-            <Plus className="w-5 h-5 md:mr-2 text-white" />
-            <span className="hidden md:inline text-white">Documento</span>
-          </Button>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div
+              className="cursor-pointer rounded-xl border-0 bg-white/15 p-4 shadow-lg backdrop-blur-xl backdrop-saturate-150"
+              onClick={() => navigate("/documentos?tab=pending-internal")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-300" />
+                <span className="text-[11px] font-light uppercase tracking-wide text-white/80">Pendentes</span>
+              </div>
+              <p className="mt-1 text-[11px] font-light text-white/70">Sua Assinatura</p>
+              <p className="mt-2 truncate text-lg font-semibold text-white tabular-nums">{pendingByOwner}</p>
+            </div>
+
+            <div
+              className="cursor-pointer rounded-xl border-0 bg-white/15 p-4 shadow-lg backdrop-blur-xl backdrop-saturate-150"
+              onClick={() => navigate("/documentos?tab=pending-external")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-300" />
+                <span className="text-[11px] font-light uppercase tracking-wide text-white/80">Pendentes</span>
+              </div>
+              <p className="mt-1 text-[11px] font-light text-white/70">Signatários Externos</p>
+              <p className="mt-2 truncate text-lg font-semibold text-white tabular-nums">{pendingByExternal}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Pending Documents Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-internal")}>
-            <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-foreground text-base">
-                Pendentes
-              </CardTitle>
-              <p className="text-muted-foreground text-xs">Sua Assinatura</p>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
+        <div className="px-8 space-y-6 lg:pt-8">
+          {/* Desktop header */}
+          <div className="hidden items-center justify-between lg:flex">
+            <div>
+              <h1 className="text-sm font-bold text-muted-foreground">Dashboard</h1>
+              <p className="text-xs text-muted-foreground/70 mt-1">
+                {subtitle}
+              </p>
+            </div>
+            <Button onClick={() => navigate("/novo-documento")} className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full px-4 py-2 font-normal">
+              <Plus className="w-5 h-5 mr-2 text-white" />
+              <span className="text-white">Documento</span>
+            </Button>
+          </div>
+
+          {/* Desktop pending documents cards */}
+          <div className="hidden grid-cols-2 gap-4 lg:grid">
+            <div
+              className="flex flex-col items-center justify-center text-center gap-1 py-6 cursor-pointer"
+              onClick={() => navigate("/documentos?tab=pending-internal")}
+            >
               <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{pendingByOwner}</p>
-            </CardContent>
-          </Card>
+              <p className="text-foreground text-base">Pendentes</p>
+              <p className="text-muted-foreground text-xs">Sua Assinatura</p>
+            </div>
 
-          <Card className="bg-card border-none cursor-pointer hover:shadow-lg transition-shadow rounded-lg" onClick={() => navigate("/documentos?tab=pending-external")}>
-            <CardHeader className="pb-2 px-6">
-              <CardTitle className="text-foreground text-base">
-                Pendentes
-              </CardTitle>
-              <p className="text-muted-foreground text-xs">Signatários Externos</p>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
+            <div
+              className="flex flex-col items-center justify-center text-center gap-1 py-6 cursor-pointer"
+              onClick={() => navigate("/documentos?tab=pending-external")}
+            >
               <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{pendingByExternal}</p>
-            </CardContent>
-          </Card>
-        </div>
+              <p className="text-foreground text-base">Pendentes</p>
+              <p className="text-muted-foreground text-xs">Signatários Externos</p>
+            </div>
+          </div>
 
-        {/* Recent Documents */}
+          {/* Mobile "novo documento" button, below the gradient header */}
+          <Button onClick={() => navigate("/novo-documento")} className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full font-normal lg:hidden">
+            <Plus className="w-5 h-5 mr-2 text-white" />
+            <span className="text-white">Documento</span>
+          </Button>
+
+          {/* Recent Documents */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm text-foreground">
               Documentos Recentes
             </h2>
           </div>
-          <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} />
+          <DocumentsTable documents={documents} showFolderActions={false} onRefresh={loadDocuments} hideHeader compactActions />
+        </div>
         </div>
       </div>
     </Layout>;

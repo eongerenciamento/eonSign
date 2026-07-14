@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    const appUrl = Deno.env.get("APP_URL") || "https://app.eonsign.com.br";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
 
     // Filter only pending signers
     const pendingSigners = signers.filter(s => s.status === "pending");
@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
             </head>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <img src="${appUrl}/email-assets/eon-sign-logo.png" alt="EON Sign" style="max-width: 150px; height: auto;">
+                <img src="${supabaseUrl}/storage/v1/object/public/email-assets/eon-sign-logo.png" alt="EON Sign" style="max-width: 150px; height: auto;">
               </div>
               
               <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">

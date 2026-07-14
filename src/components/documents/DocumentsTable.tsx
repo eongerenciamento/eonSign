@@ -20,7 +20,8 @@ import {
   ChevronRight,
   ChevronDown,
   Check,
-  Folder } from
+  Folder,
+  MoreVertical } from
 "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -77,6 +78,8 @@ interface DocumentsTableProps {
   onDocumentMoved?: () => void;
   showFolderActions?: boolean;
   onRefresh?: () => void;
+  hideHeader?: boolean;
+  compactActions?: boolean;
 }
 const statusConfig = {
   pending: {
@@ -151,7 +154,9 @@ export const DocumentsTable = ({
   allFolders = [],
   onDocumentMoved,
   showFolderActions = true,
-  onRefresh
+  onRefresh,
+  hideHeader = false,
+  compactActions = false
 }: DocumentsTableProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -186,6 +191,9 @@ export const DocumentsTable = ({
 
   // State for open folder popovers (keyed by document id)
   const [openFolderPopovers, setOpenFolderPopovers] = useState<Record<string, boolean>>({});
+
+  // State for open action-menu popovers (keyed by document id, used when compactActions=true)
+  const [openActionPopovers, setOpenActionPopovers] = useState<Record<string, boolean>>({});
 
   // Toggle folder expansion
   const toggleFolderExpansion = (folderId: string, e: React.MouseEvent) => {
@@ -969,6 +977,145 @@ export const DocumentsTable = ({
       handleViewDocument(doc.id);
     }
   };
+
+  // Menu de ações compacto (usado quando compactActions=true): substitui a linha de
+  // botões de ícone individuais por um único botão que abre um popover com as opções.
+  const renderActionMenuItems = (doc: any) => {
+    const menuItemClass =
+      "w-full flex items-center gap-2 px-2 py-1.5 text-sm text-foreground/80 rounded hover:bg-muted disabled:opacity-50 disabled:pointer-events-none";
+    const items: JSX.Element[] = [];
+
+    if (doc.signerStatuses?.[0] === "pending" && !isPrescription(doc)) {
+      items.push(
+        <button
+          key="sign"
+          className={menuItemClass}
+          onClick={() => handleSignDocument(doc.id, doc.name)}
+        >
+          <PenTool className="w-4 h-4 text-muted-foreground" />
+          Assinar documento
+        </button>
+      );
+    }
+
+    items.push(
+      <button
+        key="download"
+        className={menuItemClass}
+        onClick={() => (doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id))}
+      >
+        <Download className="w-4 h-4 text-muted-foreground" />
+        {doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}
+      </button>
+    );
+
+    if (!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0) {
+      items.push(
+        <button
+          key="certificate"
+          className={menuItemClass}
+          onClick={() => handleDownloadCertificatePDF(doc.id)}
+          disabled={downloadingCertificateId === doc.id}
+        >
+          {downloadingCertificateId === doc.id ? (
+            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+          ) : (
+            <FileDown className="w-4 h-4 text-muted-foreground" />
+          )}
+          Baixar documento assinado
+        </button>
+      );
+    }
+
+    if (doc.bryEnvelopeUuid && doc.signedBy > 0) {
+      items.push(
+        <button
+          key="report"
+          className={menuItemClass}
+          onClick={() => (doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id))}
+        >
+          <FileCheck className="w-4 h-4 text-muted-foreground" />
+          Baixar PDF com evidências das assinaturas
+        </button>
+      );
+    }
+
+    if (doc.bryEnvelopeUuid) {
+      items.push(
+        <button
+          key="validate-bry"
+          className={menuItemClass}
+          onClick={() => handleOpenValidation(doc.id)}
+        >
+          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+          Validar assinaturas no portal BRy
+        </button>
+      );
+    }
+
+    if (!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0) {
+      items.push(
+        <button
+          key="validate-cert"
+          className={menuItemClass}
+          onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
+        >
+          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+          Visualizar certificado de validação
+        </button>
+      );
+    }
+
+    if (doc.status !== "signed") {
+      const iconState = getResendIconState(doc);
+      items.push(
+        <button
+          key="resend"
+          className={menuItemClass}
+          disabled={iconState.disabled}
+          onClick={() => !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)}
+        >
+          <Mail className={`w-4 h-4 ${iconState.color}`} />
+          Reenviar notificação
+        </button>
+      );
+    }
+
+    if (doc.status !== "signed" && doc.status !== "cancelled") {
+      items.push(
+        <button
+          key="delete"
+          className={menuItemClass}
+          onClick={() => handleCancelDocument(doc)}
+        >
+          <Trash2 className="w-4 h-4 text-red-600" />
+          {doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}
+        </button>
+      );
+    }
+
+    return items;
+  };
+
+  const renderActionsPopover = (doc: any, popoverKey: string) => (
+    <Popover
+      open={openActionPopovers[popoverKey] || false}
+      onOpenChange={(open) => setOpenActionPopovers((prev) => ({ ...prev, [popoverKey]: open }))}
+    >
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full hover:bg-transparent" title="Ações">
+          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-56 p-1 bg-popover/95 backdrop-blur-sm border-border z-50"
+      >
+        <div className="flex flex-col gap-0.5">{renderActionMenuItems(doc)}</div>
+      </PopoverContent>
+    </Popover>
+  );
+
   return (
     <>
       {/* Empty State */}
@@ -984,6 +1131,7 @@ export const DocumentsTable = ({
       {documents.length > 0 &&
       <div className="hidden md:block rounded-xl overflow-hidden">
           <Table>
+            {!hideHeader &&
             <TableHeader>
               <TableRow className="border-none bg-card hover:bg-card">
                 <TableHead className="text-foreground/70">Nome do Documento</TableHead>
@@ -992,6 +1140,7 @@ export const DocumentsTable = ({
                 <TableHead className="w-[200px]"></TableHead>
               </TableRow>
             </TableHeader>
+            }
             <TableBody>
               {documents.map((doc, index) => {
               const statusInfo = statusConfig[doc.status];
@@ -1177,6 +1326,8 @@ export const DocumentsTable = ({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 justify-end">
+                        {compactActions ? renderActionsPopover(doc, doc.id) :
+                      <>
                         {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
                       <Button
                         variant="ghost"
@@ -1184,7 +1335,7 @@ export const DocumentsTable = ({
                         className="rounded-full hover:bg-transparent"
                         onClick={() => handleSignDocument(doc.id, doc.name)}
                         title="Assinar documento">
-                        
+
                             <PenTool className="w-4 h-4 text-muted-foreground" />
                           </Button>
                       }
@@ -1321,6 +1472,8 @@ export const DocumentsTable = ({
                             <Trash2 className="w-4 h-4 text-muted-foreground" />
                           </Button>
                       }
+                      </>
+                      }
                       </div>
                     </TableCell>
                   </TableRow>);
@@ -1350,6 +1503,8 @@ export const DocumentsTable = ({
                   <div className="flex items-center justify-between">
                     <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
                     <div className="flex gap-1">
+                      {compactActions ? renderActionsPopover(doc, `mobile-actions-${doc.id}`) :
+                    <>
                       {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
                     <Button
                       variant="ghost"
@@ -1357,7 +1512,7 @@ export const DocumentsTable = ({
                       className="rounded-full hover:bg-transparent h-8 w-8"
                       onClick={() => handleSignDocument(doc.id, doc.name)}
                       title="Assinar documento">
-                      
+
                           <PenTool className="w-4 h-4 text-muted-foreground" />
                         </Button>
                     }
@@ -1482,6 +1637,8 @@ export const DocumentsTable = ({
                       
                           <Trash2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
+                    }
+                    </>
                     }
                     </div>
                   </div>
