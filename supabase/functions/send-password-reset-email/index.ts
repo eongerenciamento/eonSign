@@ -91,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="padding: 30px; background: #f9f9f9;">
             <h2 style="color: #273d60;">Nova Senha Gerada</h2>
             <p style="color: #333; font-size: 16px;">
-              Sua senha foi redefinida com sucesso. Utilize as credenciais abaixo para acessar o sistema:
+              Sua senha foi redefinida com sucesso.
             </p>
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 10px 0; color: #333; font-size: 16px;">
@@ -101,16 +101,16 @@ const handler = async (req: Request): Promise<Response> => {
                 <strong>Nova Senha:</strong> ${newPassword}
               </p>
             </div>
-            <p style="color: #666; font-size: 14px;">
+            <p style="color: #666; font-size: 12px;">
               Por motivos de segurança, recomendamos que você altere sua senha após fazer login.
             </p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${APP_URL}/auth" 
-                 style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                        color: white; 
-                        padding: 15px 40px; 
-                        text-decoration: none; 
-                        border-radius: 8px;
+              <a href="${APP_URL}/auth"
+                 style="background: #2563eb;
+                        color: white;
+                        padding: 16px 48px;
+                        text-decoration: none;
+                        border-radius: 9999px;
                         font-weight: bold;
                         display: inline-block;">
                 Acessar Sistema
@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           <div style="background: #f9f9f9; padding: 20px; text-align: center;">
             <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Éon Sign - Sistema de Gestão de Documentos e Assinatura Digital
+              © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
             </p>
           </div>
         </div>
