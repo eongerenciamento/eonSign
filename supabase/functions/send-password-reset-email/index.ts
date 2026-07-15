@@ -76,6 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log("[DEBUG] APP_URL being used:", APP_URL);
     console.log("[DEBUG] Auth URL will be:", `${APP_URL}/auth`);
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
 
     // Enviar email com as credenciais
     const emailResponse = await resend.emails.send({
@@ -84,8 +85,8 @@ const handler = async (req: Request): Promise<Response> => {
       subject: "Nova Senha",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 24px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">eonSign</h1>
+          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
+            <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
           </div>
           <div style="padding: 30px; background: #f9f9f9;">
             <h2 style="color: #273d60;">Nova Senha Gerada</h2>

@@ -16,6 +16,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import { useBryStatusSync } from "@/hooks/useBryStatusSync";
 
+const activeTabLabels: Record<string, string> = {
+  signed: "Assinados",
+  "pending-internal": "Sua Assinatura",
+  "pending-external": "Signatários Externos"
+};
+
 const Documents = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
@@ -280,6 +286,9 @@ const Documents = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold text-muted-foreground">Documentos</h1>
+            <p className="md:hidden text-xs font-normal text-muted-foreground/70 mt-0.5">
+              {activeTabLabels[activeTab]}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -407,6 +416,7 @@ const Documents = () => {
               showFolderActions={true}
               onRefresh={loadSignedDocuments}
               hideHeader
+              compactActions
             />
           </TabsContent>
 
@@ -498,7 +508,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader compactActions />
           </TabsContent>
 
           <TabsContent value="pending-external" className="mt-6 space-y-6">
@@ -589,7 +599,7 @@ const Documents = () => {
             )}
 
             {/* Documents Table */}
-            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader />
+            <DocumentsTable documents={filteredDocuments} onRefresh={loadSignedDocuments} hideHeader compactActions />
           </TabsContent>
         </Tabs>
       </div>

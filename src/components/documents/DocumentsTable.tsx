@@ -1135,7 +1135,6 @@ export const DocumentsTable = ({
             <TableHeader>
               <TableRow className="border-none bg-card hover:bg-card">
                 <TableHead className="text-foreground/70">Nome do Documento</TableHead>
-                <TableHead className="text-foreground/70">Status</TableHead>
                 <TableHead className="text-foreground/70">Assinaturas</TableHead>
                 <TableHead className="w-[200px]"></TableHead>
               </TableRow>
@@ -1177,63 +1176,63 @@ export const DocumentsTable = ({
                           {isPrescription(doc) && doc.patientName &&
                         <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
                         }
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
-                            {/* For prescriptions, show prescription doc type instead of signature mode */}
-                            {isPrescription(doc) && doc.prescriptionDocType ?
-                          <Badge
-                            variant="outline"
-                            className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
-                            
-                                {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                              </Badge> :
-                          doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
-                          <Badge
-                            variant="outline"
-                            className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
-                            
-                                {signatureModeConfig[doc.signatureMode].label}
-                              </Badge> :
-                          null}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
+                              {/* For prescriptions, show prescription doc type instead of signature mode */}
+                              {isPrescription(doc) && doc.prescriptionDocType ?
+                            <Badge
+                              variant="outline"
+                              className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0">
+
+                                  {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                                </Badge> :
+                            doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
+                            <Badge
+                              variant="outline"
+                              className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0`}>
+
+                                  {signatureModeConfig[doc.signatureMode].label}
+                                </Badge> :
+                            null}
+                            </div>
+                            {/* Hide signer badges for prescriptions */}
+                            {!isPrescription(doc) &&
+                          <TooltipProvider>
+                                <div className="flex items-center gap-1">
+                                  {doc.signerNames?.map((name, idx) => {
+                                const status = doc.signerStatuses?.[idx] || "pending";
+                                const email = doc.signerEmails?.[idx] || "";
+                                const phone = doc.signerPhones?.[idx] || "";
+                                const bgColor =
+                                status === "signed" ?
+                                "bg-blue-700" :
+                                status === "rejected" ?
+                                "bg-red-700" :
+                                "bg-gray-400";
+                                return (
+                                  <Tooltip key={idx}>
+                                        <TooltipTrigger asChild>
+                                          <div
+                                        className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}>
+
+                                            {getInitials(name)}
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="flex flex-col gap-0.5">
+                                          <p className="font-medium">{name}</p>
+                                          {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                          <p className="text-xs text-muted-foreground">{email}</p>
+                                        </TooltipContent>
+                                      </Tooltip>);
+
+                              })}
+                                </div>
+                              </TooltipProvider>
+                          }
                           </div>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {/* Hide signer badges for prescriptions */}
-                      {!isPrescription(doc) &&
-                    <TooltipProvider>
-                          <div className="flex items-center gap-1">
-                            {doc.signerNames?.map((name, idx) => {
-                          const status = doc.signerStatuses?.[idx] || "pending";
-                          const email = doc.signerEmails?.[idx] || "";
-                          const phone = doc.signerPhones?.[idx] || "";
-                          const bgColor =
-                          status === "signed" ?
-                          "bg-blue-700" :
-                          status === "rejected" ?
-                          "bg-red-700" :
-                          "bg-gray-400";
-                          return (
-                            <Tooltip key={idx}>
-                                  <TooltipTrigger asChild>
-                                    <div
-                                  className={`w-7 h-7 rounded-full ${bgColor} text-white text-xs font-medium flex items-center justify-center cursor-default transition-all duration-300 ease-in-out hover:scale-110`}>
-                                  
-                                      {getInitials(name)}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="flex flex-col gap-0.5">
-                                    <p className="font-medium">{name}</p>
-                                    {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                    <p className="text-xs text-muted-foreground">{email}</p>
-                                  </TooltipContent>
-                                </Tooltip>);
-
-                        })}
-                          </div>
-                        </TooltipProvider>
-                    }
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-4">
@@ -1499,217 +1498,220 @@ export const DocumentsTable = ({
               onDragEnd={handleDragEnd}>
               
                 <div className="space-y-3">
-                  {/* Date and Action Buttons on same line - ABOVE document name */}
-                  <div className="flex items-center justify-between">
-                    <p className="text-muted-foreground text-sm">{doc.createdAt}</p>
-                    <div className="flex gap-1">
-                      {compactActions ? renderActionsPopover(doc, `mobile-actions-${doc.id}`) :
-                    <>
-                      {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() => handleSignDocument(doc.id, doc.name)}
-                      title="Assinar documento">
+                  {/* Document Name + Action Buttons on the same line */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div
+                      className="flex items-center gap-2 flex-wrap cursor-pointer min-w-0"
+                      onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)}>
 
-                          <PenTool className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                    }
+                        {doc.isEnvelope ?
+                      <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} /> :
+
+                      <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                      }
+                        <p className="font-medium text-primary">{doc.name}</p>
+                        {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 &&
+                      <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                            {doc.documentCount} docs
+                          </span>
+                      }
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {compactActions ? renderActionsPopover(doc, `mobile-actions-${doc.id}`) :
+                      <>
+                        {doc.signerStatuses?.[0] === "pending" && !isPrescription(doc) &&
                       <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() =>
-                      doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
-                      }
-                      title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}>
-                      
-                        <Download className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() => handleDownloadCertificatePDF(doc.id)}
-                      title="Baixar certificado de validação (PDF)"
-                      disabled={downloadingCertificateId === doc.id}>
-                      
-                          {downloadingCertificateId === doc.id ?
-                      <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> :
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => handleSignDocument(doc.id, doc.name)}
+                        title="Assinar documento">
 
-                      <FileDown className="w-4 h-4 text-muted-foreground" />
+                            <PenTool className="w-4 h-4 text-muted-foreground" />
+                          </Button>
                       }
+                        <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() =>
+                        doc.isEnvelope ? handleDownloadEnvelopeAll(doc) : handleDownloadDocument(doc.id)
+                        }
+                        title={doc.isEnvelope ? "Baixar todos os documentos (ZIP)" : "Baixar documento original"}>
+
+                          <Download className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                    }
-                      {doc.bryEnvelopeUuid && doc.signedBy > 0 &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() =>
-                      doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => handleDownloadCertificatePDF(doc.id)}
+                        title="Baixar certificado de validação (PDF)"
+                        disabled={downloadingCertificateId === doc.id}>
+
+                            {downloadingCertificateId === doc.id ?
+                        <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> :
+
+                        <FileDown className="w-4 h-4 text-muted-foreground" />
+                        }
+                          </Button>
                       }
-                      title="Baixar PDF com evidências das assinaturas coletadas">
-                      
-                          <FileCheck className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                    }
-                      {doc.bryEnvelopeUuid &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() => handleOpenValidation(doc.id)}
-                      title="Validar assinaturas no portal BRy">
-                      
-                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                    }
-                      {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
-                      title="Visualizar certificado de validação">
-                      
-                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                    }
-                      {doc.status !== "signed" &&
-                    (() => {
-                      const iconState = getResendIconState(doc);
-                      return (
-                        <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-full hover:bg-transparent h-8 w-8"
-                              onClick={() =>
-                              !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                        {doc.bryEnvelopeUuid && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() =>
+                        doc.isEnvelope ? handleDownloadEnvelopeReport(doc) : handleDownloadReport(doc.id)
+                        }
+                        title="Baixar PDF com evidências das assinaturas coletadas">
+
+                            <FileCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                      }
+                        {doc.bryEnvelopeUuid &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => handleOpenValidation(doc.id)}
+                        title="Validar assinaturas no portal BRy">
+
+                            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                      }
+                        {!doc.bryEnvelopeUuid && doc.signatureMode === "SIMPLE" && doc.signedBy > 0 &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => window.open(`/validar/${doc.id}`, "_blank")}
+                        title="Visualizar certificado de validação">
+
+                            <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                      }
+                        {doc.status !== "signed" &&
+                      (() => {
+                        const iconState = getResendIconState(doc);
+                        return (
+                          <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full hover:bg-transparent h-8 w-8"
+                                onClick={() =>
+                                !iconState.disabled && handleResendNotifications(doc.id, iconState.unreadSigners)
+                                }
+                                disabled={iconState.disabled}>
+
+                                    <Mail className={`w-4 h-4 ${iconState.color}`} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  {iconState.readSigners.length > 0 &&
+                              <div className="text-green-600 mb-1">
+                                      <p className="font-semibold text-xs">✓ Leram:</p>
+                                      {iconState.readSigners.map((s, i) =>
+                                <p key={i} className="text-xs">
+                                          {s.name}
+                                        </p>
+                                )}
+                                    </div>
                               }
-                              disabled={iconState.disabled}>
-                              
-                                  <Mail className={`w-4 h-4 ${iconState.color}`} />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-xs">
-                                {iconState.readSigners.length > 0 &&
-                            <div className="text-green-600 mb-1">
-                                    <p className="font-semibold text-xs">✓ Leram:</p>
-                                    {iconState.readSigners.map((s, i) =>
-                              <p key={i} className="text-xs">
-                                        {s.name}
-                                      </p>
-                              )}
-                                  </div>
-                            }
-                                {iconState.unreadSigners.length > 0 &&
-                            <div className="text-yellow-600">
-                                    <p className="font-semibold text-xs">⏳ Pendentes:</p>
-                                    {iconState.unreadSigners.map((s, i) =>
-                              <p key={i} className="text-xs">
-                                        {s.name}
-                                      </p>
-                              )}
-                                  </div>
-                            }
-                                {iconState.disabled &&
-                            <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
-                            }
-                                {!iconState.disabled && iconState.unreadSigners.length > 0 &&
-                            <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
-                            }
-                              </TooltipContent>
-                            </Tooltip>);
+                                  {iconState.unreadSigners.length > 0 &&
+                              <div className="text-yellow-600">
+                                      <p className="font-semibold text-xs">⏳ Pendentes:</p>
+                                      {iconState.unreadSigners.map((s, i) =>
+                                <p key={i} className="text-xs">
+                                          {s.name}
+                                        </p>
+                                )}
+                                    </div>
+                              }
+                                  {iconState.disabled &&
+                              <p className="text-xs text-muted-foreground mt-1">Todos já leram a mensagem</p>
+                              }
+                                  {!iconState.disabled && iconState.unreadSigners.length > 0 &&
+                              <p className="text-xs text-muted-foreground mt-1">Clique para reenviar</p>
+                              }
+                                </TooltipContent>
+                              </Tooltip>);
 
-                    })()}
-                      {doc.status !== "signed" && doc.status !== "cancelled" &&
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-transparent h-8 w-8"
-                      onClick={() => handleCancelDocument(doc)}
-                      title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
-                      
-                          <Trash2 className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                    }
-                    </>
-                    }
-                    </div>
-                  </div>
+                      })()}
+                        {doc.status !== "signed" && doc.status !== "cancelled" &&
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-transparent h-8 w-8"
+                        onClick={() => handleCancelDocument(doc)}
+                        title={doc.signedBy > 0 ? "Cancelar documento" : "Excluir documento"}>
 
-                  {/* Document Name */}
-                  <div
-                  className="space-y-2 cursor-pointer"
-                  onClick={() => doc.isEnvelope ? handleViewEnvelopeDocuments(doc) : handleViewDocument(doc.id)}>
-                  
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {doc.isEnvelope ?
-                    <FolderOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} /> :
-
-                    <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                    }
-                      <p className="font-medium text-primary">{doc.name}</p>
-                      {doc.isEnvelope && doc.documentCount && doc.documentCount > 1 &&
-                    <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                          {doc.documentCount} docs
-                        </span>
-                    }
+                            <Trash2 className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                      }
+                      </>
+                      }
+                      </div>
                     </div>
                     {/* Patient name for prescriptions */}
                     {isPrescription(doc) && doc.patientName &&
                   <p className="text-xs text-muted-foreground">Paciente: {doc.patientName}</p>
                   }
-                    {/* For prescriptions, show prescription doc type instead of signature mode */}
-                    {isPrescription(doc) && doc.prescriptionDocType ?
-                  <Badge
-                    variant="outline"
-                    className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit">
-                    
-                        {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
-                      </Badge> :
-                  doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
-                  <Badge
-                    variant="outline"
-                    className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
-                    
-                        {signatureModeConfig[doc.signatureMode].label}
-                      </Badge> :
-                  null}
+                    {/* Date + signature-mode badge, with signer initials on the same line, right-aligned */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">{doc.createdAt}</p>
+                        {/* For prescriptions, show prescription doc type instead of signature mode */}
+                        {isPrescription(doc) && doc.prescriptionDocType ?
+                      <Badge
+                        variant="outline"
+                        className="bg-transparent border border-pink-500 text-pink-500 text-[10px] px-1.5 py-0 w-fit">
 
-                    {/* Signer Badges below document name - hide for prescriptions */}
-                    {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) &&
-                  <TooltipProvider>
-                        <div className="flex gap-1 justify-end">
-                          {doc.signerStatuses?.map((status, idx) => {
-                        const name = doc.signerNames?.[idx] || "";
-                        const email = doc.signerEmails?.[idx] || "";
-                        const phone = doc.signerPhones?.[idx] || "";
-                        return (
-                          <Tooltip key={idx}>
-                                <TooltipTrigger asChild>
-                                  <div
-                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}>
-                                
-                                    {name ? getInitials(name) : idx + 1}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col gap-0.5">
-                                  <p className="font-medium">{name}</p>
-                                  {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
-                                  <p className="text-xs text-muted-foreground">{email}</p>
-                                </TooltipContent>
-                              </Tooltip>);
+                            {prescriptionDocTypeLabels[doc.prescriptionDocType] || doc.prescriptionDocType}
+                          </Badge> :
+                      doc.signatureMode && signatureModeConfig[doc.signatureMode] ?
+                      <Badge
+                        variant="outline"
+                        className={`${signatureModeConfig[doc.signatureMode].className} text-[10px] px-1.5 py-0 w-fit`}>
 
-                      })}
-                        </div>
-                      </TooltipProvider>
-                  }
+                            {signatureModeConfig[doc.signatureMode].label}
+                          </Badge> :
+                      null}
+                      </div>
+
+                      {/* Signer Badges - hide for prescriptions */}
+                      {showProgress && doc.signerStatuses && doc.signerStatuses.length > 0 && !isPrescription(doc) &&
+                    <TooltipProvider>
+                          <div className="flex gap-1">
+                            {doc.signerStatuses?.map((status, idx) => {
+                          const name = doc.signerNames?.[idx] || "";
+                          const email = doc.signerEmails?.[idx] || "";
+                          const phone = doc.signerPhones?.[idx] || "";
+                          return (
+                            <Tooltip key={idx}>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 ${status === "signed" ? "bg-blue-700" : status === "pending" ? "bg-gray-400" : "bg-red-700"}`}>
+
+                                      {name ? getInitials(name) : idx + 1}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="flex flex-col gap-0.5">
+                                    <p className="font-medium">{name}</p>
+                                    {phone && <p className="text-xs text-muted-foreground">{phone}</p>}
+                                    <p className="text-xs text-muted-foreground">{email}</p>
+                                  </TooltipContent>
+                                </Tooltip>);
+
+                        })}
+                          </div>
+                        </TooltipProvider>
+                    }
+                    </div>
                   </div>
                 </div>
 
