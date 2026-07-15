@@ -197,13 +197,13 @@ export const FoldersList = ({
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive hover:bg-muted focus:bg-muted"
+                  className="hover:bg-muted focus:bg-muted"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <Trash2 className="w-4 h-4 mr-2 text-destructive" />
                   Excluir
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -288,13 +288,13 @@ export const FoldersList = ({
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                  className="text-destructive hover:bg-muted focus:bg-muted"
+                  className="hover:bg-muted focus:bg-muted"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteFolder(folder.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <Trash2 className="w-4 h-4 mr-2 text-destructive" />
                   Excluir
                 </DropdownMenuItem>
               </DropdownMenuContent>

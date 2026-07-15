@@ -136,7 +136,7 @@ export default function Auth() {
           <div className="relative z-10">
             <img src={LOGO_URL} alt="Logo" className="h-24 w-auto" />
           </div>
-          <div className="absolute bottom-6 left-0 right-0 z-10">
+          <div className="absolute bottom-7 left-0 right-0 z-10">
             <PoweredBy />
           </div>
         </div>

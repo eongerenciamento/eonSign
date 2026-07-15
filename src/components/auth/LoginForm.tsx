@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -27,6 +27,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [emailShake, setEmailShake] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +42,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const labelClassName = "text-gray-700";
 
   const handleSubmit = async (values: LoginFormValues) => {
+    setLoginFailed(false);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
@@ -49,12 +51,8 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
       if (error) throw error;
       onSuccess();
     } catch (error) {
-      const description = error instanceof Error && error.message ? error.message : "Tente novamente em instantes.";
-      toast({
-        variant: "destructive",
-        title: "Erro ao fazer login",
-        description
-      });
+      setLoginFailed(true);
+      setTimeout(() => setLoginFailed(false), 3000);
     }
   };
 
@@ -94,7 +92,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-2">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
         <FormField
           control={form.control}
           name="email"
@@ -103,7 +101,18 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
               <FormControl>
                 <div className={`relative ${emailShake ? "animate-shake" : ""}`}>
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input {...field} type="email" placeholder="E-mail" disabled={isSubmitting} autoFocus={false} className={`${inputClassName} pl-10`} />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="E-mail"
+                    disabled={isSubmitting}
+                    autoFocus={false}
+                    className={`${inputClassName} pl-10`}
+                    onChange={e => {
+                      field.onChange(e);
+                      setLoginFailed(false);
+                    }}
+                  />
                 </div>
               </FormControl>
               <FormMessage />
@@ -125,6 +134,10 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
                     placeholder="Senha"
                     disabled={isSubmitting}
                     className={`${inputClassName} pl-10 pr-10`}
+                    onChange={e => {
+                      field.onChange(e);
+                      setLoginFailed(false);
+                    }}
                   />
                   <button
                     type="button"
@@ -143,9 +156,15 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
         />
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={isSubmitting} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full border-0">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className={`flex-1 text-white rounded-full border-0 ${
+              loginFailed ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Entrar
+            {!isSubmitting && loginFailed ? <XCircle className="h-5 w-5 text-white" /> : !isSubmitting ? "Entrar" : null}
           </Button>
 
           <Button
@@ -214,7 +233,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
               type="button"
               onClick={handleForgotPassword}
               disabled={isSubmitting || resettingPassword}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+              className="text-[13px] text-gray-500 hover:text-gray-700 transition-colors flex items-center"
             >
               {resettingPassword && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
               Esqueci a senha
@@ -223,14 +242,14 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
             <button
               type="button"
               onClick={onRegisterClick}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-[13px] text-gray-500 hover:text-gray-700 transition-colors"
             >
               Criar conta
             </button>
           </div>
           
           {/* Mobile: Powered by a esquerda, links a direita, mais baixo */}
-          <div className="md:hidden pt-10 flex items-center justify-between text-[11px] text-gray-400">
+          <div className="md:hidden pt-9 flex items-center justify-between text-[11px] text-gray-400">
             <span>
               Powered by{" "}
               <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">

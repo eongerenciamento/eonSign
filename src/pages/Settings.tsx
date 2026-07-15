@@ -598,7 +598,7 @@ const Settings = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="company-phone">Telefone</Label>
-                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="tel" className="text-foreground border-0 bg-muted dark:bg-secondary" />
+                      <Input id="company-phone" value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="(00)00000-0000" maxLength={14} inputMode="numeric" className="text-foreground border-0 bg-muted dark:bg-secondary" />
                     </div>
 
                     <div className="grid gap-2">

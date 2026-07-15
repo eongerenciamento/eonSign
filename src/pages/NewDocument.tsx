@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit, Send, Loader2 } from "lucide-react";
+import { Upload, FileText, X, Plus, Check, FolderOpen, BookUser, FileEdit, Send, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1373,7 +1373,12 @@ const NewDocument = () => {
   return <Layout>
       <div className="p-8 space-y-6 max-w-3xl mx-auto">
         <div>
-          <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)} className="text-blue-600 hover:text-blue-700 transition-colors" aria-label="Voltar">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <h1 className="text-sm font-bold text-gray-600">Novo Documento</h1>
+          </div>
           <div className="mt-2 space-y-1">
             <motion.div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${hasFileOrPrescription ? 'text-green-600' : 'text-gray-500'}`} initial={{
             opacity: 0,
