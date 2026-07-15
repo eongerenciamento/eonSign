@@ -171,6 +171,20 @@ const Dashboard = () => {
   useEffect(() => {
     loadDocuments();
   }, [loadDocuments]);
+
+  // Paint html/body navy while mounted so the mobile safe-area/status-bar
+  // continues the header gradient instead of showing white (matches Auth.tsx).
+  useEffect(() => {
+    const originalHtmlBg = document.documentElement.style.backgroundColor;
+    const originalBodyBg = document.body.style.backgroundColor;
+    document.documentElement.style.backgroundColor = "hsl(218 55% 10%)";
+    document.body.style.backgroundColor = "hsl(218 55% 10%)";
+    return () => {
+      document.documentElement.style.backgroundColor = originalHtmlBg;
+      document.body.style.backgroundColor = originalBodyBg;
+    };
+  }, []);
+
   return <Layout>
       <div className="space-y-6">
         {/* Mobile header: gradient greeting + glass metric cards */}

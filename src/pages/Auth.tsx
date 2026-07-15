@@ -129,7 +129,7 @@ export default function Auth() {
           className="flex-shrink-0 relative z-30 px-6 pt-2 flex items-center justify-between text-[11px] text-gray-400"
           style={{
             backgroundColor: '#ffffff',
-            paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)"
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 0.25rem)"
           }}
         >
           <span>
