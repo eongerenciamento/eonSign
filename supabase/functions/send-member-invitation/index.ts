@@ -249,7 +249,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #273d60 0%, #001f3f 100%); padding: 0; text-align: center; border-radius: 12px 12px 0 0;">
-                    <img src="${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/email-assets/header-banner.png" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;">
+                    <img src="${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/email-assets/header-banner.jpg" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;">
                   </td>
                 </tr>
                 

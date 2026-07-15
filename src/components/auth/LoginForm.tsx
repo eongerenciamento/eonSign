@@ -247,22 +247,6 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
               Criar conta
             </button>
           </div>
-          
-          {/* Mobile: Powered by a esquerda, links a direita, mais baixo */}
-          <div className="md:hidden pt-9 flex items-center justify-between text-[11px] text-gray-400">
-            <span>
-              Powered by{" "}
-              <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
-                eonhub
-              </a>
-            </span>
-            <div className="flex gap-1">
-              <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
-              <span>·</span>
-              <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
-            </div>
-          </div>
-          
         </div>
       </form>
     </Form>

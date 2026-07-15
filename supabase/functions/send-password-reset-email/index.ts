@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log("[DEBUG] APP_URL being used:", APP_URL);
     console.log("[DEBUG] Auth URL will be:", `${APP_URL}/auth`);
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
 
     // Enviar email com as credenciais
     const emailResponse = await resend.emails.send({

@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (APP_URL && !APP_URL.startsWith("http")) {
       APP_URL = `https://${APP_URL}`;
     }
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
 
     // Get the signed document URL
     const { data: docData, error: docError } = await supabase

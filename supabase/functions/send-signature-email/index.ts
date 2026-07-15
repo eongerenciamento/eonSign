@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     const signatureUrl = finalBrySignerLink || `${APP_URL}/assinar/${documentId}`;
     console.log("[DEBUG] Final signature URL:", signatureUrl);
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
 
     // Texto diferente se for BRy
     const isBrySignature = !!finalBrySignerLink;

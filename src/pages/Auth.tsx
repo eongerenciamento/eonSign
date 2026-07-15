@@ -110,7 +110,7 @@ export default function Auth() {
           </div>
         </div>
 
-        <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-hidden" style={{
+        <div className="flex-1 rounded-t-3xl -mt-4 px-6 py-5 relative z-30 flex flex-col overflow-y-auto" style={{
         backgroundColor: '#ffffff'
       }}>
           {mode !== 'success' && mode !== 'login' && <div className="text-center mb-4">
@@ -122,6 +122,27 @@ export default function Auth() {
             </div>}
 
           {renderContent()}
+        </div>
+
+        {/* Mobile footer: Powered by + legal links, pinned above the safe area */}
+        <div
+          className="flex-shrink-0 relative z-30 px-6 pt-2 flex items-center justify-between text-[11px] text-gray-400"
+          style={{
+            backgroundColor: '#ffffff',
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)"
+          }}
+        >
+          <span>
+            Powered by{" "}
+            <a href="https://eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-gray-600 hover:text-gray-700 transition-colors">
+              eonhub
+            </a>
+          </span>
+          <div className="flex gap-1">
+            <a href="/privacidade" className="hover:text-gray-600 transition-colors">Privacidade</a>
+            <span>·</span>
+            <a href="/termos" className="hover:text-gray-600 transition-colors">Termos</a>
+          </div>
         </div>
       </div>
 

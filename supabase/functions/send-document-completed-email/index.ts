@@ -280,7 +280,7 @@ const handler = async (req: Request): Promise<Response> => {
       APP_URL = `https://${APP_URL}`;
     }
     
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.png`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get BRy token once for all documents
