@@ -224,7 +224,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <Button onClick={() => navigate("/novo-documento")} className="relative z-10 mt-10 w-full bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full font-normal">
+          <Button onClick={() => navigate("/novo-documento")} className="relative z-10 mt-16 w-full bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full font-normal">
             <Plus className="w-5 h-5 mr-2 text-white" />
             <span className="text-white">Documento</span>
           </Button>
@@ -267,9 +267,9 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Documents */}
-        <div className="relative z-10 -mt-14 space-y-4 lg:mt-0">
+        <div className="relative z-10 -mt-24 space-y-4 lg:mt-0">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm text-foreground">
+            <h2 className="text-sm text-white lg:text-foreground">
               Documentos Recentes
             </h2>
           </div>
