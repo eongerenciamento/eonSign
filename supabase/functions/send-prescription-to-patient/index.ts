@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
+import { renderEmailShell, renderActionButton } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -47,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (APP_URL && !APP_URL.startsWith("http")) {
       APP_URL = `https://${APP_URL}`;
     }
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
 
     // Get the signed document URL
     const { data: docData, error: docError } = await supabase
@@ -91,51 +92,32 @@ const handler = async (req: Request): Promise<Response> => {
           }
         }
 
+        const contentHtml = `
+          <h2 style="color:#273d60; margin-top:0; font-size:20px;">Olá, ${patientName}!</h2>
+          <p style="color:#333; font-size:14px;">
+            ${senderName} de <strong>${organizationName}</strong> enviou uma prescrição médica para você.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:white; border-radius:8px; margin:20px 0; border-left:4px solid #7c3aed;">
+            <tr><td style="padding:16px;">
+              <p style="margin:0; color:#333; font-size:14px;"><strong>Documento:</strong> ${documentName}</p>
+              <p style="margin:10px 0 0 0; color:#7c3aed; font-weight:bold; font-size:14px;">📋 Prescrição Médica Assinada Digitalmente</p>
+            </td></tr>
+          </table>
+          <p style="color:#333; font-size:14px;">
+            O documento está anexado a este e-mail e também pode ser acessado pelo link abaixo:
+          </p>
+          ${renderActionButton(validationUrl, "Visualizar Prescrição")}
+          <p style="color:#666; font-size:12px; text-align:center;">
+            Este documento foi assinado digitalmente com Certificado ICP-Brasil.<br>
+            Para verificar a autenticidade, acesse o link acima.
+          </p>
+        `;
+
         const emailPayload: any = {
           from: "eonSign <noreply@eonhub.com.br>",
           to: [patientEmail],
           subject: `Sua Prescrição Médica - ${documentName}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="padding: 0; text-align: center;">
-                <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
-              </div>
-              <div style="padding: 30px; background: #f9f9f9;">
-                <h2 style="color: #273d60;">Olá, ${patientName}!</h2>
-                <p style="color: #333; font-size: 16px;">
-                  ${senderName} de <strong>${organizationName}</strong> enviou uma prescrição médica para você.
-                </p>
-                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
-                  <p style="margin: 0; color: #666;"><strong>Documento:</strong> ${documentName}</p>
-                  <p style="margin: 10px 0 0 0; color: #7c3aed; font-weight: bold;">📋 Prescrição Médica Assinada Digitalmente</p>
-                </div>
-                <p style="color: #333; font-size: 14px;">
-                  O documento está anexado a este e-mail e também pode ser acessado pelo link abaixo:
-                </p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${validationUrl}" 
-                     style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                            color: white; 
-                            padding: 15px 40px; 
-                            text-decoration: none; 
-                            border-radius: 8px;
-                            font-weight: bold;
-                            display: inline-block;">
-                    Visualizar Prescrição
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 12px; text-align: center;">
-                  Este documento foi assinado digitalmente com Certificado ICP-Brasil.<br>
-                  Para verificar a autenticidade, acesse o link acima.
-                </p>
-              </div>
-              <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-                <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                  © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
-                </p>
-              </div>
-            </div>
-          `,
+          html: renderEmailShell(contentHtml, { bannerUrl: BANNER_URL }),
         };
 
         if (pdfAttachment) {

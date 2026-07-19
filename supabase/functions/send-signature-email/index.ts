@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
+import { renderEmailShell, renderActionButton } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -87,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     const signatureUrl = finalBrySignerLink || `${APP_URL}/assinar/${documentId}`;
     console.log("[DEBUG] Final signature URL:", signatureUrl);
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
 
     // Texto diferente se for BRy
     const isBrySignature = !!finalBrySignerLink;
@@ -95,50 +96,29 @@ const handler = async (req: Request): Promise<Response> => {
       ? "Clique no botão abaixo para visualizar e assinar o documento digitalmente com certificado ICP-Brasil."
       : "Clique no botão abaixo para visualizar e assinar o documento.";
 
+    const contentHtml = `
+      <h2 style="color:#273d60; margin-top:0; font-size:20px;">Olá, ${signerName || "Signatário"}!</h2>
+      <p style="color:#333; font-size:14px;">
+        <strong>${organizationName}</strong> enviou um documento para você assinar digitalmente.
+      </p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:white; border-radius:8px; margin:20px 0;">
+        <tr><td style="padding:16px;">
+          <p style="margin:0; color:#333; font-size:14px;"><strong>Documento:</strong> ${documentName}</p>
+        </td></tr>
+      </table>
+      <p style="color:#333; font-size:14px;">${instructionText}</p>
+      ${renderActionButton(signatureUrl, "Assinar Documento")}
+      <p style="color:#666; font-size:12px; text-align:center;">
+        Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+        <a href="${signatureUrl}" style="color:#273d60;">${signatureUrl}</a>
+      </p>
+    `;
+
     const emailResponse = await resend.emails.send({
       from: "eonSign <noreply@eonhub.com.br>",
       to: [signerEmail],
       subject: `Você tem um documento para assinar - ${documentName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="padding: 0; text-align: center;">
-            <img src="${BANNER_URL}" alt="Éon Sign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
-          </div>
-          <div style="padding: 30px; background: #f9f9f9;">
-            <h2 style="color: #273d60;">Olá, ${signerName || "Signatário"}!</h2>
-            <p style="color: #333; font-size: 16px;">
-              <strong>${organizationName}</strong> enviou um documento para você assinar digitalmente.
-            </p>
-            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #666;"><strong>Documento:</strong> ${documentName}</p>
-            </div>
-            <p style="color: #333; font-size: 14px;">
-              ${instructionText}
-            </p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${signatureUrl}"
-                 style="background: #2563eb;
-                        color: white;
-                        padding: 16px 48px;
-                        text-decoration: none;
-                        border-radius: 9999px;
-                        font-weight: bold;
-                        display: inline-block;">
-                Assinar Documento
-              </a>
-            </div>
-            <p style="color: #999; font-size: 12px; text-align: center;">
-              Se o botão não funcionar, copie e cole este link no seu navegador:<br>
-              <a href="${signatureUrl}" style="color: #273d60;">${signatureUrl}</a>
-            </p>
-          </div>
-          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-            <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
-            </p>
-          </div>
-        </div>
-      `,
+      html: renderEmailShell(contentHtml, { bannerUrl: BANNER_URL }),
     });
 
     console.log("Email sent successfully:", emailResponse);

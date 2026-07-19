@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
+import { renderEmailShell, renderCredentialsBox, renderActionButton } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -39,71 +40,34 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("[DEBUG] APP_URL being used:", APP_URL);
     console.log("[DEBUG] Auth URL will be:", `${APP_URL}/auth`);
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
 
     const displayName = name || organizationName || "Usuário";
     const displayOrganization = organizationName || name || "Sua Organização";
     const displayTier = tierName || "Básico";
 
+    const credentialRows = [{ label: "E-mail", value: email }];
+    if (tempPassword) credentialRows.push({ label: "Senha", value: tempPassword });
+    credentialRows.push({ label: "Organização", value: displayOrganization });
+    credentialRows.push({ label: "Plano", value: displayTier });
+
+    const contentHtml = `
+      <h2 style="color:#273d60; margin-top:0; font-size:20px;">Bem-Vindo ao eonSign, ${displayName}!</h2>
+      <p style="color:#333; font-size:14px;">
+        Sua conta foi criada com sucesso. Aqui estão suas credenciais de acesso:
+      </p>
+      ${renderCredentialsBox(credentialRows)}
+      <p style="color:#666; font-size:12px;">
+        Recomendamos que você altere sua senha após o primeiro acesso.
+      </p>
+      ${renderActionButton(`${APP_URL}/auth`, "Acessar o Sistema")}
+    `;
+
     const emailResponse = await resend.emails.send({
       from: "eonSign <noreply@eonhub.com.br>",
       to: [email],
       subject: "Bem-Vindo ao eonSign",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f3f4f6;">
-          <div style="border-radius: 16px 16px 0 0; overflow: hidden;">
-            <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
-          </div>
-          <div style="padding: 30px; background: #f3f4f6;">
-            <h1 style="color: #273d60; font-size: 24px; margin: 0 0 20px 0;">Bem-Vindo ao eonSign, ${displayName}!</h1>
-            <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-              Sua conta foi criada com sucesso. Aqui estão suas credenciais de acesso:
-            </p>
-            <div style="background: white; border-radius: 12px; padding: 24px; margin: 0 0 24px 0;">
-              <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
-                <strong style="color: #273d60;">E-mail:</strong> ${email}
-              </p>
-              ${
-                tempPassword
-                  ? `
-              <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
-                <strong style="color: #273d60;">Senha:</strong> ${tempPassword}
-              </p>
-              `
-                  : ""
-              }
-              <p style="color: #374151; font-size: 15px; margin: 0 0 12px 0;">
-                <strong style="color: #273d60;">Organização:</strong> ${displayOrganization}
-              </p>
-              <p style="color: #374151; font-size: 15px; margin: 0;">
-                <strong style="color: #273d60;">Plano:</strong> ${displayTier}
-              </p>
-            </div>
-            <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-              Recomendamos que você altere sua senha após o primeiro acesso.
-            </p>
-            <div style="margin: 0 0 24px 0;">
-              <a href="${APP_URL}/auth" 
-                 style="background: #273d60; 
-                        color: white; 
-                        padding: 14px 32px; 
-                        text-decoration: none; 
-                        border-radius: 8px;
-                        font-weight: 600;
-                        font-size: 15px;
-                        display: inline-block;">
-                Acessar o Sistema
-              </a>
-            </div>
-          </div>
-          <div style="border-top: 1px solid #e5e7eb;"></div>
-          <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 0 0 16px 16px;">
-            <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} eonSign. Todos os direitos reservados.
-            </p>
-          </div>
-        </div>
-      `,
+      html: renderEmailShell(contentHtml, { bannerUrl: BANNER_URL }),
     });
 
     console.log("Welcome email sent successfully:", emailResponse);

@@ -1,4 +1,4 @@
-import { CheckCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SuccessMessageProps {
@@ -9,23 +9,22 @@ export function SuccessMessage({ onLoginClick }: SuccessMessageProps) {
   return (
     <div className="text-center space-y-6">
       <div className="flex justify-center">
-        <div className="rounded-full bg-green-100 p-3">
-          <CheckCircle className="h-12 w-12 text-green-600" />
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+          <Check className="h-8 w-8 text-green-500" strokeWidth={3} />
         </div>
       </div>
-      
+
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-800">Conta criada com sucesso!</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-gray-700">Conta criada com sucesso!</h2>
+        <p className="text-gray-500">
           Enviamos sua senha temporária para o e-mail informado.
-          <br />
-          Verifique sua caixa de entrada.
         </p>
+        <p className="text-sm text-gray-400">Verifique sua caixa de entrada.</p>
       </div>
 
       <Button
         onClick={onLoginClick}
-        className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white"
+        className="w-full rounded-full bg-blue-600 hover:bg-blue-700 text-white"
       >
         Fazer Login
       </Button>

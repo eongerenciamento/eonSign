@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { renderEmailShell, renderCredentialsBox, renderActionButton } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -76,54 +77,27 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log("[DEBUG] APP_URL being used:", APP_URL);
     console.log("[DEBUG] Auth URL will be:", `${APP_URL}/auth`);
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
 
     // Enviar email com as credenciais
+    const contentHtml = `
+      <h2 style="color:#273d60; margin-top:0; font-size:20px;">Nova Senha Gerada</h2>
+      <p style="color:#333; font-size:14px;">Sua senha foi redefinida com sucesso.</p>
+      ${renderCredentialsBox([
+        { label: "Login", value: email },
+        { label: "Nova Senha", value: newPassword },
+      ])}
+      <p style="color:#666; font-size:12px;">
+        Por motivos de segurança, recomendamos que você altere sua senha após fazer login.
+      </p>
+      ${renderActionButton(`${APP_URL}/auth`, "Acessar Sistema")}
+    `;
+
     const emailResponse = await resend.emails.send({
       from: "eonSign <noreply@eonhub.com.br>",
       to: [email],
       subject: "Nova Senha",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #273d60, #001a4d); padding: 0; text-align: center;">
-            <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
-          </div>
-          <div style="padding: 30px; background: #f9f9f9;">
-            <h2 style="color: #273d60;">Nova Senha Gerada</h2>
-            <p style="color: #333; font-size: 16px;">
-              Sua senha foi redefinida com sucesso.
-            </p>
-            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 10px 0; color: #333; font-size: 16px;">
-                <strong>Login:</strong> ${email}
-              </p>
-              <p style="margin: 10px 0; color: #333; font-size: 16px;">
-                <strong>Nova Senha:</strong> ${newPassword}
-              </p>
-            </div>
-            <p style="color: #666; font-size: 12px;">
-              Por motivos de segurança, recomendamos que você altere sua senha após fazer login.
-            </p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${APP_URL}/auth"
-                 style="background: #2563eb;
-                        color: white;
-                        padding: 16px 48px;
-                        text-decoration: none;
-                        border-radius: 9999px;
-                        font-weight: bold;
-                        display: inline-block;">
-                Acessar Sistema
-              </a>
-            </div>
-          </div>
-          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-            <p style="color: #6b7280; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
-            </p>
-          </div>
-        </div>
-      `,
+      html: renderEmailShell(contentHtml, { bannerUrl: BANNER_URL }),
     });
 
     console.log("Password reset email sent successfully:", emailResponse);

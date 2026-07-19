@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
+import { renderEmailShell, renderActionButton } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -280,7 +281,7 @@ const handler = async (req: Request): Promise<Response> => {
       APP_URL = `https://${APP_URL}`;
     }
     
-    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg`;
+    const BANNER_URL = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get BRy token once for all documents
@@ -333,53 +334,34 @@ const handler = async (req: Request): Promise<Response> => {
         ? `<br><strong>Documentos no envelope:</strong> ${idsToProcess.length}`
         : '';
         
+      const contentHtml = `
+        <h2 style="color:#273d60; margin-top:0; font-size:20px;">Documento Assinado com Sucesso!</h2>
+        <p style="color:#333; font-size:14px;">
+          O documento <strong>${documentName}</strong> foi assinado por todos os signatários.
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:white; border-radius:8px; margin:20px 0;">
+          <tr><td style="padding:16px;">
+            <p style="margin:0; color:#333; font-size:14px;">
+              <strong>Documento:</strong> ${documentName}${documentCount}<br>
+              <strong>Enviado por:</strong> ${senderName}<br>
+              <strong>Status:</strong> <span style="color:#16a34a; font-weight:bold;">✓ Assinado</span>
+            </p>
+          </td></tr>
+        </table>
+        <p style="color:#333; font-size:14px;">
+          O documento assinado está anexado a este e-mail junto com o relatório de evidências contendo todas as assinaturas e dados de validação. Você também pode visualizá-lo no sistema a qualquer momento.
+        </p>
+        ${renderActionButton(`${APP_URL}/drive`, "Acessar Eon Drive")}
+        <p style="color:#666; font-size:12px; text-align:center;">
+          Este documento possui validade legal e todas as assinaturas foram registradas com evidências de autenticação.
+        </p>
+      `;
+
       return await resend.emails.send({
         from: "eonSign <noreply@eonhub.com.br>",
         to: [email],
         subject: `Documento Assinado - ${documentName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="padding: 0; text-align: center;">
-              <img src="${BANNER_URL}" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;" />
-            </div>
-            <div style="padding: 30px; background: #f9f9f9;">
-              <h2 style="color: #273d60;">Documento Assinado com Sucesso!</h2>
-              <p style="color: #333; font-size: 16px;">
-                O documento <strong>${documentName}</strong> foi assinado por todos os signatários.
-              </p>
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; color: #666;">
-                  <strong>Documento:</strong> ${documentName}${documentCount}<br>
-                  <strong>Enviado por:</strong> ${senderName}<br>
-                  <strong>Status:</strong> <span style="color: #16a34a; font-weight: bold;">✓ Assinado</span>
-                </p>
-              </div>
-              <p style="color: #333; font-size: 14px;">
-                O documento assinado está anexado a este e-mail junto com o relatório de evidências contendo todas as assinaturas e dados de validação. Você também pode visualizá-lo no sistema a qualquer momento.
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${APP_URL}/drive" 
-                   style="background: linear-gradient(135deg, #273d60, #001a4d); 
-                          color: white; 
-                          padding: 15px 40px; 
-                          text-decoration: none; 
-                          border-radius: 8px;
-                          font-weight: bold;
-                          display: inline-block;">
-                  Acessar Eon Drive
-                </a>
-              </div>
-              <p style="color: #999; font-size: 12px; text-align: center;">
-                Este documento possui validade legal e todas as assinaturas foram registradas com evidências de autenticação.
-              </p>
-            </div>
-            <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-              <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                © ${new Date().getFullYear()} eonSign - Sistema de Gestão de Documentos e Assinatura Digital
-              </p>
-            </div>
-          </div>
-        `,
+        html: renderEmailShell(contentHtml, { bannerUrl: BANNER_URL }),
         attachments: [
           {
             filename: attachmentFilename,

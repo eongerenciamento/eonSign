@@ -36,7 +36,7 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
     }
   });
 
-  const inputClassName = "bg-gray-100 border-gray-200 text-gray-900 placeholder:text-gray-400";
+  const inputClassName = "bg-muted rounded-full h-11 border-0 text-gray-900 placeholder:text-gray-400";
   const labelClassName = "text-gray-700";
 
   const handleSubmit = async (values: RegisterFormValues) => {
@@ -117,19 +117,24 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isCreating} className="w-full bg-[#273D60] hover:bg-[#1a2847] text-white">
-          {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Criar Conta Gratuita
-        </Button>
-
-        <div className="flex flex-row items-center justify-center gap-x-4 pt-2">
-          <button
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <Button
             type="button"
+            variant="ghost"
+            disabled={isCreating}
             onClick={onLoginClick}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="rounded-full"
           >
-            Já tenho conta
-          </button>
+            Login
+          </Button>
+          <Button
+            type="submit"
+            disabled={isCreating}
+            className="rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Criar conta
+          </Button>
         </div>
       </form>
     </Form>

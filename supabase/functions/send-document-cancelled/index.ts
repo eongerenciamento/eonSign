@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { renderEmailShell } from "../_shared/email-template.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,48 +63,27 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log("Sending cancellation email to:", signer.email);
         
+        const bannerUrl = `${supabaseUrl}/storage/v1/object/public/email-assets/header-banner-v2.png`;
+        const contentHtml = `
+          <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin-bottom:20px; text-align:center;">
+            <h2 style="color:#dc2626; margin:0; font-size:18px;">Documento Cancelado</h2>
+          </div>
+          <p style="color:#333; font-size:14px; margin:0 0 12px 0;">
+            Olá <strong>${signer.name}</strong>,
+          </p>
+          <p style="color:#333; font-size:14px; margin:0 0 12px 0;">
+            O documento <strong>"${documentName}"</strong> foi cancelado pelo remetente${senderName ? ` (${senderName})` : ''} e não está mais disponível para assinatura.
+          </p>
+          <p style="color:#666; font-size:12px; margin:0;">
+            Qualquer link de assinatura associado a este documento não será mais válido.
+          </p>
+        `;
+
         const emailResponse = await resend.emails.send({
           from: "eonSign <noreply@eonhub.com.br>",
           to: [signer.email],
           subject: `Documento cancelado - ${documentName}`,
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <img src="${supabaseUrl}/storage/v1/object/public/email-assets/header-banner.jpg" alt="eonSign" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;">
-              </div>
-
-              <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-                <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">
-                  Documento Cancelado
-                </h1>
-              </div>
-              
-              <div style="background: #f9fafb; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-                <p style="margin: 0 0 15px 0; font-size: 16px;">
-                  Olá <strong>${signer.name}</strong>,
-                </p>
-                <p style="margin: 0 0 15px 0;">
-                  O documento <strong>"${documentName}"</strong> foi cancelado pelo remetente${senderName ? ` (${senderName})` : ''} e não está mais disponível para assinatura.
-                </p>
-                <p style="margin: 0; color: #666;">
-                  Qualquer link de assinatura associado a este documento não será mais válido.
-                </p>
-              </div>
-              
-              <div style="text-align: center; padding: 20px; border-top: 1px solid #eee; margin-top: 30px;">
-                <p style="color: #888; font-size: 12px; margin: 0;">
-                  Este é um e-mail automático enviado pela plataforma EON Sign.
-                </p>
-              </div>
-            </body>
-            </html>
-          `,
+          html: renderEmailShell(contentHtml, { bannerUrl }),
         });
 
         console.log("Email sent successfully to:", signer.email);

@@ -106,7 +106,7 @@ export default function Auth() {
       }}>
           <RadialGlow />
           <div className="relative z-20 flex flex-col items-center pt-24">
-            <img src={LOGO_URL} alt="Logo" className="h-20 w-auto" />
+            <img src={LOGO_URL} alt="Logo" className="h-[104px] w-auto" />
           </div>
         </div>
 
@@ -155,7 +155,7 @@ export default function Auth() {
       }}>
           <RadialGlow />
           <div className="relative z-10">
-            <img src={LOGO_URL} alt="Logo" className="h-24 w-auto" />
+            <img src={LOGO_URL} alt="Logo" className="h-[125px] w-auto" />
           </div>
           <div className="absolute bottom-7 left-0 right-0 z-10">
             <PoweredBy />
