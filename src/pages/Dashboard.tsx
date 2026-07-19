@@ -223,6 +223,11 @@ const Dashboard = () => {
               <p className="mt-2 truncate text-lg font-semibold text-white tabular-nums">{pendingByExternal}</p>
             </div>
           </div>
+
+          <Button onClick={() => navigate("/novo-documento")} className="relative z-10 mt-10 w-full bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full font-normal">
+            <Plus className="w-5 h-5 mr-2 text-white" />
+            <span className="text-white">Documento</span>
+          </Button>
         </div>
 
         <div className="px-8 space-y-6 lg:pt-8">
@@ -261,14 +266,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Mobile "novo documento" button, below the gradient header */}
-          <Button onClick={() => navigate("/novo-documento")} className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full font-normal lg:hidden">
-            <Plus className="w-5 h-5 mr-2 text-white" />
-            <span className="text-white">Documento</span>
-          </Button>
-
           {/* Recent Documents */}
-        <div className="space-y-4">
+        <div className="relative z-10 -mt-14 space-y-4 lg:mt-0">
           <div className="flex items-center justify-between">
             <h2 className="text-sm text-foreground">
               Documentos Recentes
