@@ -28,12 +28,6 @@ export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>('login');
   useEffect(() => {
-    // Fix safe area background color on mobile
-    const originalHtmlBg = document.documentElement.style.backgroundColor;
-    const originalBodyBg = document.body.style.backgroundColor;
-    document.documentElement.style.backgroundColor = '#273D60';
-    document.body.style.backgroundColor = '#273D60';
-
     const checkSession = async () => {
       const {
         data: {
@@ -56,8 +50,6 @@ export default function Auth() {
     });
     return () => {
       subscription.unsubscribe();
-      document.documentElement.style.backgroundColor = originalHtmlBg;
-      document.body.style.backgroundColor = originalBodyBg;
     };
   }, [navigate]);
   const getHeaderText = () => {
@@ -97,9 +89,7 @@ export default function Auth() {
     colorScheme: 'light'
   }}>
       {/* Mobile Layout */}
-      <div className="md:hidden h-screen flex flex-col overflow-hidden" style={{
-      backgroundColor: '#273D60'
-    }}>
+      <div className="md:hidden h-screen flex flex-col overflow-hidden">
         <div className="relative flex-shrink-0 px-6 pb-28" style={{
         background: "linear-gradient(to bottom, #273D60, #1a2847)",
         paddingTop: "calc(env(safe-area-inset-top) + 2rem)"
