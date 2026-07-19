@@ -176,7 +176,7 @@ const Dashboard = () => {
       <div className="space-y-6">
         {/* Mobile header: gradient greeting + glass metric cards */}
         <div
-          className="relative px-4 pb-32 -mb-14 text-white lg:hidden"
+          className="relative px-4 pb-64 -mb-40 text-white lg:hidden"
           style={{
             paddingTop: "calc(max(env(safe-area-inset-top, 0px), 44px) + 0.5rem)",
             marginTop: "calc(env(safe-area-inset-top, 0px) * -1)",
