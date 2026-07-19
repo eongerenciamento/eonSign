@@ -27,7 +27,7 @@ export const Layout = ({
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto md:m-3 bg-background md:rounded-2xl md:shadow-lg pt-[env(safe-area-inset-top,0px)] md:pt-0">
+          <main className="flex-1 overflow-y-auto md:m-3 bg-background md:rounded-2xl md:shadow-lg pt-[env(safe-area-inset-top,0px)] md:pt-0 pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-0">
             {children}
           </main>
         </div>
