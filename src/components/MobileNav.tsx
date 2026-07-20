@@ -52,6 +52,13 @@ export function MobileNav() {
     return "U";
   };
 
+  const getShortName = () => {
+    const fullName = profile?.nome_completo?.trim();
+    if (!fullName) return profile?.email || "Usuário";
+    const parts = fullName.split(/\s+/);
+    return parts.length === 1 ? parts[0] : `${parts[0]} ${parts[parts.length - 1]}`;
+  };
+
   return (
     <>
       {/* Floating action button */}
@@ -134,7 +141,7 @@ export function MobileNav() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-gray-800">{profile?.nome_completo || profile?.email || "Usuário"}</p>
+                  <p className="truncate text-sm text-gray-800">{getShortName()}</p>
                   <p className="truncate text-xs text-gray-600">{profile?.organizacao || ""}</p>
                   <p className="truncate text-xs text-gray-500">{profile?.cargo || ""}</p>
                 </div>

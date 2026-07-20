@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, SquarePen, Trash2, X, Check, Search, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Contact {
@@ -230,7 +231,7 @@ export function SignerGroupsTab() {
           <CardTitle className="text-gray-600 text-sm">Grupos de Signatários</CardTitle>
           <Button 
             onClick={() => { resetForm(); setShowAddForm(true); }}
-            className="rounded-full bg-gray-200 text-gray-500 hover:bg-gray-200 hover:text-gray-500 gap-2"
+            className="bg-transparent text-blue-600 hover:bg-transparent hover:text-blue-600 gap-2"
             size="sm"
           >
             <Plus className="w-4 h-4" />
@@ -248,60 +249,6 @@ export function SignerGroupsTab() {
               className="pl-9 border-0 bg-gray-200"
             />
           </div>
-
-          {/* Add/Edit Form */}
-          {(showAddForm || editingId) && (
-            <div className="p-4 border rounded-lg bg-orange-50 space-y-4">
-              <div className="grid gap-2">
-                <Label>Nome do Grupo</Label>
-                <Input
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Ex: Equipe Comercial"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Selecionar Contatos</Label>
-                {contacts.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Nenhum contato salvo. Adicione contatos primeiro na aba "Contatos".
-                  </p>
-                ) : (
-                  <div className="max-h-48 overflow-y-auto border rounded-lg bg-white p-2 space-y-1">
-                    {contacts.map(contact => (
-                      <label
-                        key={contact.id}
-                        className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={selectedContacts.has(contact.id)}
-                          onCheckedChange={() => toggleContact(contact.id)}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{contact.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {contact.email || contact.phone}
-                          </p>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="cancel" size="sm" onClick={resetForm}>
-                  <X className="w-4 h-4 mr-1" />
-                  Cancelar
-                </Button>
-                <Button variant="confirm" size="sm" onClick={handleSave}>
-                  <Check className="w-4 h-4 mr-1" />
-                  Salvar
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Groups List */}
           {loading ? (
@@ -343,15 +290,15 @@ export function SignerGroupsTab() {
                           className="h-8 w-8 hover:bg-transparent cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); startEdit(group); }}
                         >
-                          <SquarePen className="w-4 h-4 text-gray-500" />
+                          <SquarePen className="w-4 h-4 text-blue-500" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 hover:bg-transparent cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); setDeleteId(group.id); }}
                         >
-                          <Trash2 className="w-4 h-4 text-gray-500" />
+                          <Trash2 className="w-4 h-4 text-red-500" />
                         </Button>
                       </div>
                     </div>
@@ -377,6 +324,65 @@ export function SignerGroupsTab() {
         </CardContent>
       </Card>
 
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAddForm || !!editingId} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>{editingId ? "Editar Grupo" : "Novo Grupo"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid gap-2">
+              <Label>Nome do Grupo</Label>
+              <Input
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="Ex: Equipe Comercial"
+                className="border-0 bg-muted"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Selecionar Contatos</Label>
+              {contacts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum contato salvo. Adicione contatos primeiro na aba "Contatos".
+                </p>
+              ) : (
+                <div className="max-h-48 overflow-y-auto border rounded-lg bg-white p-2 space-y-1">
+                  {contacts.map(contact => (
+                    <label
+                      key={contact.id}
+                      className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedContacts.has(contact.id)}
+                        onCheckedChange={() => toggleContact(contact.id)}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{contact.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {contact.email || contact.phone}
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="cancel" onClick={resetForm}>
+              <X className="w-4 h-4 mr-1" />
+              Cancelar
+            </Button>
+            <Button variant="confirm" onClick={handleSave}>
+              <Check className="w-4 h-4 mr-1" />
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
@@ -388,7 +394,7 @@ export function SignerGroupsTab() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onClick={handleDelete} className="rounded-full bg-red-600 hover:bg-red-700">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>

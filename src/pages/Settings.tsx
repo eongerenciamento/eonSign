@@ -10,18 +10,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Upload, Building2, CreditCard, X, Check, ClipboardList, MessageCircle, Sun, Moon, LogOut, CalendarIcon } from "lucide-react";
+import { Upload, Building2, CreditCard, X, Check, ClipboardList, Sun, Moon, LogOut, CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
-import { CreateTicketSheet } from "@/components/settings/CreateTicketSheet";
-import { TicketChatSheet } from "@/components/settings/TicketChatSheet";
 import { CadastrosTab } from "@/components/settings/CadastrosTab";
 import { CertificateUpload } from "@/components/settings/CertificateUpload";
-import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useThemePreference } from "@/hooks/useThemePreference";
@@ -69,76 +66,12 @@ const Settings = () => {
     certificate_uploaded_at: string | null;
   } | null>(null);
 
-  // Selected ticket for chat
-  const [selectedTicket, setSelectedTicket] = useState<{
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-    ticket_number: string;
-    created_at: string;
-    user_id: string;
-  } | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-
-
   // Get tab from URL params - default to 'company' for admins, redirect members away from restricted tabs
   const urlTab = searchParams.get('tab') || 'company';
   // Redirect old tabs (members, contacts, groups) to cadastros
   const normalizedTab = ['members', 'contacts', 'groups'].includes(urlTab) ? 'cadastros' : urlTab;
   const activeTab = !isAdmin && normalizedTab === 'subscription' ? 'company' : normalizedTab;
 
-  // Fetch support tickets
-  const {
-    data: tickets,
-    refetch: refetchTickets
-  } = useQuery({
-    queryKey: ['support-tickets', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const {
-        data,
-        error
-      } = await supabase.from('support_tickets').select('*').eq('user_id', user.id).order('created_at', {
-        ascending: false
-      });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user
-  });
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, {
-      border: string;
-      text: string;
-      label: string;
-    }> = {
-      aberto: {
-        border: 'border-blue-600',
-        text: 'text-blue-600',
-        label: 'Aberto'
-      },
-      em_andamento: {
-        border: 'border-yellow-600',
-        text: 'text-yellow-600',
-        label: 'Em Andamento'
-      },
-      resolvido: {
-        border: 'border-green-600',
-        text: 'text-green-600',
-        label: 'Resolvido'
-      },
-      fechado: {
-        border: 'border-gray-600',
-        text: 'text-gray-600',
-        label: 'Fechado'
-      }
-    };
-    const config = statusConfig[status] || statusConfig.aberto;
-    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-transparent ${config.border} ${config.text}`}>
-        {config.label}
-      </span>;
-  };
   useEffect(() => {
     const loadData = async () => {
       const {
@@ -433,7 +366,7 @@ const Settings = () => {
         </div>
 
           <Tabs value={activeTab} onValueChange={value => navigate(`/configuracoes?tab=${value}`)} className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} rounded-full p-1 h-10`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} rounded-full p-1 h-10`}>
             <TabsTrigger value="company" className="rounded-full gap-2">
               <Building2 className="h-4 w-4" strokeWidth={1.5} />
               <span className="hidden md:inline">Empresa</span>
@@ -446,10 +379,6 @@ const Settings = () => {
                 <CreditCard className="h-4 w-4" strokeWidth={1.5} />
                 <span className="hidden md:inline">Assinatura</span>
               </TabsTrigger>}
-            <TabsTrigger value="support" className="rounded-full gap-2">
-              <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
-              <span className="hidden md:inline">Suporte</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6 mt-6">
@@ -756,139 +685,8 @@ const Settings = () => {
               </div>
             </TabsContent>}
 
-          <TabsContent value="support" className="space-y-6 mt-6">
-            <div className="flex justify-end mb-6">
-              <CreateTicketSheet onTicketCreated={() => refetchTickets()} />
-            </div>
-
-            <Card className="border-0 bg-transparent md:bg-card">
-              <CardContent className="p-0">
-                {/* Desktop Table View */}
-                <div className="overflow-x-auto hidden md:block">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700 rounded-tl-lg rounded-bl-lg">Título</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Abertura</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Categoria</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Prioridade</th>
-                        <th className="text-left p-4 font-semibold text-sm text-gray-700">Ticket</th>
-                        <th className="text-right p-4 font-semibold text-sm text-gray-700 rounded-tr-lg rounded-br-lg">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
-                        // Extract category and priority from description
-                        const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                        const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                        const category = categoryMatch ? categoryMatch[1] : '-';
-                        const priority = priorityMatch ? priorityMatch[1] : '-';
-                        return <tr 
-                          key={ticket.id} 
-                          className={`hover:bg-gray-50 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}
-                          onClick={() => {
-                            setSelectedTicket(ticket);
-                            setChatOpen(true);
-                          }}
-                        >
-                              <td className="p-4 text-sm">{ticket.title}</td>
-                              <td className="p-4 text-sm text-gray-600">
-                                {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
-                              </td>
-                              <td className="p-4 text-sm text-gray-600 capitalize">{category}</td>
-                              <td className="p-4 text-sm text-gray-600 capitalize">{priority}</td>
-                              <td className="p-4 text-sm text-gray-600">{ticket.ticket_number}</td>
-                              <td className="p-4 text-right">
-                                {getStatusBadge(ticket.status)}
-                              </td>
-                            </tr>;
-                      }) : <tr>
-                          <td colSpan={6} className="p-8 text-center text-sm text-gray-500">
-                            Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
-                          </td>
-                        </tr>}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile Card View */}
-                <div className="md:hidden space-y-4">
-                  {tickets && tickets.length > 0 ? tickets.map((ticket, index) => {
-                    // Extract category and priority from description
-                    const categoryMatch = ticket.description.match(/Categoria: ([^\n]+)/);
-                    const priorityMatch = ticket.description.match(/Prioridade: ([^\n]+)/);
-                    const category = categoryMatch ? categoryMatch[1] : '-';
-                    const priority = priorityMatch ? priorityMatch[1] : '-';
-                    return <div 
-                      key={ticket.id} 
-                      className={`p-4 space-y-3 rounded-lg cursor-pointer ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
-                      onClick={() => {
-                        setSelectedTicket(ticket);
-                        setChatOpen(true);
-                      }}
-                    >
-                        <div>
-                          <p className="text-xs text-gray-500">Título</p>
-                          <p className="text-sm font-medium">{ticket.title}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Abertura</p>
-                          <p className="text-sm text-gray-600">{new Date(ticket.created_at).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Categoria</p>
-                          <p className="text-sm text-gray-600 capitalize">{category}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Prioridade</p>
-                          <p className="text-sm text-gray-600 capitalize">{priority}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Ticket</p>
-                          <p className="text-sm text-gray-600">{ticket.ticket_number}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Status</p>
-                          <div className="mt-1">{getStatusBadge(ticket.status)}</div>
-                        </div>
-                      </div>;
-                  }) : <div className="p-8 text-center text-sm text-gray-500">
-                      Nenhum ticket encontrado. Clique em "Abrir Novo Ticket" para criar um.
-                    </div>}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Email Section */}
-            <Card className="border bg-gray-50">
-              <CardContent className="p-6 text-center">
-                <p className="text-sm text-gray-600 mb-2">Precisa de mais ajuda?</p>
-                <p className="text-sm text-gray-900">
-                  Entre em contato: <a href="mailto:contato@eonhub.com.br" className="font-semibold hover:underline text-blue-700">contato@eonhub.com.br</a>
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Footer */}
-            <div className="flex flex-col items-center pt-8 pb-4">
-              <p className="text-sm text-gray-500">eonSign</p>
-              <p className="text-xs text-gray-400">
-                Powered by <a href="https://www.eonhub.com.br" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">eonhub</a>
-              </p>
-            </div>
-          </TabsContent>
-
           </Tabs>
       </div>
-
-      {/* Ticket Chat Sheet */}
-      <TicketChatSheet
-        ticket={selectedTicket}
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        onTicketUpdated={() => refetchTickets()}
-      />
-      
     </Layout>;
 };
 export default Settings;

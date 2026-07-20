@@ -1,8 +1,5 @@
 project_id = "lujojocimuyekrhzubgz"
 
-[functions.create-ticket]
-verify_jwt = false
-
 [functions.send-signature-email]
 verify_jwt = false
 
@@ -96,17 +93,8 @@ verify_jwt = false
 [functions.get-users-list]
 verify_jwt = false
 
-[functions.send-ticket-message]
-verify_jwt = true
-
-[functions.receive-ticket-response]
-verify_jwt = false
-
 [functions.check-subscription]
 verify_jwt = false
-
-[functions.mark-messages-read]
-verify_jwt = true
 
 [functions.sync-stripe-subscription]
 verify_jwt = false

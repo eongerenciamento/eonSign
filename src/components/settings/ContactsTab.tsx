@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, SquarePen, Trash2, X, Check, Search } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Contact {
   id: string;
@@ -131,7 +132,7 @@ export function ContactsTab() {
               resetForm();
               setShowAddForm(true);
             }} 
-            className="rounded-full bg-muted text-muted-foreground hover:bg-muted hover:text-foreground gap-2" 
+            className="bg-transparent text-blue-600 hover:bg-transparent hover:text-blue-600 gap-2"
             size="sm"
           >
             <Plus className="w-4 h-4" />
@@ -149,36 +150,6 @@ export function ContactsTab() {
               className="pl-9 border-0 bg-muted" 
             />
           </div>
-
-          {/* Add/Edit Form */}
-          {(showAddForm || editingId) && (
-            <div className="p-4 border rounded-lg bg-accent/50 space-y-3">
-              <div className="grid gap-2">
-                <Label>Nome Completo / Razão Social</Label>
-                <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Digite o nome" />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label>Telefone</Label>
-                  <Input value={formPhone} onChange={e => setFormPhone(formatPhone(e.target.value))} placeholder="(00)00000-0000" maxLength={14} />
-                </div>
-                <div className="grid gap-2">
-                  <Label>E-mail</Label>
-                  <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@exemplo.com" />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="cancel" size="sm" onClick={resetForm}>
-                  <X className="w-4 h-4 mr-1" />
-                  Cancelar
-                </Button>
-                <Button variant="confirm" size="sm" onClick={handleSave}>
-                  <Check className="w-4 h-4 mr-1" />
-                  Salvar
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Contacts List */}
           {loading ? (
@@ -205,10 +176,10 @@ export function ContactsTab() {
                   </div>
                   <div className="flex items-center gap-1 ml-4">
                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent cursor-pointer" onClick={() => startEdit(contact)}>
-                      <SquarePen className="w-4 h-4 text-muted-foreground" />
+                      <SquarePen className="w-4 h-4 text-blue-500" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent cursor-pointer" onClick={() => setDeleteId(contact.id)}>
-                      <Trash2 className="w-4 h-4 text-muted-foreground" />
+                      <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </div>
                 </div>
@@ -217,6 +188,41 @@ export function ContactsTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAddForm || !!editingId} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>{editingId ? "Editar Contato" : "Novo Contato"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="grid gap-2">
+              <Label>Nome Completo / Razão Social</Label>
+              <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Digite o nome" className="border-0 bg-muted" />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Telefone</Label>
+                <Input value={formPhone} onChange={e => setFormPhone(formatPhone(e.target.value))} placeholder="(00)00000-0000" maxLength={14} className="border-0 bg-muted" />
+              </div>
+              <div className="grid gap-2">
+                <Label>E-mail</Label>
+                <Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@exemplo.com" className="border-0 bg-muted" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="cancel" onClick={resetForm}>
+              <X className="w-4 h-4 mr-1" />
+              Cancelar
+            </Button>
+            <Button variant="confirm" onClick={handleSave}>
+              <Check className="w-4 h-4 mr-1" />
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
@@ -229,7 +235,7 @@ export function ContactsTab() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onClick={handleDelete} className="rounded-full bg-red-600 hover:bg-red-700">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>

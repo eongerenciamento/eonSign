@@ -700,92 +700,6 @@ export type Database = {
         }
         Relationships: []
       }
-      support_tickets: {
-        Row: {
-          closed_at: string | null
-          created_at: string
-          description: string
-          id: string
-          rating: number | null
-          rating_comment: string | null
-          reopened_at: string | null
-          status: Database["public"]["Enums"]["ticket_status"]
-          ticket_number: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          closed_at?: string | null
-          created_at?: string
-          description: string
-          id?: string
-          rating?: number | null
-          rating_comment?: string | null
-          reopened_at?: string | null
-          status?: Database["public"]["Enums"]["ticket_status"]
-          ticket_number: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          closed_at?: string | null
-          created_at?: string
-          description?: string
-          id?: string
-          rating?: number | null
-          rating_comment?: string | null
-          reopened_at?: string | null
-          status?: Database["public"]["Enums"]["ticket_status"]
-          ticket_number?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      ticket_messages: {
-        Row: {
-          created_at: string
-          id: string
-          is_admin: boolean | null
-          message: string
-          message_type: string | null
-          read_at: string | null
-          ticket_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_admin?: boolean | null
-          message: string
-          message_type?: string | null
-          read_at?: string | null
-          ticket_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_admin?: boolean | null
-          message?: string
-          message_type?: string | null
-          read_at?: string | null
-          ticket_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ticket_messages_ticket_id_fkey"
-            columns: ["ticket_id"]
-            isOneToOne: false
-            referencedRelation: "support_tickets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -905,7 +819,6 @@ export type Database = {
         | "unpaid"
         | "trialing"
         | "incomplete"
-      ticket_status: "aberto" | "em_andamento" | "resolvido" | "fechado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1045,7 +958,6 @@ export const Constants = {
         "trialing",
         "incomplete",
       ],
-      ticket_status: ["aberto", "em_andamento", "resolvido", "fechado"],
     },
   },
 } as const

@@ -166,7 +166,7 @@ export function MembersTab() {
           <Button
             onClick={() => setIsDialogOpen(true)}
             size="icon"
-            className="h-8 w-8 rounded-full bg-muted text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="h-8 w-8 bg-transparent text-blue-600 hover:bg-transparent hover:text-blue-600"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -198,7 +198,7 @@ export function MembersTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent cursor-pointer"
+                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-transparent cursor-pointer"
                       onClick={() => setMemberToDelete(member)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -231,6 +231,7 @@ export function MembersTab() {
                 value={newMemberEmail}
                 onChange={(e) => setNewMemberEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleInviteMember()}
+                className="border-0 bg-muted"
               />
             </div>
           </div>
@@ -268,7 +269,7 @@ export function MembersTab() {
             <AlertDialogAction
               onClick={handleDeleteMember}
               disabled={isDeleting}
-              className="bg-red-500 hover:bg-red-600"
+              className="rounded-full bg-blue-600 hover:bg-blue-700"
             >
               {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-1" />Remover</>}
             </AlertDialogAction>

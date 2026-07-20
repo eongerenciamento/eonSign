@@ -61,7 +61,6 @@ export function AppSidebar() {
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [pendingDocuments, setPendingDocuments] = useState(0);
-  const [supportTickets, setSupportTickets] = useState(0);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   useEffect(() => {
     const loadUserData = async () => {
@@ -97,9 +96,6 @@ export function AppSidebar() {
           .eq("user_id", user.id)
           .eq("status", "pending");
         setPendingDocuments(count || 0);
-
-        // Placeholder para tickets de suporte (será implementado futuramente)
-        setSupportTickets(0);
       }
     };
     loadUserData();
@@ -202,10 +198,8 @@ export function AppSidebar() {
             <TooltipProvider>
               <SidebarMenu>
                 {items.map((item) => {
-                  const showBadge =
-                    (item.title === "Documentos" && pendingDocuments > 0) ||
-                    (item.title === "Configurações" && supportTickets > 0);
-                  const badgeCount = item.title === "Documentos" ? pendingDocuments : supportTickets;
+                  const showBadge = item.title === "Documentos" && pendingDocuments > 0;
+                  const badgeCount = pendingDocuments;
                   const menuButton = (
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
                       <NavLink
