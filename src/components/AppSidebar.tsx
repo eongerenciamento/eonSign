@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UserProfileSheet } from "@/components/UserProfileSheet";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { User } from "@supabase/supabase-js";
 import logoSign from "@/assets/logo-sign.png";
 import {
@@ -57,11 +59,29 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const [user, setUser] = useState<User | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [organization, setOrganization] = useState("");
   const [pendingDocuments, setPendingDocuments] = useState(0);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      return data;
+    },
+  });
+
+  const { data: companyName } = useOrganizationName();
+
   useEffect(() => {
     const loadUserData = async () => {
       const {
@@ -69,23 +89,6 @@ export function AppSidebar() {
       } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
-        // Buscar dados do company_settings
-        const { data: companyData } = await supabase
-          .from("company_settings")
-          .select("admin_name, company_name, avatar_url, admin_phone")
-          .eq("user_id", user.id)
-          .single();
-        if (companyData) {
-          setName(companyData.admin_name || user.user_metadata?.name || "");
-          setOrganization(companyData.company_name || user.user_metadata?.organization || "");
-          setAvatarUrl(companyData.avatar_url || user.user_metadata?.avatar_url || null);
-        } else {
-          // Fallback para user_metadata se não houver company_settings
-          setName(user.user_metadata?.name || "");
-          setOrganization(user.user_metadata?.organization || "");
-          setAvatarUrl(user.user_metadata?.avatar_url || null);
-        }
-
         // Buscar documentos pendentes
         const { count } = await supabase
           .from("documents")
@@ -103,11 +106,6 @@ export function AppSidebar() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        setName(session.user.user_metadata?.name || "");
-        setOrganization(session.user.user_metadata?.organization || "");
-        setAvatarUrl(session.user.user_metadata?.avatar_url || null);
-      }
     });
 
     // Realtime subscription para documentos
@@ -148,26 +146,9 @@ export function AppSidebar() {
     return currentPath.startsWith(path);
   };
   const getUserInitials = () => {
-    if (name) return name.charAt(0).toUpperCase();
+    if (profile?.nome_completo) return profile.nome_completo.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
-  };
-  const handleProfileUpdate = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { data: companyData } = await supabase
-        .from("company_settings")
-        .select("admin_name, company_name, avatar_url")
-        .eq("user_id", user.id)
-        .single();
-      if (companyData) {
-        setName(companyData.admin_name || user.user_metadata?.name || "");
-        setOrganization(companyData.company_name || user.user_metadata?.organization || "");
-        setAvatarUrl(companyData.avatar_url || user.user_metadata?.avatar_url || null);
-      }
-    }
   };
   return (
     <Sidebar className={`${collapsed ? "w-16" : "w-64"}`} collapsible="icon">
@@ -261,12 +242,12 @@ export function AppSidebar() {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground"
           >
             <Avatar className="h-10 w-10">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              {profile?.foto_url && <AvatarImage src={profile.foto_url} />}
               <AvatarFallback className="bg-white/20 text-sidebar-foreground">{getUserInitials()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{name || user?.email || "Usuário"}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">{organization || "Organização"}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{profile?.nome_completo || user?.email || "Usuário"}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">{profile?.organizacao || companyName || "Organização"}</p>
               <p className="text-xs text-sidebar-foreground/40">Administrador</p>
             </div>
           </button>
@@ -277,7 +258,7 @@ export function AppSidebar() {
             title="Perfil"
           >
             <Avatar className="h-10 w-10">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
+              {profile?.foto_url && <AvatarImage src={profile.foto_url} />}
               <AvatarFallback className="bg-white/20 text-sidebar-foreground">{getUserInitials()}</AvatarFallback>
             </Avatar>
           </button>

@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserProfileSheet } from "@/components/UserProfileSheet";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
+import logoMenu from "@/assets/logo-menu.png";
 
 const items = [
   { title: "Dashboard", url: "/", icon: DashboardIcon },
@@ -40,6 +42,8 @@ export function MobileNav() {
       return data;
     },
   });
+
+  const { data: companyName } = useOrganizationName();
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === path;
@@ -91,22 +95,7 @@ export function MobileNav() {
           >
             <aside className="flex h-full flex-col overflow-hidden rounded-2xl bg-white/95 p-4 text-gray-800 shadow-2xl">
               <div className="flex items-center justify-center pb-4 pt-2">
-                <div
-                  role="img"
-                  aria-label="Éon Sign"
-                  className="h-14 w-48"
-                  style={{
-                    backgroundColor: "hsl(var(--sidebar-background))",
-                    WebkitMaskImage: "url(/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png)",
-                    maskImage: "url(/lovable-uploads/cf697ca1-b048-4c88-8e66-1659b20e2d9e.png)",
-                    WebkitMaskSize: "contain",
-                    maskSize: "contain",
-                    WebkitMaskRepeat: "no-repeat",
-                    maskRepeat: "no-repeat",
-                    WebkitMaskPosition: "center",
-                    maskPosition: "center",
-                  }}
-                />
+                <img src={logoMenu} alt="Éon Sign" className="h-14 w-48 object-contain" />
               </div>
 
               <nav className="flex-1 space-y-0.5 overflow-y-auto pt-0">
@@ -142,7 +131,7 @@ export function MobileNav() {
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-gray-800">{getShortName()}</p>
-                  <p className="truncate text-xs text-gray-600">{profile?.organizacao || ""}</p>
+                  <p className="truncate text-xs text-gray-600">{profile?.organizacao || companyName || "Organização"}</p>
                   <p className="truncate text-xs text-gray-500">{profile?.cargo || ""}</p>
                 </div>
               </button>
