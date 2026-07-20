@@ -267,7 +267,7 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Documents */}
-        <div className="relative z-10 -mt-24 space-y-4 lg:mt-0">
+        <div className="relative z-10 !-mt-56 space-y-4 lg:mt-0">
           <div className="flex items-center justify-between">
             <h2 className="text-sm text-white lg:text-foreground">
               Documentos Recentes
