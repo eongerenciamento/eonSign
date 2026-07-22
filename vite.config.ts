@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "apple-touch-icon.png", "logo.png"],
+      includeAssets: ["favicon.png", "apple-touch-icon.png", "logo.png", "pwa-icon-192.png", "pwa-icon-512.png"],
       manifest: {
         name: "eonSign",
         short_name: "eonSign",
@@ -25,13 +25,13 @@ export default defineConfig(() => ({
         start_url: "/",
         icons: [
           {
-            src: "/favicon.png",
+            src: "/pwa-icon-192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any maskable",
           },
           {
-            src: "/apple-touch-icon.png",
+            src: "/pwa-icon-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",
